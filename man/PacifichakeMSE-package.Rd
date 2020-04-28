@@ -24,6 +24,6 @@ runhakeassessment(123)
 PacifichakeMSE on GitHub: \url{https://github.com/PacifichakeMSE}
 }
 \author{
-Nis S Jacobsen, Ian G. Taylor, Kristin Marshall, Aaron Berger 
-Package maintainer: Nis Jacobsen <nissandjac@gmail.com>
+Nis S Jacobsen, Ian G. Taylor, Kristin Marshall, Aaron Berger
+Package maintainer: Nis Jacobsen \href{mailto:nissandjac@gmail.com}{nissandjac@gmail.com}
 }

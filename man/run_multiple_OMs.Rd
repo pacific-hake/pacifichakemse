@@ -31,7 +31,7 @@ run_multiple_OMs(
 }
 \value{
 returns a list of results
- @export
+@export
 }
 \description{
 Title

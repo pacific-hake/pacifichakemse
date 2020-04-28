@@ -1,21 +1,21 @@
 Package: PacifichakeMSE
-Title: Management strategy evaluation of Pacific hake
+Title: Management Strategy Evaluation of Pacific Hake
 Version: 0.0.0.9000
-Authors@R:
+Authors@R: 
     person(given = "Nis",
-           family = "Sand Jacobsen",
+           family = "Sand Jocobsen",
            role = c("aut", "cre"),
-           email = "nissandjac@gmail.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           email = "nissandjac@gmail.com")
+Description: Management strategy evaluation framework with a spatial OM
+License: GPL-3
+Depends: R (>= 3.5.0)
+Encoding: UTF-8
+LinkingTo: TMB, RcppEigen
 Imports:
     ggplot2,
     gridExtra,
     cowplot,
     dplyr
-Depends: TMB, RcppEigen, ggplot2
-LinkingTo: TMB, RcppEigen
-Description: Management strategy evaluation framework with a spatial OM.
-License: What license it uses
-Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0
