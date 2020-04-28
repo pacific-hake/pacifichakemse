@@ -2,7 +2,7 @@
 % Please edit documentation in R/df_MSE.R
 \name{fnsum}
 \alias{fnsum}
-\title{sum spatial and seasonal data into a data frame}
+\title{Sum spatial and seasonal data into a data frame}
 \usage{
 fnsum(x, idx)
 }
@@ -15,10 +15,10 @@ fnsum(x, idx)
 returns list as data frame
 }
 \description{
-sum spatial and seasonal data into a data frame
+Sum spatial and seasonal data into a data frame
 }
 \examples{
+\dontrun{
 catchtmp.country <- map(df.MSE[names(df.MSE) == 'Catch'],.f = fnsum, idx = c(2,3))
-
-
+}
 }

@@ -1,15 +1,11 @@
-#' Title
+#' Calculate the estimated parameters with uncertainty
 #'
-#' @param obj TMB object
+#' @param obj [TMB] object
 #'
-#' @return Return estimated parameters and uncertainty
+#' @return Return a list of estimated parameters and uncertainty
 #' @export
-#'
-#' @examples
-#'
 Check_Identifiable_vs2 = function( obj ){
-
-    # Finite-different hessian
+  # Finite-different hessian
   ParHat = TMBhelper:::extract_fixed( obj )
   List = NULL
   List[["Hess"]] = optimHess( par=ParHat, fn=obj$fn, gr=obj$gr )

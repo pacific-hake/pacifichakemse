@@ -2,7 +2,7 @@
 % Please edit documentation in R/getParameters_OM.R
 \name{getParameters_OM}
 \alias{getParameters_OM}
-\title{Create a list of parameters for TMB}
+\title{Create a list of parameters for \link{TMB}}
 \usage{
 getParameters_OM(trueparms = TRUE, mod = NA, df)
 }
@@ -17,5 +17,5 @@ getParameters_OM(trueparms = TRUE, mod = NA, df)
 A list of parameters
 }
 \description{
-Create a list of parameters for TMB
+Create a list of parameters for \link{TMB}
 }

@@ -6,6 +6,9 @@
 \usage{
 load_data()
 }
+\value{
+A list of Parameters, Input parameters, Survey, Catch, and others
+}
 \description{
 Load hake data for operating model
 }

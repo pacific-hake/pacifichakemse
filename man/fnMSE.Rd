@@ -2,7 +2,7 @@
 % Please edit documentation in R/fnMSE.R
 \name{fnMSE}
 \alias{fnMSE}
-\title{Title}
+\title{Initialize the operating model}
 \usage{
 fnMSE(df, simyears = 30, TAC = 1, seeds = NA, nruns = 100)
 }
@@ -21,10 +21,10 @@ fnMSE(df, simyears = 30, TAC = 1, seeds = NA, nruns = 100)
 
 }
 \description{
-Title
+Initialize the operating model
 }
 \examples{
-
+\dontrun{
 fnMSE(df, nruns = 15) # Run MSE with 15 iterations
-
+}
 }

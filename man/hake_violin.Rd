@@ -14,7 +14,8 @@ hake_violin(ls.MSE, SSB0, move = NA)
 \item{move}{is movement included?}
 }
 \value{
-Nothing
+A \link{data.frame} with columns SSB, SSB.10, SSB.40, Catch.short,
+Catch.long, and AAV
 }
 \description{
 Violin plot of the MSE results

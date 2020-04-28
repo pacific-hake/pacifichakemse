@@ -1,14 +1,11 @@
-#' Title
+#' Create the data for [TMB]
 #'
 #' @param sim.data Operating model
 #' @param df input parameters
 #' @param history Use historical real data or OM data?
 #'
-#' @return
+#' @return A list of the data needed by [TMB]
 #' @export
-#'
-#' @examples
-#'
 create_TMB_data <- function(sim.data, df,
                              history = FALSE){
 

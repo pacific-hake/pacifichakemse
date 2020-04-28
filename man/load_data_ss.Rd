@@ -2,7 +2,7 @@
 % Please edit documentation in R/load_data_ss.R
 \name{load_data_ss}
 \alias{load_data_ss}
-\title{Load the hake data}
+\title{Load the hake data (TODO: Improve docs on this function)}
 \usage{
 load_data_ss(mod, sum_zero = 0)
 }
@@ -15,5 +15,5 @@ load_data_ss(mod, sum_zero = 0)
 A list of parameters, input parameters, catch, selectivity
 }
 \description{
-Load the hake data
+Load the hake data (TODO: Improve docs on this function)
 }

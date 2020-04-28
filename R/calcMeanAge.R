@@ -1,20 +1,14 @@
-#' Title
+#' Calculate mean age in the population
 #'
 #' @param agemat matrix of ages
 #' @param maxage maximum age to include in the calculation
 #'
-#' @return
+#' @return A vector of the mean ages
 #' @export
-#'
-#' @examples
-#' p <- calcMeanAge(matrix(1,1), 5)
 calcMeanAge <- function(agemat, maxage){
-#' Calculate mean age in the population
-
   age <- 1:maxage
   dims <- dim(agemat)
   ## Adjust the agematrix to fit the maxage
-
   if(dims[1] == maxage){
     agecalc <- agemat
   }else{
@@ -23,8 +17,6 @@ calcMeanAge <- function(agemat, maxage){
     agecalc[maxage,] <- colSums(agemat[maxage:dims[1],])
     agecalc <- agecalc/colSums(agecalc)
   }
-
-
 
   if(all(colSums(agecalc) != 1)){
     for(i in 1:dims[2]){
@@ -37,8 +29,6 @@ calcMeanAge <- function(agemat, maxage){
   for(i in 1:dims[2]){
     agemean[i] <- sum(age*agecalc[,i])
   }
-
-
 
   return(agemean)
 }

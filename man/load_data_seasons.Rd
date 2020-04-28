@@ -2,7 +2,7 @@
 % Please edit documentation in R/load_data_seasons.R
 \name{load_data_seasons}
 \alias{load_data_seasons}
-\title{Title}
+\title{Load the hake data for seasons (TODO: Improve docs on this function)}
 \usage{
 load_data_seasons(
   nseason = 4,
@@ -54,13 +54,13 @@ load_data_seasons(
 \item{sel_hist}{use historical selectivity?}
 }
 \value{
-
+A list of Parameters, Input parameters, Survey, Catch, and others
 }
 \description{
-Title
+Load the hake data for seasons (TODO: Improve docs on this function)
 }
 \examples{
+\dontrun{
 df <- load_data_seasons(nseason = 12, nspace = 2)
-
-Load data frame containing all the parameters from the hake operating model
+}
 }

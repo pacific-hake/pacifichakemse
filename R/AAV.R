@@ -1,3 +1,9 @@
+#' Average Annual Variabililty (in Catch)
+#'
+#' @param df A [data.frame]
+#'
+#' @return A vector of the AAV values
+#' @export
 AAV <- function(df) {
 
   yrs <- unique(df$year)

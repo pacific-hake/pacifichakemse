@@ -2,7 +2,7 @@
 % Please edit documentation in R/df_lists_OM.R
 \name{df_lists_OM}
 \alias{df_lists_OM}
-\title{Title}
+\title{A list of values for the Operating Model}
 \usage{
 df_lists_OM(ls.save, nms)
 }
@@ -12,11 +12,8 @@ df_lists_OM(ls.save, nms)
 \item{nms}{names to save in data frame}
 }
 \value{
-
+A list of values for the Operating Model
 }
 \description{
-Title
-}
-\examples{
-
+A list of values for the Operating Model
 }

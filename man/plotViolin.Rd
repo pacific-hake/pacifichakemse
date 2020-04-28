@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotViolin.R
 \name{plotViolin}
 \alias{plotViolin}
-\title{Title}
+\title{Plot the estimated or derived value from a \link{TMB} model using a Violin-type plot}
 \usage{
 plotViolin(data, cols)
 }
@@ -12,13 +12,14 @@ plotViolin(data, cols)
 \item{cols}{colors of the individual violins}
 }
 \value{
-
+Nothing
 }
 \description{
-Title
+Plot the estimated or derived value from a \link{TMB} model using a Violin-type plot
 }
 \examples{
+\dontrun{
 colors = c('black','green')
 plotViolin(folder, colors) # plots black and green data
-
+}
 }

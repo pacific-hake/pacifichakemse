@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotValues.R
 \name{plotValues}
 \alias{plotValues}
-\title{Plot the estimated or derived value from a TMB model}
+\title{Plot the estimated or derived value from a \link{TMB} model}
 \usage{
 plotValues(est, data, name)
 }
@@ -14,11 +14,8 @@ plotValues(est, data, name)
 \item{name}{name to print in data frame}
 }
 \value{
-
+Nothing
 }
 \description{
-Plot the estimated or derived value from a TMB model
-}
-\examples{
-
+Plot the estimated or derived value from a \link{TMB} model
 }

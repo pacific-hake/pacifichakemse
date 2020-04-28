@@ -1,39 +1,29 @@
-#' Title
+#' Plot the estimated or derived value from a [TMB] model using a Violin-type plot
 #'
 #' @param data name of data set to be loaded
 #' @param cols colors of the individual violins
 #'
-#' @return
+#' @return Nothing
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' colors = c('black','green')
 #' plotViolin(folder, colors) # plots black and green data
-#'
+#' }
 plotViolin <-function(data, cols){
-  #
-  ### load the data
   load(data)
-  df <- obj.plot.v #
-
-
+  df <- obj.plot.v
   #cols <- PNWColors::pnw_palette('Starfish',n = length(unique(df$HCR)), type = 'discrete')
-
   # Remove the 5th and 5th percentiles from df
   vars <- unique(df$variable)
-
   for(i in 1:length(vars)){
     idxtmp <- which(df$variable == vars[i])
     valstmp <- quantile(df$value[idxtmp], probs = c(0.05,0.95))
-
     rmtmp <- which(df$value[idxtmp] < valstmp[1] | df$value[idxtmp] > valstmp[2])
-
     df$value[idxtmp][rmtmp] <- NA
   }
-
-
-  ## Do some adjustments to fix the scales
-
+  # Do some adjustments to fix the scales
   p.v <- ggplot2::ggplot(df, aes(x = HCR, y = value, fill = HCR))+
     geom_violin()+
     geom_boxplot(width=0.15, col = 'black', outlier.shape = NA)+
@@ -45,6 +35,5 @@ plotViolin <-function(data, cols){
     scale_y_continuous(name = '')#+
   #coord_cartesian(ylim = c(0,1))
   print(p.v)
-
-  return(p.v)
+  p.v
 }

@@ -2,12 +2,18 @@
 % Please edit documentation in R/fn_rerun_OM.R
 \name{fn_rerun_OM}
 \alias{fn_rerun_OM}
-\title{Rerun an OM from an MSE by using catch as input
-Not functional, add correct seeds}
+\title{Rerun an OM from an MSE by using catch as input}
 \usage{
-fn_rerun_OM(folders, df, climate = FALSE)
+fn_rerun_OM(folders, df)
+}
+\arguments{
+\item{folders}{TODO}
+
+\item{df}{TODO}
+}
+\value{
+Nothing
 }
 \description{
 Rerun an OM from an MSE by using catch as input
-Not functional, add correct seeds
 }

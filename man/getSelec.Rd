@@ -2,7 +2,7 @@
 % Please edit documentation in R/getSelec.R
 \name{getSelec}
 \alias{getSelec}
-\title{Title}
+\title{Get selectivity (TODO: Improve docs on this function)}
 \usage{
 getSelec(age, psel, Smin, Smax)
 }
@@ -13,14 +13,11 @@ getSelec(age, psel, Smin, Smax)
 
 \item{Smin}{Minimum caught age}
 
-\item{Smax}{maximum age to model seperately}
+\item{Smax}{maximum age to model separately}
 }
 \value{
-
+A vector of Selectivity values
 }
 \description{
-Title
-}
-\examples{
-
+Get selectivity (TODO: Improve docs on this function)
 }

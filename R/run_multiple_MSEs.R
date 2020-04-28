@@ -421,5 +421,5 @@ run_multiple_MSEs <- function(simyears = NULL,
                  amc = amc,
                  V = sim.data$V.save)
 
-  return(df.ret)
+  df.ret
 }

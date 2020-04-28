@@ -2,7 +2,7 @@
 % Please edit documentation in R/calcSE.R
 \name{calcSE}
 \alias{calcSE}
-\title{Title}
+\title{Calculate the error on SSB}
 \usage{
 calcSE(ls.MSE)
 }
@@ -10,11 +10,9 @@ calcSE(ls.MSE)
 \item{ls.MSE}{list of MSE results}
 }
 \value{
-
+The standard error of spawning stock biomass from EM
+in regards to the OM
 }
 \description{
-Title
-}
-\examples{
-Return the standard error of spawning stock biomass from EM in regards to the OM
+Calculate the error on SSB
 }

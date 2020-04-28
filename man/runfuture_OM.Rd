@@ -12,12 +12,13 @@ runfuture_OM(df, nruns = 100)
 \item{nruns}{number of iterations}
 }
 \value{
-list of results
+Alist of results
 }
 \description{
 Run simulatons of the operating model into the future
 }
 \examples{
-
+\dontrun{
 runfuture_OM(df, 10) #  makes 10 iterations
+}
 }

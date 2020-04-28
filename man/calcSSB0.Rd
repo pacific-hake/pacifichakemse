@@ -2,7 +2,7 @@
 % Please edit documentation in R/calcSSB0.R
 \name{calcSSB0}
 \alias{calcSSB0}
-\title{Title}
+\title{Calculate the Spawning biomass at equilibrium}
 \usage{
 calcSSB0(R0, Z, nage, mat)
 }
@@ -16,11 +16,8 @@ calcSSB0(R0, Z, nage, mat)
 \item{mat}{maturity ogive}
 }
 \value{
-
+The SSB0 value
 }
 \description{
-Title
-}
-\examples{
-
+Calculate the Spawning biomass at equilibrium
 }

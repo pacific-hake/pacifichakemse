@@ -1,5 +1,4 @@
-###### Run the HAKE MSE #######
-#' Title
+#' Run the Operating Models
 #'
 #' @param simyears number of years to simulate
 #' @param seed  set the seed
@@ -9,15 +8,19 @@
 #' @param mincrease increase in the number of returning spawners
 #' @param sel_change should selectivity be time varying?
 #'
-#' @return
-#' returns a list of results
-#'  @export
+#' @return A list of results
+#' @export
 #'
 #' @examples
-#' run_multiple_OMs(df,100) Catch is 100 kg in the future
-#'
-run_multiple_OMs <- function(simyears = 30,seed = 12345, df, Catchin,
-                             cincrease = 0, mincrease = 0,
+#' \dontrun{
+#' run_multiple_OMs(df, 100) Catch is 100 kg in the future
+#' }
+run_multiple_OMs <- function(simyears = 30,
+                             seed = 12345,
+                             df,
+                             Catchin,
+                             cincrease = 0,
+                             mincrease = 0,
                              sel_change = 0){
 
   if(is.null(simyears)){
@@ -25,16 +28,13 @@ run_multiple_OMs <- function(simyears = 30,seed = 12345, df, Catchin,
     simyears <- 30
   }
 
-
   time <- 1
   yrinit <- df$nyear
-
   year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
   N0 <- NA
   sim.data <- run.agebased.true.catch(df,seed)
   simdata0 <- sim.data # The other one is gonna get overwritten.
 
-  #
   # save(sim.data,file = 'simulated_space_OM.Rdata')
   # save(df,file = 'sim_data_parms.Rdata')
 
@@ -55,16 +55,12 @@ run_multiple_OMs <- function(simyears = 30,seed = 12345, df, Catchin,
   years <- df$years
   model.save <- list()
 
-  ##
   if(length(Catchin) == 1){
     Catchin <- as.matrix(rep(Catchin, simyears-1))
   }
-
   for (time in 1:(simyears-1)){
     year <- yrinit+(time-1)
     #print(year.future[year])
-
-
     if (time > 1){
 
       if(sum(year.future[year] == S.year.future)>0){
@@ -101,32 +97,24 @@ run_multiple_OMs <- function(simyears = 30,seed = 12345, df, Catchin,
       ## Add a survey if catches are 0
       if(df$Catch[time] == 0 & df$flag_survey[time] == -1){
         print('Stock in peril! Conducting emergency survey')
-
-
         df$flag_survey[df$Catch == 0] <- 1
         df$ss_survey[df$Catch == 0] <- ceiling(mean(df$ss_survey[df$ss_survey > 0]))+200 # emergency survey adds more 200 age samples!
         df$survey_x[df$Catch == 0] <- 2
         df$survey_err[df$Catch == 0] <- mean(df$survey_err[df$survey_err < 1])
       }
-
       df$b[length(df$b)] <- df$bfuture
       df$b <- c(df$b,df$bfuture)
       Rdevs <- rnorm(n = 1,mean = 0, sd = exp(df$logSDR))
       #Rdevs <- rep(0, yr.future)
       df$parms$Rin <- c(df$parms$Rin,Rdevs)
-
-
       ### Add movement to the new years
       move.tmp <- array(0, dim = c(df$nspace,df$nage, df$nseason, df$nyear))
       move.tmp[,,,1:df$nyear-1] <- df$movemat
-
       # Add increasing movement due to climate
       nspace <- df$nspace
       nage <- df$nage
       nseason <- df$nseason
       age <- df$age
-
-
       movenew <-array(0, dim = c(nspace, nage, nseason)) # Chances of moving in to the other grid cell
       movemax <- df$movemax
       movefifty <- df$movefifty
@@ -184,26 +172,12 @@ run_multiple_OMs <- function(simyears = 30,seed = 12345, df, Catchin,
         df$flag_sel <- c(df$flag_sel,1)
         df$parms$PSEL <- rbind(df$parms$PSEL,rep(0,nrow(df$parms$PSEL)))
       }
-
       sim.data <- run.agebased.true.catch(df, seed)
-
-
-
-      ### Save some data
     }
     df.new <- create_TMB_data(sim.data, df)
-
-
   }
-
-
-
   df.ret <- list(SSB = sim.data$SSB.all[,,3],
                  ams = sim.data$age_comps_country,
-                 amc = sim.data$age_comps_catch_space
-  )
-
-
-
-  return(df.ret)
+                 amc = sim.data$age_comps_catch_space)
+  df.ret
 }

@@ -1,4 +1,4 @@
-#' sum spatial and seasonal data into a data frame
+#' Sum spatial and seasonal data into a data frame
 #'
 #' @param x list of data
 #' @param idx which index to sum over
@@ -7,16 +7,14 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' catchtmp.country <- map(df.MSE[names(df.MSE) == 'Catch'],.f = fnsum, idx = c(2,3))
-#'
-#'
+#' }
 fnsum <- function(x, idx){
-
   apply(x, MARGIN = idx, sum)
 }
 
-
-#' Turn whole list into a concanated polished data frame
+#' Turn whole list into a concatenated polished data frame
 #'
 #' @param df.MSE MSE that contains the data
 #' @param id object to extract
@@ -24,22 +22,19 @@ fnsum <- function(x, idx){
 #' @param spacenames naming convention for spatial areas
 #' @param runs number of runs in MSE
 #' @param nspace number of spaces
-
 #'
 #' @return returns a concanated data frame
 #' @export
-#'
 #' @examples
+#' \dontrun{
 #' processMSE(test) # not run
-#'
-processMSE <- function(
-  df.MSE,
-  id,
-  idx = 1,
-  spacenames = c('CAN','USA'),
-  runs = 100,
-  nspace = 2
-){
+#' }
+processMSE <- function(df.MSE,
+                       id,
+                       idx = 1,
+                       spacenames = c('CAN','USA'),
+                       runs = 100,
+                       nspace = 2){
 
 tmp <- lapply(purrr::map(df.MSE[names(df.MSE) == id],
                          .f = fnsum, idx = idx), data.frame, stringsAsFactors = FALSE)

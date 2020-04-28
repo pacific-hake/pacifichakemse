@@ -1,21 +1,13 @@
-#' Title
+#' A list of values for the Operating Model
 #'
 #' @param ls.save MSE results
 #' @param nms names to save in data frame
 #'
-#' @return
+#' @return A list of values for the Operating Model
 #' @export
-#'
-#' @examples
-#'
-
 df_lists_OM <- function(ls.save, nms){
-
-
-
   nruns <- length(ls.save)
   nfailed <- rep(1, nruns)
-
 
   if(dim(ls.save[[1]]$SSB)[2] == 1){
 

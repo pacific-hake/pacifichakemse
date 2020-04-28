@@ -2,7 +2,7 @@
 % Please edit documentation in R/df_MSE.R
 \name{processMSE}
 \alias{processMSE}
-\title{Turn whole list into a concanated polished data frame}
+\title{Turn whole list into a concatenated polished data frame}
 \usage{
 processMSE(
   df.MSE,
@@ -30,9 +30,10 @@ processMSE(
 returns a concanated data frame
 }
 \description{
-Turn whole list into a concanated polished data frame
+Turn whole list into a concatenated polished data frame
 }
 \examples{
+\dontrun{
 processMSE(test) # not run
-
+}
 }

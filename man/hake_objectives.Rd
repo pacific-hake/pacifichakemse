@@ -2,7 +2,7 @@
 % Please edit documentation in R/hake_objectives.R, R/hake_objectives_vs2.R
 \name{hake_objectives}
 \alias{hake_objectives}
-\title{Title}
+\title{Hake objectives (TODO: Improve docs on this function)}
 \usage{
 hake_objectives(ls.MSE, SSB0, move = NA)
 
@@ -16,15 +16,12 @@ hake_objectives(ls.MSE, SSB0, move = NA)
 \item{move}{is movement included?}
 }
 \value{
-
+List of three: p.export, t.export, ls.season (TODO: explain better)
 
 Nothing
 }
 \description{
-Title
+Hake objectives (TODO: Improve docs on this function)
 
 TODO: What this function does
-}
-\examples{
-
 }

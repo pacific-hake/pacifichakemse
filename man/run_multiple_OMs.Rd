@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_multiple_OMs.R
 \name{run_multiple_OMs}
 \alias{run_multiple_OMs}
-\title{Title}
+\title{Run the Operating Models}
 \usage{
 run_multiple_OMs(
   simyears = 30,
@@ -30,13 +30,13 @@ run_multiple_OMs(
 \item{sel_change}{should selectivity be time varying?}
 }
 \value{
-returns a list of results
-@export
+A list of results
 }
 \description{
-Title
+Run the Operating Models
 }
 \examples{
-run_multiple_OMs(df,100) Catch is 100 kg in the future
-
+\dontrun{
+run_multiple_OMs(df, 100) Catch is 100 kg in the future
+}
 }

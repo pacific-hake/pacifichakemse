@@ -1,110 +1,74 @@
-#' Title
+#' Hake objectives (TODO: Improve docs on this function)
 #'
 #' @param ls.MSE list of MSE results
 #' @param SSB0 unfished biomass from OM
-#' @param move is movement in the OM?
+#' @param move Logical. Is movement in the OM?
 #'
-#' @return
+#' @return List of three: p.export, t.export, ls.season (TODO: explain better)
 #' @export
-#'
-#' @examples
-#'
-hake_objectives <- function(ls.MSE, SSB0, move = NA){
-
-
+hake_objectives <- function(ls.MSE,
+                            SSB0,
+                            move = NA){
   nruns <- length(ls.MSE)
   nyears <- dim(ls.MSE[[1]][1]$Catch)[2]
-
-
   if(dim(ls.MSE[[1]][1]$Catch)[2] == 1){
     nyears <- dim(ls.MSE[[1]][1]$Catch)[1]
   }
   # Get the number of years run in that MSE
   if(all(is.na(ls.MSE[[1]]))){
     simyears <- nyears-(length(1966:2018))+1
-
-
   }else{
     simyears <- nyears-(length(1966:2018))+1
-    }
-
+  }
   yr <- 1966:(2018+simyears-1)
-
   idx <- 1
-
   if(all(is.na(ls.MSE[[idx]]))){
     idx <- 2
   }
   if(all(is.na(ls.MSE[[idx]]))){
     idx <- 3
   }
-
-
   if(is.na(move)){
     SSB.plot <- data.frame(SSB = (ls.MSE[[idx]]$SSB)/(SSB0), year = yr, run = paste('run',1, sep=''))
-
   }else{
-
     SSB.plot <- data.frame(SSB = as.numeric(rowSums(ls.MSE[[idx]]$SSB))/sum(SSB0), year = yr, run = paste('run',1, sep=''))
     V.us.plot <- data.frame(V = ls.MSE[[idx]]$V[,2,3], year = yr, run = paste('run',1, sep='')) #vulnerable biomass at mid-year start of season 3
     V.ca.plot <- data.frame(V = ls.MSE[[idx]]$V[,1,3], year = yr, run = paste('run',1, sep='')) #vulnerable biomass at mid-year start of season 3
-
   }
-
   if(is.na(move)){ #if there is no movement (single area model)
     Catch.plot <- data.frame(Catch = ls.MSE[[idx]]$Catch, year = yr, run = paste('run',1, sep=''))
   }else{
-
-
     catchtmp <- as.numeric(apply(ls.MSE[[idx]]$Catch,MARGIN = 2, FUN = sum))
-
     if(length(catchtmp) == 1){
       catchtmp <- ls.MSE[[idx]]$Catch
     }
-
     Catch.plot <- data.frame(Catch = catchtmp, year = yr, run = paste('run',1, sep=''))
-
     quota.tot <- apply(ls.MSE[[idx]]$Catch.quota, MARGIN = 1, FUN = sum)
     quota.plot <- data.frame(Quota_frac = quota.tot/catchtmp, year = yr, run = paste('run',1, sep =''))
-
-
     #sum quota over year by area
     quota.us.tot <- data.frame(quota=rowSums(ls.MSE[[idx]]$Catch.quota[,2,]), year=yr, run=paste('run',1, sep =''))
     quota.can.tot <- data.frame(quota=rowSums(ls.MSE[[idx]]$Catch.quota[,1,]), year=yr, run=paste('run',1, sep =''))
-
     #Catch by year by area
-
     catch.area<-apply(ls.MSE[[idx]]$Catch, MARGIN=c(2,3), FUN=sum)
-
-
     Catch.us.tot<- data.frame(Catch=catch.area[,2], year=yr, run=paste('run',1, sep =''))
     Catch.can.tot<- data.frame(Catch=catch.area[,1], year=yr, run=paste('run',1, sep =''))
-
     vtac.us<- data.frame(V.TAC=V.us.plot$V/Catch.us.tot$Catch, year=yr, run=paste('run',1, sep =''))
     vtac.can<- data.frame(V.TAC=V.ca.plot$V/Catch.can.tot$Catch, year=yr, run=paste('run',1, sep =''))
-
-
     Ctmp <- colSums(ls.MSE[[idx]]$Catch)
-
-
     vtac.us.seas<- data.frame(V.TAC.sp=Ctmp[,2,2]/ls.MSE[[idx]]$V[,2,2],
                               V.TAC.su=Ctmp[,2,3]/ls.MSE[[idx]]$V[,2,3],
                               V.TAC.fa=Ctmp[,2,4]/ls.MSE[[idx]]$V[,2,4],
                               year = yr, run =  paste('run',1, sep=''))
-
-
     vtac.can.seas<-  data.frame(V.TAC.sp=Ctmp[,1,2]/ls.MSE[[idx]]$V[,1,2],
-                               V.TAC.su=Ctmp[,1,3]/ls.MSE[[idx]]$V[,1,3],
-                               V.TAC.fa=Ctmp[,1,4]/ls.MSE[[idx]]$V[,1,4],
-                               year = yr, run =  paste('run',1, sep=''))
+                                V.TAC.su=Ctmp[,1,3]/ls.MSE[[idx]]$V[,1,3],
+                                V.TAC.fa=Ctmp[,1,4]/ls.MSE[[idx]]$V[,1,4],
+                                year = yr, run =  paste('run',1, sep=''))
   }
 
   AAV.plot  <- data.frame(AAV = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
                           year = yr[2:length(yr)], run = paste('run',1, sep=''))
-
   for(i in 2:nruns){
     ls.tmp <- ls.MSE[[i]]
-
     if(is.list(ls.tmp)){
       if(is.na(move)){
         SSB.tmp <- data.frame(SSB = (ls.tmp$SSB)/(SSB0), year = yr, run =  paste('run',i, sep=''))
@@ -112,22 +76,14 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
         quota.tmp <- data.frame(Catch = ls.tmp$Catch/apply(ls.tmp$Catch.quota, MARGIN = 1, FUN = sum),
                                 year = yr, run =  paste('run',i, sep=''))
         V.tmp<-data.frame(V = ls.tmp$V[,3], year = yr, run =  paste('run',i, sep=''))
-
-
-
       }else{
-
         catchtmp <-  as.numeric(apply(ls.tmp$Catch,MARGIN = 2, FUN = sum))
-
         if(length(catchtmp) == 1){
           catchtmp <- ls.MSE[[idx]]$Catch
         }
-
-
         SSB.tmp <- data.frame(SSB = rowSums(ls.tmp$SSB)/sum(SSB0), year = yr, run =  paste('run',i, sep=''))
         Catch.tmp <- data.frame(Catch = catchtmp, year = yr, run =  paste('run',i, sep=''))
         quota.tmp <- data.frame(Quota_frac = catchtmp/apply(ls.tmp$Catch.quota, MARGIN = 1, FUN = sum), year = yr, run =  paste('run',i, sep=''))
-
         if(ncol(ls.tmp$Catch) == 1){ #if a single area model, catch by country fixed as proportion of total
           Catch.can <- ls.tmp$Catch*0.26
           Catch.us <- ls.tmp$Catch*0.74
@@ -135,85 +91,56 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
           Catch.can <- apply(ls.tmp$Catch,MARGIN = c(2,3), FUN = sum)[,1]
           Catch.us <- apply(ls.tmp$Catch,MARGIN = c(2,3), FUN = sum)[,2]
         }
-
         quota.tmp.can <- data.frame(Catch = Catch.can/rowSums(ls.tmp$Catch.quota[,1,]),
                                     year = yr, run =  paste('run',i, sep=''))
         quota.tmp.us <- data.frame(Catch = Catch.us/rowSums(ls.tmp$Catch.quota[,2,]),
                                    year = yr, run =  paste('run',i, sep=''))
-
         quota.tmp.can.tot<-data.frame(quota = rowSums(ls.tmp$Catch.quota[,1,]),
                                       year = yr, run =  paste('run',i, sep=''))
         quota.tmp.us.tot<-data.frame(quota = rowSums(ls.tmp$Catch.quota[,2,]),
                                      year = yr, run =  paste('run',i, sep=''))
-
         v.tmp.can <-data.frame(V = ls.tmp$V[,1,3],
                                year = yr, run =  paste('run',i, sep=''))
-
-
         v.tmp.us <-data.frame(V = ls.tmp$V[,2,3],
-                               year = yr, run =  paste('run',i, sep=''))
-
+                              year = yr, run =  paste('run',i, sep=''))
         catch.tmp.can <- data.frame(Catch=Catch.can,
                                     year = yr, run =  paste('run',i, sep=''))
         catch.tmp.us <-  data.frame(Catch=Catch.us,
                                     year = yr, run =  paste('run',i, sep=''))
-
         vtac.tmp.can<- data.frame(V.TAC=v.tmp.can$V/quota.tmp.can.tot$quota,
-                                 year = yr, run =  paste('run',i, sep=''))
-
+                                  year = yr, run =  paste('run',i, sep=''))
         vtac.tmp.us<- data.frame(V.TAC =v.tmp.us$V/quota.tmp.us.tot$quota,
                                  year = yr, run =  paste('run',i, sep=''))
-
         Ctmp <- colSums(ls.tmp$Catch)
-
         vtac.tmp.us.seas<-data.frame(V.TAC.sp=Ctmp[,2,2]/ls.tmp$V[,2,2],
-                                      V.TAC.su=Ctmp[,2,3]/ls.tmp$V[,2,3],
-                                      V.TAC.fa=Ctmp[,2,4]/ls.tmp$V[,2,4],
-                                      year = yr, run =  paste('run',i, sep=''))
-
+                                     V.TAC.su=Ctmp[,2,3]/ls.tmp$V[,2,3],
+                                     V.TAC.fa=Ctmp[,2,4]/ls.tmp$V[,2,4],
+                                     year = yr, run =  paste('run',i, sep=''))
         vtac.tmp.can.seas<-data.frame(V.TAC.sp=Ctmp[,1,2]/ls.tmp$V[,1,2],
                                       V.TAC.su=Ctmp[,1,3]/ls.tmp$V[,1,3],
                                       V.TAC.fa=Ctmp[,1,4]/ls.tmp$V[,1,4],
                                       year = yr, run =  paste('run',i, sep=''))
-
       }
-
-
       SSB.plot <- rbind(SSB.plot,SSB.tmp)
       Catch.plot <- rbind(Catch.plot,Catch.tmp)
       quota.plot <- rbind(quota.plot, quota.tmp)
-
-
-     # quota.us<- rbind(quota.us, quota.tmp.us)
+      #quota.us<- rbind(quota.us, quota.tmp.us)
       #quota.can<- rbind(quota.can, quota.tmp.can)
-
-      V.ca.plot<- rbind(V.ca.plot, v.tmp.can)
-      V.us.plot<- rbind(V.us.plot, v.tmp.us)
-
-      Catch.can.tot<- rbind(Catch.can.tot, catch.tmp.can)
-      Catch.us.tot<- rbind(Catch.us.tot, catch.tmp.us)
-      quota.can.tot<- rbind(quota.can.tot, quota.tmp.can.tot)
-      quota.us.tot<- rbind(quota.us.tot, quota.tmp.us.tot)
-
-      vtac.can<- rbind(vtac.can, vtac.tmp.can)
-      vtac.us<-  rbind(vtac.us, vtac.tmp.us)
-
-      vtac.can.seas<- rbind(vtac.can.seas, vtac.tmp.can.seas)
-      vtac.us.seas<- rbind(vtac.us.seas, vtac.tmp.us.seas)
-
+      V.ca.plot <- rbind(V.ca.plot, v.tmp.can)
+      V.us.plot <- rbind(V.us.plot, v.tmp.us)
+      Catch.can.tot <- rbind(Catch.can.tot, catch.tmp.can)
+      Catch.us.tot <- rbind(Catch.us.tot, catch.tmp.us)
+      quota.can.tot <- rbind(quota.can.tot, quota.tmp.can.tot)
+      quota.us.tot <- rbind(quota.us.tot, quota.tmp.us.tot)
+      vtac.can <- rbind(vtac.can, vtac.tmp.can)
+      vtac.us <-  rbind(vtac.us, vtac.tmp.us)
+      vtac.can.seas <- rbind(vtac.can.seas, vtac.tmp.can.seas)
+      vtac.us.seas <- rbind(vtac.us.seas, vtac.tmp.us.seas)
       AAV.tmp <- data.frame(AAV  = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
-
                             year = yr[2:length(yr)], run =  paste('run',i, sep=''))
       AAV.plot <- rbind(AAV.plot, AAV.tmp)
-
-
     }
   }
-
-
-
-
-
   SSB.plotquant <- SSB.plot %>%
     group_by(year) %>%
     summarise(med = median(SSB),
@@ -228,13 +155,13 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
     theme_classic()+scale_y_continuous(name = 'SSB')+
     geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha('black', alpha = 0.2))
 
- V.ca.plotquant<- V.ca.plot %>%
-   group_by(year) %>%
-   summarise(med = median(V),
-             p95 = quantile(V, 0.95),
-             p25 = quantile(V, 0.25),
-             p75 = quantile(V, 0.75),
-             p5 = quantile(V,0.05))
+  V.ca.plotquant<- V.ca.plot %>%
+    group_by(year) %>%
+    summarise(med = median(V),
+              p95 = quantile(V, 0.95),
+              p25 = quantile(V, 0.25),
+              p75 = quantile(V, 0.75),
+              p5 = quantile(V,0.05))
 
   Catch.plotquant <- Catch.plot %>%
     group_by(year) %>%
@@ -249,7 +176,6 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
     geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha('gray', alpha =0.8))+
     theme_classic()+scale_y_continuous(name = 'Catch (millions)')+
     geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha('black', alpha = 0.2))
-
 
   AAV.plotquant <- AAV.plot %>%
     group_by(year) %>%
@@ -339,7 +265,6 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
               p75 = quantile(avg, 0.75),
               p5 = quantile(avg,0.05))
 
-
   V.ca.stat <- V.ca.plot %>%
     group_by(run) %>%
     summarise(avg = mean(V)) %>%
@@ -357,7 +282,6 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
               p25 = quantile(avg, 0.25),
               p75 = quantile(avg, 0.75),
               p5 = quantile(avg,0.05))
-
 
   vtac.ca.stat<- vtac.can %>%
     group_by(run) %>%
@@ -396,8 +320,6 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
     summarise(med.sp=median(avg.sp),
               med.su=median(avg.su),
               med.fa=median(avg.fa))
-
-
 
   # vtac.us.seas.stat<- vtac.us.seas %>%
   #   group_by(run) %>%
@@ -468,61 +390,49 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
   ## Calculate the median number of closed years
   nclosed <- rep(NA, length(rns))
   for(i in 1:length(unique(SSB.future$run))){
-  tmp <- SSB.future[SSB.future$run == rns[i],]
+    tmp <- SSB.future[SSB.future$run == rns[i],]
 
     nclosed[i] <- length(which(tmp$SSB < 0.1))
   }
   # Create a table with all the objective data
-  indicator =
-    c('SSB <0.10 SSB0',
-      '0.10 < S < 0.4S0',
-      'S>0.4S0',
-  #    '3 consec yrs S<S40',
-   #   'years closed fishery',
-      'AAV',
-      'Mean SSB/SSB0',
-   #   'median catch',
-      'short term catch',
-      'long term catch',
-      'Canada TAC/V spr',
-      'Canada TAC/V sum',
-      'Canada TAC/V fall',
-      'US TAC/V spr',
-      'US TAC/V sum',
-       'US TAC/V fall'
-
-   #   'yrs bio unavailable'
-   )
+  indicator <- c('SSB <0.10 SSB0',
+                 '0.10 < S < 0.4S0',
+                 'S>0.4S0',
+                 #    '3 consec yrs S<S40',
+                 #   'years closed fishery',
+                 'AAV',
+                 'Mean SSB/SSB0',
+                 #   'median catch',
+                 'short term catch',
+                 'long term catch',
+                 'Canada TAC/V spr',
+                 'Canada TAC/V sum',
+                 'Canada TAC/V fall',
+                 'US TAC/V spr',
+                 'US TAC/V sum',
+                 'US TAC/V fall')
+                # 'yrs bio unavailable')
 
   # Calculate the number of years the quota was met
-
-
-
-  t.export <- data.frame(indicator =
-                           as.factor(indicator),
+  t.export <- data.frame(indicator = as.factor(indicator),
                          value = c(
                            round(length(which(SSB.future$SSB <= 0.1))/length(SSB.future$SSB), digits = 2),
-
                            round(length(which(SSB.future$SSB>0.1 & SSB.future$SSB<0.4))/length(SSB.future$SSB), digits = 2),
-
                            round(length(which(SSB.future$SSB>0.4))/length(SSB.future$SSB), digits = 2),
-                          # round(mean(p.vals), digits = 2),
-                        #   mean(nclosed),
+                           # round(mean(p.vals), digits = 2),
+                           #   mean(nclosed),
                            round(median(AAV.plotquant$med), digits = 2),
                            median(SSB.plotquant$med[SSB.plotquant$year > 2018]),
-                        #   median(1e6*Catch.plotquant$med[Catch.plotquant$year >2017])*1e-6,
+                           #   median(1e6*Catch.plotquant$med[Catch.plotquant$year >2017])*1e-6,
                            median(1e6*Catch.plotquant$med[Catch.plotquant$year > 2018 & Catch.plotquant$year <2028])*1e-6,
                            median(1e6*Catch.plotquant$med[Catch.plotquant$year > 2025])*1e-6,
-                          vtac.can.seas.stat$med.sp,
-                          vtac.can.seas.stat$med.su,
-                          vtac.can.seas.stat$med.fa,
-                          vtac.us.seas.stat$med.sp,
-                          vtac.us.seas.stat$med.su,
-                          vtac.us.seas.stat$med.fa
-
-
-                          # median(quota.plot[quota.plot$year > 2018,]$Quota_frac < 0.95)
-                           )
+                           vtac.can.seas.stat$med.sp,
+                           vtac.can.seas.stat$med.su,
+                           vtac.can.seas.stat$med.fa,
+                           vtac.us.seas.stat$med.sp,
+                           vtac.us.seas.stat$med.su,
+                           vtac.us.seas.stat$med.fa)
+                           # median(quota.plot[quota.plot$year > 2018,]$Quota_frac < 0.95)
 
                          #lower = c(
                          #   round(length(which(SSB.future$SSB<0.1))/length(SSB.future$SSB)*100, digits = 2),
@@ -535,22 +445,12 @@ hake_objectives <- function(ls.MSE, SSB0, move = NA){
                          #   median(1e6*Catch.plotquant$med[Catch.plotquant$year >2017])*1e-6,
                          #   median(1e6*Catch.plotquant$med[Catch.plotquant$year > 2018 & Catch.plotquant$year <2030])*1e-6
                          #   )
-
-
   )
   print(t.export)
-
   p.export = NA
-
-
   # Add the seasonal stuff
   ls.season <- rbind(vtac.us.seas,  vtac.can.seas)
   ls.season$country <- c(rep('USA',nrow(vtac.us.seas)),rep('CAN',nrow(vtac.can.seas)))
-
-
   # Fix the V plots
-
-
-  return(list(p.export,t.export,ls.season))
-
+  list(p.export,t.export,ls.season)
 }

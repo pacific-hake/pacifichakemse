@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotSelectivity.R
 \name{plotSelectivity}
 \alias{plotSelectivity}
-\title{Title}
+\title{Plot selectivity for years}
 \usage{
 plotSelectivity(df.new, parameters)
 }
@@ -12,11 +12,8 @@ plotSelectivity(df.new, parameters)
 \item{parameters}{estimates parameters}
 }
 \value{
-
+Nothing
 }
 \description{
-Title
-}
-\examples{
-
+Plot selectivity for years
 }

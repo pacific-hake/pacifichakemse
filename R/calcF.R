@@ -1,4 +1,4 @@
-#' Title
+#' Calculate F based on the method
 #'
 #' @param Fmethod hybrid only viable option right now
 #' @param Etemp Catch input
@@ -8,15 +8,13 @@
 #' @param M natural mortality
 #' @param Fsel fishing selectivity
 #'
-#' @return
+#' @return A vector of the new F values
 #' @export
 calcF <- function(Fmethod = 'hybrid', Etemp,Btmp, N, weight, M, Fsel){
 
   if(Etemp/Btmp > 1){
     stop(paste('Catch exceeds available biomass in year:',df$years[yr],' and season', season, 'area', space))
   }
-
-
 
 if(Etemp == 0){
   Fseason <- 0

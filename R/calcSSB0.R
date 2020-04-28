@@ -1,20 +1,13 @@
-### Calculate the Spawning biomass at equilibrium
-#' Title
+#' Calculate the Spawning biomass at equilibrium
 #'
 #' @param R0 Unfished recruitment
 #' @param Z Total mortality
 #' @param nage number of ages
 #' @param mat maturity ogive
 #'
-#' @return
+#' @return The SSB0 value
 #' @export
-#'
-#' @examples
-#'
 calcSSB0 <- function(R0,Z,nage, mat){
-
-
-
 age <- 1:nage
 
 M <- rep(Z,nage)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/df_lists.R
 \name{df_lists}
 \alias{df_lists}
-\title{Title}
+\title{A list of values}
 \usage{
 df_lists(ls.save, nms)
 }
@@ -12,11 +12,8 @@ df_lists(ls.save, nms)
 \item{nms}{names of runs}
 }
 \value{
-
+A list of values
 }
 \description{
-Title
-}
-\examples{
-
+A list of values
 }

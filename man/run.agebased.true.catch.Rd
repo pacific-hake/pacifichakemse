@@ -12,12 +12,13 @@ run.agebased.true.catch(df, seeds = 100)
 \item{seeds}{seed for survey error and recruitment deviations}
 }
 \value{
-
+A list of model outputs (TODO)
 }
 \description{
 Run an agebased model
 }
 \examples{
+\dontrun{
 run.agebased.true.catch(df) # runs the model
-
+}
 }

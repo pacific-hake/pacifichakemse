@@ -22,11 +22,8 @@ getF(Etemp, Btemp, Mseason, Fsel, Ntemp, w_catch = w_catch, method = "Pope")
 \item{method}{'Pope' or 'Hybrid' method?}
 }
 \value{
-
+The fishing mortality value
 }
 \description{
 Calculate the fishing mortality based on catch
-}
-\examples{
-
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fn_plot_MSE.R
 \name{fn_plot_MSE}
 \alias{fn_plot_MSE}
-\title{Title}
+\title{Make MSE plots}
 \usage{
 fn_plot_MSE(
   ls,
@@ -24,11 +24,8 @@ fn_plot_MSE(
 \item{pidx}{order of runs in figures}
 }
 \value{
-
+Nothing
 }
 \description{
-Title
-}
-\examples{
-
+Make MSE plots
 }

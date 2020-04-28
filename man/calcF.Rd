@@ -2,7 +2,7 @@
 % Please edit documentation in R/calcF.R
 \name{calcF}
 \alias{calcF}
-\title{Title}
+\title{Calculate F based on the method}
 \usage{
 calcF(Fmethod = "hybrid", Etemp, Btmp, N, weight, M, Fsel)
 }
@@ -22,8 +22,8 @@ calcF(Fmethod = "hybrid", Etemp, Btmp, N, weight, M, Fsel)
 \item{Fsel}{fishing selectivity}
 }
 \value{
-
+A vector of the new F values
 }
 \description{
-Title
+Calculate F based on the method
 }

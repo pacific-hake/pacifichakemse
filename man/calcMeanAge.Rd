@@ -2,7 +2,7 @@
 % Please edit documentation in R/calcMeanAge.R
 \name{calcMeanAge}
 \alias{calcMeanAge}
-\title{Title}
+\title{Calculate mean age in the population}
 \usage{
 calcMeanAge(agemat, maxage)
 }
@@ -12,12 +12,8 @@ calcMeanAge(agemat, maxage)
 \item{maxage}{maximum age to include in the calculation}
 }
 \value{
-
+A vector of the mean ages
 }
 \description{
-Title
-}
-\examples{
-p <- calcMeanAge(matrix(1,1), 5)
 Calculate mean age in the population
 }

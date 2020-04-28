@@ -2,7 +2,7 @@
 % Please edit documentation in R/getRefpoint.R
 \name{getRefpoint}
 \alias{getRefpoint}
-\title{C}
+\title{Get reference points (TODO: improve docs on this function)}
 \usage{
 getRefpoint(par.fixed, df, SSBy, Fin = NA, Nend, TAC = 1, Vreal = NA)
 }
@@ -22,11 +22,8 @@ getRefpoint(par.fixed, df, SSBy, Fin = NA, Nend, TAC = 1, Vreal = NA)
 \item{Vreal}{Vulnerable biomass in OM}
 }
 \value{
-
+A list of reference points
 }
 \description{
-C
-}
-\examples{
-
+Get reference points (TODO: improve docs on this function)
 }

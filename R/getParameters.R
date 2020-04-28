@@ -7,24 +7,17 @@
 #' @export
 getParameters <- function(trueparms = TRUE, df){
 
-
   if (trueparms == TRUE){
     # (those with NA for Active_Cnt are not estimated)
     ### Get the Rdev params
     df$parms
-
-
-
   }else{
-
     PSEL <- matrix(0,5, length(1991:df$years[length(df$years)]))
     initN <- rep(0,df$nage-1)
     F0 <- rep(0.01, df$tEnd)
     Rdev <- rep(0, df$tEnd-1)
     #Rdev <- read.csv('Rdev_MLE.csv')[,1]
-
-
-    parms <- list( # Just start all the simluations with the same initial conditions
+    parms <- list( # Just start all the simulations with the same initial conditions
       logRinit = 16,
       logh = log(0.7),
       logMinit = log(0.3),
@@ -41,8 +34,6 @@ getParameters <- function(trueparms = TRUE, df){
       F0 = F0,
       PSEL = PSEL
     )
-
-
   }
-  return(parms)
+  parms
 }

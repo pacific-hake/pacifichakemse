@@ -1,15 +1,12 @@
-#' Title
+#' Calculate the error on SSB
 #'
 #' @param ls.MSE list of MSE results
 #'
-#' @return
+#' @return The standard error of spawning stock biomass from EM
+#' in regards to the OM
 #' @export
-#'
-#' @examples
 calcSE <- function(ls.MSE){
-  #' Return the standard error of spawning stock biomass from EM in regards to the OM
-#
-  # Calculate the error on SSB
+
   nruns <- length(ls.MSE)
   nyear <- length(ls.MSE[[1]]$SSB.hes$year)
 
