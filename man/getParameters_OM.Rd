@@ -7,14 +7,14 @@
 getParameters_OM(trueparms = TRUE, mod = NA, df)
 }
 \arguments{
-\item{trueparms}{should the model use the assesment parameters}
+\item{trueparms}{should the model use the assessment parameters}
 
-\item{mod}{r4ss object with a stock assessment}
+\item{mod}{\link{r4ss} object with a stock assessment}
 
 \item{df}{list of parameters}
 }
 \value{
-
+A list of parameters
 }
 \description{
 Create a list of parameters for TMB

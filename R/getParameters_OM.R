@@ -1,16 +1,12 @@
 #' Create a list of parameters for TMB
 #'
-#' @param trueparms  should the model use the assesment parameters
-#' @param mod r4ss object with a stock assessment
+#' @param trueparms  should the model use the assessment parameters
+#' @param mod [r4ss] object with a stock assessment
 #' @param df list of parameters
 #'
-#' @return
+#' @return A list of parameters
 #' @export
-#'
-#' @examples
 getParameters_OM <- function(trueparms = TRUE, mod = NA,df){
-
-
   if (trueparms == TRUE){
     # (those with NA for Active_Cnt are not estimated)
     pars <- mod$parameters[,c("Value","Active_Cnt")]

@@ -10,9 +10,6 @@
 #'
 #' @return
 #' @export
-#'
-#' @examples
-#' calcF(Fmethod = 'hybrid') # Not a working example
 calcF <- function(Fmethod = 'hybrid', Etemp,Btmp, N, weight, M, Fsel){
 
   if(Etemp/Btmp > 1){

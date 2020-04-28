@@ -1,12 +1,10 @@
-#' Load parameters for tmb model
+#' Load parameters for [TMB] model
 #'
 #' @param trueparms use the correct parameters for initial distribution?
 #' @param df data frame of OM parameters and life history
 #'
-#' @return
+#' @return A list of parameters
 #' @export
-#'
-#' @examples
 getParameters <- function(trueparms = TRUE, df){
 
 

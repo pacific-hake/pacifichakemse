@@ -1,5 +1,4 @@
-###### Run the HAKE MSE #######
-#' Iterate the pacific hake MSE
+#' Run/Iterate the Pacific hake MSE
 #'
 #' @param simyears number of years to simulate
 #' @param seeds set the seed
@@ -9,16 +8,16 @@
 #' @param mincrease decrease of spawners returning south
 #' @param sel_change time varying selectivity
 #'
-#' @return
+#' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
+#' F0, parms, N, converge, ams, amc, V
 #' @export
-#'
-#' @examples
-run_multiple_MSEs <- function(simyears = NULL,seeds = 12345, TAC = 1, df = NA,
-                                      cincrease = 0, mincrease = 0,
+run_multiple_MSEs <- function(simyears = NULL,
+                              seeds = 12345,
+                              TAC = 1,
+                              df = NA,
+                              cincrease = 0,
+                              mincrease = 0,
                               sel_change = 0){
-
-
-
 
   if(is.null(simyears)){
     print('Number of years to simulate not specified. Simulating 30 years into the future')
@@ -394,7 +393,7 @@ run_multiple_MSEs <- function(simyears = NULL,seeds = 12345, TAC = 1, df = NA,
 
   Catch.year <- sim.data$Catch.save.age
   ## Calculate the average age
-  source('R/calcMeanAge.R')
+  #source('R/calcMeanAge.R')
 
   #dev.off()
 
@@ -420,8 +419,7 @@ run_multiple_MSEs <- function(simyears = NULL,seeds = 12345, TAC = 1, df = NA,
                  converge = mconverge,
                  ams = ams,
                  amc = amc,
-                 V = sim.data$V.save
-  )
+                 V = sim.data$V.save)
 
   return(df.ret)
 }

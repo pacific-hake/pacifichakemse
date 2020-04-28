@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_multiple_MSEs.R
 \name{run_multiple_MSEs}
 \alias{run_multiple_MSEs}
-\title{Iterate the pacific hake MSE}
+\title{Run/Iterate the Pacific hake MSE}
 \usage{
 run_multiple_MSEs(
   simyears = NULL,
@@ -30,8 +30,9 @@ run_multiple_MSEs(
 \item{sel_change}{time varying selectivity}
 }
 \value{
-
+A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
+F0, parms, N, converge, ams, amc, V
 }
 \description{
-Iterate the pacific hake MSE
+Run/Iterate the Pacific hake MSE
 }

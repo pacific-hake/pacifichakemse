@@ -9,12 +9,12 @@ hake_violin(ls.MSE, SSB0, move = NA)
 \arguments{
 \item{ls.MSE}{list of MSE results}
 
-\item{SSB0}{OM SSB0}
+\item{SSB0}{Operating Model Spawning Stock B0 value}
 
 \item{move}{is movement included?}
 }
 \value{
-
+Nothing
 }
 \description{
 Violin plot of the MSE results

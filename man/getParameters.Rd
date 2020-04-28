@@ -2,7 +2,7 @@
 % Please edit documentation in R/getParameters.R
 \name{getParameters}
 \alias{getParameters}
-\title{Load parameters for tmb model}
+\title{Load parameters for \link{TMB} model}
 \usage{
 getParameters(trueparms = TRUE, df)
 }
@@ -12,8 +12,8 @@ getParameters(trueparms = TRUE, df)
 \item{df}{data frame of OM parameters and life history}
 }
 \value{
-
+A list of parameters
 }
 \description{
-Load parameters for tmb model
+Load parameters for \link{TMB} model
 }

@@ -2,10 +2,18 @@
 % Please edit documentation in R/getParameters_ss.R
 \name{getParameters_ss}
 \alias{getParameters_ss}
-\title{Export EM parameters for TMB based on csv files with parameters}
+\title{Export EM parameters for \link{TMB} based on csv files with parameters}
 \usage{
 getParameters_ss(trueparms = TRUE, mod = NA)
 }
+\arguments{
+\item{trueparms}{Use csv or stochastic parameters}
+
+\item{mod}{\link{r4ss} object containing parameters}
+}
+\value{
+A list of parameters
+}
 \description{
-Export EM parameters for TMB based on csv files with parameters
+Export EM parameters for \link{TMB} based on csv files with parameters
 }

@@ -1,13 +1,11 @@
 #' Violin plot of the MSE results
 #'
 #' @param ls.MSE list of MSE results
-#' @param SSB0 OM SSB0
+#' @param SSB0 Operating Model Spawning Stock B0 value
 #' @param move is movement included?
 #'
-#' @return
+#' @return Nothing
 #' @export
-#'
-#' @examples
 hake_violin <- function(ls.MSE, SSB0, move = NA){
 
   nruns <- length(ls.MSE)
@@ -112,8 +110,6 @@ hake_violin <- function(ls.MSE, SSB0, move = NA){
       AAV.tmp <- data.frame(AAV  = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
                             year = yr[2:length(yr)], run =  paste('run',i, sep=''))
       AAV.plot <- rbind(AAV.plot, AAV.tmp)
-
-
     }
   }
 
