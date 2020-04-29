@@ -5,6 +5,8 @@
 #' @param name name to print in data frame
 #'
 #' @return Nothing
+#' @importFrom ggplot2 ggplot geom_line aes geom_point geom_ribbon theme_bw
+#' @importFrom ggplot2 theme scale_y_continuous
 #' @export
 plotValues <- function(est,
                        data,
@@ -18,10 +20,10 @@ plotValues <- function(est,
                          year = data$x,
                          model = 'observed')
   df.plot <- rbind(df.plot, data.tmp)
-  p1 <- ggplot2::ggplot(df.plot,
-                        ggplot2::aes(x = year,
-                                     y = value,
-                                     color = model)) +
+  p1 <- ggplot(df.plot,
+               aes(x = year,
+                   y = value,
+                   color = model)) +
     geom_line(data = df.plot[df.plot$model == 'estimated',],
               size = 1,
               col = 'black') +

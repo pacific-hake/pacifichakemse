@@ -16,7 +16,7 @@ plotMSE(results, plotnames = NA, plotexp = FALSE, pidx = NA)
 \item{pidx}{See \code{\link[=fn_plot_MSE]{fn_plot_MSE()}}}
 }
 \value{
-
+Nothing
 }
 \description{
 Plot MSE results (TODO: Improve docs on this function)

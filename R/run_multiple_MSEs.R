@@ -10,6 +10,7 @@
 #'
 #' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
 #' F0, parms, N, converge, ams, amc, V
+#' @importFrom TMB sdreport
 #' @export
 run_multiple_MSEs <- function(simyears = NULL,
                               seeds = 12345,
@@ -23,8 +24,12 @@ run_multiple_MSEs <- function(simyears = NULL,
     print('Number of years to simulate not specified. Simulating 30 years into the future')
     simyears <- 30
   }
-  TMB::compile("src/runHakeassessment.cpp")
-  dyn.load(dynlib("src/runHakeassessment"))
+  lib_path <- file.path(system.file(package = "PacifichakeMSE",
+                                    mustWork = TRUE),
+                        "libs",
+                        "x64",
+                        TMB::dynlib("runHakeassessment"))
+  dyn.load(lib_path)
 
 
   time <- 1
@@ -43,7 +48,6 @@ run_multiple_MSEs <- function(simyears = NULL,
   Catch.save <- list()
   S.year.future <- seq(2019,2019+simyears, by = df$nsurvey)
   # Save som OM stuff
-
 
   # Save the estimated parameters from the EM (exclude time varying)
   parms.save <- array(NA, dim = c(simyears, 4))

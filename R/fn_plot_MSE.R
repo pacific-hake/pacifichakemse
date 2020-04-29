@@ -7,53 +7,45 @@
 #' @param pidx order of runs in figures
 #'
 #' @return Nothing
+#' @importFrom dplyr filter summarise summarize group_by select %>%
+#' @importFrom PNWColors pnw_palette
+#' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
+#' @importFrom ggplot2 facet_wrap element_text position_dodge geom_violin geom_boxplot
+#' @importFrom ggplot2 theme_classic coord_cartesian element_blank element_rect geom_hline
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom reshape2 melt
+#' @importFrom cowplot plot_grid
 #' @export
 fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plotexp = TRUE, pidx = NA){
 
   nms <- names(ls)
-
   if(all(is.na(pidx))){
     pidx <- 1:length(nms)
   }
-
   obj.plot <- list()
   #cols <- brewer.pal(6, 'Dark2')
-  cols <- PNWColors::pnw_palette('Starfish',n = 4, type = 'discrete')
+  cols <- pnw_palette('Starfish',n = 4, type = 'discrete')
   #cols <- LaCroixColoR::lacroix_palette('PassionFruit', n = 4, type = 'discrete')
 
   cols <- cols[1:(length(nms))]
-
   ptm <- proc.time()
-
   for(i in 1:length(nms)){
-
-
     obj.plot[[i]] <- hake_objectives(ls[[i]],sim.data$SSB0, move = 1)
     obj.plot[[i]][[2]]$HCR <- nms[i]
-
   }
-
   proc.time() - ptm
-
-
 
   df.obj <- data.frame(obj.plot[[1]][[2]])
   df.sp.vio <- data.frame(obj.plot[[1]][[3]])
   df.sp.vio$HCR <- nms[1]
 
-
   for(i in 2:length(nms)){
     df.obj <- rbind(df.obj, obj.plot[[i]][[2]])
-
     tmp <- obj.plot[[i]][[3]]
     tmp$HCR <- nms[i]
-
     df.sp.vio <- rbind(df.sp.vio, tmp)
-
   }
-
   indicators <- unique(df.obj$indicator)
-
   df.obj2 <- df.obj %>%
     filter(indicator %in% indicators[1:6])
   # df.obj2$indicator=factor(df.obj2$indicator,
@@ -63,10 +55,8 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   #                                   'AAV',
   #                                   'short term catch',
   #                                   'long term catch'))
-
   df.sp <- df.obj %>%
     filter(indicator %in% indicators[7:12])
-
   # df.sp$indicator=factor(df.sp$indicator,
   #                        levels=c('Canada TAC/V spr',
   #                                 'Canada TAC/V sum',
@@ -74,27 +64,22 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   #                                 'US TAC/V spr',
   #                                 'US TAC/V sum',
   #                                 'US TAC/V fall'))
-
   df.sp$country=c(rep('Canada',3), rep('US',3))
   df.sp$season=c(rep(c('Apr-Jun','July-Sept','Oct-Dec')))
-
   # Fix the y scales
   dummy <- data.frame(indicator = 'long term catch', value = c(0.2,0.3), HCR = 'ymin')
-
-
   # for(i in 1:length(indicators)){
   #   df.obj2[df.obj2$HCR != 'move_0' & df.obj2$indicator == indicators[i],]$value <-
   #     df.obj2[df.obj2$HCR != 'move_0' & df.obj2$indicator == indicators[i],]$value/
   #     df.obj2[df.obj2$HCR == 'move_0' & df.obj2$indicator == indicators[i],]$value-1
   #
   # }
-
   #df.obj2$value[df.obj2$HCR == 'move_0'] <- 0
   df.obj2$HCR <- factor(df.obj2$HCR, levels = names(ls)[pidx])
-
   #df.obj2$ind2=factor(df.obj2$indicator, as.character(df.obj2$indicator))
 
-  p1 <- ggplot2::ggplot(df.obj2, aes(x = HCR,y = value))+geom_bar(stat = 'identity', aes(fill = HCR))+
+  p1 <- ggplot(df.obj2, aes(x = HCR,y = value)) +
+    geom_bar(stat = 'identity', aes(fill = HCR))+
     scale_x_discrete(name = '')+
     scale_y_continuous(name = '')+
     scale_fill_manual(values = cols[1:length(unique(df.obj$HCR))])+
@@ -103,8 +88,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), legend.position = 'none')
   p1
 
-
-  p1.sp<- ggplot2::ggplot(df.sp, aes(x = HCR,y = value, factor=season))+
+  p1.sp<- ggplot(df.sp, aes(x = HCR,y = value, factor=season))+
     geom_bar(stat = 'identity', aes(fill = season), position="dodge2")+
     scale_x_discrete(name = '')+
     scale_y_continuous(name = '')+
@@ -116,7 +100,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   p1.sp
 
 
-  sp.vio.plot <- reshape2::melt(df.sp.vio[df.sp.vio$year >2018,],id.vars = c('run','HCR','country','year'), measure.vars = 1:3,
+  sp.vio.plot <- melt(df.sp.vio[df.sp.vio$year >2018,],id.vars = c('run','HCR','country','year'), measure.vars = 1:3,
                                 variable.name = 'season', value.name = 'exploitation')
 
   levels(sp.vio.plot$season) <- c('Apr-Jun','July-Sept','Oct-Dec')
@@ -127,7 +111,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
 
   dodge <- position_dodge(width = 0.5)
 
-  p.v <- ggplot2::ggplot(sp.vio.plot, aes(x = HCR, y = exploitation, factor = season, fill = HCR))+
+  p.v <- ggplot(sp.vio.plot, aes(x = HCR, y = exploitation, factor = season, fill = HCR))+
     geom_violin(position = dodge)+
     geom_boxplot(width=0.15, col = 'black', outlier.shape = NA, position = dodge)+
     scale_fill_manual(values = cols)+
@@ -213,7 +197,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   df.all$run <- factor(df.all$run, levels = nms[pidx])
   df.catch$run <- factor(df.catch$run, levels = nms[pidx])
 
-  p2 <- ggplot2::ggplot(df.all, aes(x = year, y = med.can*1e-6))+geom_line(color = 'darkred', size = 1.5)+
+  p2 <- ggplot(df.all, aes(x = year, y = med.can*1e-6))+geom_line(color = 'darkred', size = 1.5)+
     geom_line(aes(y = med.US*1e-6), color = 'darkblue', size = 1.5)+theme_classic()+scale_y_continuous(name ='SSB (million tonnes)')+facet_wrap(~run)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
     geom_ribbon(aes(ymin = p5.can*1e-6, ymax = p95.can*1e-6), fill = alpha('red', alpha = 0.2), linetype = 0)+
@@ -227,7 +211,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
     dev.off()
   }
 
-  p3 <- ggplot2::ggplot(df.catch, aes(x = year, y = med*1e-6, color = run))+geom_line(size = 1.5)+
+  p3 <- ggplot(df.catch, aes(x = year, y = med*1e-6, color = run))+geom_line(size = 1.5)+
     #  geom_ribbon(aes(ymin = p5*1e-6, ymax = p95*1e-6), linetype = 2, fill = alpha(alpha =0.2, colour = cols))+
     scale_color_manual(values=cols[1:length(unique(df.catch$run))])+scale_y_continuous(name = 'Catch (million tonnes)')+
     geom_line(aes(y = p5*1e-6, color = run), linetype = 2)+geom_line(aes(y = p95*1e-6, color = run), linetype = 2)+
@@ -255,7 +239,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
 
   rm.idx <- which(is.na(df.ams$med)) # remove years with no measurement
 
-  p4 <- ggplot2::ggplot(df.ams[-rm.idx,], aes(x = year, y = med, color = run))+geom_line(size = 2)+
+  p4 <- ggplot(df.ams[-rm.idx,], aes(x = year, y = med, color = run))+geom_line(size = 2)+
     #  geom_ribbon(aes(ymin = p5, ymax = p95, color = run), linetype = 2, fill = NA)+
     scale_color_manual(values=cols)+scale_y_continuous(name = 'Average age in survey')+
     geom_line(aes(y = p5, color = run), linetype = 2)+geom_line(aes(y = p95, color = run), linetype = 2)+
@@ -268,7 +252,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
     dev.off()
   }
 
-  p5 <- ggplot2::ggplot(df.amc, aes(x = year, y = med, color = run))+geom_line(size = 2)+
+  p5 <- ggplot(df.amc, aes(x = year, y = med, color = run))+geom_line(size = 2)+
     #  geom_ribbon(aes(ymin = p5, ymax = p95, color = run), linetype = 2, fill = NA)+
     scale_color_manual(values=cols)+scale_y_continuous(name = 'Average age in catch')+
     geom_line(aes(y = p5, color = run), linetype = 2)+geom_line(aes(y = p95, color = run), linetype = 2)
@@ -281,7 +265,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
 
   if(plotexp == TRUE){
 
-    p4 <- ggplot2::ggplot(df.ams[-rm.idx,], aes(x = year, y = med, color = run))+geom_line(size = 2)+
+    p4 <- ggplot(df.ams[-rm.idx,], aes(x = year, y = med, color = run))+geom_line(size = 2)+
       #  geom_ribbon(aes(ymin = p5, ymax = p95, color = run), linetype = 2, fill = NA)+
       scale_color_manual(values=cols)+scale_y_continuous(name = 'Average age\n in survey')+
       geom_line(aes(y = p5, color = run), linetype = 2)+geom_line(aes(y = p95, color = run), linetype = 2)+
@@ -290,7 +274,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
       coord_cartesian(ylim = c(2.5,10))
 
 
-    p5 <- ggplot2::ggplot(df.amc, aes(x = year, y = med, color = run))+geom_line(size = 2)+
+    p5 <- ggplot(df.amc, aes(x = year, y = med, color = run))+geom_line(size = 2)+
       #  geom_ribbon(aes(ymin = p5, ymax = p95, color = run), linetype = 2, fill = NA)+
       scale_color_manual(values=cols)+scale_y_continuous(name = 'Average age\n in catch')+
       geom_line(aes(y = p5, color = run), linetype = 2)+geom_line(aes(y = p95, color = run), linetype = 2)+
@@ -298,7 +282,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
       coord_cartesian(ylim = c(2.5,10))
 
     png(paste(plotfolder,'total_average_ags.png'), width = 16, height =10, res = 400, unit = 'cm')
-    print(cowplot::plot_grid(plotlist = list(p4,p5), ncol = 2, labels = c('a','b')))
+    print(plot_grid(plotlist = list(p4,p5), ncol = 2, labels = c('a','b')))
     dev.off()
   }
 
@@ -311,7 +295,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   ### SSB in the middle of the year
   df.SSB$run <- factor(df.SSB$run, levels = nms[pidx])
 
-  p6 <- ggplot2::ggplot(df.SSB, aes(x = year, y = med.can*1e-6))+geom_line(color = 'red', size = 1.2)+
+  p6 <- ggplot(df.SSB, aes(x = year, y = med.can*1e-6))+geom_line(color = 'red', size = 1.2)+
     geom_line(aes(y = med.US*1e-6), color = 'blue', size = 1.2)+
     theme_classic()+scale_y_continuous(name ='SSB (m tonnes)\nmidyear')+facet_wrap(~run)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
@@ -336,7 +320,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
 
   cols_c <- c('darkred', 'blue4')
 
-  p7 <- ggplot2::ggplot(df.ams.space,aes(x = year, y = med.can))+geom_line(size = 2, color = cols_c[1])+
+  p7 <- ggplot(df.ams.space,aes(x = year, y = med.can))+geom_line(size = 2, color = cols_c[1])+
     geom_ribbon(aes(ymin = p5.can, ymax = p95.can), linetype = 0, fill = alpha(cols_c[1], alpha = 0.2), color = cols_c[1])+
     geom_line(aes(y = med.us), size = 2, color = cols_c[2])+
     geom_ribbon(aes(ymin = p5.us, ymax = p95.us), linetype = 0, fill = alpha(cols_c[2], alpha = 0.2), color = cols_c[2])+
@@ -360,7 +344,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
 
   df.amc.space$run <- factor(df.amc.space$run, levels = nms[pidx])
 
-  p8 <- ggplot2::ggplot(df.amc.space[df.amc.space$year > 2014,],aes(x = year, y = med.can))+geom_line(size = 2, color = cols_c[1])+
+  p8 <- ggplot(df.amc.space[df.amc.space$year > 2014,],aes(x = year, y = med.can))+geom_line(size = 2, color = cols_c[1])+
     geom_ribbon(aes(ymin = p5.can, ymax = p95.can), linetype = 0, fill = alpha(cols_c[1], alpha = 0.2), color = cols_c[1])+
     geom_line(aes(y = med.us), size = 2, color = cols_c[2])+
     geom_ribbon(aes(ymin = p5.us, ymax = p95.us), linetype = 0, fill = alpha(cols_c[2], alpha = 0.2), color = cols_c[2])+
@@ -397,7 +381,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
     se.plot <- rbind(se.plot, data.frame(qfunc(calcSE(ls[[i]]),nms[i])))
   }
 
-  p9  <- ggplot2::ggplot(se.plot[se.plot$year > 2014,], aes(x = year, y = E5))+theme_classic()+
+  p9  <- ggplot(se.plot[se.plot$year > 2014,], aes(x = year, y = E5))+theme_classic()+
     geom_line(size = 1.5)+facet_wrap(~name)+geom_hline(yintercept = 0.0, linetype = 2)+
     geom_ribbon(aes(ymin =E05, ymax = E95), fill = alpha('gray', alpha = 0.5))+
     scale_y_continuous(name = 'Standard error')+
@@ -426,7 +410,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   ### SSB in the middle of the year
   df.F0$run <- factor(df.F0$run, levels = nms[pidx])
 
-  p10 <- ggplot2::ggplot(df.F0, aes(x = year, y = med.can))+geom_line(color = 'red')+
+  p10 <- ggplot(df.F0, aes(x = year, y = med.can))+geom_line(color = 'red')+
     geom_line(aes(y = med.us), color = 'blue')+coord_cartesian(ylim = c(0,1))+
     theme_classic()+scale_y_continuous(name ='Exploitation rate')+facet_wrap(~run)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
@@ -449,7 +433,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   }
   df.catchq$run <- factor(df.catchq$run, levels = nms[pidx])
 
-  p11 <- ggplot2::ggplot(df.catchq, aes(x = year, y = med.can))+geom_line(color = 'red')+
+  p11 <- ggplot(df.catchq, aes(x = year, y = med.can))+geom_line(color = 'red')+
     geom_line(aes(y = med.us), color = 'blue')+
     theme_classic()+scale_y_continuous(name ='Catch/quota')+facet_wrap(~run)+
     coord_cartesian(ylim = c(0.6,1.1))+
@@ -478,7 +462,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   df.SSB$p95 <- df.SSB$p95/(sum(sim.data$SSB0))
   df.SSB$run <-  factor(df.SSB$run, levels = nms[pidx])
 
-  p12<- ggplot2::ggplot(df.SSB, aes(x = year, y = med, color = run, fill = run))+
+  p12<- ggplot(df.SSB, aes(x = year, y = med, color = run, fill = run))+
     geom_line(size = 1.5)+
     geom_line(aes(y = p95), linetype =2, size = 1.2)+
     geom_line(aes(y = p5), linetype =2, size = 1.2)+
@@ -500,7 +484,7 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
     dev.off()
   }
 
-  p13 <- ggplot2::ggplot(df.catchq, aes(x = year, y = med.tot, color = run))+geom_line(size = 1.4)+
+  p13 <- ggplot(df.catchq, aes(x = year, y = med.tot, color = run))+geom_line(size = 1.4)+
     scale_color_manual(values = cols[1:length(nms)])+
     geom_line(aes(y = p5.tot), linetype =2,size = 0.9)+
     geom_line(aes(y = p95.tot), linetype =2,size = 0.9)+

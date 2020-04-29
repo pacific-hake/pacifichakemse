@@ -19,6 +19,6 @@ Run an agebased model
 }
 \examples{
 \dontrun{
-run.agebased.true.catch(df) # runs the model
+run.agebased.true.catch(df)
 }
 }

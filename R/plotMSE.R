@@ -5,10 +5,8 @@
 #' @param plotexp See [fn_plot_MSE()]
 #' @param pidx See [fn_plot_MSE()]
 #'
-#' @return
+#' @return Nothing
 #' @export
-#'
-#' @examples
 plotMSE <- function(results,
                     plotnames = NA,
                     plotexp = FALSE,
