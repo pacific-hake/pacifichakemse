@@ -16,10 +16,6 @@ mod <- SS_output(system.file("SS32018/"), printstats=FALSE, verbose = FALSE) # R
 
 plot.figures = FALSE# Set true for printing to file
 # Run the simulation model
-# source('R/load_files_OM.R')
-# source('R/load_files.R')
-# source('R/runfuture_OM.R')
-# source('R/run_agebased_model_true_catch.R')
 assessment <- read.csv(system.file("assessment_MLE.csv"))
 
 #assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]

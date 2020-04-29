@@ -154,7 +154,6 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   }
 
   # Do violin plots as well
-  #source('hake_violin.R')
 
   obj.plot.v <- hake_violin(ls[[1]],sim.data$SSB0, move = 1)
   obj.plot.v$HCR <- nms[1]
@@ -170,7 +169,6 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
 
   save(obj.plot.v,file = paste(results,'violindata.Rdata', sep =''))
 
-  #source('plotViolin.R')
   p.vio <- plotViolin(paste(results,'violindata.Rdata', sep = ''), cols)
   # cols <- PNWColors::pnw_palette('Starfish',n = length(nms), type = 'discrete')
   #
@@ -380,7 +378,6 @@ fn_plot_MSE <- function(ls, sim.data, plotfolder = 'results/Figs/newplots/', plo
   }
 
   # How accurate is the SSB estimation
-  #source('calcSE.R')
 
   # Rebuild into nice figs
   qfunc <- function(df, name){

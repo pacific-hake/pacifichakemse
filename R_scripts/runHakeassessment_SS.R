@@ -1,10 +1,4 @@
 # Run the hake assessment
-source('R/load_files.R')
-source('R/getParameters_ss.R')
-source('R/load_data_ss.R')
-library(r4ss)
-library(dplyr)
-library(reshape2)
 # Read the assessment data
 mod <- SS_output(system.file("SS32018"), printstats=FALSE, verbose = FALSE) # Read the true selectivity
 
@@ -58,8 +52,6 @@ xx<- Check_Identifiable_vs2(obj)
 sdrep <- summary(rep)
 rep.values<-rownames(sdrep)
 
-
-source('R/getUncertainty.R')
 df$nyear <- length(years)
 df$year <- years
 
@@ -176,7 +168,6 @@ ggplot(df.plot.parms[df.plot.parms$name %in% c('Rinit', 'h', 'Minit', 'SDsurv'),
   theme(strip.text.x = element_blank())+scale_x_discrete('')
 dev.off()
 # plot the base and survey selectivity
-source('getSelec.R')
 
 sel.ss3 <- getSelec(df$age,psel =parms.true['psel_fish'][[1]],Smin = df$Smin,df$Smax)
 sel.tmb <- getSelec(df$age, psel = rep$par.fixed[names(rep$par.fixed) == 'psel_fish'], Smin = df$Smin, Smax = df$Smax)

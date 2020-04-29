@@ -393,7 +393,6 @@ run_multiple_MSEs <- function(simyears = NULL,
 
   Catch.year <- sim.data$Catch.save.age
   ## Calculate the average age
-  #source('R/calcMeanAge.R')
 
   #dev.off()
 

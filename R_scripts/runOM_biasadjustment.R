@@ -1,7 +1,6 @@
 ### Run the OM in X amount of years
 
 ###### Initialize the operating model ######
-source('R/load_files_OM.R')
 assessment <- read.csv(system.file("asssessment_MLE.csv"))
 plot.figures = FALSE # Set true for printing to file
 # Run the simulation model

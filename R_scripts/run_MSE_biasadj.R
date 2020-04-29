@@ -8,9 +8,6 @@ mod <- SS_output(system.file("SS32018"), printstats=FALSE, verbose = FALSE) # Re
 seedz <- 12345
 set.seed(seedz)
 
-source('R/load_files.R')
-source('R/load_files_OM.R')
-source('R/run_multiple_OMs.R')
 nruns <- 1000
 seeds <- floor(runif(n = nruns, min = 1, max = 1e6))
 
@@ -39,8 +36,6 @@ save(ls.save,file = 'results/bias adjustment/MSErun_move_nofishing_nobiasadj.Rda
 ls.save <- list()
 ls.converge <- matrix(0, nruns)
 df <- load_data_seasons(nseason = 4, nspace = 2, bfuture = 0.87) # Prepare data for operating model
-source('run_multiple_OMs.R')
-
 
 for (i in 1:nruns){
   tmp <- run_multiple_OMs(simyears = 50, seeds[i], df =df, Catchin =0)

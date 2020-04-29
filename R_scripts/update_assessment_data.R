@@ -1,12 +1,7 @@
-### Update the conditioning data 
-# Run the hake assessment 
+### Update the conditioning data
+# Run the hake assessment
 
-source('load_files.R')
-source('load_data_ss.R')
-library(r4ss)
-library(dplyr)
-library(reshape2)
-# Read the assessment data 
+# Read the assessment data
 mod <- SS_output(paste(getwd(),'/data/SS32018/', sep =''), printstats=FALSE, verbose = FALSE)
 
 df <- load_data_ss(mod)
@@ -25,15 +20,15 @@ years.catch <- unique(age.ss$Yr)
 ages <- unique(age.ss$Bin)
 
 age.ss.save <- data.frame(year = years.catch, nTrips = NA)
-# Do some stupid magic 
+# Do some stupid magic
 tmp <- as.data.frame(matrix(NA, nrow = length(years.catch), ncol = length(ages)))
 names(tmp) <- paste('a',ages, sep ='')
 age.ss.save <- cbind(age.ss.save,tmp)
 
 for(i in 1:length(years.catch)){
-  
+
   tmp <- age.ss[age.ss$Yr == years.catch[i],]
-  
+
   age.ss.save$nTrips[i] <- mean(tmp$N) # fix if different for some age classes
   age.ss.save[i,paste('a',ages, sep ='')] <- round(tmp$Obs, digits =3)
   print(sum(tmp$Obs))
@@ -67,7 +62,7 @@ ggplot(ac.tmb.plot[ac.tmb.plot$year == yr,],aes(x= as.numeric(age), y = value))+
   geom_point(data =age.ss.plot[age.ss.plot$year == yr,])#+
 
 
-# Compare the total catch at age 
+# Compare the total catch at age
 caa <- mod$catage[mod$catage$Era == 'TIME',]
 yr <- 1966
 ix <- 11:31

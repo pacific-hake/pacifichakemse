@@ -1,11 +1,4 @@
 # Run the hake assessment
-source('R/load_files.R')
-source('R/getParameters_ss.R')
-source('R/load_data_ss.R')
-library(r4ss)
-library(dplyr)
-library(reshape2)
-library(scales)
 # Read the assessment data
 mod <- SS_output(system.file("SS32018/"), printstats=FALSE, verbose = FALSE) # Read the true selectivity
 
@@ -57,8 +50,6 @@ rep
 sdrep <- summary(rep)
 rep.values<-rownames(sdrep)
 
-
-source('getUncertainty.R')
 df$nyear <- length(years)
 df$year <- years
 

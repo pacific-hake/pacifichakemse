@@ -1,6 +1,4 @@
-## Run the MSE plots 
-
-source('plotMSE.R')
+## Run the MSE plots
 
 # Plot CLIMATE STUFF
 results <- 'results/Climate/'
@@ -25,7 +23,6 @@ plotMSE(results, plotexp = FALSE, plotnames = c('survey1','base scenario','surve
 
 
 # Plot the bias adjustment (no fishing) runs
-source('plotMSE_biasadjustment.R')
 results <- 'results/bias adjustment/'
 plotMSE_biasadjustment(results, plotnames = c('0.87','0.5','0'), plotexp = TRUE)
 

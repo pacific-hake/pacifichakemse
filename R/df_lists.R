@@ -63,8 +63,6 @@ df_lists <- function(ls.save, nms){
 
         }
 
-        #source('calcMeanAge.R')
-
         if(is.null(ls.save[[i]]$F0)){
           ls.save[[i]]$F0 <- matrix(NA, length(yr),2)
         }

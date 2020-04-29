@@ -27,7 +27,7 @@ library(here)
 ```
 Source the functions required to run the MSE (put into package later)
 ```{r}
-source('load_files_OM.R')
+#source('load_files_OM.R')
 ```
 Load the assessment data
 ```{r}
@@ -147,7 +147,7 @@ ggplot(df.R, aes(x= year, y = R, color = source))+geom_line()+geom_point()+theme
 
 Calculate average ages using the calcMeanAge() function
 ```{r}
-source('calcMeanAge.R')
+#source('calcMeanAge.R')
 
 age.comps <- sim.data$age_comps_catch_space
 age.comps <- apply(age.comps,c(1,2),sum)/2

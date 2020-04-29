@@ -1,13 +1,4 @@
 ### Calculate the estimated vs realized TAC
-library(ggplot2)
-library(scales)
-library(reshape2)
-library(PacifichakeMSE)
-library(patchwork)
-# source('load_data_seasons.R')
-# source('getSelec.R')
-# source('load_files.R')
-# source('load_files_OM.R')
 
 df.tac <- read.csv(system.file("TAC.csv"))
 

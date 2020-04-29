@@ -11,10 +11,6 @@ mod <- SS_output(paste(getwd(),'/data/SS32018/', sep =''), printstats=FALSE, ver
 seedz <- 12345
 set.seed(seedz)
 
-source('load_files.R')
-source('load_files_OM.R')
-source('run_multiple_MSEs.R')
-
 df <- load_data_seasons(nseason = 4, nspace = 2, bfuture = 0.5) # Prepare data for operating model
 
 parms.true <- getParameters_OM(TRUE,df) # Load parameters from assessment
