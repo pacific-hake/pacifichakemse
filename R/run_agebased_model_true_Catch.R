@@ -8,7 +8,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' run.agebased.true.catch(df) # runs the model
+#' run.agebased.true.catch(df)
 #' }
 run.agebased.true.catch <- function(df,
                                     seeds = 100){
@@ -341,7 +341,6 @@ run.agebased.true.catch <- function(df,
         N.tmp <- N.save.age[,yr,space,season]#
         V.save[yr,space,season] <- B.tmp
         Catch.quota[yr,space,season] <- E.temp
-
         if(E.temp/B.tmp >= .9){
           if(df$years[yr] < 2018){
             stop(paste('Catch exceeds available biomass in year:',year,' and season', season, 'area', space)) # Stop if in the past

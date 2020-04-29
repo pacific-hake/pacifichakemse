@@ -7,9 +7,15 @@
 getParameters_csv <- function(trueparms = TRUE){
 
   if (trueparms == TRUE){
-    initN <- read.csv(system.file("Ninit_MLE.csv"))[,1]
-    Rdev <- read.csv(system.file("Rdev_MLE.csv"))[,1]
-    PSEL <- as.matrix(read.csv(system.file("p_MLE.csv")))
+    initN <- read.csv(system.file("extdata/Ninit_MLE.csv",
+                                  package = "PacifichakeMSE",
+                                  mustWork = TRUE))[,1]
+    Rdev <- read.csv(system.file("extdata/Rdev_MLE.csv",
+                                 package = "PacifichakeMSE",
+                                 mustWork = TRUE))[,1]
+    PSEL <- as.matrix(read.csv(system.file("extdata/p_MLE.csv",
+                                           package = "PacifichakeMSE",
+                                           mustWork = TRUE)))
     F0 <- assessment$F0
 
     # assessment <- read.csv('data/assessment_MLE.csv')

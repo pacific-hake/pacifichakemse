@@ -61,7 +61,7 @@ load_data_seasons <- function(nseason = 4,
   movefifty <- movefiftyinit
   movemax <- rep(movemaxinit,nseason)
   movemat <- array(0, dim = c(nspace, nage, nseason, nyear)) # Chances of moving in to the other grid cell
-  move <- ifelse(nspace == 1, TRUE, FALSE)
+  move <- ifelse(nspace == 1, FALSE, TRUE)
   if(move){
     for(j in 1:nspace){
       for(i in 1:nseason){
@@ -86,9 +86,13 @@ load_data_seasons <- function(nseason = 4,
     move.init <- 1
   }
   # weight at age
-  wage_ss <- read.csv(system.file("wage_ss.csv"))
+  wage_ss <- read.csv(system.file("extdata/wage_ss.csv",
+                                  package = "PacifichakeMSE",
+                                  mustWork = TRUE))
   wage_ss <- wage_ss[wage_ss$Yr %in% years,]
-  wage_unfished <- read.csv(system.file("unfished_waa.csv"))
+  wage_unfished <- read.csv(system.file("extdata/unfished_waa.csv",
+                                        package = "PacifichakeMSE",
+                                        mustWork = TRUE))
   wage_ssb <- wage_ss[wage_ss$Fleet == -2,paste('X',age, sep = '')]
   wage_ssb[[1]] <- unname(wage_ssb[[1]])
   wage_catch <- wage_ss[wage_ss$Fleet == 1 ,paste('X',age, sep = '')]
@@ -109,16 +113,23 @@ load_data_seasons <- function(nseason = 4,
   # }
   #
   # Catch
-  catch <- read.csv(system.file("hake_totcatch.csv"))
+  catch <- read.csv(system.file("extdata/hake_totcatch.csv",
+                                package = "PacifichakeMSE",
+                                mustWork = TRUE))
   # Survey abundance
-  df.survey <- read.csv(system.file("acoustic survey.csv"))
+  df.survey <- read.csv(system.file("extdata/acoustic_survey.csv",
+                                    package = "PacifichakeMSE",
+                                    mustWork = TRUE))
   # Maturity
-  # mat <- read.csv('data/maturity.csv')
   mat <- wage_ssb[1,]
   # Age comps
-  age_survey.df <- read.csv(system.file("agecomps_survey.csv"))
+  age_survey.df <- read.csv(system.file("extdata/agecomps_survey.csv",
+                                        package = "PacifichakeMSE",
+                                        mustWork = TRUE))
   age_survey.df$flag <- 1
-  age_catch.df <- read.csv(system.file("agecomps_fishery.csv"))
+  age_catch.df <- read.csv(system.file("extdata/agecomps_fishery.csv",
+                                       package = "PacifichakeMSE",
+                                       mustWork = TRUE))
   age_catch.df$flag <- 1
   if(nseason == 1){
     surveyseason <-  1
@@ -127,11 +138,19 @@ load_data_seasons <- function(nseason = 4,
   }else{
     surveyseason <- floor(nseason/2)
   }
-  survey <- read.csv(system.file("survey.csv"))
+  survey <- read.csv(system.file("extdata/survey.csv",
+                                 package = "PacifichakeMSE",
+                                 mustWork = TRUE))
   # Load the age comps
-  age_survey.tmp <- read.csv(system.file("age_survey_ss.csv"))
-  age_catch.tmp <- read.csv(system.file("age_catch_ss.csv"))
-  ac.data <- read.csv(system.file("ac_data.csv"))
+  age_survey.tmp <- read.csv(system.file("extdata/age_survey_ss.csv",
+                                         package = "PacifichakeMSE",
+                                         mustWork = TRUE))
+  age_catch.tmp <- read.csv(system.file("extdata/age_catch_ss.csv",
+                                        package = "PacifichakeMSE",
+                                        mustWork = TRUE))
+  ac.data <- read.csv(system.file("extdata/ac_data.csv",
+                                  package = "PacifichakeMSE",
+                                  mustWork = TRUE))
   # age_survey <- as.data.frame(matrix(-1, nyear,dim(age_survey.df)[2]))
   # names(age_survey) <- names(age_survey.df)
   # age_survey$year <- years
@@ -151,9 +170,15 @@ load_data_seasons <- function(nseason = 4,
   #
   # }
   # Load parameters from the assessment
-  initN <- rev(read.csv(system.file("Ninit_MLE.csv"))[,1])
-  Rdev <- read.csv(system.file("Rdev_MLE.csv"))[,1]
-  PSEL <- as.matrix(read.csv(system.file("p_MLE.csv")))
+  initN <- rev(read.csv(system.file("extdata/Ninit_MLE.csv",
+                                    package = "PacifichakeMSE",
+                                    mustWork = TRUE))[,1])
+  Rdev <- read.csv(system.file("extdata/Rdev_MLE.csv",
+                               package = "PacifichakeMSE",
+                               mustWork = TRUE))[,1]
+  PSEL <- as.matrix(read.csv(system.file("extdata/p_MLE.csv",
+                                         package = "PacifichakeMSE",
+                                         mustWork = TRUE)))
   #Fin <- assessment$F0
   # b <- matrix(NA, nyear)
   # Yr <- 1946:max(years)
@@ -190,7 +215,9 @@ load_data_seasons <- function(nseason = 4,
   # }
   #
   #b <- matrix(1, tEnd)
-  b <- as.matrix(read.csv(system.file("b_input.csv")))
+  b <- as.matrix(read.csv(system.file("extdata/b_input.csv",
+                                      package = "PacifichakeMSE",
+                                      mustWork = TRUE)))
 
   # if(move == TRUE){
   #    mul <- 1.015
@@ -198,12 +225,22 @@ load_data_seasons <- function(nseason = 4,
   #  mul <- 1
   #  }
   # load parameters specifically for hake
-  parms.scalar <- read.csv(system.file("parms_scalar.csv"))
-  parms.sel <- read.csv(system.file("selectivity.csv"))
-  initN <-as.matrix(read.table(system.file("initN.csv")))
-  Rdev <- as.matrix(read.csv(system.file("Rdev.csv")))
+  parms.scalar <- read.csv(system.file("extdata/parms_scalar.csv",
+                                       package = "PacifichakeMSE",
+                                       mustWork = TRUE))
+  parms.sel <- read.csv(system.file("extdata/selectivity.csv",
+                                    package = "PacifichakeMSE",
+                                    mustWork = TRUE))
+  initN <-as.matrix(read.table(system.file("extdata/initN.csv",
+                                           package = "PacifichakeMSE",
+                                           mustWork = TRUE)))
+  Rdev <- as.matrix(read.csv(system.file("extdata/Rdev.csv",
+                                         package = "PacifichakeMSE",
+                                         mustWork = TRUE)))
   if(sel_hist == 1){
-    PSEL <- as.matrix(read.csv(system.file("PSEL.csv")))
+    PSEL <- as.matrix(read.csv(system.file("extdata/PSEL.csv",
+                                           package = "PacifichakeMSE",
+                                           mustWork = TRUE)))
   }else{
     PSEL <- matrix(0, 5, 28)
   }
@@ -317,7 +354,9 @@ load_data_seasons <- function(nseason = 4,
             Catch = catch)
             # Parameters from the estimation model
 
-  Catch.country <- read.csv(system.file("catch_per_country.csv"))
+  Catch.country <- read.csv(system.file("extdata/catch_per_country.csv",
+                                        package = "PacifichakeMSE",
+                                        mustWork = TRUE))
   df$Catch.country <- as.matrix(Catch.country[,2:3])[,c(2,1)]
   df$Catch <- rowSums(df$Catch.country)
   if(nyear > length(df$Catch)){
