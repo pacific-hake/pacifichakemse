@@ -9,7 +9,7 @@ library(patchwork)
 # source('load_files.R')
 # source('load_files_OM.R')
 
-df.tac <- read.csv('inst/extdata/TAC.csv')
+df.tac <- read.csv(system.file("TAC.csv"))
 
 df <- load_data_seasons(nseason = 1, nspace = 1)
 sim.data <- run.agebased.true.catch(df)

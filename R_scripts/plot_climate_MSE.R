@@ -8,7 +8,7 @@ library(dplyr)
 library(reshape2)
 library(patchwork)
 
-mod <- SS_output('inst/extdata/SS32018', printstats=FALSE, verbose = FALSE) # Read the true selectivity
+mod <- SS_output(system.file("SS32018"), printstats=FALSE, verbose = FALSE) # Read the true selectivity
 
 # Set the seed
 seedz <- 12345

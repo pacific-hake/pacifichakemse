@@ -11,7 +11,7 @@ library(PacifichakeMSE)
 library(patchwork)
 # Survey age distribution
 # 2018 assessment
-mod <- SS_output('inst/extdata/SS32018/', printstats=FALSE, verbose = FALSE) # Read the true selectivity
+mod <- SS_output(system.file("SS32018/"), printstats=FALSE, verbose = FALSE) # Read the true selectivity
 
 
 plot.figures = FALSE# Set true for printing to file
@@ -20,11 +20,11 @@ plot.figures = FALSE# Set true for printing to file
 # source('R/load_files.R')
 # source('R/runfuture_OM.R')
 # source('R/run_agebased_model_true_catch.R')
-assessment <- read.csv('inst/extdata/assessment_MLE.csv')
+assessment <- read.csv(system.file("assessment_MLE.csv"))
 
 #assessment <- assessment[assessment$year > 1965 &assessment$year < 2018 ,]
-survey.obs <- read.csv('inst/extdata/survey_country.csv')
-survey.ac <- read.csv('inst/extdata/ac_survey_country.csv')
+survey.obs <- read.csv(system.file("survey_country.csv"))
+survey.ac <- read.csv(system.file("ac_survey_country.csv"))
 
 nparms <- 5
 movemax.parms <- seq(0.1,0.9, length.out = nparms)
@@ -52,7 +52,7 @@ AC.catch.tot <- AC.survey.tot <- array(NA, dim = c(df$age_maxage,df$nyear,
                                                    df$nspace,length(movemax.parms)*length(movefifty.parms)))
 survey.ml <- array(NA,dim = c(df$nyear,df$nspace,length(movemax.parms)*length(movefifty.parms)))
 
-catch.ac.obs <- read.csv('inst/extdata/age_in_catch_obs.csv')
+catch.ac.obs <- read.csv(system.file("age_in_catch_obs.csv"))
 standard.move <- runfuture_OM(df, 1)
 standard.move_sel <- runfuture_OM(df.2, 1)
 
@@ -129,7 +129,7 @@ p1/p.EE
 #   dev.off()
 # }
 # Check the fleet age comps again
-ac.data <- read.csv('inst/extdata/FleetAgeComp_byNation.csv' )
+ac.data <- read.csv(system.file("FleetAgeComp_byNation.csv"))
 names(ac.data)[names(ac.data) %in% paste('X',1:15, sep ='')] <- 1:15
 
 ac.tot <- melt(ac.data, id.vars = c('Year', 'Country','Nsamples'), measure.vars = paste(1:15),
@@ -266,7 +266,7 @@ if(plot.figures == TRUE){
 
 
 
-catch.ac.obs <- read.csv('inst/extdata/age_in_catch_obs.csv') # This data is outdated (last year is wrong)
+catch.ac.obs <- read.csv(system.file("age_in_catch_obs.csv")) # This data is outdated (last year is wrong)
 
 
 p.AC.catch <- ggplot(catch.ac.obs, aes(x = year, y= am, color = Country))+geom_line(size = 1, linetype = 2)+theme_classic()+
@@ -304,7 +304,7 @@ if(plot.figures == TRUE){
 # Fishing mortality per area
 
 F.plot <- apply(sim.data$Fout, FUN = sum, MARGIN = c(1,3))
-F0.assessment <- read.csv('inst/extdata/F0.csv')
+F0.assessment <- read.csv(system.file("F0.csv"))
 
 df.F <- data.frame(year = rep(df$years,2),
                    F0 = c(F.plot[,1],F.plot[,2]),

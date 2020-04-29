@@ -135,7 +135,7 @@ getRefpoint <- function(par.fixed,
   #   Cnew <- 500000
   # }
   # Adjust TAC by JMC/Utilization
-  TAC.obs <- read.csv('inst/extdata/adjusted_tac_fn.csv')
+  TAC.obs <- read.csv(system.file("adjusted_tac_fn.csv"))
 
   if(TAC == 1){
     Cexp <- Cnew

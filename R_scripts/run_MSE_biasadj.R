@@ -2,7 +2,7 @@ library(TMB)
 compile("src/runHakeassessment.cpp")
 dyn.load(dynlib("src/runHakeassessment"))
 library(r4ss)
-mod <- SS_output('inst/extdata/SS32018/', printstats=FALSE, verbose = FALSE) # Read the true selectivity 
+mod <- SS_output(system.file("SS32018"), printstats=FALSE, verbose = FALSE) # Read the true selectivity
 
 # Set the seed
 seedz <- 12345
@@ -31,9 +31,9 @@ for (i in 1:nruns){
     ls.save[[i]] <- NA
     ls.converge[i] <- 0
   }
-  
+
 }
-# # # # 
+# # # #
 save(ls.save,file = 'results/bias adjustment/MSErun_move_nofishing_nobiasadj.Rdata')
 
 ls.save <- list()
@@ -53,9 +53,9 @@ for (i in 1:nruns){
     ls.save[[i]] <- NA
     ls.converge[i] <- 0
   }
-  
+
 }
-# # # # 
+# # # #
 save(ls.save,file = 'results/bias adjustment/MSErun_move_nofishing_biasadj.Rdata')
 
 ls.save <- list()
@@ -74,8 +74,8 @@ for (i in 1:nruns){
     ls.save[[i]] <- NA
     ls.converge[i] <- 0
   }
-  
+
 }
-# # # # 
+# # # #
 save(ls.save,file = 'results/bias adjustment/MSErun_move_nofishing_biasadj_med.Rdata')
 
