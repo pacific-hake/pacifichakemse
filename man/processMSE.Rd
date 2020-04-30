@@ -27,7 +27,7 @@ processMSE(
 \item{nspace}{number of spaces}
 }
 \value{
-returns a concanated data frame
+returns a concatenated data frame
 }
 \description{
 Turn whole list into a concatenated polished data frame

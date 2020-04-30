@@ -3,12 +3,17 @@
 #' @param ls.MSE list of MSE results
 #' @param SSB0 unfished biomass from OM
 #' @param move Logical. Is movement in the OM?
+#' @param short_term_yrs Years for short term plots
+#' @param long_term_yrs Years greater than this will be in long term plots
 #'
 #' @return List of three: p.export, t.export, ls.season (TODO: explain better)
+#' @importFrom ggplot2 alpha
 #' @export
 hake_objectives <- function(ls.MSE,
                             SSB0,
-                            move = NA){
+                            move = NA,
+                            short_term_yrs = 2018:2027,
+                            long_term_yrs = 2027){
   nruns <- length(ls.MSE)
   nyears <- dim(ls.MSE[[1]][1]$Catch)[2]
   if(dim(ls.MSE[[1]][1]$Catch)[2] == 1){
@@ -236,25 +241,33 @@ hake_objectives <- function(ls.MSE,
               p75 = quantile(pcnt, 0.75),
               p5 = quantile(pcnt,0.05))
 
-  Catch.plotshort <- Catch.plot %>%
-    group_by(run) %>%
-    filter(year>2018 & year<2028) %>%
-    summarise(avg = mean(Catch)*1e-6) %>%
-    summarise(med=median(avg),
-              p95 = quantile(avg, 0.95),
-              p25 = quantile(avg, 0.25),
-              p75 = quantile(avg, 0.75),
-              p5 = quantile(avg,0.05))
+  if(max(Catch.plot$year) >= min(short_term_yrs)){
+    Catch.plotshort <- Catch.plot %>%
+      group_by(run) %>%
+      filter(year>2018 & year<2028) %>%
+      summarise(avg = mean(Catch)*1e-6) %>%
+      summarise(med=median(avg),
+                p95 = quantile(avg, 0.95),
+                p25 = quantile(avg, 0.25),
+                p75 = quantile(avg, 0.75),
+                p5 = quantile(avg,0.05))
+  }else{
+    Catch.plotshort <- NA
+  }
 
-  Catch.plotlong <- Catch.plot %>%
-    group_by(run) %>%
-    filter(year>2027) %>%
-    summarise(avg = mean(Catch)*1e-6) %>%
-    summarise(med=median(avg),
-              p95 = quantile(avg, 0.95),
-              p25 = quantile(avg, 0.25),
-              p75 = quantile(avg, 0.75),
-              p5 = quantile(avg,0.05))
+  if(max(Catch.plot$year) > long_term_yrs){
+    Catch.plotlong <- Catch.plot %>%
+      group_by(run) %>%
+      filter(year>2027) %>%
+      summarise(avg = mean(Catch)*1e-6) %>%
+      summarise(med=median(avg),
+                p95 = quantile(avg, 0.95),
+                p25 = quantile(avg, 0.25),
+                p75 = quantile(avg, 0.75),
+                p5 = quantile(avg,0.05))
+  }else{
+    Catch.plotlong <- NA
+  }
 
   AAV.plotshort <- AAV.plot %>%
     group_by(run) %>%
@@ -301,26 +314,32 @@ hake_objectives <- function(ls.MSE,
               p75 = quantile(prop, 0.75),
               p5 = quantile(prop,0.05))
 
-  vtac.us.seas.stat<- vtac.us.seas %>%
-    group_by(run) %>%
-    filter(year>2027) %>%
-    summarise(avg.sp = mean(1/V.TAC.sp),
-              avg.su = mean(1/V.TAC.su),
-              avg.fa= mean(1/V.TAC.fa)) %>%
-    summarise(med.sp=median(avg.sp),
-              med.su=median(avg.su),
-              med.fa=median(avg.fa))
-
-  vtac.can.seas.stat<- vtac.can.seas %>%
-    group_by(run) %>%
-    filter(year>2027) %>%
-    summarise(avg.sp = mean(1/V.TAC.sp),
-              avg.su = mean(1/V.TAC.su),
-              avg.fa= mean(1/V.TAC.fa)) %>%
-    summarise(med.sp=median(avg.sp),
-              med.su=median(avg.su),
-              med.fa=median(avg.fa))
-
+  if(max(Catch.plot$year) > long_term_yrs){
+    vtac.us.seas.stat <- vtac.us.seas %>%
+      group_by(run) %>%
+      filter(year>2027) %>%
+      summarise(avg.sp = mean(1/V.TAC.sp),
+                avg.su = mean(1/V.TAC.su),
+                avg.fa= mean(1/V.TAC.fa)) %>%
+      summarise(med.sp=median(avg.sp),
+                med.su=median(avg.su),
+                med.fa=median(avg.fa))
+  }else{
+    vtac.us.seas.stat <- NA
+  }
+  if(max(Catch.plot$year) > long_term_yrs){
+    vtac.can.seas.stat <- vtac.can.seas %>%
+      group_by(run) %>%
+      filter(year>2027) %>%
+      summarise(avg.sp = mean(1/V.TAC.sp),
+                avg.su = mean(1/V.TAC.su),
+                avg.fa= mean(1/V.TAC.fa)) %>%
+      summarise(med.sp=median(avg.sp),
+                med.su=median(avg.su),
+                med.fa=median(avg.fa))
+  }else{
+    vtac.can.seas.stat <- NA
+  }
   # vtac.us.seas.stat<- vtac.us.seas %>%
   #   group_by(run) %>%
   #   summarise(prop.sp = (length(which(V.TAC.sp>1))/length(V.TAC.sp)),
@@ -375,14 +394,15 @@ hake_objectives <- function(ls.MSE,
 
   for(i in 1:length(unique(SSB.future$run))){
     tmp <- SSB.future[SSB.future$run == rns[i],]
-    for(j in 1:(length(tmp$year)-3)){
-      if(tmp$SSB[j]< 0.4){
-        if(tmp$SSB[j+1]<0.4 & tmp$SSB[j+2] <0.4 & tmp$SSB[j+2]<0.4){
-          p.vals[i] <- 1+p.vals[i]
+    if(length(tmp$year) >= 4){
+      for(j in 1:(length(tmp$year)-3)){
+        if(tmp$SSB[j]< 0.4){
+          if(tmp$SSB[j+1]<0.4 & tmp$SSB[j+2] <0.4 & tmp$SSB[j+2]<0.4){
+            p.vals[i] <- 1+p.vals[i]
+          }
         }
       }
     }
-
   }
 
   p.vals <- p.vals/(length(tmp$year)-3)
@@ -412,27 +432,31 @@ hake_objectives <- function(ls.MSE,
                  'US TAC/V sum',
                  'US TAC/V fall')
                 # 'yrs bio unavailable')
-
   # Calculate the number of years the quota was met
-  t.export <- data.frame(indicator = as.factor(indicator),
-                         value = c(
-                           round(length(which(SSB.future$SSB <= 0.1))/length(SSB.future$SSB), digits = 2),
-                           round(length(which(SSB.future$SSB>0.1 & SSB.future$SSB<0.4))/length(SSB.future$SSB), digits = 2),
-                           round(length(which(SSB.future$SSB>0.4))/length(SSB.future$SSB), digits = 2),
-                           # round(mean(p.vals), digits = 2),
-                           #   mean(nclosed),
-                           round(median(AAV.plotquant$med), digits = 2),
-                           median(SSB.plotquant$med[SSB.plotquant$year > 2018]),
-                           #   median(1e6*Catch.plotquant$med[Catch.plotquant$year >2017])*1e-6,
-                           median(1e6*Catch.plotquant$med[Catch.plotquant$year > 2018 & Catch.plotquant$year <2028])*1e-6,
-                           median(1e6*Catch.plotquant$med[Catch.plotquant$year > 2025])*1e-6,
-                           vtac.can.seas.stat$med.sp,
-                           vtac.can.seas.stat$med.su,
-                           vtac.can.seas.stat$med.fa,
-                           vtac.us.seas.stat$med.sp,
-                           vtac.us.seas.stat$med.su,
-                           vtac.us.seas.stat$med.fa)
-                           # median(quota.plot[quota.plot$year > 2018,]$Quota_frac < 0.95)
+  if(is.na(vtac.can.seas.stat) | is.na(vtac.us.seas.stat)){
+    t.export <- NA
+  }else{
+    t.export <- data.frame(indicator = as.factor(indicator),
+                           value = c(
+                             round(length(which(SSB.future$SSB <= 0.1))/length(SSB.future$SSB), digits = 2),
+                             round(length(which(SSB.future$SSB>0.1 & SSB.future$SSB<0.4))/length(SSB.future$SSB), digits = 2),
+                             round(length(which(SSB.future$SSB>0.4))/length(SSB.future$SSB), digits = 2),
+                             # round(mean(p.vals), digits = 2),
+                             #   mean(nclosed),
+                             round(median(AAV.plotquant$med), digits = 2),
+                             median(SSB.plotquant$med[SSB.plotquant$year > min(short_term_yrs)]),
+                             #   median(1e6*Catch.plotquant$med[Catch.plotquant$year >2017])*1e-6,
+                             median(1e6*Catch.plotquant$med[Catch.plotquant$year > min(short_term_yrs) &
+                                                              Catch.plotquant$year <= long_term_yrs])*1e-6,
+                             median(1e6*Catch.plotquant$med[Catch.plotquant$year > long_term_yrs - 2])*1e-6,
+                             vtac.can.seas.stat$med.sp,
+                             vtac.can.seas.stat$med.su,
+                             vtac.can.seas.stat$med.fa,
+                             vtac.us.seas.stat$med.sp,
+                             vtac.us.seas.stat$med.su,
+                             vtac.us.seas.stat$med.fa))
+    # median(quota.plot[quota.plot$year > 2018,]$Quota_frac < 0.95)
+  }
 
                          #lower = c(
                          #   round(length(which(SSB.future$SSB<0.1))/length(SSB.future$SSB)*100, digits = 2),
@@ -445,7 +469,6 @@ hake_objectives <- function(ls.MSE,
                          #   median(1e6*Catch.plotquant$med[Catch.plotquant$year >2017])*1e-6,
                          #   median(1e6*Catch.plotquant$med[Catch.plotquant$year > 2018 & Catch.plotquant$year <2030])*1e-6
                          #   )
-  )
   print(t.export)
   p.export = NA
   # Add the seasonal stuff

@@ -23,7 +23,8 @@ fnsum <- function(x, idx){
 #' @param runs number of runs in MSE
 #' @param nspace number of spaces
 #'
-#' @return returns a concanated data frame
+#' @return returns a concatenated data frame
+#' @importFrom purrr map
 #' @export
 #' @examples
 #' \dontrun{
@@ -36,8 +37,9 @@ processMSE <- function(df.MSE,
                        runs = 100,
                        nspace = 2){
 
-tmp <- lapply(purrr::map(df.MSE[names(df.MSE) == id],
-                         .f = fnsum, idx = idx), data.frame, stringsAsFactors = FALSE)
+tmp <- lapply(map(df.MSE[names(df.MSE) == id],
+                  .f = fnsum, idx = idx),
+              data.frame, stringsAsFactors = FALSE)
 
 if(length(idx) == 1){
 tmp <- lapply(tmp, setNames, nm = 'value')
