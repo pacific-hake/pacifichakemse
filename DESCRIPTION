@@ -16,12 +16,18 @@ Imports:
     dplyr,
     ggplot2,
     gridExtra,
+    here,
     PNWColors,
+    r4ss,
     reshape2,
+    purrr,
+    stringr,
+    tictoc,
     TMB
 Remotes:
     jakelawlor/PNWColors,
-    kaskr/adcomp
+    kaskr/adcomp,
+    r4ss/r4ss
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
