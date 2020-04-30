@@ -9,11 +9,12 @@ run_mses(
   nruns = 10,
   simyears = NULL,
   fns = NULL,
-  tacs = NULL,
+  tacs = 1,
   cincreases = 0,
   mincreases = 0,
   sel_changes = 0,
   nsurveys = NULL,
+  multiple_season_data = NULL,
   om_params_seed = 12345,
   results_root_dir = "results",
   results_dir = "default",
@@ -44,6 +45,9 @@ order as the \code{fns} file names, or a single value}
 
 \item{nsurveys}{The number of surveys for each run. This must be a vector of the same length as \code{fns} or \code{NULL}.
 If \code{NULL}, nothing will be changed}
+
+\item{multiple_season_data}{A list of the same length as \code{fns}, with each element being a vector of
+three items, \code{nseason}, \code{nspace}, and \code{bfuture}. If NULL, biasadjustment will not be incorporated}
 
 \item{om_params_seed}{A seed value to use when calling the \code{\link[=run.agebased.true.catch]{run.agebased.true.catch()}} function}
 

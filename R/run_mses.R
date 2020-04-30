@@ -18,6 +18,8 @@
 #' order as the `fns` file names, or a single value
 #' @param nsurveys The number of surveys for each run. This must be a vector of the same length as `fns` or `NULL`.
 #' If `NULL`, nothing will be changed
+#' @param multiple_season_data A list of the same length as `fns`, with each element being a vector of
+#' three items, `nseason`, `nspace`, and `bfuture`. If NULL, biasadjustment will not be incorporated
 #' @param om_params_seed A seed value to use when calling the [run.agebased.true.catch()] function
 #' @param results_root_dir The name of the results root directory (relative to [here::here()])
 #' @param results_dir The name of the results directory (relative to [here::here(results_root_dir)])
@@ -34,11 +36,12 @@ run_mses <- function(ss_extdata_dir = NULL,
                      nruns = 10,
                      simyears = NULL,
                      fns = NULL,
-                     tacs = NULL,
+                     tacs = 1,
                      cincreases = 0,
                      mincreases = 0,
                      sel_changes = 0,
                      nsurveys = NULL,
+                     multiple_season_data = NULL,
                      om_params_seed = 12345,
                      results_root_dir = "results",
                      results_dir = "default",
@@ -53,6 +56,7 @@ run_mses <- function(ss_extdata_dir = NULL,
   stopifnot(!is.null(mincreases))
   stopifnot(!is.null(sel_changes))
   stopifnot(is.null(nsurveys) | length(nsurveys) == length(fns))
+  stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
   stopifnot(length(tacs) == 1 | length(tacs) == length(fns))
   stopifnot(length(cincreases) == 1 | length(cincreases) == length(fns))
   stopifnot(length(mincreases) == 1 | length(mincreases) == length(fns))
@@ -97,13 +101,23 @@ run_mses <- function(ss_extdata_dir = NULL,
       if(!is.null(nsurveys)){
         df$nsurvey <- nsurveys[.y]
       }
-      tmp <- run_multiple_MSEs(
-        simyears = simyears,
-        seeds = seeds[run],
-        df = df,
-        TAC = if(length(tacs) == 1) tacs else tacs[.y],
-        cincrease = ifelse(length(cincreases) == 1, cincreases, cincreases[.y]),
-        mincrease = ifelse(length(mincreases) == 1, mincreases, mincreases[.y]))
+      if(is.null(multiple_season_data)){
+        tmp <- run_multiple_MSEs(
+          simyears = simyears,
+          seeds = seeds[run],
+          df = df,
+          TAC = if(length(tacs) == 1) tacs else tacs[.y],
+          cincrease = ifelse(length(cincreases) == 1, cincreases, cincreases[.y]),
+          mincrease = ifelse(length(mincreases) == 1, mincreases, mincreases[.y]))
+      }else{
+        dfs <- map(multiple_season_data, ~{
+          do.call(load_data_seasons, as.list(.x))
+        })
+        tmp <- run_multiple_OMs(simyears = simyears,
+                                seed = seeds[run],
+                                df = dfs[[.y]],
+                                Catchin = 0)
+      }
       if(is.list(tmp)) tmp else NA
     }, ...)
     saveRDS(ls_save, file = here(results_root_dir, results_dir, .x))
