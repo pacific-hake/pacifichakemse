@@ -15,7 +15,7 @@
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
 #' (6) A vector of plot names, one for each scenario, and (7) sim_data, which is the output of
 #' running [run.agebased.true.catch()]
-#' @importFrom dplyr filter summarise summarize group_by select %>%
+#' @importFrom dplyr filter summarise summarize group_by select %>% mutate
 #' @importFrom PNWColors pnw_palette
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
 #' @importFrom ggplot2 facet_wrap element_text position_dodge geom_violin geom_boxplot
@@ -41,10 +41,19 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   ls_plots <- map(fls, ~{
     readRDS(.x)
   })
+  # Use the plot names provided to the function. If that is `NULL`,
+  # use the plot names set up when running the MSE scenarios. If that is
+  # `NULL`, use the file names
   if(is.null(plotnames[1])){
-    plotnames <- map_chr(fls, ~{
-      gsub(".rds$", "", basename(.x))
-    })
+    if(is.null(ls_plots[[1]]$plotname)){
+      plotnames <- map_chr(fls, ~{
+        gsub(".rds$", "", basename(.x))
+      })
+    }else{
+      plotnames <- map_chr(ls_plots, ~{
+        .x$plotname
+      })
+    }
   }
   stopifnot(length(ls_plots) == length(plotnames))
   seasons_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$season)
@@ -113,7 +122,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp
   }) %>%
     mutate(HCR = factor(HCR, levels = plotnames[pidx]))
-browser()
+
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
        violin_indicators = df_violin_indicators,

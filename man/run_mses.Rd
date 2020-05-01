@@ -9,6 +9,7 @@ run_mses(
   nruns = 10,
   simyears = NULL,
   fns = NULL,
+  plotnames = NULL,
   tacs = 1,
   cincreases = 0,
   mincreases = 0,
@@ -30,6 +31,9 @@ which contains SS3 model run output}
 \item{simyears}{The number of years to simulate into the future}
 
 \item{fns}{A vector of file names for the scenarios (.rds files). .rds extension is optional}
+
+\item{plotnames}{A vector of strings to use for the scenarios later when plotting. Must either be
+\code{NULL} or the same length as \code{fns}}
 
 \item{tacs}{A vector of TAC values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}

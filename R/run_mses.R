@@ -8,6 +8,8 @@
 #' @param nruns Then number of runs to do for each simulation
 #' @param simyears The number of years to simulate into the future
 #' @param fns A vector of file names for the scenarios (.rds files). .rds extension is optional
+#' @param plotnames A vector of strings to use for the scenarios later when plotting. Must either be
+#' `NULL` or the same length as `fns`
 #' @param tacs A vector of TAC values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
 #' @param cincreases A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
@@ -36,6 +38,7 @@ run_mses <- function(ss_extdata_dir = NULL,
                      nruns = 10,
                      simyears = NULL,
                      fns = NULL,
+                     plotnames = NULL,
                      tacs = 1,
                      cincreases = 0,
                      mincreases = 0,
@@ -51,6 +54,7 @@ run_mses <- function(ss_extdata_dir = NULL,
   stopifnot(length(ss_extdata_dir) == 1)
   stopifnot(class(ss_extdata_dir) == "character")
   stopifnot(!is.null(fns))
+  stopifnot(is.null(plotnames) | length(fns) == length(plotnames))
   stopifnot(!is.null(tacs))
   stopifnot(!is.null(cincreases))
   stopifnot(!is.null(mincreases))
@@ -120,6 +124,7 @@ run_mses <- function(ss_extdata_dir = NULL,
       }
       if(is.list(tmp)) tmp else NA
     }, ...)
+    ls_save$plotname <- plotnames[.y]
     saveRDS(ls_save, file = file.path(results_dir, .x))
   }, ...)
   toc()
