@@ -433,7 +433,7 @@ hake_objectives <- function(ls.MSE,
                  'US TAC/V fall')
                 # 'yrs bio unavailable')
   # Calculate the number of years the quota was met
-  if(is.na(vtac.can.seas.stat) | is.na(vtac.us.seas.stat)){
+  if(is.na(vtac.can.seas.stat[1]) | is.na(vtac.us.seas.stat[1])){
     t.export <- NA
   }else{
     t.export <- data.frame(indicator = as.factor(indicator),
