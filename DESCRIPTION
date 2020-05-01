@@ -10,7 +10,10 @@ Description: Management strategy evaluation framework with a spatial OM
 License: GPL-3
 Depends: R (>= 3.5.0)
 Encoding: UTF-8
-LinkingTo: TMB, RcppEigen
+LinkingTo: 
+    TMB,
+    RcppEigen,
+    Rcpp
 Imports:
     cowplot,
     dplyr,
@@ -23,7 +26,8 @@ Imports:
     purrr,
     stringr,
     tictoc,
-    TMB
+    TMB,
+    Rcpp
 Remotes:
     jakelawlor/PNWColors,
     kaskr/adcomp,
