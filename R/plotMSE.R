@@ -113,7 +113,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp
   }) %>%
     mutate(HCR = factor(HCR, levels = plotnames[pidx]))
-
+browser()
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
        violin_indicators = df_violin_indicators,
