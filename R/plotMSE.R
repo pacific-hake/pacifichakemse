@@ -11,8 +11,10 @@
 #'
 #' @return A list of length 4: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
-#' containing the violin indicators (data in format for violin plots), (4) A vector of colors,
-#' one for each file loaded (scenario), and (5) A vector of plot names, one for each scenario
+#' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
+#' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
+#' (6) A vector of plot names, one for each scenario, and (7) sim_data, which is the output of
+#' running [run.agebased.true.catch()]
 #' @importFrom dplyr filter summarise summarize group_by select %>%
 #' @importFrom PNWColors pnw_palette
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
@@ -31,7 +33,6 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   stopifnot(!is.null(results_dir))
 
   fls <- dir(results_dir)
-  ls.plots <- list()
   fls <- fls[grep("\\.rds", fls)]
   fls <- fls[grep("MSE", fls)]
   fls <- map_chr(fls, ~{
@@ -70,6 +71,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp[[3]]$HCR <- .y
     tmp
   })
+
   df_all_indicators <- map_df(lst_indicators, ~{
     .x[[2]]
   })
@@ -103,9 +105,20 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                                   "July-Sept",
                                   "Oct-Dec")))
 
+  df_violin <- map_df(seq_along(ls_plots), ~{
+    tmp <- hake_violin(ls_plots[[.x]],
+                       sim_data$SSB0,
+                       move = 1)
+    tmp$HCR <- plotnames[.x]
+    tmp
+  }) %>%
+    mutate(HCR = factor(HCR, levels = plotnames[pidx]))
+
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
        violin_indicators = df_violin_indicators,
+       violin_data = df_violin,
        cols = cols,
-       plotnames = plotnames)
+       plotnames = plotnames,
+       sim_data = sim_data)
 }
