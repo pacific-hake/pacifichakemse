@@ -5,15 +5,15 @@
 \title{Make MSE plots}
 \usage{
 fn_plot_MSE(
-  ls,
-  sim.data,
-  plotfolder = "results/Figs/newplots/",
+  lst = NULL,
+  sim.data = NULL,
+  plotfolder = NULL,
   plotexp = TRUE,
   pidx = NA
 )
 }
 \arguments{
-\item{ls}{list of MSE runs}
+\item{lst}{list of MSE runs}
 
 \item{sim.data}{baseline operating model}
 

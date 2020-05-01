@@ -21,8 +21,8 @@
 #' @param multiple_season_data A list of the same length as `fns`, with each element being a vector of
 #' three items, `nseason`, `nspace`, and `bfuture`. If NULL, biasadjustment will not be incorporated
 #' @param om_params_seed A seed value to use when calling the [run.agebased.true.catch()] function
-#' @param results_root_dir The name of the results root directory (relative to [here::here()])
-#' @param results_dir The name of the results directory (relative to [here::here(results_root_dir)])
+#' @param results_root_dir The results root directory
+#' @param results_dir The results directory
 #' @param ... Arguments passed to [load_data_seasons()]
 #'
 #' @return Nothing
@@ -43,8 +43,8 @@ run_mses <- function(ss_extdata_dir = NULL,
                      nsurveys = NULL,
                      multiple_season_data = NULL,
                      om_params_seed = 12345,
-                     results_root_dir = "results",
-                     results_dir = "default",
+                     results_root_dir = here("results"),
+                     results_dir = here("results", "default"),
                      ...){
 
   stopifnot(!is.null(ss_extdata_dir))
@@ -67,11 +67,11 @@ run_mses <- function(ss_extdata_dir = NULL,
     ifelse(str_ends(.x, pattern = "\\.rds"), .x, paste0(.x, ".rds"))
   })
 
-  if(!dir.exists(here(results_root_dir))){
-    dir.create(here(results_root_dir))
+  if(!dir.exists(results_root_dir)){
+    dir.create(results_root_dir)
   }
-  if(!dir.exists(here(results_root_dir, results_dir))){
-    dir.create(here(results_root_dir, results_dir))
+  if(!dir.exists(results_dir)){
+    dir.create(results_dir)
   }
 
   mod <- SS_output(system.file(file.path("extdata", ss_extdata_dir),
@@ -120,7 +120,7 @@ run_mses <- function(ss_extdata_dir = NULL,
       }
       if(is.list(tmp)) tmp else NA
     }, ...)
-    saveRDS(ls_save, file = here(results_root_dir, results_dir, .x))
+    saveRDS(ls_save, file = file.path(results_dir, .x))
   }, ...)
   toc()
 }

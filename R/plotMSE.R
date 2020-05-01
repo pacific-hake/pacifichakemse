@@ -1,48 +1,60 @@
 #' Plot MSE results (TODO: Improve docs on this function)
 #'
-#' @param results Output from... (TODO)
+#' @param results_dir A directory name where results from [run_mses()] resides. Only files
+#' in this directory that end in '.rds' and contain 'MSE' will be loaded
+#' @param figures_root_dir The root directory for figures. Scenario figure types will be
+#' subdirectories called `figures_dir`.
+#' @param figures_dir The directory to place the figures in.
 #' @param plotnames Names for the plots
 #' @param plotexp See [fn_plot_MSE()]
 #' @param pidx See [fn_plot_MSE()]
 #'
 #' @return Nothing
 #' @export
-plotMSE <- function(results,
-                    plotnames = NA,
+plotMSE <- function(results_dir = NULL,
+                    figures_root_dir = here("figures"),
+                    figures_dir = NULL,
+                    plotnames = NULL,
                     plotexp = FALSE,
                     pidx = NA){
-  # Load data
-  fls <- dir(results)
-  ls.plots <- list()
-  fls <- fls[grep('.Rdata', x = fls)]
-  fls <- fls[grep('MSE', x = fls)]
-  print(paste('order = ', fls))
-  for(i in 1:length(fls)){
-    load(paste(results,fls[i], sep= ''))
-    ls.plots[[i]] <- ls.save
+  stopifnot(!is.null(results_dir))
+  stopifnot(!is.null(figures_root_dir))
+  stopifnot(!is.null(figures_dir))
+
+  if(!dir.exists(figures_root_dir)){
+    dir.create(figures_root_dir)
+  }
+  if(!dir.exists(figures_dir)){
+    dir.create(figures_dir)
   }
 
-  if(is.na(plotnames[1])){
-    plotnames <- rep(NA, length(fls))
-    for(i in 1:length(fls)){
-      plotnames[i] <- strsplit(fls[i],split = '\\.')[[1]][1]
-    }
-  }else{
-    if(length(plotnames) != length(ls.plots)){
-      stop('incorrect number of names')
-    }
+  fls <- dir(results_dir)
+  ls.plots <- list()
+  fls <- fls[grep("\\.rds", fls)]
+  fls <- fls[grep("MSE", fls)]
+  fls <- map_chr(fls, ~{
+    file.path(results_dir, .x)
+  })
+  ls_plots <- map(fls, ~{
+    readRDS(.x)
+  })
+  if(is.null(plotnames[1])){
+    plotnames <- map_chr(fls, ~{
+      gsub(".rds$", "", basename(.x))
+    })
   }
-  #
-  # simyears <- 50
-  # yr <- 1966:(2017+simyears-1)
-  # nruns <- 100
-  df <- load_data_seasons(nseason = 4,
-                          nspace = 2) # Save these in future runs - calculates SSB0
-  sim.data <- run.agebased.true.catch(df)
-  names(ls.plots) <- plotnames
-  fn_plot_MSE(ls.plots,
-              sim.data,
-              plotfolder = results,
+  stopifnot(length(ls_plots) == length(plotnames))
+  seasons_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$season)
+  spaces_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$space)
+
+  # Save these in future runs - calculates SSB0
+  df <- load_data_seasons(nseason = length(seasons_in_output),
+                          nspace = length(spaces_in_output))
+  sim_data <- run.agebased.true.catch(df)
+  names(ls_plots) <- plotnames
+  fn_plot_MSE(ls_plots,
+              sim_data,
+              plotfolder = figures_dir,
               plotexp = plotexp,
               pidx = pidx)
 }

@@ -16,8 +16,8 @@ run_mses(
   nsurveys = NULL,
   multiple_season_data = NULL,
   om_params_seed = 12345,
-  results_root_dir = "results",
-  results_dir = "default",
+  results_root_dir = here("results"),
+  results_dir = here("results", "default"),
   ...
 )
 }
@@ -51,9 +51,9 @@ three items, \code{nseason}, \code{nspace}, and \code{bfuture}. If NULL, biasadj
 
 \item{om_params_seed}{A seed value to use when calling the \code{\link[=run.agebased.true.catch]{run.agebased.true.catch()}} function}
 
-\item{results_root_dir}{The name of the results root directory (relative to \code{\link[here:here]{here::here()}})}
+\item{results_root_dir}{The results root directory}
 
-\item{results_dir}{The name of the results directory (relative to \link[here:here(results_root_dir)]{here::here(results_root_dir)})}
+\item{results_dir}{The results directory}
 
 \item{...}{Arguments passed to \code{\link[=load_data_seasons]{load_data_seasons()}}}
 }

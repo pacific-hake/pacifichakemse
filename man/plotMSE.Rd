@@ -4,10 +4,23 @@
 \alias{plotMSE}
 \title{Plot MSE results (TODO: Improve docs on this function)}
 \usage{
-plotMSE(results, plotnames = NA, plotexp = FALSE, pidx = NA)
+plotMSE(
+  results_dir = NULL,
+  figures_root_dir = here("figures"),
+  figures_dir = NULL,
+  plotnames = NULL,
+  plotexp = FALSE,
+  pidx = NA
+)
 }
 \arguments{
-\item{results}{Output from... (TODO)}
+\item{results_dir}{A directory name where results from \code{\link[=run_mses]{run_mses()}} resides. Only files
+in this directory that end in '.rds' and contain 'MSE' will be loaded}
+
+\item{figures_root_dir}{The root directory for figures. Scenario figure types will be
+subdirectories called \code{figures_dir}.}
+
+\item{figures_dir}{The directory to place the figures in.}
 
 \item{plotnames}{Names for the plots}
 
