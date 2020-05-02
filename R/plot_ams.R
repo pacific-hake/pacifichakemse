@@ -1,10 +1,10 @@
-#' Plot AMS by scenario and country
+#' Plot Average Age in Survey (AAS) by scenario and country
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
-plot_ams <- function(ps){
+plot_aas <- function(ps){
   ams <- ps$mse_values_agg$amsplot
   ams <- ams[-which(is.na(ams$med)), ]
   g <- ggplot(ams, aes(x = year, y = med, color = run)) +
