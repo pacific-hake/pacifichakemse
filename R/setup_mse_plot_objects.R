@@ -7,13 +7,14 @@
 #' in this directory that end in '.rds' and contain 'MSE' will be loaded
 #' @param plotnames Names for the plots
 #' @param porder Order of the scenarios in the figures. Default is the order they appear in the
-#'
-#' @return A list of length 7: The items are (1) A [data.frame] containing the SSB/AAV/Catch
+#' `results_dir` directory. All outputs will be ordered in this way
+#' @return A list of length 8: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
-#' (6) A vector of plot names, one for each scenario, and (7) mse_out_data which is a list, one for
-#' each scenario, and each containing a list of length 3, which is the output of [df_lists()]
+#' (6) A vector of plot names, one for each scenario, (7) mse_out_data which is a list, one for
+#' each scenario, and each containing a list of length 3, which is the output of [df_lists()],
+#' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`
 #' @importFrom dplyr filter summarise summarize group_by select %>% mutate
 #' @importFrom PNWColors pnw_palette
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
@@ -129,8 +130,60 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     mutate(HCR = factor(HCR, levels = plotnames[porder]))
 
   mse_out_data <- map(ls_plots, ~{
-    df_lists(.x, max_yr = max(df$years))
+    tmp <- df_lists(.x, max_yr = max(df$years))
   })
+  # Merge all list[[3]] data frames into singles, and order by scenario
+
+  mse_ssbplot <- map_df(mse_out_data, ~{
+    .x[[3]]$SSBplot
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_ssbmid <- map_df(mse_out_data, ~{
+    .x[[3]]$SSBmid
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_ssbtot <- map_df(mse_out_data, ~{
+    .x[[3]]$SSBtot
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_catchplot <- map_df(mse_out_data, ~{
+    .x[[3]]$Catchplot
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_amcplot <- map_df(mse_out_data, ~{
+    .x[[3]]$amcplot
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_amsplot <- map_df(mse_out_data, ~{
+    .x[[3]]$amsplot
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_amcspace <- map_df(mse_out_data, ~{
+    .x[[3]]$amc.space
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_amsspace <- map_df(mse_out_data, ~{
+    .x[[3]]$ams.space
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_f0 <- map_df(mse_out_data, ~{
+    .x[[3]]$F0
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_catchq <- map_df(mse_out_data, ~{
+    .x[[3]]$Catch.q
+  }) %>%
+    mutate(run = factor(run, levels = plotnames[porder]))
+  mse_values_agg <- list(ssbplot = mse_ssbplot,
+                         ssbmid = mse_ssbmid,
+                         ssbtot = mse_ssbtot,
+                         catchplot = mse_catchplot,
+                         amcplot = mse_amcplot,
+                         amsplot = mse_amsplot,
+                         amcspace = mse_amcspace,
+                         amsspace = mse_amsspace,
+                         f0 = mse_f0,
+                         catchq = mse_catchq)
 
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
@@ -138,5 +191,6 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        violin_data = df_violin,
        cols = cols,
        plotnames = plotnames,
-       mse_out_data = mse_out_data)
+       mse_out_data = mse_out_data,
+       mse_values_agg = mse_values_agg)
 }

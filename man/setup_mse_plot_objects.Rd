@@ -12,15 +12,17 @@ in this directory that end in '.rds' and contain 'MSE' will be loaded}
 
 \item{plotnames}{Names for the plots}
 
-\item{porder}{Order of the scenarios in the figures. Default is the order they appear in the}
+\item{porder}{Order of the scenarios in the figures. Default is the order they appear in the
+\code{results_dir} directory. All outputs will be ordered in this way}
 }
 \value{
-A list of length 7: The items are (1) A \link{data.frame} containing the SSB/AAV/Catch
+A list of length 8: The items are (1) A \link{data.frame} containing the SSB/AAV/Catch
 indicators, (2) A \link{data.frame} containing the country and season indicators, (3) A \link{data.frame}
 containing the violin indicators (data in format for violin plots), (4) A \link{data.frame} of data
 to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
-(6) A vector of plot names, one for each scenario, and (7) mse_out_data which is a list, one for
-each scenario, and each containing a list of length 3, which is the output of \code{\link[=df_lists]{df_lists()}}
+(6) A vector of plot names, one for each scenario, (7) mse_out_data which is a list, one for
+each scenario, and each containing a list of length 3, which is the output of \code{\link[=df_lists]{df_lists()}},
+(8) A list of data frames, which are the scenario-aggregated data frames from \code{mse_out_data[[N]][[3]]}
 }
 \description{
 Setup MSE plot data frames, colors, and plot names
