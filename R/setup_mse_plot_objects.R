@@ -8,12 +8,12 @@
 #' @param plotnames Names for the plots
 #' @param porder Order of the scenarios in the figures. Default is the order they appear in the
 #'
-#' @return A list of length 4: The items are (1) A [data.frame] containing the SSB/AAV/Catch
+#' @return A list of length 7: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
-#' (6) A vector of plot names, one for each scenario, and (7) sim_data, which is the output of
-#' running [run.agebased.true.catch()]
+#' (6) A vector of plot names, one for each scenario, and (7) mse_out_data which is a list, one for
+#' each scenario, and each containing a list of length 3, which is the output of [df_lists()]
 #' @importFrom dplyr filter summarise summarize group_by select %>% mutate
 #' @importFrom PNWColors pnw_palette
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
@@ -128,11 +128,15 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   }) %>%
     mutate(HCR = factor(HCR, levels = plotnames[porder]))
 
+  mse_out_data <- map(ls_plots, ~{
+    df_lists(.x, max_yr = max(df$years))
+  })
+
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
        violin_indicators = df_violin_indicators,
        violin_data = df_violin,
        cols = cols,
        plotnames = plotnames,
-       sim_data = sim_data)
+       mse_out_data = mse_out_data)
 }
