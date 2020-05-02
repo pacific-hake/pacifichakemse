@@ -2,18 +2,31 @@
 % Please edit documentation in R/df_lists.R
 \name{df_lists}
 \alias{df_lists}
-\title{A list of values}
+\title{Create a list of \link{data.frame}s containing key values of interest output from the
+MSE run provided}
 \usage{
-df_lists(ls.save, nms)
+df_lists(lst, max_yr = 2018, can.prop = 0.2488, us.prop = 0.7612)
 }
 \arguments{
-\item{ls.save}{list of MSE data}
+\item{lst}{list of MSE data as read in using \link{readRDS("MSE_output.rds")}}
 
-\item{nms}{names of runs}
+\item{max_yr}{The last year before simulations start}
+
+\item{can.prop}{The proportion of TAC that Canada gets each year}
+
+\item{us.prop}{The proportion of TAC that the US gets each year}
 }
 \value{
-A list of values
+A list of 3 lists of \link{data.frame}s containing key values of interest output from the
+MSE run provided.
 }
 \description{
-A list of values
+Create a list of \link{data.frame}s containing key values of interest output from the
+MSE run provided
+}
+\details{
+Create a list of 3 lists of data frames which contain various values
+of interest such as SSB by country, SSB total, F by country, Catch
+by country, q by country and other data frame values used for plotting, containing
+quantile information and run (scenario) name
 }
