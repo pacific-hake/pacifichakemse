@@ -14,11 +14,12 @@
 #' @return A list of 3 lists of [data.frame]s containing key values of interest output from the
 #' MSE run provided.
 #' @export
-df_lists <- function(lst,
+df_lists <- function(lst = NULL,
                      max_yr = 2018,
                      can.prop = 0.2488,
                      us.prop = 0.7612){
 
+  stopifnot(!is.null(lst))
   yrs <- as.numeric(attributes(lst[[1]]$Catch)$dimnames$year)
   min_yr <- min(yrs)
   nyrs <- length(yrs)
