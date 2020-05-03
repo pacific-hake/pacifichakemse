@@ -132,58 +132,25 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   mse_out_data <- map(ls_plots, ~{
     tmp <- df_lists(.x, max_yr = max(df$years))
   })
-  # Merge all list[[3]] data frames into singles, and order by scenario
 
-  mse_ssbplot <- map_df(mse_out_data, ~{
-    .x[[3]]$SSBplot
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_ssbmid <- map_df(mse_out_data, ~{
-    .x[[3]]$SSBmid
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_ssbtot <- map_df(mse_out_data, ~{
-    .x[[3]]$SSBtot
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_catchplot <- map_df(mse_out_data, ~{
-    .x[[3]]$Catchplot
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_amcplot <- map_df(mse_out_data, ~{
-    .x[[3]]$amcplot
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_amsplot <- map_df(mse_out_data, ~{
-    .x[[3]]$amsplot
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_amcspace <- map_df(mse_out_data, ~{
-    .x[[3]]$amc.space
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_amsspace <- map_df(mse_out_data, ~{
-    .x[[3]]$ams.space
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_f0 <- map_df(mse_out_data, ~{
-    .x[[3]]$F0
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_catchq <- map_df(mse_out_data, ~{
-    .x[[3]]$Catch.q
-  }) %>%
-    mutate(run = factor(run, levels = plotnames[porder]))
-  mse_values_agg <- list(ssbplot = mse_ssbplot,
-                         ssbmid = mse_ssbmid,
-                         ssbtot = mse_ssbtot,
-                         catchplot = mse_catchplot,
-                         amcplot = mse_amcplot,
-                         amsplot = mse_amsplot,
-                         amcspace = mse_amcspace,
-                         amsspace = mse_amsspace,
-                         f0 = mse_f0,
-                         catchq = mse_catchq)
+  # Bind rows of all list[[3]] data frames into single data frame, and order it by scenario
+  # `lst` is a list of the outputs from [df_lists()], `val` is the name of the data frame
+  merge_dfs_from_scenarios <- function(lst, val){
+    map_df(lst, ~{
+      .x[[3]][[val]]
+    }) %>%
+      mutate(run = factor(run, levels = plotnames[porder]))
+  }
+  mse_values_agg <- list(ssbplot = merge_dfs_from_scenarios(mse_out_data, "SSBplot"),
+                         ssbmid = merge_dfs_from_scenarios(mse_out_data, "SSBmid"),
+                         ssbtot = merge_dfs_from_scenarios(mse_out_data, "SSBtot"),
+                         catchplot = merge_dfs_from_scenarios(mse_out_data, "Catchplot"),
+                         amcplot = merge_dfs_from_scenarios(mse_out_data, "amcplot"),
+                         amsplot = merge_dfs_from_scenarios(mse_out_data, "amsplot"),
+                         amcspace = merge_dfs_from_scenarios(mse_out_data, "amc.space"),
+                         amsspace = merge_dfs_from_scenarios(mse_out_data, "ams.space"),
+                         f0 = merge_dfs_from_scenarios(mse_out_data, "F0"),
+                         catchq = merge_dfs_from_scenarios(mse_out_data, "Catch.q"))
 
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
