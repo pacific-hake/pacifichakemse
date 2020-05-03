@@ -15,7 +15,7 @@ plot_ssb <- function(ps){
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
     geom_ribbon(aes(ymin = p5.can * 1e-6, ymax = p95.can * 1e-6),
                 fill = alpha("red", alpha = 0.2), linetype = 0)+
-    geom_ribbon(aes(ymin = p5.US*1e-6, ymax = p95.US * 1e-6),
+    geom_ribbon(aes(ymin = p5.US * 1e-6, ymax = p95.US * 1e-6),
                 fill = alpha("blue", alpha = 0.2), linetype = 0)
   g
 }
