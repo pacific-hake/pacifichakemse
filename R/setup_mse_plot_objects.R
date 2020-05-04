@@ -8,7 +8,7 @@
 #' @param plotnames Names for the plots
 #' @param porder Order of the scenarios in the figures. Default is the order they appear in the
 #' `results_dir` directory. All outputs will be ordered in this way
-#' @return A list of length 9: The items are (1) A [data.frame] containing the SSB/AAV/Catch
+#' @return A list of length 10: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
@@ -16,7 +16,8 @@
 #' each scenario, and each containing a list of length 3, which is the output of [df_lists()],
 #' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`,
 #' (9) A list of length = number of scenarios, containing three-column [data.frame]s with `run`, `SE.SSB`,
-#' and `year` as columns/ SE.SSB is the standard error between the OM and EM
+#' and `year` as columns/ SE.SSB is the standard error between the OM and EM, (10) `sim_data` - output
+#' from the function [run.agebased.true.catch()] (the operating model output)
 #' @importFrom dplyr filter summarise summarize group_by select %>% mutate
 #' @importFrom PNWColors pnw_palette
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
@@ -176,5 +177,6 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        plotnames = plotnames,
        mse_out_data = mse_out_data,
        mse_values_agg = mse_values_agg,
-       standard_error_ssb = standard_error_ssb)
+       standard_error_ssb = standard_error_ssb,
+       sim_data = sim_data)
 }
