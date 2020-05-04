@@ -151,6 +151,7 @@ df_lists <- function(lst = NULL,
     }
   }
 
+  plotname <- attributes(lst)$plotname
   ggplot(ls.df, aes(x = year, y = Catch, color = run)) +
     geom_line() +
     theme(legend.position = "none")
@@ -163,7 +164,7 @@ df_lists <- function(lst = NULL,
               med.US = median(SSB.US),
               p95.US = quantile(SSB.US, 0.95),
               p5.US = quantile(SSB.US,0.05))
-  SSB.plotquant$run <- lst$plotname
+  SSB.plotquant$run <- plotname
 
   SSB.plottot <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -171,7 +172,7 @@ df_lists <- function(lst = NULL,
               avg = mean(SSBtot),
               p95 = quantile(SSBtot, 0.95),
               p5 = quantile(SSBtot,0.05))
-  SSB.plottot$run <- lst$plotname
+  SSB.plottot$run <- plotname
 
   SSB.plotmid <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -181,7 +182,7 @@ df_lists <- function(lst = NULL,
               med.US = median(SSB.mid.us),
               p95.US = quantile(SSB.mid.us, 0.95),
               p5.US = quantile(SSB.mid.us,0.05))
-  SSB.plotmid$run <- lst$plotname
+  SSB.plotmid$run <- plotname
 
   Catch.plotquant <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -189,7 +190,7 @@ df_lists <- function(lst = NULL,
               p95 = quantile(Catch, 0.95),
               p5 = quantile(Catch,0.05)
     )
-  Catch.plotquant$run <- lst$plotname
+  Catch.plotquant$run <- plotname
   #
   ams.plotquant <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -197,7 +198,7 @@ df_lists <- function(lst = NULL,
               p95 = quantile(ams, 0.95,na.rm = TRUE),
               p5 = quantile(ams,0.05,na.rm = TRUE)
     )
-  ams.plotquant$run <- lst$plotname
+  ams.plotquant$run <- plotname
 
   amc.plotquant <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -205,7 +206,7 @@ df_lists <- function(lst = NULL,
               p95 = quantile(amc, 0.95,na.rm = TRUE),
               p5 = quantile(amc,0.05,na.rm = TRUE)
     )
-  amc.plotquant$run <- lst$plotname
+  amc.plotquant$run <- plotname
 
   ams.space <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -217,7 +218,7 @@ df_lists <- function(lst = NULL,
               p5.us = quantile(ams.us,0.05,na.rm = TRUE)
 
     )
-  ams.space$run <- lst$plotname
+  ams.space$run <- plotname
 
   amc.space <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -229,7 +230,7 @@ df_lists <- function(lst = NULL,
               p5.us = quantile(amc.us,0.05,na.rm = TRUE)
 
     )
-  amc.space$run <- lst$plotname
+  amc.space$run <- plotname
 
   F0.space <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -241,7 +242,7 @@ df_lists <- function(lst = NULL,
               p5.us = quantile(F0.us,0.05,na.rm = TRUE)
 
     )
-  F0.space$run <- lst$plotname
+  F0.space$run <- plotname
 
   Catch.q <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
@@ -256,7 +257,7 @@ df_lists <- function(lst = NULL,
               p95.tot = quantile(Catch/Catch.q,0.95,na.rm = TRUE)
 
     )
-  Catch.q$run <- lst$plotname
+  Catch.q$run <- plotname
 
   ggplot(Catch.q, aes(x = year, y = med.can)) +
     geom_line() +

@@ -44,20 +44,22 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   ls_plots <- map(fls, ~{
     readRDS(.x)
   })
-  # Use the plot names provided to the function. If that is `NULL`,
-  # use the plot names set up when running the MSE scenarios. If that is
-  # `NULL`, use the file names
+
+  # Use the plot names provided to the function. If those are `NULL`,
+  # use the plot names set up when running the MSE scenarios. If any of those
+  # are `NULL`, use the file name associated with the run
   if(is.null(plotnames[1])){
-    if(is.null(ls_plots[[1]]$plotname)){
-      plotnames <- map_chr(fls, ~{
-        gsub(".rds$", "", basename(.x))
-      })
-    }else{
-      plotnames <- map_chr(ls_plots, ~{
-        .x$plotname
-      })
-    }
+    plotnames <- map_chr(ls_plots, ~{
+      if(is.null(attributes(.x)$plotname)){
+        plotnames <- map_chr(fls, ~{
+          gsub(".rds$", "", basename(.x))
+        })
+      }else{
+        attributes(.x)$plotname
+      }
+    })
   }
+
   stopifnot(length(ls_plots) == length(plotnames))
   seasons_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$season)
   spaces_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$space)

@@ -124,7 +124,7 @@ run_mses <- function(ss_extdata_dir = NULL,
       }
       if(is.list(tmp)) tmp else NA
     }, ...)
-    ls_save$plotname <- plotnames[.y]
+    attr(ls_save, "plotname") <- plotnames[.y]
     saveRDS(ls_save, file = file.path(results_dir, .x))
   }, ...)
   toc()
