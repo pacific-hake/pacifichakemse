@@ -8,13 +8,15 @@
 #' @param plotnames Names for the plots
 #' @param porder Order of the scenarios in the figures. Default is the order they appear in the
 #' `results_dir` directory. All outputs will be ordered in this way
-#' @return A list of length 8: The items are (1) A [data.frame] containing the SSB/AAV/Catch
+#' @return A list of length 9: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
 #' (6) A vector of plot names, one for each scenario, (7) mse_out_data which is a list, one for
 #' each scenario, and each containing a list of length 3, which is the output of [df_lists()],
-#' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`
+#' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`,
+#' (9) A list of length = number of scenarios, containing three-column [data.frame]s with `run`, `SE.SSB`,
+#' and `year` as columns/ SE.SSB is the standard error between the OM and EM
 #' @importFrom dplyr filter summarise summarize group_by select %>% mutate
 #' @importFrom PNWColors pnw_palette
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
@@ -154,6 +156,18 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                          f0 = merge_dfs_from_scenarios(mse_out_data, "F0"),
                          catchq = merge_dfs_from_scenarios(mse_out_data, "Catch.q"))
 
+  # Standard error on SSB. First make a list of scenario data frames and reorder,
+  # then bind those together into a data frame using [purrr::map_df()]
+  standard_error_ssb <- map2(ls_plots, names(ls_plots), ~{
+    calc_standard_error_ssb(.x) %>%
+      mutate(scenario = .y) %>%
+      select(scenario, run, year, SE.SSB)
+  })
+  standard_error_ssb <- map_df(standard_error_ssb, ~{
+    .x
+  }) %>%
+    mutate(scenario = factor(scenario, levels = plotnames[porder]))
+
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
        violin_indicators = df_violin_indicators,
@@ -161,5 +175,6 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        cols = cols,
        plotnames = plotnames,
        mse_out_data = mse_out_data,
-       mse_values_agg = mse_values_agg)
+       mse_values_agg = mse_values_agg,
+       standard_error_ssb = standard_error_ssb)
 }
