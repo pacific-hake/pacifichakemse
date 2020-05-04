@@ -2,18 +2,21 @@
 % Please edit documentation in R/plot_tac_estimated_vs_realized.R
 \name{plot_tac_vs_hcr}
 \alias{plot_tac_vs_hcr}
-\title{Plot estimated vs realized TAC (called Catch in plot) by harvest control rule
-value}
+\title{Plot estimated vs realized TAC (called Catch in plot) by Harvest Control Rule}
 \usage{
-plot_tac_vs_hcr(df)
+plot_tac_vs_hcr(
+  df,
+  labels = c("Base scenario", "Historical", "Realized", "Floor")
+)
 }
 \arguments{
 \item{df}{A \link{data.frame} as output by \code{\link[=calc_tac_est_vs_real]{calc_tac_est_vs_real()}}}
+
+\item{labels}{A vector of labels to use for the plot.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
-Plot estimated vs realized TAC (called Catch in plot) by harvest control rule
-value
+Plot estimated vs realized TAC (called Catch in plot) by Harvest Control Rule
 }

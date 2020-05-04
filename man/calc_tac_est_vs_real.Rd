@@ -4,11 +4,15 @@
 \alias{calc_tac_est_vs_real}
 \title{Calculated the estimated TAC vs the Realized TAC (from data)}
 \usage{
-calc_tac_est_vs_real()
+calc_tac_est_vs_real(catch_floor = 180000)
+}
+\arguments{
+\item{catch_floor}{The least possible catch that is allowed in the fishery per year}
 }
 \value{
-A list of 2 items. (1) A \link{data.frame} as read in from the TAC.csv data file
-found in this package, and (2) A \link{data.frame} as calculated by this function
+A list of 3 items. (1) A \link{data.frame} as read in from the TAC.csv data file
+found in this package. (2) A \link{data.frame} with \code{ssb} and \code{tac} as columns, and
+(3) A \link{data.frame} as calculated by this function
 }
 \description{
 Calculated the estimated TAC vs the Realized TAC (from data)
