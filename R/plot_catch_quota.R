@@ -28,3 +28,29 @@ plot_catch_quota <- function(ps = NULL){
                linetype = 2)
   g
 }
+
+#' Plot Catch/Quota by scenario all in one panel
+#'
+#' @param ps A plot setup object as output by [setup_mse_plot_objects()]
+#'
+#' @return A [ggplot2::ggplot()] object
+#' @export
+plot_catch_quota_1panel <- function(ps = NULL){
+
+  stopifnot(!is.null(ps))
+
+  cq <- ps$mse_values_agg$catchq
+  g <- ggplot(cq, aes(x = year, y = med.tot, color = run)) +
+    geom_line(size = 1.4) +
+    scale_color_manual(values = ps$cols) +
+    geom_line(aes(y = p5.tot), linetype = 2, size = 0.9) +
+    geom_line(aes(y = p95.tot), linetype = 2, size = 0.9) +
+    theme_classic() +
+    scale_y_continuous(name ="Catch/quota") +
+    geom_hline(aes(yintercept = 1),
+               color = "black",
+               linetype = 2) +
+    theme(legend.position = c(0.2, 0.4),
+          legend.title = element_blank())
+  g
+}
