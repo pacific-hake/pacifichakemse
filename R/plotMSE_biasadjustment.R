@@ -6,6 +6,7 @@
 #' If FALSE, plot them using [gridExtra::grid.arrange()]
 #'
 #' @return A list of two [ggplot2] plots
+#' @importFrom gridExtra grid.arrange
 #' @export
 plotMSE_biasadjustment <- function(results,
                                    plotnames = NA,

@@ -1,4 +1,4 @@
-#' Create a list of parameters for [TMB]
+#' Create a list of parameters for [TMB::MakeADFun()]
 #'
 #' @param trueparms  should the model use the assessment parameters
 #' @param mod [r4ss] object with a stock assessment

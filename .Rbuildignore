@@ -1,2 +1,7 @@
 ^PacifichakeMSE\.Rproj$
 ^\.Rproj\.user$
+^.dll$
+^.here$
+^.travis.yml$
+^codecov.yml$
+^doc$

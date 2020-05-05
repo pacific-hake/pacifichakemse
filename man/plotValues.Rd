@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotValues.R
 \name{plotValues}
 \alias{plotValues}
-\title{Plot the estimated or derived value from a \link{TMB} model}
+\title{Plot the estimated or derived value from a \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}} model}
 \usage{
 plotValues(est, data, name)
 }
@@ -17,5 +17,5 @@ plotValues(est, data, name)
 Nothing
 }
 \description{
-Plot the estimated or derived value from a \link{TMB} model
+Plot the estimated or derived value from a \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}} model
 }

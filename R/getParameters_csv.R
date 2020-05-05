@@ -1,4 +1,4 @@
-#' Export EM parameters for [TMB] based on csv files with parameters
+#' Export EM parameters for [TMB::MakeADFun()] based on csv files with parameters
 #'
 #' @param trueparms Logical. TRUE if random parameter initialization
 #'

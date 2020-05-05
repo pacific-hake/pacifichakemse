@@ -1,4 +1,4 @@
-#' Load parameters for [TMB] model
+#' Load parameters for [TMB::MakeADFun()] model
 #'
 #' @param trueparms use the correct parameters for initial distribution?
 #' @param df data frame of OM parameters and life history

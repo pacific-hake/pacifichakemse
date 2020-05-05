@@ -11,6 +11,7 @@
 #' @importFrom ggplot2 alpha
 #' @importFrom dplyr left_join lead lag n summarize_at vars everything
 #' @importFrom purrr partial
+#' @importFrom stats quantile
 #' @export
 hake_objectives <- function(lst = NULL,
                             ssb0 = NULL,
@@ -82,7 +83,7 @@ hake_objectives <- function(lst = NULL,
       left_join(.y, by = c("year", "run")) %>%
       mutate(quota_frac = catch.x / catch.y) %>%
       select(year, quota_frac, run)
-  })
+  }) %>% map_df(~{.x})
 
   quota_us_tot <- map2(lst, seq_along(lst), ~{
     data.frame(year = yrs,
@@ -152,11 +153,48 @@ hake_objectives <- function(lst = NULL,
       select(year, aav, run)
   }) %>% map_df(~{.x})
 
+  # Calculate quantiles
+  ssb_yrs <- sort(unique(ssb_plot$year))
   ssb_plotquant <- ssb_plot %>%
     group_by(year) %>%
     group_map(~ apply_quantiles(.x, col = "ssb", probs = quants)) %>%
     map_df(~{.x}) %>%
-    mutate(year = yrs) %>%
+    mutate(year = ssb_yrs) %>%
+    select(year, everything())
+
+  v_ca_yrs <- sort(unique(v_ca_plot$year))
+  v_ca_plotquant <- v_ca_plot %>%
+    group_by(year) %>%
+    group_map(~ apply_quantiles(.x, col = "v", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = v_ca_yrs) %>%
+    select(year, everything())
+
+  catch_yrs <- sort(unique(catch_plot$year))
+  catch_plotquant <- catch_plot %>%
+    group_by(year) %>%
+    group_map(~ apply_quantiles(.x, col = "catch", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = catch_yrs) %>%
+    select(year, everything()) %>%
+    # Multiply all columns except `year` by 1e-6
+    mutate_at(vars(-year), ~{.x * 1e-6})
+
+  aav_yrs <- sort(unique(aav_plot$year))
+  aav_plotquant <- aav_plot %>%
+    group_by(year) %>%
+    group_map(~ apply_quantiles(.x, col = "aav", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = aav_yrs) %>%
+    select(year, everything())
+
+  browser()
+  quota_yrs <- sort(unique(quota_plot$year))
+  quota_plotquant <- quota_plot %>%
+    group_by(year) %>%
+    group_map(~ apply_quantiles(.x, col = "quota_frac", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = quota_yrs) %>%
     select(year, everything())
 
   browser()
@@ -167,21 +205,6 @@ hake_objectives <- function(lst = NULL,
     theme_classic()+scale_y_continuous(name = "SSB")+
     geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha("black", alpha = 0.2))
 
-  V.ca.plotquant<- V.ca.plot %>%
-    group_by(year) %>%
-    summarise(med = median(V),
-              p95 = quantile(V, 0.95),
-              p25 = quantile(V, 0.25),
-              p75 = quantile(V, 0.75),
-              p5 = quantile(V,0.05))
-
-  Catch.plotquant <- Catch.plot %>%
-    group_by(year) %>%
-    summarise(med = median(Catch)*1e-6,
-              p95 = quantile(Catch, 0.95)*1e-6,
-              p25 = quantile(Catch, 0.25)*1e-6,
-              p75 = quantile(Catch, 0.75)*1e-6,
-              p5 = quantile(Catch,0.05)*1e-6)
 
   p2 <-  ggplot(Catch.plotquant,aes(x= year,y = med)) +
     geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
@@ -189,27 +212,12 @@ hake_objectives <- function(lst = NULL,
     theme_classic()+scale_y_continuous(name = "Catch (millions)")+
     geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha("black", alpha = 0.2))
 
-  AAV.plotquant <- AAV.plot %>%
-    group_by(year) %>%
-    summarise(med = median(AAV),
-              p95 = quantile(AAV, 0.95),
-              p25 = quantile(AAV, 0.25),
-              p75 = quantile(AAV, 0.75),
-              p5 = quantile(AAV,0.05))
 
   p3 <-  ggplot(AAV.plotquant,aes(x= year,y = med)) +
     geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
     geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
     theme_classic()+scale_y_continuous(name = "Catch\nvariability")+
     geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha("black", alpha = 0.2))
-
-  quota.plotquant <- quota.plot[quota.plot$year>2010,] %>%
-    group_by(year) %>%
-    summarise(med = mean(Quota_frac),
-              p95 = quantile(Quota_frac, 0.95),
-              p25 = quantile(Quota_frac, 0.25),
-              p75 = quantile(Quota_frac, 0.75),
-              p5 = quantile(Quota_frac,0.05))
 
   p4 <- ggplot(data=quota.plotquant, aes(x= year,y = med)) +
     geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+

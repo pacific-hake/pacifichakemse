@@ -11,6 +11,8 @@
 #' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
 #' F0, parms, N, converge, ams, amc, V
 #' @importFrom TMB sdreport
+#' @importFrom stats rnorm nlminb runif predict lm median optim setNames
+#' @importFrom utils read.csv read.table
 #' @export
 run_multiple_MSEs <- function(simyears = NULL,
                               seeds = 12345,

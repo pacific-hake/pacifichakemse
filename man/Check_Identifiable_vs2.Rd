@@ -7,7 +7,7 @@
 Check_Identifiable_vs2(obj)
 }
 \arguments{
-\item{obj}{\link{TMB} object}
+\item{obj}{Object to be used as input to \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 }
 \value{
 Return a list of estimated parameters and uncertainty

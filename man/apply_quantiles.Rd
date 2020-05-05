@@ -14,8 +14,40 @@ apply_quantiles(df = NULL, col = NULL, probs = c(0.05, 0.5, 0.95))
 \item{probs}{A vector of probabilities to be passed to the \code{\link[stats:quantile]{stats::quantile()}} function}
 }
 \value{
-A \link{data.frame} with a new column for wach value in the \code{probs} vector
+A \link{data.frame} with a new column for each value in the \code{probs} vector
 }
 \description{
 Apply arbitrary quantiles to a column of data
+}
+\examples{
+library(tibble)
+library(dplyr)
+library(purrr)
+pq <- tribble(
+  ~year, ~grp, ~val,
+  2000,    1,  2.1,
+  2001,    1,  3.4,
+  2002,    1,  4.5,
+  2003,    1,  5.6,
+  2004,    1,  6.7,
+  2000,    2,  3.1,
+  2001,    2,  4.4,
+  2002,    2,  5.5,
+  2003,    2,  6.6,
+  2004,    2,  8.7,
+  2000,    3, 13.1,
+  2001,    3, 14.4,
+  2002,    3, 15.5,
+  2003,    3, 16.6,
+  2004,    3, 18.7)
+
+probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
+
+yrs <- sort(unique(pq$year))
+df <- pq \%>\%
+  group_by(year) \%>\%
+  group_map(~ apply_quantiles(.x, col = "val", probs = probs)) \%>\%
+  map_df(~{.x}) \%>\%
+  mutate(year = yrs) \%>\%
+  select(year, everything())
 }

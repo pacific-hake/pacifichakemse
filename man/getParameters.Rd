@@ -2,7 +2,7 @@
 % Please edit documentation in R/getParameters.R
 \name{getParameters}
 \alias{getParameters}
-\title{Load parameters for \link{TMB} model}
+\title{Load parameters for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}} model}
 \usage{
 getParameters(trueparms = TRUE, df)
 }
@@ -15,5 +15,5 @@ getParameters(trueparms = TRUE, df)
 A list of parameters
 }
 \description{
-Load parameters for \link{TMB} model
+Load parameters for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}} model
 }

@@ -1,4 +1,4 @@
-#' Plot the estimated or derived value from a [TMB] model
+#' Plot the estimated or derived value from a [TMB::MakeADFun()] model
 #'
 #' @param est estimated values
 #' @param data available data
@@ -6,7 +6,7 @@
 #'
 #' @return Nothing
 #' @importFrom ggplot2 ggplot geom_line aes geom_point geom_ribbon theme_bw
-#' @importFrom ggplot2 theme scale_y_continuous
+#' @importFrom ggplot2 theme scale_y_continuous scale_x_continuous
 #' @export
 plotValues <- function(est,
                        data,

@@ -1,6 +1,6 @@
 #' Calculate the estimated parameters with uncertainty
 #'
-#' @param obj [TMB] object
+#' @param obj Object to be used as input to [TMB::MakeADFun()]
 #'
 #' @return Return a list of estimated parameters and uncertainty
 #' @export

@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_TMB_data.R
 \name{create_TMB_data}
 \alias{create_TMB_data}
-\title{Create the data for \link{TMB}}
+\title{Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 \usage{
 create_TMB_data(sim.data, df, history = FALSE)
 }
@@ -14,8 +14,8 @@ create_TMB_data(sim.data, df, history = FALSE)
 \item{history}{Use historical real data or OM data?}
 }
 \value{
-A list of the data needed by \link{TMB}
+A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}
 }
 \description{
-Create the data for \link{TMB}
+Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}
 }

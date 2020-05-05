@@ -1,10 +1,10 @@
-#' Create the data for [TMB]
+#' Create the data for [TMB::MakeADFun()]
 #'
 #' @param sim.data Operating model
 #' @param df input parameters
 #' @param history Use historical real data or OM data?
 #'
-#' @return A list of the data needed by [TMB]
+#' @return A list of the data needed by [TMB::MakeADFun()]
 #' @export
 create_TMB_data <- function(sim.data, df,
                              history = FALSE){

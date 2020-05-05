@@ -2,7 +2,7 @@
 % Please edit documentation in R/getParms_noAge.R
 \name{getParms_noage}
 \alias{getParms_noage}
-\title{Get a list of \link{TMB} parameters}
+\title{Get a list of parameters for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 \usage{
 getParms_noage(hakedat)
 }
@@ -10,8 +10,8 @@ getParms_noage(hakedat)
 \item{hakedat}{Hake data (TODO: where is this from? What is it's structure?)}
 }
 \value{
-A list of \link{TMB} parameters
+A list of parameters for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}
 }
 \description{
-Get a list of \link{TMB} parameters
+Get a list of parameters for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}
 }

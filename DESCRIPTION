@@ -22,6 +22,7 @@ Imports:
     here,
     PNWColors,
     r4ss,
+    readr,
     reshape2,
     purrr,
     stringr,
@@ -31,6 +32,8 @@ Imports:
 Remotes:
     jakelawlor/PNWColors,
     r4ss/r4ss
+BinaryFiles:
+    src/runHakeassessment.dll
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0

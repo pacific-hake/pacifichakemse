@@ -1,8 +1,8 @@
-#' Get a list of [TMB] parameters
+#' Get a list of parameters for [TMB::MakeADFun()]
 #'
 #' @param hakedat Hake data (TODO: where is this from? What is it's structure?)
 #'
-#' @return A list of [TMB] parameters
+#' @return A list of parameters for [TMB::MakeADFun()]
 #' @export
 getParms_noage <- function(hakedat){
 

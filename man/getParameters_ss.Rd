@@ -2,7 +2,7 @@
 % Please edit documentation in R/getParameters_ss.R
 \name{getParameters_ss}
 \alias{getParameters_ss}
-\title{Export EM parameters for \link{TMB} based on csv files with parameters}
+\title{Export EM parameters for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}} based on csv files with parameters}
 \usage{
 getParameters_ss(trueparms = TRUE, mod = NA)
 }
@@ -15,5 +15,5 @@ getParameters_ss(trueparms = TRUE, mod = NA)
 A list of parameters
 }
 \description{
-Export EM parameters for \link{TMB} based on csv files with parameters
+Export EM parameters for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}} based on csv files with parameters
 }
