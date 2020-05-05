@@ -30,7 +30,6 @@ Imports:
     Rcpp
 Remotes:
     jakelawlor/PNWColors,
-    kaskr/adcomp,
     r4ss/r4ss
 LazyData: true
 Roxygen: list(markdown = TRUE)
