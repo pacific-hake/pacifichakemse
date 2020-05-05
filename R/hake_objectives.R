@@ -9,7 +9,7 @@
 #'
 #' @return List of three: p.export, t.export, ls.season (TODO: explain better)
 #' @importFrom ggplot2 alpha
-#' @importFrom dplyr left_join lead lag n summarize_at vars
+#' @importFrom dplyr left_join lead lag n summarize_at vars everything
 #' @importFrom purrr partial
 #' @export
 hake_objectives <- function(lst = NULL,
@@ -153,13 +153,11 @@ hake_objectives <- function(lst = NULL,
   }) %>% map_df(~{.x})
 
   ssb_plotquant <- ssb_plot %>%
-    group_by(year, run) %>%
-    summarize_at(vars(ssb),
-                 map(quants,
-                     ~partial(quantile, probs = .x, na.rm = TRUE)) %>%
-                   set_names(quants)) %>%
-    ungroup() %>%
-    arrange(run, year)
+    group_by(year) %>%
+    group_map(~ apply_quantiles(.x, col = "ssb", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = yrs) %>%
+    select(year, everything())
 
   browser()
 
