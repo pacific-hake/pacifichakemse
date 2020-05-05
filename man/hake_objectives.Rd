@@ -11,7 +11,8 @@ hake_objectives(
   short_term_yrs = 2018:2027,
   long_term_yrs = 2027,
   can.prop = 0.2488,
-  us.prop = 0.7612
+  us.prop = 0.7612,
+  quants = c(0.05, 0.25, 0.5, 0.75, 0.95)
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ hake_objectives(
 \item{short_term_yrs}{Years for short term plots}
 
 \item{long_term_yrs}{Years greater than this will be in long term plots}
+
+\item{quants}{Quantiles to calculate for plotting output \link{data.frame}s}
 }
 \value{
 List of three: p.export, t.export, ls.season (TODO: explain better)
