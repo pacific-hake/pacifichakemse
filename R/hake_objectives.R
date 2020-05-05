@@ -8,7 +8,7 @@
 #'
 #' @return List of three: p.export, t.export, ls.season (TODO: explain better)
 #' @importFrom ggplot2 alpha
-#' @importFrom dplyr left_join
+#' @importFrom dplyr left_join lead lag n
 #' @export
 hake_objectives <- function(lst = NULL,
                             ssb0 = NULL,
@@ -102,49 +102,56 @@ hake_objectives <- function(lst = NULL,
               ca = area.1,
               us = area.2,
               run)
-  catch_area_us_tot <- catch_area %>%
+  catch_us_tot <- catch_area %>%
     transmute(year, catch = us, run)
-  catch_area_ca_tot <- catch_area %>%
+  catch_ca_tot <- catch_area %>%
     transmute(year, catch = ca, run)
 
-#browser()
+  vtac_us <- map2(list(df_v_us_plot), list(catch_us_tot), ~{
+    .x %>%
+      left_join(.y, by = c("year", "run")) %>%
+      mutate(v_tac = v / catch) %>%
+      select(year, v_tac, run)
+  }) %>% map_df(~{.x})
 
-  idx <- 1
-  if(is.na(move)){ #if there is no movement (single area model)
-    Catch.plot <- data.frame(Catch = lst[[idx]]$Catch,
-                             year = yrs,
-                             run = paste("run",1, sep=""))
-  }else{
-    catchtmp <- as.numeric(apply(lst[[idx]]$Catch,MARGIN = 2, FUN = sum))
-    if(length(catchtmp) == 1){
-      catchtmp <- lst[[idx]]$Catch
-    }
-    Catch.plot <- data.frame(Catch = catchtmp, year = yrs, run = paste("run",1, sep=""))
-    quota.tot <- apply(lst[[idx]]$Catch.quota, MARGIN = 1, FUN = sum)
-    quota.plot <- data.frame(Quota_frac = quota.tot/catchtmp, year = yrs, run = paste("run",1, sep =""))
-    #sum quota over year by area
-    quota.us.tot <- data.frame(quota=rowSums(lst[[idx]]$Catch.quota[,2,]), year=yrs, run=paste("run",1, sep =""))
-    quota.can.tot <- data.frame(quota=rowSums(lst[[idx]]$Catch.quota[,1,]), year=yrs, run=paste("run",1, sep =""))
-    #Catch by year by area
-    catch.area<-apply(lst[[idx]]$Catch, MARGIN=c(2,3), FUN=sum)
-    Catch.us.tot<- data.frame(Catch=catch.area[,2], year=yrs, run=paste("run",1, sep =""))
-    Catch.can.tot<- data.frame(Catch=catch.area[,1], year=yrs, run=paste("run",1, sep =""))
-    browser()
-    vtac.us<- data.frame(V.TAC=df_v_us_plot$v/Catch.us.tot$Catch, year=yrs, run=paste("run",1, sep =""))
-    vtac.can<- data.frame(V.TAC=df_v_ca_plot$v/Catch.can.tot$Catch, year=yrs, run=paste("run",1, sep =""))
-    Ctmp <- colSums(lst[[idx]]$Catch)
-    vtac.us.seas<- data.frame(V.TAC.sp=Ctmp[,2,2]/lst[[idx]]$V[,2,2],
-                              V.TAC.su=Ctmp[,2,3]/lst[[idx]]$V[,2,3],
-                              V.TAC.fa=Ctmp[,2,4]/lst[[idx]]$V[,2,4],
-                              year = yrs, run =  paste("run",1, sep=""))
-    vtac.can.seas<-  data.frame(V.TAC.sp=Ctmp[,1,2]/lst[[idx]]$V[,1,2],
-                                V.TAC.su=Ctmp[,1,3]/lst[[idx]]$V[,1,3],
-                                V.TAC.fa=Ctmp[,1,4]/lst[[idx]]$V[,1,4],
-                                year = yrs, run =  paste("run",1, sep=""))
-  }
+  vtac_ca <- map2(list(df_v_us_plot), list(catch_ca_tot), ~{
+    .x %>%
+      left_join(.y, by = c("year", "run")) %>%
+      mutate(v_tac = v / catch) %>%
+      select(year, v_tac, run)
+  }) %>% map_df(~{.x})
+
+  vtac_us_seas <- map2(lst, seq_along(lst), ~{
+    ctmp <- colSums(.x$Catch)
+    data.frame(year = yrs,
+               v_tac_sp = ctmp[, 2, 2] / .x$V[, 2, 2],
+               v_tac_su = ctmp[, 2, 3] / .x$V[, 2, 3],
+               v_tac_fa = ctmp[, 2, 4] / .x$V[, 2, 4],
+               run = .y)
+  }) %>% map_df(~{.x})
+
+  vtac_ca_seas <- map2(lst, seq_along(lst), ~{
+    ctmp <- colSums(.x$Catch)
+    data.frame(year = yrs,
+               v_tac_sp = ctmp[, 1, 2] / .x$V[, 1, 2],
+               v_tac_su = ctmp[, 1, 3] / .x$V[, 1, 3],
+               v_tac_fa = ctmp[, 1, 4] / .x$V[, 1, 4],
+               run = .y)
+  }) %>% map_df(~{.x})
+
+  aav_plot <- map2(list(catch_plot), seq_along(list(catch_plot)), ~{
+    .x %>%
+      group_by(run) %>%
+      mutate(catch_lag = lag(catch, 1)) %>%
+      mutate(aav = abs(catch - catch_lag) / n()) %>%
+      ungroup() %>%
+      filter(!is.na(aav)) %>%
+      select(year, aav, run)
+  }) %>% map_df(~{.x})
+
   browser()
-  AAV.plot  <- data.frame(AAV = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
-                          year = yr[2:length(yr)], run = paste("run",1, sep=""))
+
+
   for(i in 2:nruns){
     ls.tmp <- lst[[i]]
     if(is.list(ls.tmp)){
