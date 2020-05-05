@@ -5,6 +5,7 @@
 #' @param probs A vector of probabilities to be passed to the [stats::quantile()] function
 #'
 #' @return A [data.frame] with a new column for wach value in the `probs` vector
+#' @importFrom purrr set_names
 #' @export
 apply_quantiles <- function(df = NULL,
                             col = NULL,

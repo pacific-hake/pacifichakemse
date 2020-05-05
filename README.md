@@ -1,4 +1,8 @@
 # PacifichakeMSE
+
+[![Travis build status](https://travis-ci.org/cgrandin/PacifichakeMSE.svg?branch=master)](https://travis-ci.org/cgrandin/PacifichakeMSE)
+[![Coverage status](https://codecov.io/gh/cgrandin/PacifichakeMSE/branch/master/graph/badge.svg)](https://codecov.io/github/cgrandin/PacifichakeMSE?branch=master)
+
 Management strategy evaluation of Pacific hake
 
 This code runs a management strategy evaluation (MSE) of Pacific hake. The model can be run from R_scripts/run_MSE_XX.R where XX represent either of the four current MSE scenarios (climate, HCR, survey or selectivity). The repository also includes code to run the hake stock assessment using a reformulation in TMB.
