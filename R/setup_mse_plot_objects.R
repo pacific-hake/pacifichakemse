@@ -82,6 +82,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
   cols <- pnw_palette("Starfish", n = length(plotnames), type = "discrete")
   lst_indicators <- map2(ls_plots, plotnames, ~{
+    browser()
     tmp <- hake_objectives(.x, sim_data$SSB0, move = 1)
     tmp[[2]]$HCR <- .y
     tmp[[3]]$HCR <- .y

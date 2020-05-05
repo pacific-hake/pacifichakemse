@@ -1,94 +1,167 @@
 #' Hake objectives (TODO: Improve docs on this function)
 #'
-#' @param ls.MSE list of MSE results
-#' @param SSB0 unfished biomass from OM
+#' @param lst list of MSE results
+#' @param ssb0 unfished biomass from OM
 #' @param move Logical. Is movement in the OM?
 #' @param short_term_yrs Years for short term plots
 #' @param long_term_yrs Years greater than this will be in long term plots
 #'
 #' @return List of three: p.export, t.export, ls.season (TODO: explain better)
 #' @importFrom ggplot2 alpha
+#' @importFrom dplyr left_join
 #' @export
-hake_objectives <- function(ls.MSE,
-                            SSB0,
+hake_objectives <- function(lst = NULL,
+                            ssb0 = NULL,
                             move = NA,
                             short_term_yrs = 2018:2027,
-                            long_term_yrs = 2027){
-  nruns <- length(ls.MSE)
-  nyears <- dim(ls.MSE[[1]][1]$Catch)[2]
-  if(dim(ls.MSE[[1]][1]$Catch)[2] == 1){
-    nyears <- dim(ls.MSE[[1]][1]$Catch)[1]
-  }
-  # Get the number of years run in that MSE
-  if(all(is.na(ls.MSE[[1]]))){
-    simyears <- nyears-(length(1966:2018))+1
-  }else{
-    simyears <- nyears-(length(1966:2018))+1
-  }
-  yr <- 1966:(2018+simyears-1)
-  idx <- 1
-  if(all(is.na(ls.MSE[[idx]]))){
-    idx <- 2
-  }
-  if(all(is.na(ls.MSE[[idx]]))){
-    idx <- 3
-  }
-  if(is.na(move)){
-    SSB.plot <- data.frame(SSB = (ls.MSE[[idx]]$SSB)/(SSB0), year = yr, run = paste('run',1, sep=''))
-  }else{
-    SSB.plot <- data.frame(SSB = as.numeric(rowSums(ls.MSE[[idx]]$SSB))/sum(SSB0), year = yr, run = paste('run',1, sep=''))
-    V.us.plot <- data.frame(V = ls.MSE[[idx]]$V[,2,3], year = yr, run = paste('run',1, sep='')) #vulnerable biomass at mid-year start of season 3
-    V.ca.plot <- data.frame(V = ls.MSE[[idx]]$V[,1,3], year = yr, run = paste('run',1, sep='')) #vulnerable biomass at mid-year start of season 3
-  }
-  if(is.na(move)){ #if there is no movement (single area model)
-    Catch.plot <- data.frame(Catch = ls.MSE[[idx]]$Catch, year = yr, run = paste('run',1, sep=''))
-  }else{
-    catchtmp <- as.numeric(apply(ls.MSE[[idx]]$Catch,MARGIN = 2, FUN = sum))
-    if(length(catchtmp) == 1){
-      catchtmp <- ls.MSE[[idx]]$Catch
-    }
-    Catch.plot <- data.frame(Catch = catchtmp, year = yr, run = paste('run',1, sep=''))
-    quota.tot <- apply(ls.MSE[[idx]]$Catch.quota, MARGIN = 1, FUN = sum)
-    quota.plot <- data.frame(Quota_frac = quota.tot/catchtmp, year = yr, run = paste('run',1, sep =''))
-    #sum quota over year by area
-    quota.us.tot <- data.frame(quota=rowSums(ls.MSE[[idx]]$Catch.quota[,2,]), year=yr, run=paste('run',1, sep =''))
-    quota.can.tot <- data.frame(quota=rowSums(ls.MSE[[idx]]$Catch.quota[,1,]), year=yr, run=paste('run',1, sep =''))
-    #Catch by year by area
-    catch.area<-apply(ls.MSE[[idx]]$Catch, MARGIN=c(2,3), FUN=sum)
-    Catch.us.tot<- data.frame(Catch=catch.area[,2], year=yr, run=paste('run',1, sep =''))
-    Catch.can.tot<- data.frame(Catch=catch.area[,1], year=yr, run=paste('run',1, sep =''))
-    vtac.us<- data.frame(V.TAC=V.us.plot$V/Catch.us.tot$Catch, year=yr, run=paste('run',1, sep =''))
-    vtac.can<- data.frame(V.TAC=V.ca.plot$V/Catch.can.tot$Catch, year=yr, run=paste('run',1, sep =''))
-    Ctmp <- colSums(ls.MSE[[idx]]$Catch)
-    vtac.us.seas<- data.frame(V.TAC.sp=Ctmp[,2,2]/ls.MSE[[idx]]$V[,2,2],
-                              V.TAC.su=Ctmp[,2,3]/ls.MSE[[idx]]$V[,2,3],
-                              V.TAC.fa=Ctmp[,2,4]/ls.MSE[[idx]]$V[,2,4],
-                              year = yr, run =  paste('run',1, sep=''))
-    vtac.can.seas<-  data.frame(V.TAC.sp=Ctmp[,1,2]/ls.MSE[[idx]]$V[,1,2],
-                                V.TAC.su=Ctmp[,1,3]/ls.MSE[[idx]]$V[,1,3],
-                                V.TAC.fa=Ctmp[,1,4]/ls.MSE[[idx]]$V[,1,4],
-                                year = yr, run =  paste('run',1, sep=''))
-  }
+                            long_term_yrs = 2027,
+                            can.prop = 0.2488,
+                            us.prop = 0.7612){
+  stopifnot(!is.null(lst))
+  stopifnot(!is.null(ssb0))
 
+  yrs <- as.numeric(attributes(lst[[1]]$Catch)$dimnames$year)
+  min_yr <- min(yrs)
+  nyrs <- length(yrs)
+  if(nyrs == 1){
+    nyrs <- nrow(lst[[1]]$Catch)
+  }
+  simyears <- nyrs - (length(min_yr:short_term_yrs[1])) + 1
+  nruns <- length(lst)
+
+  df_ssb_plot <- map2(lst, seq_along(lst), ~{
+    data.frame(year = yrs,
+               ssb = rowSums(.x$SSB) / sum(ssb0),
+               run = .y)
+  }) %>% map_df(~{.x})
+
+  # Vulnerable biomass at mid-year start of season 3 for each country
+  df_v_ca_plot <- map2(lst, seq_along(lst), ~{
+    data.frame(year = yrs,
+               v = .x$V[,1,3],
+               run = .y)
+  }) %>% map_df(~{.x})
+
+  df_v_us_plot <- map2(lst, seq_along(lst), ~{
+    data.frame(year = yrs,
+               v = .x$V[,2,3],
+               run = .y)
+  }) %>% map_df(~{.x})
+
+  catch_plot <- map2(lst, seq_along(lst), ~{
+    ct <- apply(.x$Catch, MARGIN = 2, FUN = sum)
+    if(length(ct) == 1){
+      data.frame(year = yrs,
+                 catch = .x$Catch,
+                 run = .y)
+    }else{
+      data.frame(year = yrs,
+                 catch = ct,
+                 run = .y)
+    }
+  }) %>% map_df(~{.x})
+
+  quota_tot <- map2(lst, seq_along(lst), ~{
+    quot <- apply(.x$Catch.quota, MARGIN = 1, FUN = sum)
+    if(length(quot) == 1){
+      data.frame(year = yrs,
+                 catch = .x$Catch.quota,
+                 run = .y)
+    }else{
+      data.frame(year = yrs,
+                 catch = quot,
+                 run = .y)
+    }
+  }) %>% map_df(~{.x})
+
+  quota_plot <- map2(list(quota_tot), list(catch_plot), ~{
+    .x %>%
+      left_join(.y, by = c("year", "run")) %>%
+      mutate(quota_frac = catch.x / catch.y) %>%
+      select(year, quota_frac, run)
+  })
+
+  quota_us_tot <- map2(lst, seq_along(lst), ~{
+    data.frame(year = yrs,
+               quota = rowSums(.x$Catch.quota[,2,]),
+               run = .y)
+  }) %>% map_df(~{.x})
+
+  quota_ca_tot <- map2(lst, seq_along(lst), ~{
+    data.frame(year = yrs,
+               quota = rowSums(.x$Catch.quota[,1,]),
+               run = .y)
+  }) %>% map_df(~{.x})
+
+  catch_area <- map2(lst, seq_along(lst), ~{
+    data.frame(year = yrs,
+               area = apply(.x$Catch, MARGIN = c(2, 3), FUN = sum),
+               run = .y)
+  }) %>% map_df(~{.x}) %>%
+    transmute(year,
+              ca = area.1,
+              us = area.2,
+              run)
+  catch_area_us_tot <- catch_area %>%
+    transmute(year, catch = us, run)
+  catch_area_ca_tot <- catch_area %>%
+    transmute(year, catch = ca, run)
+
+#browser()
+
+  idx <- 1
+  if(is.na(move)){ #if there is no movement (single area model)
+    Catch.plot <- data.frame(Catch = lst[[idx]]$Catch,
+                             year = yrs,
+                             run = paste("run",1, sep=""))
+  }else{
+    catchtmp <- as.numeric(apply(lst[[idx]]$Catch,MARGIN = 2, FUN = sum))
+    if(length(catchtmp) == 1){
+      catchtmp <- lst[[idx]]$Catch
+    }
+    Catch.plot <- data.frame(Catch = catchtmp, year = yrs, run = paste("run",1, sep=""))
+    quota.tot <- apply(lst[[idx]]$Catch.quota, MARGIN = 1, FUN = sum)
+    quota.plot <- data.frame(Quota_frac = quota.tot/catchtmp, year = yrs, run = paste("run",1, sep =""))
+    #sum quota over year by area
+    quota.us.tot <- data.frame(quota=rowSums(lst[[idx]]$Catch.quota[,2,]), year=yrs, run=paste("run",1, sep =""))
+    quota.can.tot <- data.frame(quota=rowSums(lst[[idx]]$Catch.quota[,1,]), year=yrs, run=paste("run",1, sep =""))
+    #Catch by year by area
+    catch.area<-apply(lst[[idx]]$Catch, MARGIN=c(2,3), FUN=sum)
+    Catch.us.tot<- data.frame(Catch=catch.area[,2], year=yrs, run=paste("run",1, sep =""))
+    Catch.can.tot<- data.frame(Catch=catch.area[,1], year=yrs, run=paste("run",1, sep =""))
+    browser()
+    vtac.us<- data.frame(V.TAC=df_v_us_plot$v/Catch.us.tot$Catch, year=yrs, run=paste("run",1, sep =""))
+    vtac.can<- data.frame(V.TAC=df_v_ca_plot$v/Catch.can.tot$Catch, year=yrs, run=paste("run",1, sep =""))
+    Ctmp <- colSums(lst[[idx]]$Catch)
+    vtac.us.seas<- data.frame(V.TAC.sp=Ctmp[,2,2]/lst[[idx]]$V[,2,2],
+                              V.TAC.su=Ctmp[,2,3]/lst[[idx]]$V[,2,3],
+                              V.TAC.fa=Ctmp[,2,4]/lst[[idx]]$V[,2,4],
+                              year = yrs, run =  paste("run",1, sep=""))
+    vtac.can.seas<-  data.frame(V.TAC.sp=Ctmp[,1,2]/lst[[idx]]$V[,1,2],
+                                V.TAC.su=Ctmp[,1,3]/lst[[idx]]$V[,1,3],
+                                V.TAC.fa=Ctmp[,1,4]/lst[[idx]]$V[,1,4],
+                                year = yrs, run =  paste("run",1, sep=""))
+  }
+  browser()
   AAV.plot  <- data.frame(AAV = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
-                          year = yr[2:length(yr)], run = paste('run',1, sep=''))
+                          year = yr[2:length(yr)], run = paste("run",1, sep=""))
   for(i in 2:nruns){
-    ls.tmp <- ls.MSE[[i]]
+    ls.tmp <- lst[[i]]
     if(is.list(ls.tmp)){
       if(is.na(move)){
-        SSB.tmp <- data.frame(SSB = (ls.tmp$SSB)/(SSB0), year = yr, run =  paste('run',i, sep=''))
-        Catch.tmp <- data.frame(Catch = ls.tmp$Catch, year = yr, run =  paste('run',i, sep=''))
+        SSB.tmp <- data.frame(SSB = (ls.tmp$SSB)/(ssb0), year = yr, run =  paste("run",i, sep=""))
+        Catch.tmp <- data.frame(Catch = ls.tmp$Catch, year = yr, run =  paste("run",i, sep=""))
         quota.tmp <- data.frame(Catch = ls.tmp$Catch/apply(ls.tmp$Catch.quota, MARGIN = 1, FUN = sum),
-                                year = yr, run =  paste('run',i, sep=''))
-        V.tmp<-data.frame(V = ls.tmp$V[,3], year = yr, run =  paste('run',i, sep=''))
+                                year = yr, run =  paste("run",i, sep=""))
+        V.tmp<-data.frame(V = ls.tmp$V[,3], year = yr, run =  paste("run",i, sep=""))
       }else{
         catchtmp <-  as.numeric(apply(ls.tmp$Catch,MARGIN = 2, FUN = sum))
         if(length(catchtmp) == 1){
-          catchtmp <- ls.MSE[[idx]]$Catch
+          catchtmp <- lst[[idx]]$Catch
         }
-        SSB.tmp <- data.frame(SSB = rowSums(ls.tmp$SSB)/sum(SSB0), year = yr, run =  paste('run',i, sep=''))
-        Catch.tmp <- data.frame(Catch = catchtmp, year = yr, run =  paste('run',i, sep=''))
-        quota.tmp <- data.frame(Quota_frac = catchtmp/apply(ls.tmp$Catch.quota, MARGIN = 1, FUN = sum), year = yr, run =  paste('run',i, sep=''))
+        SSB.tmp <- data.frame(SSB = rowSums(ls.tmp$SSB)/sum(ssb0), year = yr, run =  paste("run",i, sep=""))
+        Catch.tmp <- data.frame(Catch = catchtmp, year = yr, run =  paste("run",i, sep=""))
+        quota.tmp <- data.frame(Quota_frac = catchtmp/apply(ls.tmp$Catch.quota, MARGIN = 1, FUN = sum), year = yr, run =  paste("run",i, sep=""))
         if(ncol(ls.tmp$Catch) == 1){ #if a single area model, catch by country fixed as proportion of total
           Catch.can <- ls.tmp$Catch*0.26
           Catch.us <- ls.tmp$Catch*0.74
@@ -97,34 +170,34 @@ hake_objectives <- function(ls.MSE,
           Catch.us <- apply(ls.tmp$Catch,MARGIN = c(2,3), FUN = sum)[,2]
         }
         quota.tmp.can <- data.frame(Catch = Catch.can/rowSums(ls.tmp$Catch.quota[,1,]),
-                                    year = yr, run =  paste('run',i, sep=''))
+                                    year = yr, run =  paste("run",i, sep=""))
         quota.tmp.us <- data.frame(Catch = Catch.us/rowSums(ls.tmp$Catch.quota[,2,]),
-                                   year = yr, run =  paste('run',i, sep=''))
+                                   year = yr, run =  paste("run",i, sep=""))
         quota.tmp.can.tot<-data.frame(quota = rowSums(ls.tmp$Catch.quota[,1,]),
-                                      year = yr, run =  paste('run',i, sep=''))
+                                      year = yr, run =  paste("run",i, sep=""))
         quota.tmp.us.tot<-data.frame(quota = rowSums(ls.tmp$Catch.quota[,2,]),
-                                     year = yr, run =  paste('run',i, sep=''))
+                                     year = yr, run =  paste("run",i, sep=""))
         v.tmp.can <-data.frame(V = ls.tmp$V[,1,3],
-                               year = yr, run =  paste('run',i, sep=''))
+                               year = yr, run =  paste("run",i, sep=""))
         v.tmp.us <-data.frame(V = ls.tmp$V[,2,3],
-                              year = yr, run =  paste('run',i, sep=''))
+                              year = yr, run =  paste("run",i, sep=""))
         catch.tmp.can <- data.frame(Catch=Catch.can,
-                                    year = yr, run =  paste('run',i, sep=''))
+                                    year = yr, run =  paste("run",i, sep=""))
         catch.tmp.us <-  data.frame(Catch=Catch.us,
-                                    year = yr, run =  paste('run',i, sep=''))
+                                    year = yr, run =  paste("run",i, sep=""))
         vtac.tmp.can<- data.frame(V.TAC=v.tmp.can$V/quota.tmp.can.tot$quota,
-                                  year = yr, run =  paste('run',i, sep=''))
+                                  year = yr, run =  paste("run",i, sep=""))
         vtac.tmp.us<- data.frame(V.TAC =v.tmp.us$V/quota.tmp.us.tot$quota,
-                                 year = yr, run =  paste('run',i, sep=''))
+                                 year = yr, run =  paste("run",i, sep=""))
         Ctmp <- colSums(ls.tmp$Catch)
         vtac.tmp.us.seas<-data.frame(V.TAC.sp=Ctmp[,2,2]/ls.tmp$V[,2,2],
                                      V.TAC.su=Ctmp[,2,3]/ls.tmp$V[,2,3],
                                      V.TAC.fa=Ctmp[,2,4]/ls.tmp$V[,2,4],
-                                     year = yr, run =  paste('run',i, sep=''))
+                                     year = yr, run =  paste("run",i, sep=""))
         vtac.tmp.can.seas<-data.frame(V.TAC.sp=Ctmp[,1,2]/ls.tmp$V[,1,2],
                                       V.TAC.su=Ctmp[,1,3]/ls.tmp$V[,1,3],
                                       V.TAC.fa=Ctmp[,1,4]/ls.tmp$V[,1,4],
-                                      year = yr, run =  paste('run',i, sep=''))
+                                      year = yr, run =  paste("run",i, sep=""))
       }
       SSB.plot <- rbind(SSB.plot,SSB.tmp)
       Catch.plot <- rbind(Catch.plot,Catch.tmp)
@@ -142,7 +215,7 @@ hake_objectives <- function(ls.MSE,
       vtac.can.seas <- rbind(vtac.can.seas, vtac.tmp.can.seas)
       vtac.us.seas <- rbind(vtac.us.seas, vtac.tmp.us.seas)
       AAV.tmp <- data.frame(AAV  = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
-                            year = yr[2:length(yr)], run =  paste('run',i, sep=''))
+                            year = yr[2:length(yr)], run =  paste("run",i, sep=""))
       AAV.plot <- rbind(AAV.plot, AAV.tmp)
     }
   }
@@ -155,10 +228,10 @@ hake_objectives <- function(ls.MSE,
               p5 = quantile(SSB,0.05))
 
   p1 <- ggplot(data=SSB.plotquant, aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha('gray', alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha('gray', alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = 'SSB')+
-    geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha('black', alpha = 0.2))
+    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
+    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
+    theme_classic()+scale_y_continuous(name = "SSB")+
+    geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha("black", alpha = 0.2))
 
   V.ca.plotquant<- V.ca.plot %>%
     group_by(year) %>%
@@ -177,10 +250,10 @@ hake_objectives <- function(ls.MSE,
               p5 = quantile(Catch,0.05)*1e-6)
 
   p2 <-  ggplot(Catch.plotquant,aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha('gray', alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha('gray', alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = 'Catch (millions)')+
-    geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha('black', alpha = 0.2))
+    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
+    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
+    theme_classic()+scale_y_continuous(name = "Catch (millions)")+
+    geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha("black", alpha = 0.2))
 
   AAV.plotquant <- AAV.plot %>%
     group_by(year) %>%
@@ -191,10 +264,10 @@ hake_objectives <- function(ls.MSE,
               p5 = quantile(AAV,0.05))
 
   p3 <-  ggplot(AAV.plotquant,aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha('gray', alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha('gray', alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = 'Catch\nvariability')+
-    geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha('black', alpha = 0.2))
+    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
+    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
+    theme_classic()+scale_y_continuous(name = "Catch\nvariability")+
+    geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha("black", alpha = 0.2))
 
   quota.plotquant <- quota.plot[quota.plot$year>2010,] %>%
     group_by(year) %>%
@@ -205,14 +278,14 @@ hake_objectives <- function(ls.MSE,
               p5 = quantile(Quota_frac,0.05))
 
   p4 <- ggplot(data=quota.plotquant, aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha('gray', alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha('gray', alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = 'SSB')+coord_cartesian(ylim = c(0.4,1.05))+
-    geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha('black', alpha = 0.2))
+    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
+    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
+    theme_classic()+scale_y_continuous(name = "SSB")+coord_cartesian(ylim = c(0.4,1.05))+
+    geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha("black", alpha = 0.2))
   p4
-  #cairo_pdf(filename = 'MSE_run.pdf')
+  #cairo_pdf(filename = "MSE_run.pdf")
   #p.plot <- list(p1,p2,p3)
-  #p.export <- plot_grid(plotlist = p.plot, ncol = 1, align ='v')
+  #p.export <- plot_grid(plotlist = p.plot, ncol = 1, align ="v")
   #dev.off()
   ###  Plot the performance metrics from Kristins spreadsheet
 
@@ -359,35 +432,35 @@ hake_objectives <- function(ls.MSE,
   #             med.fa=median(prop.fa))
 
 
-  # print(paste('percentage of years where SSB < 0.1SSB0= ',
-  #             round(length(which(SSB.future$SSB<0.1))/length(SSB.future$SSB)*100, digits = 2),'%', sep = ''))
+  # print(paste("percentage of years where SSB < 0.1ssb0= ",
+  #             round(length(which(SSB.future$SSB<0.1))/length(SSB.future$SSB)*100, digits = 2),"%", sep = ""))
   #
-  # print(paste('percentage of years where SSB > 0.1SSB0 & SSB < 0.4SSB0 = ',
-  #             round(length(which(SSB.future$SSB>0.1 & SSB.future$SSB<0.4))/length(SSB.future$SSB)*100, digits = 2),'%', sep = ''))
-  # print(paste('percentage of years where SSB > 0.4SSB0 = ',
-  #             round(length(which(SSB.future$SSB>0.4))/length(SSB.future$SSB)*100, digits = 2),'%', sep = ''))
+  # print(paste("percentage of years where SSB > 0.1ssb0 & SSB < 0.4ssb0 = ",
+  #             round(length(which(SSB.future$SSB>0.1 & SSB.future$SSB<0.4))/length(SSB.future$SSB)*100, digits = 2),"%", sep = ""))
+  # print(paste("percentage of years where SSB > 0.4ssb0 = ",
+  #             round(length(which(SSB.future$SSB>0.4))/length(SSB.future$SSB)*100, digits = 2),"%", sep = ""))
   #
   #
   # Catch.future <- Catch.plot[Catch.plot$year > 2018,]
   #
-  # print(paste('percentage of Catch  < 180000= ',
-  #             round(length(which(Catch.future$Catch < 180000))/length(Catch.future$Catch)*100, digits = 2),'%', sep = ''))
+  # print(paste("percentage of Catch  < 180000= ",
+  #             round(length(which(Catch.future$Catch < 180000))/length(Catch.future$Catch)*100, digits = 2),"%", sep = ""))
   #
-  # print(paste('percentage of Catch  > 180k and < 350k= ',
-  #             round(length(which(Catch.future$Catch > 180000 & Catch.future$Catch < 350000))/length(Catch.future$Catch)*100, digits = 2),'%', sep = ''))
+  # print(paste("percentage of Catch  > 180k and < 350k= ",
+  #             round(length(which(Catch.future$Catch > 180000 & Catch.future$Catch < 350000))/length(Catch.future$Catch)*100, digits = 2),"%", sep = ""))
   #
-  # print(paste('percentage of Catch > 350k= ',
-  #             round(length(which(Catch.future$Catch > 350000))/length(Catch.future$Catch)*100, digits = 2),'%', sep = ''))
+  # print(paste("percentage of Catch > 350k= ",
+  #             round(length(which(Catch.future$Catch > 350000))/length(Catch.future$Catch)*100, digits = 2),"%", sep = ""))
   #
   # # Catch variability
   #
-  # print(paste('median AAV = ',round(median(AAV.plotquant$med), digits = 2), sep = ''))
+  # print(paste("median AAV = ",round(median(AAV.plotquant$med), digits = 2), sep = ""))
 
   ###
   #p.export <- grid.arrange(p1,p2,p3)
 
 
-  ##calculate the probability of being between 10 and 40 percent of SSB0 for 3 consecutive years
+  ##calculate the probability of being between 10 and 40 percent of ssb0 for 3 consecutive years
 
   rns <- unique(SSB.future$run)
   p.vals <- matrix(0, length(unique(SSB.future$run)))
@@ -415,23 +488,23 @@ hake_objectives <- function(ls.MSE,
     nclosed[i] <- length(which(tmp$SSB < 0.1))
   }
   # Create a table with all the objective data
-  indicator <- c('SSB <0.10 SSB0',
-                 '0.10 < S < 0.4S0',
-                 'S>0.4S0',
-                 #    '3 consec yrs S<S40',
-                 #   'years closed fishery',
-                 'AAV',
-                 'Mean SSB/SSB0',
-                 #   'median catch',
-                 'short term catch',
-                 'long term catch',
-                 'Canada TAC/V spr',
-                 'Canada TAC/V sum',
-                 'Canada TAC/V fall',
-                 'US TAC/V spr',
-                 'US TAC/V sum',
-                 'US TAC/V fall')
-                # 'yrs bio unavailable')
+  indicator <- c("SSB <0.10 ssb0",
+                 "0.10 < S < 0.4S0",
+                 "S>0.4S0",
+                 #    "3 consec yrs S<S40",
+                 #   "years closed fishery",
+                 "AAV",
+                 "Mean SSB/ssb0",
+                 #   "median catch",
+                 "short term catch",
+                 "long term catch",
+                 "Canada TAC/V spr",
+                 "Canada TAC/V sum",
+                 "Canada TAC/V fall",
+                 "US TAC/V spr",
+                 "US TAC/V sum",
+                 "US TAC/V fall")
+                # "yrs bio unavailable")
   # Calculate the number of years the quota was met
   if(is.na(vtac.can.seas.stat[1]) | is.na(vtac.us.seas.stat[1])){
     t.export <- NA
@@ -473,7 +546,7 @@ hake_objectives <- function(ls.MSE,
   p.export = NA
   # Add the seasonal stuff
   ls.season <- rbind(vtac.us.seas,  vtac.can.seas)
-  ls.season$country <- c(rep('USA',nrow(vtac.us.seas)),rep('CAN',nrow(vtac.can.seas)))
+  ls.season$country <- c(rep("USA",nrow(vtac.us.seas)),rep("CAN",nrow(vtac.can.seas)))
   # Fix the V plots
   list(p.export,t.export,ls.season)
 }

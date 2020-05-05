@@ -5,17 +5,19 @@
 \title{Hake objectives (TODO: Improve docs on this function)}
 \usage{
 hake_objectives(
-  ls.MSE,
-  SSB0,
+  lst = NULL,
+  ssb0 = NULL,
   move = NA,
   short_term_yrs = 2018:2027,
-  long_term_yrs = 2027
+  long_term_yrs = 2027,
+  can.prop = 0.2488,
+  us.prop = 0.7612
 )
 }
 \arguments{
-\item{ls.MSE}{list of MSE results}
+\item{lst}{list of MSE results}
 
-\item{SSB0}{unfished biomass from OM}
+\item{ssb0}{unfished biomass from OM}
 
 \item{move}{Logical. Is movement in the OM?}
 
