@@ -43,6 +43,6 @@ plot_violins_country <- function(ps = NULL,
     theme(legend.position = "none",
           axis.text.x = element_text(angle = 90, vjust = 0.5)) +
     scale_x_discrete(name = "") +
-    scale_y_continuous(name = "", limit = c(0, 0.5))
+    scale_y_continuous(name = "", limits = c(0, 0.5))
   g
 }

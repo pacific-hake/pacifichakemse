@@ -26,6 +26,10 @@ hake_objectives(
 
 \item{long_term_yrs}{Years greater than this will be in long term plots}
 
+\item{can.prop}{Proportion of the coastwide TAC that Canada receives}
+
+\item{us.prop}{Proportion of the coastwide TAC that the US receives}
+
 \item{quants}{Quantiles to calculate for plotting output \link{data.frame}s}
 }
 \value{

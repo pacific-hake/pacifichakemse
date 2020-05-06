@@ -6,7 +6,7 @@
 #' by country, q by country and other data frame values used for plotting, containing
 #' quantile information and run (scenario) name
 #'
-#' @param lst list of MSE data as read in using [readRDS("MSE_output.rds")]
+#' @param lst list of MSE data as read in from an MSE data file (.rds) using [base::readRDS()]
 #' @param max_yr The last year before simulations start
 #' @param can.prop The proportion of TAC that Canada gets each year
 #' @param us.prop The proportion of TAC that the US gets each year

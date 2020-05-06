@@ -6,7 +6,7 @@ Authors@R:
            family = "Sand Jocobsen",
            role = c("aut", "cre"),
            email = "nissandjac@gmail.com")
-Description: Management strategy evaluation framework with a spatial OM
+Description: Management strategy evaluation framework with a Spatial Operating Model.
 License: GPL-3
 Depends: R (>= 3.5.0)
 Encoding: UTF-8
@@ -16,12 +16,14 @@ LinkingTo:
     Rcpp
 Imports:
     cowplot,
+    data.table,
     dplyr,
     ggplot2,
     gridExtra,
     here,
     PNWColors,
     r4ss,
+    RColorBrewer,
     readr,
     reshape2,
     purrr,
@@ -38,4 +40,5 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Suggests: 
-    testthat
+    testthat,
+    tibble

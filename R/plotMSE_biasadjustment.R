@@ -7,6 +7,7 @@
 #'
 #' @return A list of two [ggplot2] plots
 #' @importFrom gridExtra grid.arrange
+#' @importFrom RColorBrewer brewer.pal
 #' @export
 plotMSE_biasadjustment <- function(results,
                                    plotnames = NA,

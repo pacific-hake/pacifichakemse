@@ -1,9 +1,5 @@
 globalVariables(c(
-"par",
-"plot",
 "ylimits",
-"points",
-"polygon",
 "year",
 "value",
 "model",
@@ -70,7 +66,6 @@ globalVariables(c(
 "avg.fa",
 "avg.sp",
 "avg.su",
-"brewer.pal",
 "ca",
 "dev.off",
 "df",
@@ -81,7 +76,6 @@ globalVariables(c(
 "ls.save",
 "margin",
 "nruns",
-"optimHess",
 "p25",
 "p75",
 "par",
@@ -105,5 +99,7 @@ globalVariables(c(
 "year.future",
 "years",
 "ylimits",
-"yr"
+"yr",
+"can.prop",
+"us.prop"
 ))

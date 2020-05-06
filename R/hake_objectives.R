@@ -5,6 +5,8 @@
 #' @param move Logical. Is movement in the OM?
 #' @param short_term_yrs Years for short term plots
 #' @param long_term_yrs Years greater than this will be in long term plots
+#' @param can.prop Proportion of the coastwide TAC that Canada receives
+#' @param us.prop Proportion of the coastwide TAC that the US receives
 #' @param quants Quantiles to calculate for plotting output [data.frame]s
 #'
 #' @return List of three: p.export, t.export, ls.season (TODO: explain better)

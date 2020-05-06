@@ -18,7 +18,9 @@ fnMSE(df, simyears = 30, TAC = 1, seeds = NA, nruns = 100)
 \item{nruns}{number of iterations}
 }
 \value{
-
+QA list of length 2: (1) is a list of number of runs of MSE results,
+output by \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}}, (2) is a simulation object as output from
+\code{\link[=run.agebased.true.catch]{run.agebased.true.catch()}}
 }
 \description{
 Initialize the operating model

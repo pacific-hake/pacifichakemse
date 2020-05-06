@@ -43,7 +43,7 @@ runfuture_OM <- function(df,nruns = 100){
   start.time <- Sys.time()
   for(i in 1:nruns){
     set.seed(seedz[i])
-    sim.data <- run.agebased.true.catch(df,seed =  seedz[i])
+    sim.data <- run.agebased.true.catch(df, seeds =  seedz[i])
     if(is.list(sim.data)){
       SSB.save[i,,] <- sim.data$SSB.all[,,df$surveyseason]
       SSB.tot[i,] <- rowSums(sim.data$SSB)

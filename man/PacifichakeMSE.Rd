@@ -3,21 +3,14 @@
 \docType{package}
 \name{PacifichakeMSE}
 \alias{PacifichakeMSE}
-\title{Pacific hake MSE package}
-\examples{
-\dontrun{
-# Run the MSE
-Fill in stuff
-
-# Run the hake stock assessment
-runhakeassessment(123)
-}
-
+\title{Pacific Hake MSE package}
+\description{
+Management strategy evaluation framework with a Spatial Operating Model.
 }
 \references{
-PacifichakeMSE on GitHub: \url{https://github.com/PacifichakeMSE}
+PacifichakeMSE on GitHub: \url{https://github.com/nissandjac/PacifichakeMSE}
 }
 \author{
-Nis S Jacobsen, Ian G. Taylor, Kristin Marshall, Aaron Berger
+Nis S Jacobsen, Ian G. Taylor, Kristin Marshall, Aaron Berger, Chris Grandin
 Package maintainer: Nis Jacobsen \href{mailto:nissandjac@gmail.com}{nissandjac@gmail.com}
 }

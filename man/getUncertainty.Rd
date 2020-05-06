@@ -9,12 +9,12 @@ getUncertainty(name, data, sdrep)
 \arguments{
 \item{name}{The parameter name}
 
-\item{data}{Data (TODO: explain)}
+\item{data}{Data}
 
-\item{sdrep}{A \link{data.frame} of standard deviations (TODO: explain)}
+\item{sdrep}{A \link{data.frame} of standard deviations}
 }
 \value{
-
+A \link{data.frame} containing uncertainty
 }
 \description{
 Get uncertainty (TODO: Improve docs on this function)

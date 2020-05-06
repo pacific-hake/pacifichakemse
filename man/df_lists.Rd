@@ -8,7 +8,7 @@ MSE run provided}
 df_lists(lst = NULL, max_yr = 2018, can.prop = 0.2488, us.prop = 0.7612)
 }
 \arguments{
-\item{lst}{list of MSE data as read in using \link{readRDS("MSE_output.rds")}}
+\item{lst}{list of MSE data as read in from an MSE data file (.rds) using \code{\link[base:readRDS]{base::readRDS()}}}
 
 \item{max_yr}{The last year before simulations start}
 

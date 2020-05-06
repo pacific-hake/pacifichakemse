@@ -10,6 +10,9 @@ plot_aa_country(ps = NULL, type = NULL, country_colors = c("darkred", "blue4"))
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
 \item{type}{Which data type to plot, "survey" or "catch"}
+
+\item{country_colors}{A vector of two colors, the first for Canada, the second for
+the US}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

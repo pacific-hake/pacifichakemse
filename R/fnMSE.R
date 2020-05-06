@@ -6,7 +6,9 @@
 #' @param seeds seed
 #' @param nruns number of iterations
 #'
-#' @return
+#' @return QA list of length 2: (1) is a list of number of runs of MSE results,
+#' output by [run_multiple_MSEs()], (2) is a simulation object as output from
+#' [run.agebased.true.catch()]
 #' @export
 #'
 #' @examples
@@ -43,7 +45,7 @@ fnMSE <- function(df,
 
   for (i in 1:nruns){
     tmp <- try(run_multiple_MSEs(simyears = simyears,
-                                 seed = seeds[i],
+                                 seeds = seeds[i],
                                  TAC = TAC,
                                  df))
     #tmp <- run_multiple_MSEs(simyears = 30, seeds[i])

@@ -4,6 +4,7 @@
 #' @param idx which index to sum over
 #'
 #' @return returns list as data frame
+#' @importFrom data.table rbindlist
 #' @export
 #'
 #' @examples
@@ -54,7 +55,7 @@ yrs <- as.numeric(rownames(tmp[[1]]))
 
 names(tmp) <- paste('run',1:runs, sep = '')
 
-tmp.df <- data.table::rbindlist(tmp, idcol = 'run')
+tmp.df <- rbindlist(tmp, idcol = 'run')
 tmp.df$year <- rep(yrs, runs)
 
 if(length(idx) > 1){

@@ -3,10 +3,11 @@
 #' @param obj Object to be used as input to [TMB::MakeADFun()]
 #'
 #' @return Return a list of estimated parameters and uncertainty
+#' @importFrom stats optimHess
 #' @export
 Check_Identifiable_vs2 = function( obj ){
   # Finite-different hessian
-  ParHat = TMBhelper:::extract_fixed( obj )
+  ParHat = extract_initial_values( obj )
   List = NULL
   List[["Hess"]] = optimHess( par=ParHat, fn=obj$fn, gr=obj$gr )
 

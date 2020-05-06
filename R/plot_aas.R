@@ -37,6 +37,8 @@ plot_aa <- function(ps = NULL,
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param type Which data type to plot, "survey" or "catch"
+#' @param country_colors A vector of two colors, the first for Canada, the second for
+#' the US
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export

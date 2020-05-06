@@ -1,10 +1,10 @@
 #' Get uncertainty (TODO: Improve docs on this function)
 #'
 #' @param name The parameter name
-#' @param data Data (TODO: explain)
-#' @param sdrep A [data.frame] of standard deviations (TODO: explain)
+#' @param data Data
+#' @param sdrep A [data.frame] of standard deviations
 #'
-#' @return
+#' @return A [data.frame] containing uncertainty
 #' @export
 getUncertainty <- function(name,
                            data,
