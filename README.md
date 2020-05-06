@@ -12,7 +12,7 @@ estimation model which is coded in C++ using the [TMB](https://github.com/kaskr/
 devtools::install_github("cgrandin/PacifichakeMSE")
 ```
 
-This code runs a management strategy evaluation for Pacific hake.
+To get started, clone or download the [companion project](https://github.com/cgrandin/runhakemse) which contains the calls to the package functions necessary for running the MSE and plotting the results.
 
 ## Operating model
 The MSE runs with a spatial operating model and the estimation model used in the hake assessment using the file run_MSE_all.R
