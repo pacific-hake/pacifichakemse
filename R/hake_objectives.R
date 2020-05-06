@@ -159,7 +159,7 @@ hake_objectives <- function(lst = NULL,
   ssb_yrs <- sort(unique(ssb_plot$year))
   ssb_plotquant <- ssb_plot %>%
     group_by(year) %>%
-    group_map(~ apply_quantiles(.x, col = "ssb", probs = quants)) %>%
+    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
     map_df(~{.x}) %>%
     mutate(year = ssb_yrs) %>%
     select(year, everything())
@@ -167,7 +167,7 @@ hake_objectives <- function(lst = NULL,
   v_ca_yrs <- sort(unique(v_ca_plot$year))
   v_ca_plotquant <- v_ca_plot %>%
     group_by(year) %>%
-    group_map(~ apply_quantiles(.x, col = "v", probs = quants)) %>%
+    group_map(~ calc_quantiles(.x, col = "v", probs = quants)) %>%
     map_df(~{.x}) %>%
     mutate(year = v_ca_yrs) %>%
     select(year, everything())
@@ -175,7 +175,7 @@ hake_objectives <- function(lst = NULL,
   catch_yrs <- sort(unique(catch_plot$year))
   catch_plotquant <- catch_plot %>%
     group_by(year) %>%
-    group_map(~ apply_quantiles(.x, col = "catch", probs = quants)) %>%
+    group_map(~ calc_quantiles(.x, col = "catch", probs = quants)) %>%
     map_df(~{.x}) %>%
     mutate(year = catch_yrs) %>%
     select(year, everything()) %>%
@@ -185,115 +185,66 @@ hake_objectives <- function(lst = NULL,
   aav_yrs <- sort(unique(aav_plot$year))
   aav_plotquant <- aav_plot %>%
     group_by(year) %>%
-    group_map(~ apply_quantiles(.x, col = "aav", probs = quants)) %>%
+    group_map(~ calc_quantiles(.x, col = "aav", probs = quants)) %>%
     map_df(~{.x}) %>%
     mutate(year = aav_yrs) %>%
     select(year, everything())
 
-  browser()
   quota_yrs <- sort(unique(quota_plot$year))
   quota_plotquant <- quota_plot %>%
     group_by(year) %>%
-    group_map(~ apply_quantiles(.x, col = "quota_frac", probs = quants)) %>%
+    group_map(~ calc_quantiles(.x, col = "quota_frac", probs = quants)) %>%
     map_df(~{.x}) %>%
     mutate(year = quota_yrs) %>%
     select(year, everything())
 
+  ssb_future <- ssb_plot %>%
+    filter(year > min(short_term_yrs))
+  # Probability of SSB < SSB_10%
+  ssb_10 <- ssb_future %>%
+    group_by(run) %>%
+    summarize(pcnt = length(which(ssb < 0.1)) /
+                length(unique(year))) %>%
+    group_map(~ calc_quantiles(.x, col = "pcnt", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    ungroup()
+
+  # Probability of SSB >= SSB_10% and <= SSB_40%
+  ssb_4010 <- ssb_future %>%
+    group_by(run) %>%
+    summarize(pcnt = length(which(ssb >= 0.1 & ssb <= 0.4)) /
+                length(unique(year))) %>%
+    group_map(~ calc_quantiles(.x, col = "pcnt", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    ungroup()
+
+
   browser()
+  catch_short_term <- calc_term_quantiles(catch_plot,
+                                          grp_col = "run",
+                                          col = "catch",
+                                          min_yr = min(short_term_yrs),
+                                          max_yr = long_term_yrs,
+                                          probs = quants,
+                                          mean_multiplier = 1e-6)
 
-  p1 <- ggplot(data=SSB.plotquant, aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = "SSB")+
-    geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha("black", alpha = 0.2))
+  catch_long_term <- calc_term_quantiles(catch_plot,
+                                         grp_col = "run",
+                                         col = "catch",
+                                         min_yr = long_term_yrs + 1,
+                                         probs = quants,
+                                         mean_multiplier = 1e-6)
 
 
-  p2 <-  ggplot(Catch.plotquant,aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = "Catch (millions)")+
-    geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha("black", alpha = 0.2))
-
-
-  p3 <-  ggplot(AAV.plotquant,aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = "Catch\nvariability")+
-    geom_line(color="black", size = 1.5)#+geom_line(data = Catch.plot, aes(y = Catch,group = run), color = alpha("black", alpha = 0.2))
-
-  p4 <- ggplot(data=quota.plotquant, aes(x= year,y = med)) +
-    geom_ribbon(aes(ymin = p5, ymax = p95), fill = alpha("gray", alpha =0.5))+
-    geom_ribbon(aes(ymin = p25, ymax = p75), fill = alpha("gray", alpha =0.8))+
-    theme_classic()+scale_y_continuous(name = "SSB")+coord_cartesian(ylim = c(0.4,1.05))+
-    geom_line(color="black", size = 1.5)#+geom_line(data = SSB.plot, aes(y = SSB,group = run), color = alpha("black", alpha = 0.2))
-  p4
-  #cairo_pdf(filename = "MSE_run.pdf")
-  #p.plot <- list(p1,p2,p3)
-  #p.export <- plot_grid(plotlist = p.plot, ncol = 1, align ="v")
-  #dev.off()
-  ###  Plot the performance metrics from Kristins spreadsheet
-
-  ## Probability of S < S10
-  SSB.future <- SSB.plot[SSB.plot$year > 2018,]
-
-  #####KM alternative metric calculation October 10, 2019
-  ###create Prob S<S10 stat by run and look at med across years
-  SSB10.stat <- SSB.future %>%
-    group_by(run) %>%
-    #filter(year>2018 & year<2028) %>%
-    summarise(pcnt = length(which(SSB<0.1))/length(unique(SSB.future$year)))%>%
-    summarise(med=median(pcnt),
-              p95 = quantile(pcnt, 0.95),
-              p25 = quantile(pcnt, 0.25),
-              p75 = quantile(pcnt, 0.75),
-              p5 = quantile(pcnt,0.05))
-
-  SSB40.stat <- SSB.future %>%
-    group_by(run) %>%
-    #filter(year>2018 & year<2028) %>%
-    summarise(pcnt = length(which(SSB<0.4 & SSB>0.1))/length(unique(SSB.future$year))) %>%
-    summarise(med=median(pcnt),
-              p95 = quantile(pcnt, 0.95),
-              p25 = quantile(pcnt, 0.25),
-              p75 = quantile(pcnt, 0.75),
-              p5 = quantile(pcnt,0.05))
-
-  if(max(Catch.plot$year) >= min(short_term_yrs)){
-    Catch.plotshort <- Catch.plot %>%
+  aav_short_term <- NA
+  if(max(aav_plot$year) > min(short_term_yrs)){
+    aav_short_term <- aav_plot %>%
       group_by(run) %>%
-      filter(year>2018 & year<2028) %>%
-      summarise(avg = mean(Catch)*1e-6) %>%
-      summarise(med=median(avg),
-                p95 = quantile(avg, 0.95),
-                p25 = quantile(avg, 0.25),
-                p75 = quantile(avg, 0.75),
-                p5 = quantile(avg,0.05))
-  }else{
-    Catch.plotshort <- NA
+      summarize(avg = mean(aav)) %>%
+      group_map(~ calc_quantiles(.x, col = "avg", probs = quants)) %>%
+      map_df(~{.x}) %>%
+      ungroup()
   }
-
-  if(max(Catch.plot$year) > long_term_yrs){
-    Catch.plotlong <- Catch.plot %>%
-      group_by(run) %>%
-      filter(year>2027) %>%
-      summarise(avg = mean(Catch)*1e-6) %>%
-      summarise(med=median(avg),
-                p95 = quantile(avg, 0.95),
-                p25 = quantile(avg, 0.25),
-                p75 = quantile(avg, 0.75),
-                p5 = quantile(avg,0.05))
-  }else{
-    Catch.plotlong <- NA
-  }
-
-  AAV.plotshort <- AAV.plot %>%
-    group_by(run) %>%
-    summarise(avg = mean(AAV)) %>%
-    summarise(med=median(avg),
-              p95 = quantile(avg, 0.95),
-              p25 = quantile(avg, 0.25),
-              p75 = quantile(avg, 0.75),
-              p5 = quantile(avg,0.05))
 
   V.ca.stat <- V.ca.plot %>%
     group_by(run) %>%

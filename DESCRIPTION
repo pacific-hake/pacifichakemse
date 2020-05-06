@@ -26,6 +26,7 @@ Imports:
     RColorBrewer,
     readr,
     reshape2,
+    rlang,
     purrr,
     stringr,
     tictoc,

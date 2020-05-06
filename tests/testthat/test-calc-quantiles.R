@@ -1,4 +1,4 @@
-context("Test the apply_quantiles() function")
+context("Test the calc_quantiles() function")
 
 pq <- tribble(
   ~year, ~grp, ~val,
@@ -20,18 +20,18 @@ pq <- tribble(
 
 probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
 
-test_that("apply_quantiles() - Tests for argument errors", {
-  expect_error(apply_quantiles(df = NULL, col = "val", probs = probs))
-  expect_error(apply_quantiles(df = pq, col = NULL, probs = probs))
-  expect_error(apply_quantiles(df = pq, col = "val", probs = NULL))
-  expect_error(apply_quantiles(df = pq, col = "valx", probs = probs))
+test_that("calc_quantiles() - Tests for argument errors", {
+  expect_error(calc_quantiles(df = NULL, col = "val", probs = probs))
+  expect_error(calc_quantiles(df = pq, col = NULL, probs = probs))
+  expect_error(calc_quantiles(df = pq, col = "val", probs = NULL))
+  expect_error(calc_quantiles(df = pq, col = "valx", probs = probs))
   pq_wrongvaltype <- pq %>%
     mutate(val = as.character(val))
-  expect_error(apply_quantiles(df = pq_wrongvaltype, col = "val", probs = probs))
+  expect_error(calc_quantiles(df = pq_wrongvaltype, col = "val", probs = probs))
 })
 
-test_that("apply_quantiles() - Tests for outputs, simple case", {
-  df <- apply_quantiles(df = pq, col = "val", probs = probs)
+test_that("calc_quantiles() - Tests for outputs, simple case", {
+  df <- calc_quantiles(df = pq, col = "val", probs = probs)
   expect_true(nrow(df) == 1)
   expect_true(ncol(df) == 5)
   df_names <- names(df)
@@ -42,11 +42,11 @@ test_that("apply_quantiles() - Tests for outputs, simple case", {
   expect_true(df_names[5] == "0.95")
 })
 
-test_that("apply_quantiles() - Tests for outputs, complex grouped case", {
+test_that("calc_quantiles() - Tests for outputs, complex grouped case", {
   yrs <- sort(unique(pq$year))
   df <- pq %>%
     group_by(year) %>%
-    group_map(~ apply_quantiles(.x, col = "val", probs = probs)) %>%
+    group_map(~ calc_quantiles(.x, col = "val", probs = probs)) %>%
     map_df(~{.x}) %>%
     mutate(year = yrs) %>%
     select(year, everything())
