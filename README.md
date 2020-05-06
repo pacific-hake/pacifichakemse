@@ -3,11 +3,16 @@
 [![Travis build status](https://travis-ci.org/cgrandin/PacifichakeMSE.svg?branch=master)](https://travis-ci.org/cgrandin/PacifichakeMSE)
 [![Coverage status](https://codecov.io/gh/cgrandin/PacifichakeMSE/branch/master/graph/badge.svg)](https://codecov.io/github/cgrandin/PacifichakeMSE?branch=master)
 
-Management strategy evaluation of Pacific hake
+Management Strategy Evaluation (MSE) for Pacific hake
 
-This code runs a management strategy evaluation (MSE) of Pacific hake. The model can be run from R_scripts/run_MSE_XX.R where XX represent either of the four current MSE scenarios (climate, HCR, survey or selectivity). The repository also includes code to run the hake stock assessment using a reformulation in TMB.
-PacifichakeMSE is now bundled as an R package - install with install.packages('~/PacifichakeMSE', repos = NULL, type="source")
+To install this package, run the following code. You need to have [Rtools](https://cran.r-project.org/bin/windows/Rtools/) installed to allow compilation of the
+estimation model which is coded in C++ using the [TMB](https://github.com/kaskr/adcomp) package.
 
+```r
+devtools::install_github("cgrandin/PacifichakeMSE")
+```
+
+This code runs a management strategy evaluation for Pacific hake.
 
 ## Operating model
 The MSE runs with a spatial operating model and the estimation model used in the hake assessment using the file run_MSE_all.R
