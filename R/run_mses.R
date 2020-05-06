@@ -87,8 +87,6 @@ run_mses <- function(ss_extdata_dir = NULL,
 
   # Prepare data for operating model
   df <- load_data_seasons(...)
-  # Load parameters from assessment
-  parms.true <- getParameters_OM(TRUE, mod, df)
 
   # Run the operating model until last_yr
   sim.data <- run.agebased.true.catch(df, om_params_seed)
