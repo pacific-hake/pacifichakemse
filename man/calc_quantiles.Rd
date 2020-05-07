@@ -5,7 +5,12 @@
 \alias{calc_term_quantiles}
 \title{Calculate and insert columns containing arbitrary quantiles for a particular column}
 \usage{
-calc_quantiles(df = NULL, col = NULL, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
+calc_quantiles(
+  df = NULL,
+  col = NULL,
+  probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
+  include_mean = TRUE
+)
 
 calc_term_quantiles(
   df = NULL,
@@ -25,6 +30,8 @@ the string assigned to \code{col}}
 will be thrown}
 
 \item{probs}{A vector of quantiles to pass to \code{\link[stats:quantile]{stats::quantile()}}}
+
+\item{include_mean}{If TRUE, include the mean in the output}
 
 \item{grp_col}{The column name to use for grouping the data}
 

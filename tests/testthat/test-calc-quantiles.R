@@ -1,4 +1,5 @@
-context("Test the calc_quantiles() function")
+context("Test the conv_vec_to_mse_df() function")
+
 
 pq <- tribble(
   ~year, ~grp, ~val,
