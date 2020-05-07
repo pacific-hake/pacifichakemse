@@ -8,6 +8,8 @@
 #' @param plotnames Names for the plots
 #' @param porder Order of the scenarios in the figures. Default is the order they appear in the
 #' `results_dir` directory. All outputs will be ordered in this way
+#' @param ... Arguments to be passed to [hake_objectives()]
+#'
 #' @return A list of length 10: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
@@ -31,7 +33,8 @@
 #' @export
 setup_mse_plot_objects <- function(results_dir = NULL,
                                    plotnames = NULL,
-                                   porder = NA){
+                                   porder = NA,
+                                   ...){
   stopifnot(!is.null(results_dir))
 
   fls <- dir(results_dir)
@@ -81,14 +84,14 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   #cols <- brewer.pal(6, "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
   cols <- pnw_palette("Starfish", n = length(plotnames), type = "discrete")
-  lst_indicators <- map2(ls_plots, plotnames, ~{
-    tmp <- hake_objectives(.x, sim_data$SSB0)
+  lst_indicators <- map2(ls_plots, plotnames, function(.x, .y, ...){
+    tmp <- hake_objectives(.x, sim_data$SSB0, ...)
     tmp$info <- tmp$info %>%
       mutate(HCR = .y)
     tmp$vtac_seas <- tmp$vtac_seas %>%
       mutate(HCR = .y)
     tmp
-  })
+  }, ...)
 
   df_all_indicators <- map_df(lst_indicators, ~{
     .x$info
