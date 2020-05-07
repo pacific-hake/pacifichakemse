@@ -6,6 +6,7 @@
 #' @param col A column name on which to perform the calculations. Must be in `df` or an error
 #' will be thrown
 #' @param probs A vector of quantile probabilities to pass to [stats::quantile()]
+#' @param include_mean If TRUE, include the mean in the output
 #'
 #' @return A [data.frame] with a new column for each value in the `probs` vector
 #' @importFrom purrr set_names
@@ -43,7 +44,8 @@
 #'   select(year, everything())
 calc_quantiles <- function(df = NULL,
                            col = NULL,
-                           probs = c(0.05, 0.25, 0.5, 0.75, 0.95)){
+                           probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
+                           include_mean = TRUE){
 
   stopifnot(!is.null(df))
   stopifnot(!is.null(col))
@@ -51,11 +53,16 @@ calc_quantiles <- function(df = NULL,
   stopifnot(col %in% names(df))
   stopifnot(class(df[[col]]) == "numeric")
   col_sym <- sym(col)
-  summarize_at(df,
+  out <- summarize_at(df,
                vars(!!col_sym),
                map(probs,
                    ~partial(quantile, probs = .x, na.rm = TRUE)) %>%
                  set_names(probs))
+  if(include_mean){
+    out <- out %>%
+      mutate(avg = mean(df[[col]]))
+  }
+  out
 }
 
 #' Calculate quantiles for the mean values (across years) of each value in
@@ -145,7 +152,7 @@ calc_term_quantiles <- function(df = NULL,
     filter(year >= min_yr & year <= max_yr) %>%
     group_by(!!grp_col_sym) %>%
     summarize(avg = mean(!!col_sym) * mean_multiplier) %>%
-    group_map(~ calc_quantiles(.x, col = "avg", probs = probs)) %>%
+    group_map(~ calc_quantiles(.x, col = "avg", probs = probs, include_mean = FALSE)) %>%
     map_df(~{.x}) %>%
     ungroup()
 }

@@ -31,7 +31,7 @@ test_that("calc_quantiles() - Tests for argument errors", {
 })
 
 test_that("calc_quantiles() - Tests for outputs, simple case", {
-  df <- calc_quantiles(df = pq, col = "val", probs = probs)
+  df <- calc_quantiles(df = pq, col = "val", probs = probs, include_mean = FALSE)
   expect_true(nrow(df) == 1)
   expect_true(ncol(df) == 5)
   df_names <- names(df)
@@ -42,11 +42,24 @@ test_that("calc_quantiles() - Tests for outputs, simple case", {
   expect_true(df_names[5] == "0.95")
 })
 
+test_that("calc_quantiles() - Tests for outputs, including mean", {
+  df <- calc_quantiles(df = pq, col = "val", probs = probs)
+  expect_true(nrow(df) == 1)
+  expect_true(ncol(df) == 6)
+  df_names <- names(df)
+  expect_true(df_names[1] == "0.05")
+  expect_true(df_names[2] == "0.25")
+  expect_true(df_names[3] == "0.5")
+  expect_true(df_names[4] == "0.75")
+  expect_true(df_names[5] == "0.95")
+  expect_true(df_names[6] == "avg")
+})
+
 test_that("calc_quantiles() - Tests for outputs, complex grouped case", {
   yrs <- sort(unique(pq$year))
   df <- pq %>%
     group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = "val", probs = probs)) %>%
+    group_map(~ calc_quantiles(.x, col = "val", probs = probs, include_mean = FALSE)) %>%
     map_df(~{.x}) %>%
     mutate(year = yrs) %>%
     select(year, everything())
