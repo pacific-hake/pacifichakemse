@@ -107,7 +107,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                                  "Oct-Dec"))
   violin_names[season_inds] <- month_strings[season_inds]
   names(df_violin_indicators) <- violin_names
-browser()
+
   indicators <- unique(df_all_indicators$indicator) %>% as.character
   cutoff_ind <- grep("ong term", indicators)
 
