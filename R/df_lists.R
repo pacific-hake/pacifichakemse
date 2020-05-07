@@ -52,7 +52,7 @@ df_lists <- function(lst = NULL,
       }
       data.frame(year = yrs,
                  ssb_can = .x$SSB[,1],
-                 ssb_US = .x$SSB[,2],
+                 ssb_us = .x$SSB[,2],
                  ssbtot =  .x$SSB[,1] + .x$SSB[,2],
                  F0_can = .x$F0[,1],
                  F0_us = .x$F0[,2],
@@ -80,16 +80,36 @@ df_lists <- function(lst = NULL,
 
   plotname <- attributes(lst)$plotname
 
-  SSB.plotquant <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med.can = median(ssb_can),
-              p95.can = quantile(ssb_can, 0.95),
-              p5.can = quantile(ssb_can,0.05),
-              med.US = median(ssb_US),
-              p95.US = quantile(ssb_US, 0.95),
-              p5.US = quantile(ssb_US,0.05))
-  SSB.plotquant$run <- plotname
-
+  runs <- rep(seq_along(lst), each = nyrs)
+  ssb_yrs <- rep(yrs, length(lst))
+  ssb_can_skel <- ls.df$ssb_can %>%
+    as.data.frame %>%
+    rename(ssb = 1) %>%
+    mutate(year = rep(yrs, length(lst))) %>%
+    mutate(run = runs) %>%
+    group_by(run, year) %>%
+    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = ssb_yrs) %>%
+    mutate(run = runs) %>%
+    mutate(country = "Canada") %>%
+    select(country, year, run, everything())
+  ssb_us_skel <- ls.df$ssb_us %>%
+    as.data.frame %>%
+    rename(ssb = 1) %>%
+    mutate(year = rep(yrs, length(lst))) %>%
+    mutate(run = runs) %>%
+    group_by(run, year) %>%
+    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = ssb_yrs) %>%
+    mutate(run = runs) %>%
+    mutate(country = "US") %>%
+    select(country, year, run, everything())
+  ssb_plotquant <- ssb_can_skel %>%
+    bind_rows(ssb_us_skel) %>%
+  #SSB.plotquant$run <- plotname
+browser()
   SSB.plottot <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
     summarise(med = median(ssbtot),
@@ -167,7 +187,7 @@ df_lists <- function(lst = NULL,
 
     )
   F0.space$run <- plotname
-
+browser()
   Catch.q <- ls.df[ls.df$year > 2010,] %>%
     group_by(year) %>%
     summarise(med.can = mean(catch_can/catch_q_can,na.rm = TRUE),
