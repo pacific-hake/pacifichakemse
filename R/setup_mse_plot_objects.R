@@ -82,18 +82,19 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
   cols <- pnw_palette("Starfish", n = length(plotnames), type = "discrete")
   lst_indicators <- map2(ls_plots, plotnames, ~{
-    browser()
-    tmp <- hake_objectives(.x, sim_data$SSB0, move = 1)
-    tmp[[2]]$HCR <- .y
-    tmp[[3]]$HCR <- .y
+    tmp <- hake_objectives(.x, sim_data$SSB0)
+    tmp$info <- tmp$info %>%
+      mutate(HCR = .y)
+    tmp$vtac_seas <- tmp$vtac_seas %>%
+      mutate(HCR = .y)
     tmp
   })
 
   df_all_indicators <- map_df(lst_indicators, ~{
-    .x[[2]]
+    .x$info
   })
   df_violin_indicators <- map_df(lst_indicators, ~{
-    .x[[3]]
+    .x$vtac_seas
   }) %>%
     mutate(HCR = factor(HCR, levels = names(lst_indicators)[porder]))
   violin_names <- names(df_violin_indicators)
@@ -106,9 +107,10 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                                  "Oct-Dec"))
   violin_names[season_inds] <- month_strings[season_inds]
   names(df_violin_indicators) <- violin_names
-
+browser()
   indicators <- unique(df_all_indicators$indicator) %>% as.character
-  cutoff_ind <- grep("long term", indicators)
+  cutoff_ind <- grep("ong term", indicators)
+
   df_ssb_catch_indicators <- df_all_indicators %>%
     filter(indicator %in% indicators[1:cutoff_ind]) %>%
     mutate(HCR = factor(HCR, levels = names(lst_indicators)[porder]))

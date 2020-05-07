@@ -7,20 +7,18 @@
 hake_objectives(
   lst = NULL,
   ssb0 = NULL,
-  move = NA,
   short_term_yrs = 2018:2027,
   long_term_yrs = 2027,
   can.prop = 0.2488,
   us.prop = 0.7612,
-  quants = c(0.05, 0.25, 0.5, 0.75, 0.95)
+  quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
+  catch_multiplier = 1e-06
 )
 }
 \arguments{
 \item{lst}{list of MSE results}
 
 \item{ssb0}{unfished biomass from OM}
-
-\item{move}{Logical. Is movement in the OM?}
 
 \item{short_term_yrs}{Years for short term plots}
 
@@ -31,6 +29,8 @@ hake_objectives(
 \item{us.prop}{Proportion of the coastwide TAC that the US receives}
 
 \item{quants}{Quantiles to calculate for plotting output \link{data.frame}s}
+
+\item{catch_multiplier}{Value to multiply all catch calculations by}
 }
 \value{
 List of three: p.export, t.export, ls.season (TODO: explain better)
