@@ -5,7 +5,13 @@
 \title{Create a list of \link{data.frame}s containing key values of interest output from the
 MSE run provided}
 \usage{
-df_lists(lst = NULL, max_yr = 2018, can.prop = 0.2488, us.prop = 0.7612)
+df_lists(
+  lst = NULL,
+  max_yr = 2018,
+  can.prop = 0.2488,
+  us.prop = 0.7612,
+  quants = c(0.05, 0.25, 0.5, 0.75, 0.95)
+)
 }
 \arguments{
 \item{lst}{list of MSE data as read in from an MSE data file (.rds) using \code{\link[base:readRDS]{base::readRDS()}}}

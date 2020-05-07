@@ -35,6 +35,10 @@ hake_objectives <- function(lst = NULL,
   simyears <- nyrs - (length(min_yr:short_term_yrs[1])) + 1
   nruns <- length(lst)
 
+
+
+
+
   ssb_plot <- map2(lst, seq_along(lst), ~{
     data.frame(year = yrs,
                ssb = rowSums(.x$SSB) / sum(ssb0),
