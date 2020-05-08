@@ -1,4 +1,4 @@
-context("Test the plot_bars_country() function")
+context("Test the plot_bars_country_season() function")
 
 ps <- NULL
 ps$cols <- PNWColors::pnw_palette("Starfish", n = 4, type = "discrete")
@@ -29,13 +29,13 @@ ps$country_season_indicators <- tibble::tribble(
        "US TAC/V sum",     9.372939,       "Floor 50",      "US", "July-Sept",
       "US TAC/V fall",     9.243503,       "Floor 50",      "US",   "Oct-Dec")
 
-test_that("plot_bars_country() - Tests for argument errors", {
-  expect_error(plot_bars_country(ps = NULL))
+test_that("plot_bars_country_season() - Tests for argument errors", {
+  expect_error(plot_bars_country_season(ps = NULL))
 })
 
-test_that("plot_bars_country() - Tests for plots matching previous ones", {
-  p <- plot_bars_country(ps = ps)
-  vdiffr::expect_doppelganger("plot-bars-country", p)
+test_that("plot_bars_country_season() - Tests for plots matching previous ones", {
+  p <- plot_bars_country_season(ps = ps)
+  vdiffr::expect_doppelganger("plot-bars-country-season", p)
   # Use following command to add new plots
   # vdiffr::manage_cases()
 })

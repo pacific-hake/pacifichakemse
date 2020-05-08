@@ -1,10 +1,13 @@
-#' Plot faceted barplots by Country and Season for scenarios
+#' Plot faceted barplots by country, season, and scenarios
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
-plot_bars_country_season <- function(ps){
+plot_bars_country_season <- function(ps = NULL){
+
+  stopifnot(!is.null(ps))
+
   g <- ggplot(ps$country_season_indicators,
               aes(x = HCR,y = value)) +
     geom_bar(stat = "identity", aes(fill = HCR)) +
