@@ -12,8 +12,7 @@ The variable \code{ssb_quant} in \code{ps$mse_values_agg$ssb_quant} is construct
 in \code{\link[=df_lists]{df_lists()}}}
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.
-These values must have been calculated in \code{\link[=df_lists]{df_lists()}} and exist in the data in
-\code{ps}}
+These values must have been calculated in \code{\link[=df_lists]{df_lists()}} and exist in the data in \code{ps}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

@@ -4,8 +4,7 @@
 #' The variable `ssb_quant` in `ps$mse_values_agg$ssb_quant` is constructed
 #' in [df_lists()]
 #' @param ci A vector of length two of the lower and upper credible interval values.
-#' These values must have been calculated in [df_lists()] and exist in the data in
-#' `ps`
+#' These values must have been calculated in [df_lists()] and exist in the data in `ps`
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
@@ -17,9 +16,11 @@ plot_ssb <- function(ps = NULL,
 
   ssb <- ps$mse_values_agg$ssb_quant
   stopifnot("country" %in% names(ssb))
+  stopifnot("0.5" %in% names(ssb))
   stopifnot(is.numeric(ci))
   stopifnot(all(ci %in% names(ssb)))
   stopifnot(length(ci) == 2)
+
   ssb_can <- ssb %>% filter(country == "Canada")
   ssb_us <- ssb %>% filter(country == "US")
   ci <- as.character(ci) %>% map(~{sym(.x)})

@@ -32,7 +32,6 @@ test_that("plot_aa() - Tests for argument errors", {
   expect_error(plot_aa(ps = ps_no_median,
                        type = "survey",
                        ci = c(0.05, 0.95)))
-
 })
 
 test_that("plot_aa() - Tests for plots matching previous ones", {
