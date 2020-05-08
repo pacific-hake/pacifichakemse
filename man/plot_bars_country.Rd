@@ -2,9 +2,9 @@
 % Please edit documentation in R/plot_bars_country.R
 \name{plot_bars_country}
 \alias{plot_bars_country}
-\title{Plot faceted barplots by Country for scenarios}
+\title{Plot faceted barplots by country and scenario}
 \usage{
-plot_bars_country(ps)
+plot_bars_country(ps = NULL)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
@@ -13,5 +13,5 @@ plot_bars_country(ps)
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
-Plot faceted barplots by Country for scenarios
+Plot faceted barplots by country and scenario
 }
