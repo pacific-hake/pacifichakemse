@@ -25,6 +25,14 @@ test_that("plot_aa() - Tests for argument errors", {
   expect_error(plot_aa(ps = ps, type = "survey", ci = c(0.05, 0.94)))
   expect_error(plot_aa(ps = ps, type = "survey", ci = c("a", "b")))
   expect_error(plot_aa(ps = ps, type = "survey", ci = c(0.05, 0.5, 0.95)))
+  ps_no_median <- ps
+  tmpnames <- names(ps$mse_values_agg$ams_quant)
+  tmpnames[4] <- "notright"
+  names(ps_no_median$mse_values_agg$ams_quant) <- tmpnames
+  expect_error(plot_aa(ps = ps_no_median,
+                       type = "survey",
+                       ci = c(0.05, 0.95)))
+
 })
 
 test_that("plot_aa() - Tests for plots matching previous ones", {

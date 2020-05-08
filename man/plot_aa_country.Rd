@@ -4,12 +4,20 @@
 \alias{plot_aa_country}
 \title{Plot Average Age in Survey (AAS) of Catch (AAC) by scenario and country}
 \usage{
-plot_aa_country(ps = NULL, type = NULL, country_colors = c("darkred", "blue4"))
+plot_aa_country(
+  ps = NULL,
+  type = NULL,
+  ci = c(0.05, 0.95),
+  country_colors = c("darkred", "blue4")
+)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
 \item{type}{Which data type to plot, "survey" or "catch"}
+
+\item{ci}{A vector of length two of the lower and upper credible interval values.
+These values must have been calculated in \code{\link[=df_lists]{df_lists()}} and exist in the data in \code{ps}}
 
 \item{country_colors}{A vector of two colors, the first for Canada, the second for
 the US}
