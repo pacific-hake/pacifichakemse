@@ -1,26 +1,41 @@
 #' Plot Catch/Quota by scenario
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
+#' @param ci A vector of length two of the lower and upper credible interval values.
+#' These values must have been calculated in [df_lists()] and exist in the data in `ps`
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
-plot_catch_quota <- function(ps = NULL){
+plot_catch_quota <- function(ps = NULL,
+                             ci = c(0.05, 0.95)){
 
   stopifnot(!is.null(ps))
+  stopifnot(!is.null(ci))
 
-  cq <- ps$mse_values_agg$catchq
-  g <- ggplot(cq, aes(x = year, y = med.can)) +
+  cq <- ps$mse_values_agg$catch_q_quant
+  stopifnot("0.5" %in% names(cq))
+  stopifnot(is.numeric(ci))
+  stopifnot(all(ci %in% names(cq)))
+  stopifnot(length(ci) == 2)
+  cq_can <- cq %>%
+    filter(country == "Canada")
+  cq_us <- cq %>%
+    filter(country == "US")
+
+  ci <- as.character(ci) %>% map(~{sym(.x)})
+
+  g <- ggplot(cq_can, aes(x = year, y = `0.5`)) +
     geom_line(color = "red") +
-    geom_line(aes(y = med.us), color = "blue") +
+    geom_line(aes(y = cq_us$`0.5`), color = "blue") +
     theme_classic() +
     scale_y_continuous(name = "Catch/quota") +
     facet_wrap(~run) +
     coord_cartesian(ylim = c(0.6, 1.1)) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-    geom_ribbon(aes(ymin = p5.can, ymax = p95.can),
+    geom_ribbon(aes(ymin = !!ci[[1]], ymax = !!ci[[2]]),
                 fill = alpha("red", alpha = 0.2),
                 linetype = 0) +
-    geom_ribbon(aes(ymin = p5.us, ymax = p95.us),
+    geom_ribbon(aes(ymin = cq_us[[ci[[1]]]], ymax = cq_us[[ci[[2]]]]),
                 fill = alpha("blue", alpha = 0.2),
                 linetype = 0) +
     geom_hline(aes(yintercept = 1),
