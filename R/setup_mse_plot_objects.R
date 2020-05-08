@@ -150,16 +150,17 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     }) %>%
       mutate(run = factor(run, levels = plotnames[porder]))
   }
-  mse_values_agg <- list(ssbplot = merge_dfs_from_scenarios(mse_out_data, "SSBplot"),
-                         ssbmid = merge_dfs_from_scenarios(mse_out_data, "SSBmid"),
-                         ssbtot = merge_dfs_from_scenarios(mse_out_data, "SSBtot"),
-                         catchplot = merge_dfs_from_scenarios(mse_out_data, "Catchplot"),
-                         amcplot = merge_dfs_from_scenarios(mse_out_data, "amcplot"),
-                         amsplot = merge_dfs_from_scenarios(mse_out_data, "amsplot"),
-                         amcspace = merge_dfs_from_scenarios(mse_out_data, "amc.space"),
-                         amsspace = merge_dfs_from_scenarios(mse_out_data, "ams.space"),
-                         f0 = merge_dfs_from_scenarios(mse_out_data, "F0"),
-                         catchq = merge_dfs_from_scenarios(mse_out_data, "Catch.q"))
+
+  mse_values_agg <- list(ssb_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_quant"),
+                         ssb_mid_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_mid_quant"),
+                         ssb_tot_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_tot_quant"),
+                         catch_quant = merge_dfs_from_scenarios(mse_out_data, "catch_quant"),
+                         amc_quant = merge_dfs_from_scenarios(mse_out_data, "amc_quant"),
+                         ams_quant = merge_dfs_from_scenarios(mse_out_data, "ams_quant"),
+                         amc_space_quant = merge_dfs_from_scenarios(mse_out_data, "amc_space_quant"),
+                         ams_space_quant = merge_dfs_from_scenarios(mse_out_data, "ams_space_quant"),
+                         f0_quant = merge_dfs_from_scenarios(mse_out_data, "f0_quant"),
+                         catch_q_quant = merge_dfs_from_scenarios(mse_out_data, "catch_q_quant"))
 
   # Standard error on SSB. First make a list of scenario data frames and reorder,
   # then bind those together into a data frame using [purrr::map_df()]

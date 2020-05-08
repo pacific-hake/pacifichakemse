@@ -9,8 +9,9 @@ conv_vec_to_mse_df(
   vec = NULL,
   col = NULL,
   yr_vec = NULL,
-  cntry = NULL,
-  probs = c(0.05, 0.25, 0.5, 0.75, 0.95)
+  country = NULL,
+  probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
+  inc_mean = TRUE
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ and \code{yr_vec}}
 \item{yr_vec}{The vector of years to place in the \link{data.frame}. This must be the
 same length as \code{vec}}
 
-\item{cntry}{The name for the country. If \code{NULL}, no country column will be added}
+\item{country}{The name for the country. If \code{NULL}, no country column will be added}
 
 \item{probs}{A vector of quantiles to pass to \code{\link[stats:quantile]{stats::quantile()}}}
+
+\item{inc_mean}{Logical. Include the mean (as column \code{avg})}
 }
 \value{
 A \link{data.frame} containing the year, run, value, and possibly country as columns

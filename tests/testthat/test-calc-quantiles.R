@@ -1,7 +1,7 @@
 context("Test the conv_vec_to_mse_df() function")
 
 
-pq <- tribble(
+pq <- tibble::tribble(
   ~year, ~grp, ~val,
    2000,    1,  2.1,
    2001,    1,  3.4,
@@ -75,7 +75,7 @@ test_that("calc_quantiles() - Tests for outputs, complex grouped case", {
   expect_true(df_names[6] == "0.95")
   df <- df %>%
     as.data.frame()
-  correct_df <- tribble(
+  correct_df <- tibble::tribble(
     ~year, ~`0.05`, ~`0.25`, ~`0.5`, ~`0.75`, ~`0.95`,
     2000, 2.2, 2.6, 3.1, 8.1, 12.1,
     2001, 3.5, 3.9, 4.4, 9.4, 13.4,

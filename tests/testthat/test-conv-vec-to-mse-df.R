@@ -34,3 +34,20 @@ test_that("conv_vec_to_mse_df() - Tests for outputs, simple case", {
   expect_equivalent(df %>% dplyr::slice(5) %>% unlist(., use.names=FALSE),
                     c(2004, quantile(vec[c(5, 10)], probs = probs), mean(vec[c(5, 10)])))
 })
+
+test_that("conv_vec_to_mse_df() - Tests for outputs, add country", {
+  df <- conv_vec_to_mse_df(vec = vec, col = "ssb", yr_vec = yr_vec, probs = probs, country = "Canada")
+  expect_true(nrow(df) == 5)
+  expect_true(ncol(df) == 6)
+  expect_true(length(unique(df$country)) == 1)
+})
+
+test_that("conv_vec_to_mse_df() - Tests for outputs, no avg calculated", {
+  df <- conv_vec_to_mse_df(vec = vec,
+                           col = "ssb",
+                           yr_vec = yr_vec,
+                           probs = probs,
+                           inc_mean = FALSE)
+  expect_true(nrow(df) == 5)
+  expect_true(ncol(df) == 4)
+})

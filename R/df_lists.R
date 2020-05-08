@@ -32,7 +32,7 @@ df_lists <- function(lst = NULL,
   nruns <- length(lst)
   nfailed <- rep(1, nruns)
 
-  ls.df <- map2(lst, seq_along(lst), ~{
+  lst_df <- map2(lst, seq_along(lst), ~{
     if(length(.x) > 1){
       if(nyrs == 1){
         catch_us <- .x$Catch * us_prop
@@ -54,8 +54,8 @@ df_lists <- function(lst = NULL,
                  ssb_can = .x$SSB[,1],
                  ssb_us = .x$SSB[,2],
                  ssbtot =  .x$SSB[,1] + .x$SSB[,2],
-                 F0_can = .x$F0[,1],
-                 F0_us = .x$F0[,2],
+                 f0_can = .x$F0[,1],
+                 f0_us = .x$F0[,2],
                  amc = .x$amc$amc.tot,
                  ams = .x$ams$ams.tot,
                  amc_can = .x$amc$amc.can,
@@ -80,148 +80,125 @@ df_lists <- function(lst = NULL,
 
   plotname <- attributes(lst)$plotname
 
-  runs <- rep(seq_along(lst), each = nyrs)
-  ssb_yrs <- rep(yrs, length(lst))
-  ssb_can_skel <- ls.df$ssb_can %>%
-    as.data.frame %>%
-    rename(ssb = 1) %>%
-    mutate(year = rep(yrs, length(lst))) %>%
-    mutate(run = runs) %>%
-    group_by(run, year) %>%
-    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = ssb_yrs) %>%
-    mutate(run = runs) %>%
-    mutate(country = "Canada") %>%
-    select(country, year, run, everything())
-  ssb_us_skel <- ls.df$ssb_us %>%
-    as.data.frame %>%
-    rename(ssb = 1) %>%
-    mutate(year = rep(yrs, length(lst))) %>%
-    mutate(run = runs) %>%
-    group_by(run, year) %>%
-    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = ssb_yrs) %>%
-    mutate(run = runs) %>%
-    mutate(country = "US") %>%
-    select(country, year, run, everything())
-  ssb_plotquant <- ssb_can_skel %>%
-    bind_rows(ssb_us_skel) %>%
-  #SSB.plotquant$run <- plotname
-browser()
-  SSB.plottot <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med = median(ssbtot),
-              avg = mean(ssbtot),
-              p95 = quantile(ssbtot, 0.95),
-              p5 = quantile(ssbtot,0.05))
-  SSB.plottot$run <- plotname
+  allruns_yrs <- rep(yrs, length(lst))
+  ssb_can <- conv_vec_to_mse_df(lst_df$ssb_can,
+                                col = "ssb",
+                                yr_vec = allruns_yrs,
+                                country = "Canada",
+                                probs = quants)
+  ssb_us <- conv_vec_to_mse_df(lst_df$ssb_us,
+                               col = "ssb",
+                               yr_vec = allruns_yrs,
+                               country = "US",
+                               probs = quants)
+  ssb_quant <- ssb_can %>%
+    bind_rows(ssb_us) %>%
+    mutate(run = plotname)
 
-  SSB.plotmid <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med.can = median(ssb_mid_can),
-              p95.can = quantile(ssb_mid_can, 0.95),
-              p5.can = quantile(ssb_mid_can,0.05),
-              med.US = median(ssb_mid_us),
-              p95.US = quantile(ssb_mid_us, 0.95),
-              p5.US = quantile(ssb_mid_us,0.05))
-  SSB.plotmid$run <- plotname
+  ssb_tot_quant <- conv_vec_to_mse_df(lst_df$ssbtot,
+                                      col = "ssb",
+                                      yr_vec = allruns_yrs,
+                                      probs = quants) %>%
+    mutate(run = plotname)
 
-  Catch.plotquant <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med = median(catch),
-              p95 = quantile(catch, 0.95),
-              p5 = quantile(catch,0.05)
-    )
-  Catch.plotquant$run <- plotname
-  #
-  ams.plotquant <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med = median(ams,na.rm = TRUE),
-              p95 = quantile(ams, 0.95,na.rm = TRUE),
-              p5 = quantile(ams,0.05,na.rm = TRUE)
-    )
-  ams.plotquant$run <- plotname
+  ssb_mid_can <- conv_vec_to_mse_df(lst_df$ssb_mid_can,
+                                    col = "ssb",
+                                    yr_vec = allruns_yrs,
+                                    country = "Canada",
+                                    probs = quants)
+  ssb_mid_us <- conv_vec_to_mse_df(lst_df$ssb_mid_us,
+                                   col = "ssb",
+                                   yr_vec = allruns_yrs,
+                                   country = "US",
+                                   probs = quants)
+  ssb_mid_quant <- ssb_mid_can %>%
+    bind_rows(ssb_mid_us) %>%
+    mutate(run = plotname)
 
-  amc.plotquant <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med= median(amc,na.rm = TRUE),
-              p95 = quantile(amc, 0.95,na.rm = TRUE),
-              p5 = quantile(amc,0.05,na.rm = TRUE)
-    )
-  amc.plotquant$run <- plotname
+  catch_quant <- conv_vec_to_mse_df(lst_df$catch,
+                                    col = "catch",
+                                    yr_vec = allruns_yrs,
+                                    probs = quants) %>%
+    mutate(run = plotname)
 
-  ams.space <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med.can = median(ams_can,na.rm = TRUE),
-              p95.can = quantile(ams_can, 0.95,na.rm = TRUE),
-              p5.can = quantile(ams_can,0.05,na.rm = TRUE),
-              med.us = median(ams_us,na.rm = TRUE),
-              p95.us = quantile(ams_us, 0.95,na.rm = TRUE),
-              p5.us = quantile(ams_us,0.05,na.rm = TRUE)
+  ams_quant <- conv_vec_to_mse_df(lst_df$ams,
+                                  col = "ams",
+                                  yr_vec = allruns_yrs,
+                                  probs = quants) %>%
+    mutate(run = plotname)
 
-    )
-  ams.space$run <- plotname
+  amc_quant <- conv_vec_to_mse_df(lst_df$amc,
+                                  col = "amc",
+                                  yr_vec = allruns_yrs,
+                                  probs = quants) %>%
+    mutate(run = plotname)
 
-  amc.space <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med.can = median(amc_can,na.rm = TRUE),
-              p95.can = quantile(amc_can, 0.95,na.rm = TRUE),
-              p5.can = quantile(amc_can,0.05,na.rm = TRUE),
-              med.us = median(amc_us,na.rm = TRUE),
-              p95.us = quantile(amc_us, 0.95,na.rm = TRUE),
-              p5.us = quantile(amc_us,0.05,na.rm = TRUE)
+  ams_space_can <- conv_vec_to_mse_df(lst_df$ams_can,
+                                      col = "ams",
+                                      yr_vec = allruns_yrs,
+                                      country = "Canada",
+                                      probs = quants)
+  ams_space_us <- conv_vec_to_mse_df(lst_df$ams_us,
+                                     col = "ams",
+                                     yr_vec = allruns_yrs,
+                                     country = "US",
+                                     probs = quants)
+  ams_space_quant <- ams_space_can %>%
+    bind_rows(ams_space_us) %>%
+    mutate(run = plotname)
 
-    )
-  amc.space$run <- plotname
+  amc_space_can <- conv_vec_to_mse_df(lst_df$amc_can,
+                                      col = "ams",
+                                      yr_vec = allruns_yrs,
+                                      country = "Canada",
+                                      probs = quants)
+  amc_space_us <- conv_vec_to_mse_df(lst_df$amc_us,
+                                     col = "ams",
+                                     yr_vec = allruns_yrs,
+                                     country = "US",
+                                     probs = quants)
+  amc_space_quant <- amc_space_can %>%
+    bind_rows(amc_space_us) %>%
+    mutate(run = plotname)
 
-  F0.space <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med.can = median(f0_can,na.rm = TRUE),
-              p95.can = quantile(f0_can, 0.95,na.rm = TRUE),
-              p5.can = quantile(f0_can,0.05,na.rm = TRUE),
-              med.us = median(f0_us,na.rm = TRUE),
-              p95.us = quantile(f0_us, 0.95,na.rm = TRUE),
-              p5.us = quantile(f0_us,0.05,na.rm = TRUE)
+  f0_can <- conv_vec_to_mse_df(lst_df$f0_can,
+                               col = "F0",
+                               yr_vec = allruns_yrs,
+                               country = "Canada",
+                               probs = quants)
+  f0_us <- conv_vec_to_mse_df(lst_df$f0_us,
+                              col = "F0",
+                              yr_vec = allruns_yrs,
+                              country = "US",
+                              probs = quants)
+  f0_quant <- f0_can %>%
+    bind_rows(f0_us) %>%
+    mutate(run = plotname)
 
-    )
-  F0.space$run <- plotname
-browser()
-  Catch.q <- ls.df[ls.df$year > 2010,] %>%
-    group_by(year) %>%
-    summarise(med.can = mean(catch_can/catch_q_can,na.rm = TRUE),
-              p95.can = quantile(catch_can/catch_q_can, 0.95,na.rm = TRUE),
-              p5.can = quantile(catch_can/catch_q_can,0.05,na.rm = TRUE),
-              med.us = mean(catch_us/catch_q_us,na.rm = TRUE),
-              p95.us = quantile(catch_us/catch_q_us, 0.95,na.rm = TRUE),
-              p5.us = quantile(catch_us/catch_q_us,0.05,na.rm = TRUE),
-              med.tot = mean(catch/catch_q),
-              p5.tot = quantile(catch/catch_q,0.05,na.rm = TRUE),
-              p95.tot = quantile(catch/catch_q,0.95,na.rm = TRUE)
+  catch_q_can <- conv_vec_to_mse_df(lst_df$catch_can / lst_df$catch_q_can,
+                                    col = "catch",
+                                    yr_vec = allruns_yrs,
+                                    country = "Canada",
+                                    probs = quants)
+  catch_q_us <- conv_vec_to_mse_df(lst_df$catch_us / lst_df$catch_q_us,
+                                   col = "catch",
+                                   yr_vec = allruns_yrs,
+                                   country = "Canada",
+                                   probs = quants)
+  catch_q_quant <- catch_q_can %>%
+    bind_rows(catch_q_us) %>%
+    mutate(run = plotname)
 
-    )
-  Catch.q$run <- plotname
-
-  ggplot(Catch.q, aes(x = year, y = med.can)) +
-    geom_line() +
-    coord_cartesian(ylim = c(0.2, 1.3)) +
-    geom_line(aes(y = med.us)) +
-    geom_line(aes(y = p5.can)) +
-    geom_line(aes(y = p95.can), col = 'red') +
-    geom_line(aes(y=  p95.us), col ='blue') +
-    geom_line(aes(y = p5.us), col = 'blue')
-
-  list(ls.df,
+  list(lst_df,
        nfailed,
-       list(SSBplot = SSB.plotquant,
-            SSBmid = SSB.plotmid,
-            SSBtot = SSB.plottot,
-            Catchplot = Catch.plotquant,
-            amcplot = amc.plotquant,
-            amsplot = ams.plotquant,
-            amc.space = amc.space,
-            ams.space = ams.space,
-            F0 =F0.space,
-            Catch.q = Catch.q))
+       list(ssb_quant = ssb_quant,
+            ssb_mid_quant = ssb_mid_quant,
+            ssb_tot_quant = ssb_tot_quant,
+            catch_quant = catch_quant,
+            amc_quant = amc_quant,
+            ams_quant = ams_quant,
+            amc_space_quant = amc_space_quant,
+            ams_space_quant = ams_space_quant,
+            f0_quant = f0_quant,
+            catch_q_quant = catch_q_quant))
 }

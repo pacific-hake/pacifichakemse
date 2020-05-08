@@ -1,6 +1,6 @@
 context("Test the calc_term_quantiles() function")
 
-pq <- tribble(
+pq <- tibble::tribble(
   ~year, ~run, ~val,
   2000,    1,  2.1,
   2001,    1,  3.4,
