@@ -44,6 +44,9 @@ test_that("plot_aa() - Tests for argument errors", {
                                type = "survey",
                                ci = c(0.05, 0.5, 0.95),
                                country_colors = c("darkred", "blue4")))
+  expect_error(plot_aa_country(ps = ps,
+                               type = "nonimplemented_type",
+                               ci = c(0.05, 0.95)))
   ps_no_median <- ps
   tmpnames <- names(ps$mse_values_agg$ams_space_quant)
   tmpnames[5] <- "notright"
