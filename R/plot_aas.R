@@ -2,32 +2,45 @@
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param type Which data type to plot, "survey" or "catch"
-#'
+#' @param ci A vector of length two of the lower and upper credible interval values.
+#' These values must have been calculated in [df_lists()] and exist in the data in
+#' `ps`
+
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_aa <- function(ps = NULL,
-                    type = NULL){
+                    type = NULL,
+                    ci = c(0.05, 0.95)){
   stopifnot(!is.null(ps))
   stopifnot(!is.null(type))
+  stopifnot(is.numeric(ci))
+  stopifnot(length(ci) == 2)
 
   if(type == "survey"){
-    aa <- ps$mse_values_agg$amsplot
-    aa <- aa[-which(is.na(aa$med)), ]
+    aa <- ps$mse_values_agg$ams_quant
+    stopifnot(all(ci %in% names(aa)))
+    are_na <- aa[-which(is.na(aa$`0.5`)), ]
+    if(length(are_na)){
+      aa <- aa[-which(is.na(aa$`0.5`)), ]
+    }
     ylab <- "Average age in survey"
   }else if(type == "catch"){
-    aa <- ps$mse_values_agg$amcplot
+    aa <- ps$mse_values_agg$amc_quant
+    stopifnot(all(ci %in% names(aa)))
     ylab <- "Average age in catch"
   }else{
     stop("`type` must be one of 'survey' or 'catch'",
          call. = FALSE)
   }
-  g <- ggplot(aa, aes(x = year, y = med, color = run)) +
+
+  ci <- as.character(ci) %>% map(~{sym(.x)})
+  g <- ggplot(aa, aes(x = year, y = `0.5`, color = run)) +
     geom_line(size = 2) +
     #geom_ribbon(aes(ymin = p5, ymax = p95, color = run), linetype = 2, fill = NA) +
     scale_color_manual(values = ps$cols) +
     scale_y_continuous(name = ylab) +
-    geom_line(aes(y = p5, color = run), linetype = 2) +
-    geom_line(aes(y = p95, color = run), linetype = 2) +
+    geom_line(aes(y = !!ci[[1]], color = run), linetype = 2) +
+    geom_line(aes(y = !!ci[[2]], color = run), linetype = 2) +
     theme(legend.title = element_blank(),
           legend.position = c(0.1, 0.9))
   g

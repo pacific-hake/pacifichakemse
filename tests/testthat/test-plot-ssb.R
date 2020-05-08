@@ -42,7 +42,7 @@ test_that("plot_ssb() - Tests for argument errors", {
   expect_error(plot_ssb(ps = ps, ci = c(0.05, 0.5, 0.95)))
 })
 
-test_that("plot_ssb() - Tests for plot layers matching expectations", {
+test_that("plot_ssb() - Tests for plots matching previous ones", {
   p <- plot_ssb(ps = ps, ci = c(0.05, 0.95))
   vdiffr::expect_doppelganger("plot-ssb", p)
   # Use following command to add new plots

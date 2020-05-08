@@ -4,10 +4,16 @@
 \alias{plot_ssb}
 \title{Plot Spawning Stock Biomass (SSB) by scenario and country}
 \usage{
-plot_ssb(ps)
+plot_ssb(ps = NULL, ci = c(0.05, 0.95))
 }
 \arguments{
-\item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
+\item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}.
+The variable \code{ssb_quant} in \code{ps$mse_values_agg$ssb_quant} is constructed
+in \code{\link[=df_lists]{df_lists()}}}
+
+\item{ci}{A vector of length two of the lower and upper credible interval values.
+These values must have been calculated in \code{\link[=df_lists]{df_lists()}} and exist in the data in
+\code{ps}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
