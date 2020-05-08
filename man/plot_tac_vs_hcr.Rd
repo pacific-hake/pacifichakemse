@@ -5,7 +5,7 @@
 \title{Plot estimated vs realized TAC (called Catch in plot) by Harvest Control Rule}
 \usage{
 plot_tac_vs_hcr(
-  df,
+  df = NULL,
   labels = c("Base scenario", "Historical", "Realized", "Floor")
 )
 }

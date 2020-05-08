@@ -19,10 +19,16 @@ plot_tac_est_vs_real <- function(df){
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom dplyr rename
+#' @importFrom ggplot2 margin
 #' @importFrom PNWColors pnw_palette
 #' @export
-plot_tac_vs_hcr <- function(df,
-                            labels = c("Base scenario", "Historical", "Realized", "Floor")){
+plot_tac_vs_hcr <- function(ps = NULL){
+
+  stopifnot(!is.null(ps))
+
+  labels <- ps$plotnames
+
+  df <- calc_tac_est_vs_real()
   d <- df$plot
   cols <- attributes(d)$cols
   g <- ggplot(d, aes(x = tac * 1e-3, y = Quota * 1e-3, color = HCR)) +
@@ -34,7 +40,8 @@ plot_tac_vs_hcr <- function(df,
     geom_point(data = df$tac, aes(x = AssessTac * 1e-3, y = Realized * 1e-3), color = cols[3]) +
     geom_point(data = df$tac, aes(x = AssessTac * 1e-3, y = TAC * 1e-3), color = cols[2]) +
     theme_classic() +
-    #geom_point(data = df.tac[df.tac$Year >= 2012,],aes(x=AssessTac*1e-3,y = TAC*1e-3), color = alpha(cols[4],0.5))+
+    #geom_point(data = df.tac[df.tac$Year >= 2012,],
+    # aes(x = AssessTac * 1e-3, y = TAC * 1e-3), color = alpha(cols[4], 0.5)) +
     theme(legend.title = element_blank(),
           legend.text = element_text(),
           legend.justification = "left",
