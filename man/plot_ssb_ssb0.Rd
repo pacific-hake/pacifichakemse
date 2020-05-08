@@ -5,10 +5,13 @@
 \title{Plot total SSB/SSB0 by scenario where SSB is the Spawning Stock Biomass from the
 Estimation model and SSB0 is the initial SSB from teh Operating model}
 \usage{
-plot_ssb_ssb0(ps = NULL)
+plot_ssb_ssb0(ps = NULL, ci = c(0.05, 0.95))
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
+
+\item{ci}{A vector of length two of the lower and upper credible interval values.
+These values must have been calculated in \code{\link[=df_lists]{df_lists()}} and exist in the data in \code{ps}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
