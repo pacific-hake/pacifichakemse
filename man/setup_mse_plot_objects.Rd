@@ -15,7 +15,8 @@ in this directory that end in '.rds' and contain 'MSE' will be loaded}
 \item{porder}{Order of the scenarios in the figures. Default is the order they appear in the
 \code{results_dir} directory. All outputs will be ordered in this way}
 
-\item{...}{Arguments to be passed to \code{\link[=hake_objectives]{hake_objectives()}}}
+\item{...}{Arguments to be passed to \code{\link[=hake_objectives]{hake_objectives()}}, \code{\link[=df_lists]{df_lists()}}, and
+\code{\link[=calc_standard_error_ssb]{calc_standard_error_ssb()}}}
 }
 \value{
 A list of length 10: The items are (1) A \link{data.frame} containing the SSB/AAV/Catch
