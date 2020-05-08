@@ -8,7 +8,8 @@
 #' @param plotnames Names for the plots
 #' @param porder Order of the scenarios in the figures. Default is the order they appear in the
 #' `results_dir` directory. All outputs will be ordered in this way
-#' @param ... Arguments to be passed to [hake_objectives()]
+#' @param ... Arguments to be passed to [hake_objectives()], [df_lists()], and
+#' [calc_standard_error_ssb()]
 #'
 #' @return A list of length 10: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
@@ -138,9 +139,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   }) %>%
     mutate(HCR = factor(HCR, levels = plotnames[porder]))
 
-  mse_out_data <- map(ls_plots, ~{
-    tmp <- df_lists(.x, max_yr = max(df$years))
-  })
+  mse_out_data <- map(ls_plots, function(.x, ...){
+    tmp <- df_lists(.x, max_yr = max(df$years), ...)
+  }, ...)
 
   # Bind rows of all list[[3]] data frames into single data frame, and order it by scenario
   # `lst` is a list of the outputs from [df_lists()], `val` is the name of the data frame
@@ -164,11 +165,11 @@ setup_mse_plot_objects <- function(results_dir = NULL,
 
   # Standard error on SSB. First make a list of scenario data frames and reorder,
   # then bind those together into a data frame using [purrr::map_df()]
-  standard_error_ssb <- map2(ls_plots, names(ls_plots), ~{
-    calc_standard_error_ssb(.x) %>%
+  standard_error_ssb <- map2(ls_plots, names(ls_plots), function(.x, .y, ...){
+    calc_standard_error_ssb(.x, ...) %>%
       mutate(scenario = .y) %>%
-      select(scenario, run, year, SE.SSB)
-  })
+      select(scenario, year, everything())
+  }, ...)
   standard_error_ssb <- map_df(standard_error_ssb, ~{
     .x
   }) %>%
