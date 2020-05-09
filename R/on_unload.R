@@ -3,7 +3,7 @@
 #' @param libpath Path where the library is located
 #'
 #' @return Nothing
-#' @export
 .onUnload <- function(libpath){
+  message("Unloading PacifihakeMSE dynamic link (shared object) library...")
   library.dynam.unload("PacifichakeMSE", libpath)
 }
