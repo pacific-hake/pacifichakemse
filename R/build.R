@@ -1,0 +1,1 @@
+TMB::compile("src/runHakeassessment.cpp")
