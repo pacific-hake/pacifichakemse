@@ -4,10 +4,7 @@
 \alias{plot_tac_vs_hcr}
 \title{Plot estimated vs realized TAC (called Catch in plot) by Harvest Control Rule}
 \usage{
-plot_tac_vs_hcr(
-  df = NULL,
-  labels = c("Base scenario", "Historical", "Realized", "Floor")
-)
+plot_tac_vs_hcr(ps = NULL)
 }
 \arguments{
 \item{df}{A \link{data.frame} as output by \code{\link[=calc_tac_est_vs_real]{calc_tac_est_vs_real()}}}
