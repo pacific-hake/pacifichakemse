@@ -1,0 +1,7 @@
+all: runHakeassessment.dll
+
+runHakeassessment.dll: runHakeassessment.cpp
+	Rscript --vanilla -e "TMB::compile('runHakeassessment.cpp')"
+
+clean:
+	rm -rf *o

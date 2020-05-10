@@ -4,6 +4,6 @@
 #'
 #' @return Nothing
 .onUnload <- function(libpath){
-  message("Unloading PacifihakeMSE dynamic link (shared object) library...")
-  library.dynam.unload("PacifichakeMSE", libpath)
+  message("Unloading runHakeassessment dynamic link (shared object) library...")
+  library.dynam.unload("runHakeassessment", libpath)
 }

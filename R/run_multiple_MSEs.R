@@ -26,12 +26,12 @@ run_multiple_MSEs <- function(simyears = NULL,
     print('Number of years to simulate not specified. Simulating 30 years into the future')
     simyears <- 30
   }
-  lib_path <- file.path(system.file(package = "PacifichakeMSE",
-                                    mustWork = TRUE),
-                        "libs",
-                        "x64",
-                        TMB::dynlib("runHakeassessment"))
-  dyn.load(lib_path)
+  # lib_path <- file.path(system.file(package = "PacifichakeMSE",
+  #                                   mustWork = TRUE),
+  #                       "libs",
+  #                       "x64",
+  #                       TMB::dynlib("runHakeassessment"))
+  # dyn.load(lib_path)
 
 
   time <- 1
@@ -39,6 +39,7 @@ run_multiple_MSEs <- function(simyears = NULL,
 
   year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
   N0 <- NA
+
   sim.data <- run.agebased.true.catch(df,seeds)
   simdata0 <- sim.data # The other one is gonna get overwritten.
 

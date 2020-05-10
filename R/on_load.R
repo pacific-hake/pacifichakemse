@@ -5,7 +5,13 @@
 #'
 #' @return Nothing
 .onLoad <- function(lib, pkg) {
-  message("Loading PacifichakeMSE dynamic link (shared object) library...")
-  message("Pass DLL = 'PacifichakeMSE' to all 'MakeADFun()' calls.")
-  library.dynam("PacifichakeMSE", pkg, lib)
+  message("Loading runHakeassessment dynamic link (shared object) library...")
+  message("Pass DLL = 'runHakeassessment' to all 'MakeADFun()' calls.")
+  # TODO: When running devtools::document(), the following method must be used:
+  # lib_path <- file.path("src",
+  #                       TMB::dynlib("runHakeassessment"))
+  # dyn.load(lib_path)
+  #
+  # When running devtools::install(), the following method must be used:
+  library.dynam("runHakeassessment", pkg, lib)
 }
