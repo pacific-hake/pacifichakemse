@@ -7,7 +7,7 @@
 csv_data(sel_hist = TRUE)
 }
 \arguments{
-\item{sel_hist}{Logical Load the PSEL file?}
+\item{sel_hist}{Logical. Load the PSEL file?}
 }
 \value{
 A list of the loaded data.frames

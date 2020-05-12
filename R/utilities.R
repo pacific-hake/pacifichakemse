@@ -251,7 +251,7 @@ get_yrs_mse_list <- function(lst){
 
 #' Load data from CSV files
 #'
-#' @param sel_hist Logical Load the PSEL file?
+#' @param sel_hist Logical. Load the PSEL file?
 #'
 #' @return A list of the loaded data.frames
 #' @importFrom readr read_csv cols
@@ -279,19 +279,21 @@ csv_data <- function(sel_hist = TRUE){
   # Load parameters from the assessment
   # Not used
   # initN <- rev(load_from_csv("Ninit_MLE.csv")[,1])
-  Rdev <- load_from_csv("Rdev_MLE.csv")[,1]
+  # Not used
+  # Rdev <- load_from_csv("Rdev_MLE.csv")[,1]
   # Not used
   # PSEL <- as.matrix(load_from_csv("p_MLE.csv")
   b <- as.matrix(load_from_csv("b_input.csv"))
   # load parameters specifically for hake
   parms_scalar <- load_from_csv("parms_scalar.csv")
   parms_sel <- load_from_csv("selectivity.csv")
-  initN <-as.matrix(load_from_csv("initN.csv"))
+  initN <- as.matrix(load_from_csv("initN.csv"))
   Rdev <- as.matrix(load_from_csv("Rdev.csv"))
-  PSEL <- NA
+  psel <- NA
   if(sel_hist){
-    PSEL <- as.matrix(load_from_csv("PSEL.csv"))
+    psel <- as.matrix(load_from_csv("PSEL.csv"))
   }
+  catch_country <- load_from_csv("catch_per_country.csv")
 
   list(wage_ss = wage_ss,
        wage_unfished = wage_unfished,
@@ -303,7 +305,11 @@ csv_data <- function(sel_hist = TRUE){
        age_survey_tmp = age_survey_tmp,
        age_catch_tmp = age_catch_tmp,
        ac_data = ac_data,
+       b = b,
+       parms_scalar = parms_scalar,
+       parms_sel = parms_sel,
        initN = initN,
        Rdev = Rdev,
-       PSEL = PSEL)
+       psel = psel,
+       catch_country = catch_country)
 }
