@@ -7,7 +7,10 @@
 load_data_seasons(
   nseason = 4,
   nspace = 2,
+  syear = 1966,
   myear = 2018,
+  ages = 0:20,
+  sel_change_yr = 1991,
   movemaxinit = 0.35,
   movefiftyinit = 6,
   nsurvey = 2,
@@ -19,7 +22,7 @@ load_data_seasons(
   moveslope = 0.9,
   selectivity_change = 0,
   yr_future = 0,
-  sel_hist = 1
+  sel_hist = TRUE
 )
 }
 \arguments{
@@ -27,7 +30,13 @@ load_data_seasons(
 
 \item{nspace}{number of spatial areas}
 
+\item{syear}{first year of historical simulations}
+
 \item{myear}{last year of historical simulations}
+
+\item{ages}{A vector of ages}
+
+\item{sel_change_yr}{A year in which a selectivity change took place}
 
 \item{movemaxinit}{max movement rate}
 

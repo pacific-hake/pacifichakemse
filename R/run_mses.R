@@ -104,7 +104,7 @@ run_mses <- function(ss_extdata_dir = NULL,
       if(!is.null(nsurveys)){
         df$nsurvey <- nsurveys[.y]
       }
-      browser()
+
       if(is.null(multiple_season_data)){
         tmp <- run_multiple_MSEs(
           simyears = simyears,

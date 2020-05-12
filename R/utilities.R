@@ -248,3 +248,62 @@ get_yrs_mse_list <- function(lst){
   }
   ls_all[[1]]
 }
+
+#' Load data from CSV files
+#'
+#' @param sel_hist Logical Load the PSEL file?
+#'
+#' @return A list of the loaded data.frames
+#' @importFrom readr read_csv cols
+#' @export
+csv_data <- function(sel_hist = TRUE){
+  load_from_csv <- function(file){
+    read_csv(system.file(file.path("extdata", file),
+                         package = "PacifichakeMSE",
+                         mustWork = TRUE),
+             col_types = cols())
+  }
+
+  wage_ss <- load_from_csv("wage_ss.csv")
+  wage_unfished <- load_from_csv("unfished_waa.csv")
+  catch <- load_from_csv("hake_totcatch.csv")
+  # Survey abundance
+  df_survey <- load_from_csv("acoustic_survey.csv")
+  age_survey_df <- load_from_csv("agecomps_survey.csv")
+  age_catch_df <- load_from_csv("agecomps_fishery.csv")
+  survey <- load_from_csv("survey.csv")
+  # Load the age comps
+  age_survey_tmp <- load_from_csv("age_survey_ss.csv")
+  age_catch_tmp <- load_from_csv("age_catch_ss.csv")
+  ac_data <- load_from_csv("ac_data.csv")
+  # Load parameters from the assessment
+  # Not used
+  # initN <- rev(load_from_csv("Ninit_MLE.csv")[,1])
+  Rdev <- load_from_csv("Rdev_MLE.csv")[,1]
+  # Not used
+  # PSEL <- as.matrix(load_from_csv("p_MLE.csv")
+  b <- as.matrix(load_from_csv("b_input.csv"))
+  # load parameters specifically for hake
+  parms_scalar <- load_from_csv("parms_scalar.csv")
+  parms_sel <- load_from_csv("selectivity.csv")
+  initN <-as.matrix(load_from_csv("initN.csv"))
+  Rdev <- as.matrix(load_from_csv("Rdev.csv"))
+  PSEL <- NA
+  if(sel_hist){
+    PSEL <- as.matrix(load_from_csv("PSEL.csv"))
+  }
+
+  list(wage_ss = wage_ss,
+       wage_unfished = wage_unfished,
+       catch = catch,
+       df_survey = df_survey,
+       age_survey_df = age_survey_df,
+       age_catch_df = age_catch_df,
+       survey = survey,
+       age_survey_tmp = age_survey_tmp,
+       age_catch_tmp = age_catch_tmp,
+       ac_data = ac_data,
+       initN = initN,
+       Rdev = Rdev,
+       PSEL = PSEL)
+}
