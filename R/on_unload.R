@@ -5,5 +5,5 @@
 #' @return Nothing
 .onUnload <- function(libpath){
   message("Unloading runHakeassessment dynamic link (shared object) library...")
-  library.dynam.unload("runHakeassessment", libpath)
+  try(library.dynam.unload("runHakeassessment", libpath), silent = TRUE)
 }
