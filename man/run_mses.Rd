@@ -48,7 +48,7 @@ order as the \code{fns} file names, or a single value}
 order as the \code{fns} file names, or a single value}
 
 \item{nsurveys}{The number of surveys for each run. This must be a vector of the same length as \code{fns} or \code{NULL}.
-If \code{NULL}, nothing will be changed}
+If \code{NULL}, 2 will be used for every scenario}
 
 \item{multiple_season_data}{A list of the same length as \code{fns}, with each element being a vector of
 three items, \code{nseason}, \code{nspace}, and \code{bfuture}. If NULL, biasadjustment will not be incorporated}

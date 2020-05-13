@@ -19,7 +19,7 @@
 #' @param sel_changes A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
 #' @param nsurveys The number of surveys for each run. This must be a vector of the same length as `fns` or `NULL`.
-#' If `NULL`, nothing will be changed
+#' If `NULL`, 2 will be used for every scenario
 #' @param multiple_season_data A list of the same length as `fns`, with each element being a vector of
 #' three items, `nseason`, `nspace`, and `bfuture`. If NULL, biasadjustment will not be incorporated
 #' @param om_params_seed A seed value to use when calling the [run.agebased.true.catch()] function
@@ -60,6 +60,7 @@ run_mses <- function(ss_extdata_dir = NULL,
   stopifnot(!is.null(cincreases))
   stopifnot(!is.null(mincreases))
   stopifnot(!is.null(sel_changes))
+  stopifnot(!is.null(nsurveys))
   stopifnot(is.null(nsurveys) | length(nsurveys) == length(fns))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
   stopifnot(length(tacs) == 1 | length(tacs) == length(fns))
@@ -86,9 +87,10 @@ run_mses <- function(ss_extdata_dir = NULL,
                    verbose = FALSE)
 
   # Prepare data for operating model
+
   df <- load_data_seasons(...)
 
-  # Run the operating model until last_yr
+  # Run the operating model
   sim.data <- run.agebased.true.catch(df, om_params_seed)
 
   seeds <- floor(runif(n = nruns, min = 1, max = 1e6))
@@ -101,7 +103,9 @@ run_mses <- function(ss_extdata_dir = NULL,
                                                             sel_changes,
                                                             sel_changes[.y]))
       }
-      if(!is.null(nsurveys)){
+      if(is.null(nsurveys)){
+        df$nsurvey <- 2
+      }else{
         df$nsurvey <- nsurveys[.y]
       }
 
@@ -120,7 +124,8 @@ run_mses <- function(ss_extdata_dir = NULL,
         tmp <- run_multiple_OMs(simyears = simyears,
                                 seed = seeds[run],
                                 df = dfs[[.y]],
-                                Catchin = 0)
+                                Catchin = 0,
+                                ...)
       }
       if(is.list(tmp)) tmp else NA
     }, ...)

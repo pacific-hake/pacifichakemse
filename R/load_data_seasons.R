@@ -1,23 +1,23 @@
 #' Load the hake data for seasons (TODO: Improve docs on this function)
 #'
-#' @param nseason number of seasons
-#' @param nspace number of spatial areas
-#' @param syear first year of historical simulations
-#' @param myear last year of historical simulations
+#' @param nseason Number of seasons
+#' @param nspace Number of spatial areas
+#' @param syr First year of historical simulations
+#' @param myr Last year of historical simulations
 #' @param ages A vector of ages
 #' @param sel_change_yr A year in which a selectivity change took place
-#' @param movemaxinit max movement rate
-#' @param movefiftyinit age at 50percent max movement rate
-#' @param nsurvey survey frequency
-#' @param logSDR recruitment deviations
-#' @param bfuture bias adjustment in the future
-#' @param moveout fraction of individuals that travel south in the last season
-#' @param movesouth fraction of individuals that move south during the year
+#' @param movemaxinit Maximum movement rate
+#' @param movefiftyinit Age at 50 percent maximum movement rate
+#' @param nsurvey Survey frequency
+#' @param logSDR Recruitment deviations
+#' @param bfuture Bias adjustment in the future
+#' @param moveout Fraction of individuals that travel south in the last season
+#' @param movesouth Fraction of individuals that move south during the year
 #' @param moveinit Initial distribution of fish
 #' @param moveslope Slope of the movement function
-#' @param selectivity_change should selectivity change?
-#' @param yr_future how many years into the future should there be stochastic values
-#' @param sel_hist use historical selectivity?
+#' @param selectivity_change Should selectivity change?
+#' @param yr_future How many years into the future should there be stochastic values
+#' @param sel_hist Use historical selectivity?
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
 #' @importFrom purrr map_dfr map_dfc
@@ -30,13 +30,13 @@
 #' }
 load_data_seasons <- function(nseason = 4,
                               nspace = 2,
-                              syear = 1966,
-                              myear = 2018,
+                              syr = 1966,
+                              myr = 2018,
                               ages = 0:20,
                               sel_change_yr = 1991,
                               movemaxinit = 0.35,
                               movefiftyinit = 6,
-                              nsurvey = 2,
+                              nsurveys = 2,
                               logSDR = 1.4,
                               bfuture = 0.5,
                               moveout = 0.85,
@@ -47,20 +47,24 @@ load_data_seasons <- function(nseason = 4,
                               yr_future  = 0,
                               sel_hist = TRUE){
 
+  # Throw error if yr_future is exactly 1
+  stopifnot(yr_future == 0 | yr_future > 1)
+  # Throw error if moveinit is NA and nspace is not 2
+  stopifnot(!is.na(moveinit) | (is.na(moveinit) & nspace == 2))
+
   lst <- csv_data(sel_hist)
 
   if(is.na(moveinit)){
-    if(nspace == 2){
-      moveinit <-  c(0.25, 0.75)
-    }
+    # nspace must be 2 due to error check above
+    moveinit <-  c(0.25, 0.75)
   }
-  years <- syear:(myear + yr_future)
-  nyear <- length(years)
-  tEnd <- length(years) * nseason
+  yrs <- syr:(myr + yr_future)
+  nyr <- length(yrs)
+  tEnd <- length(yrs) * nseason
 
   # Age stuff
   nage <- length(ages)
-  msel <- rep(1,nage)
+  msel <- rep(1, nage)
 
   # TODO: for later use
   # 4 is seasonality
@@ -74,7 +78,7 @@ load_data_seasons <- function(nseason = 4,
   movefifty <- movefiftyinit
   movemax <- rep(movemaxinit, nseason)
   # Chances of moving in to the other grid cell
-  movemat <- array(0, dim = c(nspace, nage, nseason, nyear))
+  movemat <- array(0, dim = c(nspace, nage, nseason, nyr))
   move <- ifelse(nspace == 1, FALSE, TRUE)
   if(move){
     for(j in 1:nspace){
@@ -99,7 +103,7 @@ load_data_seasons <- function(nseason = 4,
   }
   # weight at age
   wage_ss <- lst$wage_ss %>%
-    filter(Yr %in% years)
+    filter(Yr %in% yrs)
   wage_mid <- wage_ss %>%
     filter(Fleet == -1)
   wage_ssb <- wage_ss %>%
@@ -172,23 +176,23 @@ load_data_seasons <- function(nseason = 4,
   }
 
   # Selectivity change in that year
-  flag_sel <- rep(FALSE, nyear)
-  flag_sel[which(years == sel_change_yr):which(years == myear)] <- TRUE
+  flag_sel <- rep(FALSE, nyr)
+  flag_sel[which(yrs == sel_change_yr):which(yrs == myr)] <- TRUE
   df <-list(# Parameters
             wage_ssb = t(wage_ssb),
             wage_catch = t(wage_catch),
             wage_survey = t(wage_survey),
             wage_mid = t(wage_mid),
-            selidx = which(years == sel_change_yr),
+            selidx = which(yrs == sel_change_yr),
             # Input parameters
-            # Years to model time varying sel
-            year_sel = length(sel_change_yr:max(years)),
+            # yrs to model time varying sel
+            year_sel = length(sel_change_yr:max(yrs)),
             Msel = msel,
             Matsel= as.numeric(mat),
             nage = nage,
             ages = ages,
             nseason = nseason,
-            nyear = nyear,
+            nyr = nyr,
             # The extra year is to initialize
             tEnd = tEnd,
             # Analytical solution
@@ -200,7 +204,7 @@ load_data_seasons <- function(nseason = 4,
             Smax_survey = 6,
             flag_sel = flag_sel,
             surveyseason = surveyseason,
-            # Frequency of survey years (e.g., 2 is every second year)
+            # Frequency of survey yrs (e.g., 2 is every second year)
             nsurvey = nsurvey,
             # Make sure the survey has the same length as the catch time series
             survey = lst$survey,
@@ -223,7 +227,7 @@ load_data_seasons <- function(nseason = 4,
             # Fixed in stock assessment
             logSDR = log(logSDR),
             logphi_survey = log(11.46),
-            years = years,
+            yrs = yrs,
             b = lst$b,
             bfuture = bfuture,
             #logh = log(0.8),
@@ -255,36 +259,35 @@ load_data_seasons <- function(nseason = 4,
     select(Can, US) %>%
     mutate(tot = rowSums(.))
   df$catch <- df$catch_country$tot
-  # If nyear greater than the number of catch observations, append the mean catch across
-  # time series to the end years
-  if(nyear > length(df$catch)){
-    df$catch <- c(df$catch, rep(mean(df$catch), nyear - length(df$catch)))
+  # If nyr greater than the number of catch observations, append the mean catch across
+  # time series to the end yrs
+  if(nyr > length(df$catch)){
+    df$catch <- c(df$catch, rep(mean(df$catch), nyr - length(df$catch)))
   }
 
-  if(nyear > nrow(df$catch_country)){
+  if(nyr > nrow(df$catch_country)){
     means <- df$catch_country %>%
       summarize_all(mean)
     df$catch_country <- df$catch_country %>%
       bind_rows(means)
   }
-  browser()
 
-  if(yr_future > 0){
-    idx.future <- length(1966:myear)+seq(2,yr_future, by = df$nsurvey) # Years where survey occurs
-    df$survey_x <- c(df$survey_x,rep(-2, yr_future))
+  if(yr_future > 1){
+    # yrs where survey occurs
+    idx.future <- length(syr:myr) + seq(2, yr_future, by = df$nsurvey)
+    df$survey_x <- c(df$survey_x, rep(-2, yr_future))
     df$survey_x[idx.future] <- 2
-    df$survey_err <- c(df$survey_err,rep(1, yr_future))
+    df$survey_err <- c(df$survey_err, rep(1, yr_future))
     df$survey_err[idx.future] <- mean(df$survey_err[df$survey_err != 1])
     df$ss_survey <- c(df$ss_survey, rep(0,  yr_future))
     df$ss_survey[idx.future] <- mean(df$ss_survey[df$ss_survey != -1])
-    df$flag_survey <- c(df$flag_survey, rep(-1,yr_future))
+    df$flag_survey <- c(df$flag_survey, rep(-1, yr_future))
     df$flag_survey[idx.future] <- 1
-    df$flag_catch[years > 2018] <- 1
-    Rdevs <- rnorm(n = yr_future,mean = 0, sd = exp(df$logSDR))
-    #Rdevs <- rep(0, yr_future)
-    df$parms$Rin <- c(df$parms$Rin,Rdevs)
+    df$flag_catch[yrs > myr] <- 1
+    Rdevs <- rnorm(n = yr_future, mean = 0, sd = exp(df$logSDR))
+    df$parms$Rin <- c(df$parms$Rin, Rdevs)
     # Bias adjustment
-    df$b <- c(df$b,rep(df$bfuture, yr_future))
+    df$b <- c(df$b, rep(df$bfuture, yr_future))
   }
   df
 }

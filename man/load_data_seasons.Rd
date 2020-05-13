@@ -7,13 +7,13 @@
 load_data_seasons(
   nseason = 4,
   nspace = 2,
-  syear = 1966,
-  myear = 2018,
+  syr = 1966,
+  myr = 2018,
   ages = 0:20,
   sel_change_yr = 1991,
   movemaxinit = 0.35,
   movefiftyinit = 6,
-  nsurvey = 2,
+  nsurveys = 2,
   logSDR = 1.4,
   bfuture = 0.5,
   moveout = 0.85,
@@ -26,41 +26,41 @@ load_data_seasons(
 )
 }
 \arguments{
-\item{nseason}{number of seasons}
+\item{nseason}{Number of seasons}
 
-\item{nspace}{number of spatial areas}
+\item{nspace}{Number of spatial areas}
 
-\item{syear}{first year of historical simulations}
+\item{syr}{First year of historical simulations}
 
-\item{myear}{last year of historical simulations}
+\item{myr}{Last year of historical simulations}
 
 \item{ages}{A vector of ages}
 
 \item{sel_change_yr}{A year in which a selectivity change took place}
 
-\item{movemaxinit}{max movement rate}
+\item{movemaxinit}{Maximum movement rate}
 
-\item{movefiftyinit}{age at 50percent max movement rate}
+\item{movefiftyinit}{Age at 50 percent maximum movement rate}
 
-\item{nsurvey}{survey frequency}
+\item{logSDR}{Recruitment deviations}
 
-\item{logSDR}{recruitment deviations}
+\item{bfuture}{Bias adjustment in the future}
 
-\item{bfuture}{bias adjustment in the future}
+\item{moveout}{Fraction of individuals that travel south in the last season}
 
-\item{moveout}{fraction of individuals that travel south in the last season}
-
-\item{movesouth}{fraction of individuals that move south during the year}
+\item{movesouth}{Fraction of individuals that move south during the year}
 
 \item{moveinit}{Initial distribution of fish}
 
 \item{moveslope}{Slope of the movement function}
 
-\item{selectivity_change}{should selectivity change?}
+\item{selectivity_change}{Should selectivity change?}
 
-\item{yr_future}{how many years into the future should there be stochastic values}
+\item{yr_future}{How many years into the future should there be stochastic values}
 
-\item{sel_hist}{use historical selectivity?}
+\item{sel_hist}{Use historical selectivity?}
+
+\item{nsurvey}{Survey frequency}
 }
 \value{
 A list of Parameters, Input parameters, Survey, Catch, and others

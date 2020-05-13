@@ -11,7 +11,8 @@ run_multiple_MSEs(
   df = NA,
   cincrease = 0,
   mincrease = 0,
-  sel_change = 0
+  sel_change = 0,
+  ...
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ run_multiple_MSEs(
 \item{mincrease}{decrease of spawners returning south}
 
 \item{sel_change}{time varying selectivity}
+
+\item{...}{Absorb arguments intended for other functions}
 }
 \value{
 A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om

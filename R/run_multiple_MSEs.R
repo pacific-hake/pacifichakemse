@@ -7,6 +7,7 @@
 #' @param cincrease increase in max movement
 #' @param mincrease decrease of spawners returning south
 #' @param sel_change time varying selectivity
+#' @param ... Absorb arguments intended for other functions
 #'
 #' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
 #' F0, parms, N, converge, ams, amc, V
@@ -20,7 +21,8 @@ run_multiple_MSEs <- function(simyears = NULL,
                               df = NA,
                               cincrease = 0,
                               mincrease = 0,
-                              sel_change = 0){
+                              sel_change = 0,
+                              ...){
 
   if(is.null(simyears)){
     print('Number of years to simulate not specified. Simulating 30 years into the future')
