@@ -1,12 +1,12 @@
 #' Run/Iterate the Pacific hake MSE
 #'
-#' @param simyears number of years to simulate
-#' @param seeds set the seed
-#' @param TAC Which harvest control rule should the model use
-#' @param df data frame of parameters
-#' @param cincrease increase in max movement
-#' @param mincrease decrease of spawners returning south
-#' @param sel_change time varying selectivity
+#' @param simyears Number of years to simulate
+#' @param seed The random number seed to use
+#' @param tac Which harvest control rule should the model use
+#' @param df Data frame of parameters as output by [load_data_seasons()]
+#' @param cincrease Increase in max movement
+#' @param mincrease Decrease of spawners returning south
+#' @param sel_change Time varying selectivity
 #' @param ... Absorb arguments intended for other functions
 #'
 #' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
@@ -15,27 +15,18 @@
 #' @importFrom stats rnorm nlminb runif predict lm median optim setNames
 #' @importFrom utils read.csv read.table
 #' @export
-run_multiple_MSEs <- function(simyears = NULL,
-                              seeds = 12345,
-                              TAC = 1,
-                              df = NA,
+run_multiple_MSEs <- function(df = NULL,
+                              simyears = NULL,
+                              seed = 12345,
+                              tac = 1,
                               cincrease = 0,
                               mincrease = 0,
                               sel_change = 0,
                               ...){
+  stopifnot(!is.null(df))
+  stopifnot(!is.null(simyears))
 
-  if(is.null(simyears)){
-    print('Number of years to simulate not specified. Simulating 30 years into the future')
-    simyears <- 30
-  }
-  # lib_path <- file.path(system.file(package = "PacifichakeMSE",
-  #                                   mustWork = TRUE),
-  #                       "libs",
-  #                       "x64",
-  #                       TMB::dynlib("runHakeassessment"))
-  # dyn.load(lib_path)
-
-
+  browser()
   time <- 1
   yrinit <- df$nyear
 
@@ -358,7 +349,7 @@ run_multiple_MSEs <- function(simyears = NULL,
                    matrix(rep(df$wage_catch[,df$nyear-1],df$nspace), ncol = df$nspace)*(sim.data$Fsel[,df$nyear,]))
 
     Nend <- N[,dim(N)[2]]
-    Fnew <- getRefpoint(opt$par, df,SSBy = SSB[length(SSB)], Fin=Fyear[length(Fyear)], Nend, TAC = TAC,
+    Fnew <- getRefpoint(opt$par, df,SSBy = SSB[length(SSB)], Fin=Fyear[length(Fyear)], Nend, tac = tac,
                         Vreal)
     #Fnew <- 0.3
     # Update the data data frame

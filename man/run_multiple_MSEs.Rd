@@ -5,10 +5,10 @@
 \title{Run/Iterate the Pacific hake MSE}
 \usage{
 run_multiple_MSEs(
+  df = NULL,
   simyears = NULL,
-  seeds = 12345,
-  TAC = 1,
-  df = NA,
+  seed = 12345,
+  tac = 1,
   cincrease = 0,
   mincrease = 0,
   sel_change = 0,
@@ -16,19 +16,19 @@ run_multiple_MSEs(
 )
 }
 \arguments{
-\item{simyears}{number of years to simulate}
+\item{df}{Data frame of parameters as output by \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
-\item{seeds}{set the seed}
+\item{simyears}{Number of years to simulate}
 
-\item{TAC}{Which harvest control rule should the model use}
+\item{seed}{The random number seed to use}
 
-\item{df}{data frame of parameters}
+\item{tac}{Which harvest control rule should the model use}
 
-\item{cincrease}{increase in max movement}
+\item{cincrease}{Increase in max movement}
 
-\item{mincrease}{decrease of spawners returning south}
+\item{mincrease}{Decrease of spawners returning south}
 
-\item{sel_change}{time varying selectivity}
+\item{sel_change}{Time varying selectivity}
 
 \item{...}{Absorb arguments intended for other functions}
 }

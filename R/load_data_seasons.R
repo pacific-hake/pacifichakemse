@@ -36,7 +36,7 @@ load_data_seasons <- function(nseason = 4,
                               sel_change_yr = 1991,
                               movemaxinit = 0.35,
                               movefiftyinit = 6,
-                              nsurveys = 2,
+                              nsurvey = 2,
                               logSDR = 1.4,
                               bfuture = 0.5,
                               moveout = 0.85,
@@ -60,7 +60,7 @@ load_data_seasons <- function(nseason = 4,
   }
   yrs <- syr:(myr + yr_future)
   nyr <- length(yrs)
-  tEnd <- length(yrs) * nseason
+  t_end <- length(yrs) * nseason
 
   # Age stuff
   nage <- length(ages)
@@ -179,22 +179,24 @@ load_data_seasons <- function(nseason = 4,
   flag_sel <- rep(FALSE, nyr)
   flag_sel[which(yrs == sel_change_yr):which(yrs == myr)] <- TRUE
   df <-list(# Parameters
-            wage_ssb = t(wage_ssb),
-            wage_catch = t(wage_catch),
-            wage_survey = t(wage_survey),
-            wage_mid = t(wage_mid),
+            wage_ssb = wage_ssb,
+            wage_catch = wage_catch,
+            wage_survey = wage_survey,
+            wage_mid = wage_mid,
             selidx = which(yrs == sel_change_yr),
             # Input parameters
             # yrs to model time varying sel
             year_sel = length(sel_change_yr:max(yrs)),
             Msel = msel,
             Matsel= as.numeric(mat),
+            syr = syr,
+            myr = myr,
             nage = nage,
             ages = ages,
             nseason = nseason,
             nyr = nyr,
             # The extra year is to initialize
-            tEnd = tEnd,
+            t_end = t_end,
             # Analytical solution
             logQ = log(1.14135),
             # Selectivity
@@ -247,7 +249,7 @@ load_data_seasons <- function(nseason = 4,
             movesouth = movesouth,
             moveout = moveout,
             moveslope = moveslope,
-            # F0 = Fin,
+            #f0 = Fin,
             psel = psel,
             parms = parms,
             catch_props = catch_props,

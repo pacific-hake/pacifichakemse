@@ -13,7 +13,7 @@ load_data_seasons(
   sel_change_yr = 1991,
   movemaxinit = 0.35,
   movefiftyinit = 6,
-  nsurveys = 2,
+  nsurvey = 2,
   logSDR = 1.4,
   bfuture = 0.5,
   moveout = 0.85,
@@ -42,6 +42,8 @@ load_data_seasons(
 
 \item{movefiftyinit}{Age at 50 percent maximum movement rate}
 
+\item{nsurvey}{Survey frequency}
+
 \item{logSDR}{Recruitment deviations}
 
 \item{bfuture}{Bias adjustment in the future}
@@ -59,8 +61,6 @@ load_data_seasons(
 \item{yr_future}{How many years into the future should there be stochastic values}
 
 \item{sel_hist}{Use historical selectivity?}
-
-\item{nsurvey}{Survey frequency}
 }
 \value{
 A list of Parameters, Input parameters, Survey, Catch, and others

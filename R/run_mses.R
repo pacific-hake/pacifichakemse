@@ -91,7 +91,7 @@ run_mses <- function(ss_extdata_dir = NULL,
   df <- load_data_seasons(...)
 
   # Run the operating model
-  sim.data <- run.agebased.true.catch(df, om_params_seed)
+  sim.data <- run_agebased_true_catch(df, om_params_seed)
 
   seeds <- floor(runif(n = nruns, min = 1, max = 1e6))
   tic()
@@ -111,9 +111,9 @@ run_mses <- function(ss_extdata_dir = NULL,
 
       if(is.null(multiple_season_data)){
         tmp <- run_multiple_MSEs(
-          simyears = simyears,
-          seeds = seeds[run],
           df = df,
+          simyears = simyears,
+          seed = seeds[run],
           TAC = if(length(tacs) == 1) tacs else tacs[.y],
           cincrease = ifelse(length(cincreases) == 1, cincreases, cincreases[.y]),
           mincrease = ifelse(length(mincreases) == 1, mincreases, mincreases[.y]))
