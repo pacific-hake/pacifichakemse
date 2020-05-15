@@ -1,37 +1,32 @@
-#' Get selectivity (TODO: Improve docs on this function)
+#' Get a vector of selectivities of the same length as the `age` vector
+#' based on a range asked for
 #'
-#' @param age vector of ages
-#' @param psel selectivity parameters
-#' @param Smin Minimum caught age
-#' @param Smax maximum age to model separately
+#' @param age Vector of ages
+#' @param p_sel Log selectivity values from age `s_min` to `s_max`
+#' @param s_min Minimum age
+#' @param s_max Maximum age
 #'
-#' @return A vector of Selectivity values
+#' @return A vector of selectivity values of the same length as the `age` vector
 #' @export
-getSelec <- function(age,
-                     psel,
-                     Smin,
-                     Smax){
-  psel<- c(0,psel)
-  nage <- length(age)
-  selectivity <- rep(NA,nage)
-  pmax <- max(cumsum(psel))
-  for(j in 1:nage){ # Find the  selectivity
-    if (age[j] < Smin){
-      selectivity[j] = 0;
-      ptmp <- 0
-    }
-    if (age[j] == Smin){
-      ptmp = psel[j-Smin]
-      selectivity[j] = exp(ptmp-pmax)
-    }
-    if (age[j] > Smin & (age[j] <= Smax)){
-      ptmp = psel[j-Smin]+ptmp;
-      selectivity[j] = exp(ptmp-pmax);
-    }
-    if(age[j] > (Smax)){
-      selectivity[j] = selectivity[Smax+1];
-    }
-    # print(ptmp-pmax)
-  }
-  selectivity
+get_select <- function(ages = NULL,
+                       p_sel = NULL,
+                       s_min = NULL,
+                       s_max = NULL){
+  verify_argument(ages, "integer")
+  verify_argument(p_sel, "numeric")
+  verify_argument(s_min, "numeric", 1)
+  verify_argument(s_max, "numeric", 1)
+  stopifnot(s_min < s_max)
+  stopifnot(sum(!is.na(match(s_min:s_max, ages))) == length(s_min:s_max))
+
+  p_sel <- c(0, p_sel)
+  nage <- length(ages)
+  kk <- sel <- rep(NA, nage)
+  p_max <- max(cumsum(p_sel))
+
+  sel[1:(s_min - 1)] <- 0
+  sel[(s_max + 1):nage] <- 1
+  sel[is.na(sel)] <- exp(p_sel - p_max)
+
+  sel
 }

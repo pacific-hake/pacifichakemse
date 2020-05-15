@@ -16,8 +16,8 @@ verify_argument(arg = NULL, chk_class = NULL, chk_len = NULL, chk_is_in = NULL)
 \item{chk_is_in}{A vector of values to ensure \code{arg} is in}
 }
 \value{
-Nothing, but the function will throw an error if \code{arg} does not follow
-the constraints given
+TRUE, invisibly or the function will throw an error if \code{arg} does not follow
+the constraints given; FALSE is not returned
 }
 \description{
 Verify that the argument \code{arg} is valid in the context of the arguments given

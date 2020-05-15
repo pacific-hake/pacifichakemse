@@ -571,14 +571,13 @@ verify_argument <- function(arg = NULL,
 #'
 #' @param skip_frames The level in the calling stack to look. 1 is in the current
 #' function, 2 is one before, etc.
-#' @param skip_names
-#' @param ret_stack
-#' @param extra_perf_per_level
+#' @param skip_names Names returned to skip, these are not real function names but
+#' generalized values used internally
+#' @param ret_stack If TRUE, return the stack trace
+#' @param extra_perf_per_level This is prepended by R and will be removed from the output
 #'
-#' @return
+#' @return The name of the calling function at level `skip_frames` in the stack trace
 #' @export
-#'
-#' @examples
 fn_finder <- function(skip_frames = 1,
                       skip_names = "(FUN)|(.+apply)|(replicate)",
                       ret_stack = FALSE,
