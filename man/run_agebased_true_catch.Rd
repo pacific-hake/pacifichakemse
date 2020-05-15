@@ -7,7 +7,7 @@
 run_agebased_true_catch(df = NULL, seed = 100)
 }
 \arguments{
-\item{df}{data frame of parameters and life history values}
+\item{df}{data frame of parameters and life histor_y values}
 
 \item{seed}{seed for survey error and recruitment deviations}
 }

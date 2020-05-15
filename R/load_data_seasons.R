@@ -140,7 +140,7 @@ load_data_seasons <- function(n_season = 4,
   wage_survey <- wage_ss %>%
     filter(Fleet == 2)
   # Maturity from first year only
-  mat <- wage_ssb[1,]
+  mat <- wage_ssb[1,] %>% select(-c(Yr, Fleet))
   # Age comps
   age_survey_df <- lst$age_survey_df %>%
     mutate(flag = 1)
@@ -153,9 +153,9 @@ load_data_seasons <- function(n_season = 4,
   }else{
     survey_season <- floor(n_season / 2)
   }
-  psel <- lst$psel
+  p_sel <- lst$p_sel
   if(!sel_hist){
-    psel <- matrix(0, 5, 28)
+    p_sel <- matrix(0, 5, 28)
   }
 
   if(n_season == 4 & n_space == 2){
@@ -183,17 +183,17 @@ load_data_seasons <- function(n_season = 4,
                      log_sd_surv = lst$parms_scalar$logSDsurv,
                      log_phi_catch = lst$parms_scalar$logphi_catch,
                      # Selectivity parameters
-                     psel_fish = lst$parms_sel %>% filter(source == "fish") %>% pull("value"),
-                     psel_surv = lst$parms_sel %>% filter(source == "survey") %>% pull("value"),
-                     init_n = lst$initN,
-                     r_in = lst$Rdev,
-                     psel = psel)
+                     p_sel_fish = lst$parms_sel %>% filter(source == "fish") %>% pull("value"),
+                     p_sel_surv = lst$parms_sel %>% filter(source == "survey") %>% pull("value"),
+                     init_n = lst$init_n,
+                     r_in = lst$r_dev,
+                     p_sel = p_sel)
 
   # USA selectivity
   # psel[i,] <- c(2.8476, 0.973, 0.3861, 0.1775, 0.5048)
   d_sel <- matrix(NA, 5, n_space)
   d_sel <- map(seq_len(ncol(d_sel)), ~{
-     d_sel[,.x] = parms_init$psel_fish
+     d_sel[,.x] = parms_init$p_sel_fish
    }) %>%
     set_names(seq_along(.)) %>%
     bind_rows() %>%
@@ -213,7 +213,7 @@ load_data_seasons <- function(n_season = 4,
             sel_idx = which(yrs == sel_change_yr),
             year_sel = length(sel_change_yr:max(yrs)),
             m_sel = m_sel,
-            mat_sel= as.numeric(mat),
+            mat_sel = as.numeric(mat),
             n_season = n_season,
             s_yr = s_yr,
             m_yr = m_yr,
@@ -259,7 +259,7 @@ load_data_seasons <- function(n_season = 4,
             # Space parameters
             # Annual survey timing
             s_mul = 0.5,
-            sigma_psel = 1.4,
+            sigma_p_sel = 1.4,
             sum_zero = 0,
             n_space = n_space,
             recruit_mat = recruit_mat,
@@ -272,7 +272,8 @@ load_data_seasons <- function(n_season = 4,
             move_out = move_out,
             move_slope = move_slope,
             catch_props_season = catch_props_season,
-            catch = lst$catch)
+            catch = lst$catch,
+            p_sel = p_sel)
 
   df$catch_country <- lst$catch_country %>%
     select(Can, US) %>%

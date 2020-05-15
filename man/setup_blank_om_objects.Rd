@@ -4,16 +4,16 @@
 \alias{setup_blank_om_objects}
 \title{Construct blank objects for Operating model outputs}
 \usage{
-setup_blank_om_objects(yrs, ages, nspace, nseason)
+setup_blank_om_objects(yrs, ages, n_space, n_season)
 }
 \arguments{
 \item{yrs}{A vector of years}
 
 \item{ages}{A vector of ages}
 
-\item{nspace}{The number of spaces in the movement model}
+\item{n_space}{The number of spaces in the movement model}
 
-\item{nseason}{The number of seasons in the movement model}
+\item{n_season}{The number of seasons in the movement model}
 }
 \value{
 A list of the blank OM outputs
