@@ -313,3 +313,319 @@ csv_data <- function(sel_hist = TRUE){
        psel = psel,
        catch_country = catch_country)
 }
+
+#' Construct blank objects for Operating model outputs
+#'
+#' @param yrs A vector of years
+#' @param ages A vector of ages
+#' @param nspace The number of spaces in the movement model
+#' @param nseason The number of seasons in the movement model
+#'
+#' @return A list of the blank OM outputs
+#' @export
+setup_blank_om_objects <- function(yrs,
+                                   ages,
+                                   nspace,
+                                   nseason){
+
+  nyr <- length(yrs)
+  nage <- length(ages)
+
+  ssb <- matrix(NA,
+                nyr,
+                nspace,
+                dimnames = list(yrs = yrs,
+                                space = seq_len(nspace)))
+  ssb_all <- array(NA,
+                   dim = c(nyr, nspace, nseason),
+                   dimnames = list(yrs = yrs,
+                                   space = seq_len(nspace),
+                                   season = seq_len(nseason)))
+  ssb_weight <- matrix(NA,
+                       nyr,
+                       nspace,
+                       dimnames = list(yrs = yrs,
+                                       space = seq_len(nspace)))
+  biomass_save <- matrix(NA,
+                         nyr,
+                         nspace,
+                         dimnames = list(yrs = yrs,
+                                         space = seq_len(nspace)))
+  catch <- matrix(NA,
+                  nyr,
+                  dimnames = list(yrs = yrs))
+  catch_age <- matrix(NA,
+                      nage,
+                      nyr,
+                      dimnames = list(ages = ages,
+                                      yrs = yrs))
+  catch_n <- matrix(NA,
+                    nyr,
+                    dimnames = list(yrs = yrs))
+  catch_n_age <- matrix(NA,
+                        nage,
+                        nyr,
+                        dimnames = list(ages = ages,
+                                        yrs = yrs))
+  fsel_save <- array(NA,
+                     dim = c(nage, nyr, nspace),
+                     dimnames = list(ages = ages,
+                                     yrs = yrs,
+                                     space = seq_len(nspace)))
+  fseason_ave <- array(NA,
+                       dim = c(nage, nyr, nspace, nseason),
+                       dimnames = list(ages = ages,
+                                       yrs = yrs,
+                                       space = seq_len(nspace),
+                                       season = seq_len(nseason)))
+  fout_save <- array(NA,
+                     dim = c(nyr, nseason, nspace),
+                     dimnames = list(yrs = yrs,
+                                     season = seq_len(nseason),
+                                     space = seq_len(nspace)))
+  n_save_age <- array(NA,
+                      dim = c(nage, nyr + 1, nspace, nseason),
+                      dimnames = list(ages = ages,
+                                      yrs = c(yrs, max(yrs) + 1),
+                                      space = seq_len(nspace),
+                                      season = seq_len(nseason)))
+  n_save_age_mid <- array(NA,
+                          dim = c(nage, nyr + 1, nspace, nseason),
+                          dimnames = list(ages = ages,
+                                          yrs = c(yrs, max(yrs) + 1),
+                                          space = seq_len(nspace),
+                                          season = seq_len(nseason)))
+  r_save <- matrix(NA,
+                   nyr,
+                   nspace)
+  v_save <- array(NA,
+                  dim = c(nyr, nspace, nseason),
+                  dimnames = list(yrs = yrs,
+                                  space = seq_len(nspace),
+                                  season = seq_len(nseason)))
+  catch_save_age <- array(NA,
+                          dim = c(nage, nyr, nspace, nseason),
+                          dimnames = list(ages = ages,
+                                          yrs = yrs,
+                                          space = seq_len(nspace),
+                                          season = seq_len(nseason)))
+  catch_n_save_age <- array(NA,
+                            dim = c(nage, nyr, nspace, nseason),
+                            dimnames = list(ages = ages,
+                                            yrs = yrs,
+                                            space = seq_len(nspace),
+                                            season = seq_len(nseason)))
+  catch_quota <- array(NA,
+                       dim = c(nyr, nspace, nseason),
+                       dimnames = list(yrs = yrs,
+                                       space = seq_len(nspace),
+                                       season = seq_len(nseason)))
+  catch_quota_n <- array(0,
+                         dim = c(nyr, nspace, nseason),
+                         dimnames = list(yrs = yrs,
+                                         space = seq_len(nspace),
+                                         season = seq_len(nseason)))
+  survey <- array(NA,
+                  dim = c(nyr),
+                  dimnames = list(yrs = yrs))
+  survey_true <- array(NA,
+                       dim = c(nspace, nyr),
+                       dimnames = list(space = seq_len(nspace),
+                                       yrs = yrs))
+  surv_tot <- matrix(NA,
+                     nyr,
+                     nspace,
+                     dimnames = list(yrs = yrs,
+                                     space = seq_len(nspace)))
+  age_comps_surv <- array(NA,
+                          dim = c(max(ages), nyr),
+                          dimnames = list(ages = seq_len(max(ages)),
+                                          yrs = yrs))
+  age_comps_surv_space <- array(NA,
+                                dim = c(max(ages), nyr, nspace),
+                                dimnames = list(ages = seq_len(max(ages)),
+                                                yrs = yrs))
+  n_survey <- matrix(NA,
+                     max(ages),
+                     nyr,
+                     dimnames = list(ages = seq_len(max(ages)),
+                                     yrs= yrs))
+  age_comps_catch <- array(NA,
+                           dim = c(max(ages), nyr),
+                           dimnames = list(ages = seq_len(max(ages)),
+                                           yrs = yrs))
+  age_comps_catch_space <- array(NA,
+                                 dim = c(max(ages), nyr, nspace),
+                                 dimnames = list(ages = seq_len(max(ages)),
+                                                 yrs = yrs,
+                                                 space = seq_len(nspace)))
+  age_comps_om <- array(NA,
+                        dim = c(nage, nyr, nspace,nseason),
+                        dimnames = list(ages = ages,
+                                        yrs= yrs,
+                                        space = seq_len(nspace),
+                                        season = seq_len(nseason)))
+  z_save <- array(NA,
+                  dim = c(nage, nyr, nspace, nseason),
+                  dimnames = list(ages = ages,
+                                  yrs = yrs,
+                                  space = seq_len(nspace),
+                                  season = seq_len(nseason)))
+  list(ssb = ssb,
+       ssb_all = ssb_all,
+       ssb_weight = ssb_weight,
+       biomass_save = biomass_save,
+       catch = catch,
+       catch_age = catch_age,
+       catch_n = catch_n,
+       catch_n_age = catch_n_age,
+       fsel_save = fsel_save,
+       fseason_ave = fseason_ave,
+       fout_save = fout_save,
+       n_save_age = n_save_age,
+       n_save_age_mid = n_save_age_mid,
+       r_save = r_save,
+       v_save = v_save,
+       catch_save_age = catch_save_age,
+       catch_n_save_age = catch_n_save_age,
+       catch_quota = catch_quota,
+       catch_quota_n = catch_quota_n,
+       survey = survey,
+       survey_true = survey_true,
+       surv_tot = surv_tot,
+       age_comps_surv = age_comps_surv,
+       age_comps_surv_space = age_comps_surv_space,
+       n_survey = n_survey,
+       age_comps_catch = age_comps_catch,
+       age_comps_catch_space = age_comps_catch_space,
+       age_comps_om = age_comps_om,
+       z_save = z_save)
+}
+
+#' Extract row(s) of age data from a [data.frame]
+#'
+#' @param d A [data.frame] in the format of the `wage_*` data frames as
+#' output by [load_data_seasons()]
+#' @param yr A vector of years to extract row of data for
+#'
+#' @return A data frame with the rows requested
+#' @export
+get_age_dat <- function(d = NULL,
+                        yr = NULL){
+  stopifnot(!is.null(d))
+  stopifnot(!is.null(yr))
+  stopifnot(is.numeric(yr))
+  stopifnot("data.frame" %in% class(d))
+  stopifnot("Fleet" %in% names(d))
+  stopifnot("Yr" %in% names(d))
+
+  d %>% filter(Yr %in% yr) %>% select(-c(Yr, Fleet))
+}
+
+#' Verify that the argument `arg` is valid in the context of the arguments given
+#'
+#' @param arg The object to check
+#' @param chk_class A character string of the name of the class to ensure `arg` is
+#' @param chk_len A numeric value to ensure `arg` has the length of
+#' @param chk_is_in A vector of values to ensure `arg` is in
+#'
+#' @return TRUE, invisibly or the function will throw an error if `arg` does not follow
+#' the constraints given; FALSE is not returned
+#' @export
+#'
+#' @examples
+#' verify_argument(23, "numeric", 1) # Succeeds
+#' verify_argument(23, "numeric", 1, 1:20) # Fails
+verify_argument <- function(arg = NULL,
+                            chk_class = NULL,
+                            chk_len = NULL,
+                            chk_is_in = NULL){
+
+  stopifnot(!is.null(arg))
+  stopifnot(is.null(chk_class) | length(chk_class) == 1)
+  stopifnot(is.null(chk_len) | length(chk_len) == 1)
+
+  calling_func_name <- func_name(levels_up = 2)
+  if(!is.null(chk_class)){
+    if(class(arg) != chk_class){
+      message("Error from calling function ", calling_func_name, ":")
+      stop("class(arg) == chk_class is not TRUE")
+    }
+  }
+  if(!is.null(chk_len)){
+    if(length(arg) != chk_len){
+      message("Error from calling function ", calling_func_name, ":")
+      stop("length(arg) == chk_len is not TRUE")
+    }
+  }
+  if(!is.null(chk_is_in)){
+    if(sum(!is.na(match(chk_is_in, arg))) != length(arg)){
+      message("Error from calling function ", calling_func_name, ":")
+      stop("Not all values in arg are in chk_is_in")
+    }
+  }
+  invisible(TRUE)
+}
+
+#' Get a calling function's name from within the function
+#'
+#' @param skip_frames The level in the calling stack to look. 1 is in the current
+#' function, 2 is one before, etc.
+#' @param skip_names
+#' @param ret_stack
+#' @param extra_perf_per_level
+#'
+#' @return
+#' @export
+#'
+#' @examples
+fn_finder <- function(skip_frames = 1,
+                      skip_names = "(FUN)|(.+apply)|(replicate)",
+                      ret_stack = FALSE,
+                      extra_perf_per_level = "\t"){
+
+  prefix <- sapply(3 + skip_frames + 1:sys.nframe(), function(i){
+    sys.call(sys.parent(n = i))[[1]]
+  })
+  prefix[grep(skip_names, prefix)] <- NULL
+  prefix <- gsub("function \\(.*", "do.call", prefix)
+  if(length(prefix)==0){
+    stop("Could not find any calling function at stack level ", skip_frames,
+         call. = FALSE)
+  }else if(ret_stack){
+    paste(rev(prefix), collapse = "|")
+  }else{
+    retval <- as.character(unlist(prefix[1]))
+    if(length(prefix) > 1){
+      retval <- paste0(paste(rep(extra_perf_per_level,
+                                 length(prefix) - 1),
+                             collapse = ""),
+                       retval)
+    }
+    retval
+  }
+}
+
+#' Returns a calling function's name `levels_up` levels up the stack trace
+#'
+#' @param levels_up How many levels back in the stack trace to look for the
+#' function name
+#'
+#' @return A calling function's name `levels_up` levels up the stack trace
+#' @export
+#'
+#' @examples
+#' f <- function(){
+#'   message("You are in ", func_name())
+#' }
+func_name <- function(levels_up = 1){
+  stopifnot(!is.null(levels_up))
+  stopifnot(class(levels_up) == "numeric")
+  stopifnot(length(levels_up) == 1)
+  stopifnot(levels_up >= 0)
+
+  fn_name <- fn_finder(skip_frames = levels_up)
+  fn_name <- gsub("\t+", "", fn_name)
+  fn_name <- gsub("\ +", "", fn_name)
+  fn_name
+}

@@ -5,20 +5,20 @@
 #'
 #' @param ss_extdata_dir A directory in the PacifichakeMSE package extdata directory
 #' which contains SS3 model run output
-#' @param nruns Then number of runs to do for each simulation
-#' @param simyears The number of years to simulate into the future
+#' @param n_runs Then number of runs to do for each simulation
+#' @param sim_yrs The number of years to simulate into the future
 #' @param fns A vector of file names for the scenarios (.rds files). .rds extension is optional
-#' @param plotnames A vector of strings to use for the scenarios later when plotting. Must either be
+#' @param plot_names A vector of strings to use for the scenarios later when plotting. Must either be
 #' `NULL` or the same length as `fns`
 #' @param tacs A vector of TAC values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param cincreases A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param c_increases A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param mincreases A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param m_increases A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
 #' @param sel_changes A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param nsurveys The number of surveys for each run. This must be a vector of the same length as `fns` or `NULL`.
+#' @param n_surveys The number of surveys for each run. This must be a vector of the same length as `fns` or `NULL`.
 #' If `NULL`, 2 will be used for every scenario
 #' @param multiple_season_data A list of the same length as `fns`, with each element being a vector of
 #' three items, `nseason`, `nspace`, and `bfuture`. If NULL, biasadjustment will not be incorporated
@@ -36,38 +36,36 @@
 #' @importFrom tictoc tic toc
 #' @export
 run_mses <- function(ss_extdata_dir = NULL,
-                     nruns = 10,
-                     simyears = NULL,
+                     n_runs = 10,
+                     n_sim_yrs = NULL,
                      fns = NULL,
-                     plotnames = NULL,
+                     plot_names = NULL,
                      tacs = 1,
-                     cincreases = 0,
-                     mincreases = 0,
+                     c_increases = 0,
+                     m_increases = 0,
                      sel_changes = 0,
-                     nsurveys = NULL,
+                     n_surveys = NULL,
                      multiple_season_data = NULL,
                      om_params_seed = 12345,
                      results_root_dir = here("results"),
                      results_dir = here("results", "default"),
                      ...){
 
-  stopifnot(!is.null(ss_extdata_dir))
-  stopifnot(length(ss_extdata_dir) == 1)
-  stopifnot(class(ss_extdata_dir) == "character")
-  stopifnot(!is.null(fns))
-  stopifnot(is.null(plotnames) | length(fns) == length(plotnames))
-  stopifnot(!is.null(tacs))
-  stopifnot(!is.null(cincreases))
-  stopifnot(!is.null(mincreases))
-  stopifnot(!is.null(sel_changes))
-  stopifnot(!is.null(nsurveys))
-  stopifnot(is.null(nsurveys) | length(nsurveys) == length(fns))
-  stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
-  stopifnot(length(tacs) == 1 | length(tacs) == length(fns))
-  stopifnot(length(cincreases) == 1 | length(cincreases) == length(fns))
-  stopifnot(length(mincreases) == 1 | length(mincreases) == length(fns))
-  stopifnot(length(sel_changes) == 1 | length(sel_changes) == length(fns))
+  verify_argument(ss_extdata_dir, "character", 1)
+  verify_argument(fns, chk_len = length(plotnames))
+  verify_argument(tacs, "numeric")
+  verify_argument(c_increases, "numeric")
+  verify_argument(m_increases, "numeric")
+  verify_argument(sel_changes, "numeric")
+  verify_argument(n_surveys, "numeric")
 
+  stopifnot(length(tacs) == 1 | length(tacs) == length(fns))
+  stopifnot(length(c_increases) == 1 | length(c_increases) == length(fns))
+  stopifnot(length(m_increases) == 1 | length(m_increases) == length(fns))
+  stopifnot(length(sel_changes) == 1 | length(sel_changes) == length(fns))
+  stopifnot(is.null(n_surveys) | length(n_surveys) == length(fns))
+  stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
+  browser()
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
     ifelse(str_ends(.x, pattern = "\\.rds"), .x, paste0(.x, ".rds"))
