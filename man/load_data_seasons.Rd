@@ -22,7 +22,8 @@ load_data_seasons(
   b_future = 0.5,
   yr_future = 0,
   sel_change_yr = 1991,
-  sel_hist = TRUE
+  sel_hist = TRUE,
+  f_space = c(0.2612, 0.7388)
 )
 }
 \arguments{
@@ -61,6 +62,9 @@ load_data_seasons(
 \item{sel_change_yr}{A year in which a selectivity change took place}
 
 \item{sel_hist}{Use historical selectivity?}
+
+\item{f_space}{The proportion of TAC given to each country. First value is Canada,
+the second is the US}
 }
 \value{
 A list of Parameters, Input parameters, Survey, Catch, and others

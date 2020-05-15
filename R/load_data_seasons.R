@@ -18,6 +18,8 @@
 #' @param selectivity_change Should selectivity change?
 #' @param yr_future How many years into the future should there be stochastic values
 #' @param sel_hist Use historical selectivity?
+#' @param f_space The proportion of TAC given to each country. First value is Canada,
+#' the second is the US
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
 #' @importFrom purrr map_dfr map_dfc
@@ -45,7 +47,8 @@ load_data_seasons <- function(n_season = 4,
                               b_future = 0.5,
                               yr_future  = 0,
                               sel_change_yr = 1991,
-                              sel_hist = TRUE){
+                              sel_hist = TRUE,
+                              f_space = c(0.2612, 0.7388)){
 
   verify_argument(n_season, "numeric", 1, 1:4)
   verify_argument(n_space, "numeric", 1, 1:2)
@@ -73,6 +76,7 @@ load_data_seasons <- function(n_season = 4,
   verify_argument(yr_future, "numeric", 1)
   verify_argument(sel_change_yr, "numeric", 1)
   verify_argument(sel_hist, "logical", 1)
+  verify_argument(f_space, "numeric", n_space)
 
   # Throw error if yr_future is exactly 1
   stopifnot(yr_future == 0 | yr_future > 1)
@@ -105,29 +109,21 @@ load_data_seasons <- function(n_season = 4,
   move_fifty <- move_fifty_init
   move_max <- rep(move_max_init, n_season)
   # Chances of moving in to the other grid cell
-  move_mat <- array(0, dim = c(n_space, n_age, n_season, n_yr))
-  move <- ifelse(n_space == 1, FALSE, TRUE)
-  if(move){
-    for(j in 1:n_space){
-      for(i in 1:n_season){
-        move_mat[j,,i,] <- move_max[i] / (1 + exp(-move_slope * (ages - move_fifty)))
-      }
-    }
-    # Recruits and 1 year olds don't move
-    move_mat[,1:2,,] <- 0
-    # For the standard model
-    if(n_season == 4){
-      # Don't move south during the year
-      move_mat[1, 3:n_age, 2:3,] <- move_south
-      # continuing south movement at spawning time
-      move_mat[1, 3:n_age, 1,] <- move_south
-      move_mat[1, 3:n_age, n_season,] <- move_out
-      move_mat[2, 3:n_age, n_season,] <- move_south
-    }
-    move_init <- move_init
-  }else{
-    move_init <- 1
-  }
+  move_mat_obj <- init_movement_mat(n_space,
+                                    n_season,
+                                    n_yr,
+                                    move_max,
+                                    move_slope,
+                                    move_fifty,
+                                    move_south,
+                                    move_out,
+                                    move_init,
+                                    ages,
+                                    f_space)
+  move_mat <- move_mat_obj$move_mat
+  move_init <- move_mat_obj$move_init
+  f_space <- move_mat_obj$f_space
+browser()
   # weight at age
   wage_ss <- lst$wage_ss %>%
     filter(Yr %in% yrs)
@@ -177,6 +173,7 @@ load_data_seasons <- function(n_season = 4,
   r_mul <- ifelse(n_space == 2, 1.1, 1)
 
   # Just start all the simulations with the same initial conditions
+  lst$r_dev <- lst$r_dev %>% as.data.frame() %>% mutate(yr = yrs) %>% select(yr, everything())
   parms_init <- list(log_r_init = lst$parms_scalar$logRinit + log(r_mul),
                      log_h = lst$parms_scalar$logh,
                      log_m_init = lst$parms_scalar$logMinit,
@@ -273,7 +270,8 @@ load_data_seasons <- function(n_season = 4,
             move_slope = move_slope,
             catch_props_season = catch_props_season,
             catch = lst$catch,
-            p_sel = p_sel)
+            p_sel = p_sel,
+            f_space = f_space)
 
   df$catch_country <- lst$catch_country %>%
     select(Can, US) %>%
@@ -310,4 +308,76 @@ load_data_seasons <- function(n_season = 4,
     df$b <- c(df$b, rep(df$b_future, yr_future))
   }
   df
+}
+
+#' Initialize the movement model matrix. An alternative function should be
+#' written if changes are required to the initialization assumptions
+#'
+#' @param n_space See [load_data_seasons()]
+#' @param n_age The number of `ages`
+#' @param n_season See [load_data_seasons()]
+#' @param n_yr Th number of years
+#' @param move_max A vector of the maximum movement rate, one for each of `n_seasons`
+#' @param move_slope  See [load_data_seasons()]
+#' @param move_fifty Age at 50 percent movement rate
+#' @param move_south  See [load_data_seasons()]
+#' @param move_out  See [load_data_seasons()]
+#' @param move_init  See [load_data_seasons()]
+#' @param ages See [load_data_seasons()]
+#' @param f_space See [load_data_seasons()]
+#'
+#' @return A list of 3 elements: The `move_mat` matrix for movement, the `move_init`
+#' vector of length `n_space` and the `f_space` vector of length `n_space`
+#' @export
+init_movement_mat <- function(n_space = NULL,
+                              n_season = NULL,
+                              n_yr = NULL,
+                              move_max = NULL,
+                              move_slope = NULL,
+                              move_fifty = NULL,
+                              move_south = NULL,
+                              move_out = NULL,
+                              move_init = NULL,
+                              ages = NULL,
+                              f_space = NULL){
+
+  verify_argument(n_space, "numeric", 1)
+  verify_argument(n_season, "numeric", 1)
+  verify_argument(n_yr, "integer", 1)
+  verify_argument(move_max, "numeric", n_season)
+  verify_argument(move_slope, "numeric", 1)
+  verify_argument(move_fifty, "numeric", 1)
+  verify_argument(move_south, "numeric", 1)
+  verify_argument(move_out, "numeric", 1)
+  verify_argument(move_init, "numeric", n_space)
+  verify_argument(ages, "integer")
+  verify_argument(f_space, "numeric", n_space)
+
+  n_age <- length(ages)
+  move_mat <- array(0, dim = c(n_space, n_age, n_season, n_yr))
+  for(i in 1:n_space){
+    for(j in 1:n_season){
+      move_mat[i, , j, ] <- move_max[j] / (1 + exp(-move_slope * (ages - move_fifty)))
+    }
+  }
+  # Recruits (age 0) and 1 year olds don't move
+  move_mat[, 1:2, , ] <- 0
+  if(n_season == 4){
+    # Don't move south during the year
+    move_mat[1, 3:n_age, 2:3,] <- move_south
+    # continuing south movement at spawning time
+    move_mat[1, 3:n_age, 1,] <- move_south
+    # The following two lines are co-dependent. The fish that move_out of Canada
+    # move into the US
+    move_mat[1, 3:n_age, 4,] <- move_out
+    move_mat[2, 3:n_age, 4,] <- move_south
+
+  }else{
+    move_init <- 1
+    # All F occurs in US
+    f_space <- c(0, 1)
+  }
+  list(move_mat = move_mat,
+       move_init = move_init,
+       f_space = f_space)
 }
