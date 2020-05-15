@@ -2,63 +2,63 @@
 % Please edit documentation in R/load_data_seasons.R
 \name{load_data_seasons}
 \alias{load_data_seasons}
-\title{Load the hake data for seasons (TODO: Improve docs on this function)}
+\title{Prepare the data for the operating model}
 \usage{
 load_data_seasons(
-  nseason = 4,
-  nspace = 2,
-  syr = 1966,
-  myr = 2018,
+  n_season = 4,
+  n_space = 2,
+  n_survey = 2,
+  s_yr = 1966,
+  m_yr = 2018,
   ages = 0:20,
-  sel_change_yr = 1991,
-  movemaxinit = 0.35,
-  movefiftyinit = 6,
-  nsurvey = 2,
-  logSDR = 1.4,
-  bfuture = 0.5,
-  moveout = 0.85,
-  movesouth = 0.05,
-  moveinit = NA,
-  moveslope = 0.9,
+  rdev_sd = 1.4,
+  move_init = NULL,
+  move_max_init = 0.35,
+  move_fifty_init = 6,
+  move_out = 0.85,
+  move_south = 0.05,
+  move_slope = 0.9,
   selectivity_change = 0,
+  b_future = 0.5,
   yr_future = 0,
+  sel_change_yr = 1991,
   sel_hist = TRUE
 )
 }
 \arguments{
-\item{nseason}{Number of seasons}
+\item{n_season}{Number of seasons}
 
-\item{nspace}{Number of spatial areas}
+\item{n_space}{Number of spatial areas}
 
-\item{syr}{First year of historical simulations}
+\item{n_survey}{Survey frequency}
 
-\item{myr}{Last year of historical simulations}
+\item{s_yr}{First year of historical simulations}
+
+\item{m_yr}{Last year of historical simulations}
 
 \item{ages}{A vector of ages}
 
-\item{sel_change_yr}{A year in which a selectivity change took place}
+\item{rdev_sd}{Recruitment deviation Standard deviation}
 
-\item{movemaxinit}{Maximum movement rate}
+\item{move_init}{Initial distribution of fish}
 
-\item{movefiftyinit}{Age at 50 percent maximum movement rate}
+\item{move_max_init}{Maximum movement rate}
 
-\item{nsurvey}{Survey frequency}
+\item{move_fifty_init}{Age at 50 percent maximum movement rate}
 
-\item{logSDR}{Recruitment deviations}
+\item{move_out}{Fraction of individuals that travel south in the last season}
 
-\item{bfuture}{Bias adjustment in the future}
+\item{move_south}{Fraction of individuals that move south during the year}
 
-\item{moveout}{Fraction of individuals that travel south in the last season}
-
-\item{movesouth}{Fraction of individuals that move south during the year}
-
-\item{moveinit}{Initial distribution of fish}
-
-\item{moveslope}{Slope of the movement function}
+\item{move_slope}{Slope of the movement function}
 
 \item{selectivity_change}{Should selectivity change?}
 
+\item{b_future}{Bias adjustment in the future}
+
 \item{yr_future}{How many years into the future should there be stochastic values}
+
+\item{sel_change_yr}{A year in which a selectivity change took place}
 
 \item{sel_hist}{Use historical selectivity?}
 }
@@ -66,10 +66,10 @@ load_data_seasons(
 A list of Parameters, Input parameters, Survey, Catch, and others
 }
 \description{
-Load the hake data for seasons (TODO: Improve docs on this function)
+Prepare the data for the operating model
 }
 \examples{
 \dontrun{
-df <- load_data_seasons(nseason = 12, nspace = 2)
+df <- load_data_seasons(n_season = 2, n_space = 2)
 }
 }

@@ -6,15 +6,15 @@
 \usage{
 run_mses(
   ss_extdata_dir = NULL,
-  nruns = 10,
-  simyears = NULL,
+  n_runs = 10,
+  n_sim_yrs = NULL,
   fns = NULL,
-  plotnames = NULL,
+  plot_names = NULL,
   tacs = 1,
-  cincreases = 0,
-  mincreases = 0,
+  c_increases = 0,
+  m_increases = 0,
   sel_changes = 0,
-  nsurveys = NULL,
+  n_surveys = NULL,
   multiple_season_data = NULL,
   om_params_seed = 12345,
   results_root_dir = here("results"),
@@ -26,28 +26,28 @@ run_mses(
 \item{ss_extdata_dir}{A directory in the PacifichakeMSE package extdata directory
 which contains SS3 model run output}
 
-\item{nruns}{Then number of runs to do for each simulation}
+\item{n_runs}{Then number of runs to do for each simulation}
 
-\item{simyears}{The number of years to simulate into the future}
+\item{n_sim_yrs}{The number of years to simulate into the future}
 
 \item{fns}{A vector of file names for the scenarios (.rds files). .rds extension is optional}
 
-\item{plotnames}{A vector of strings to use for the scenarios later when plotting. Must either be
+\item{plot_names}{A vector of strings to use for the scenarios later when plotting. Must either be
 \code{NULL} or the same length as \code{fns}}
 
 \item{tacs}{A vector of TAC values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{cincreases}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{c_increases}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{mincreases}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{m_increases}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
 \item{sel_changes}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{nsurveys}{The number of surveys for each run. This must be a vector of the same length as \code{fns} or \code{NULL}.
+\item{n_surveys}{The number of surveys for each run. This must be a vector of the same length as \code{fns} or \code{NULL}.
 If \code{NULL}, 2 will be used for every scenario}
 
 \item{multiple_season_data}{A list of the same length as \code{fns}, with each element being a vector of

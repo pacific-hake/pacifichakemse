@@ -6,7 +6,7 @@
 #' @param ss_extdata_dir A directory in the PacifichakeMSE package extdata directory
 #' which contains SS3 model run output
 #' @param n_runs Then number of runs to do for each simulation
-#' @param sim_yrs The number of years to simulate into the future
+#' @param n_sim_yrs The number of years to simulate into the future
 #' @param fns A vector of file names for the scenarios (.rds files). .rds extension is optional
 #' @param plot_names A vector of strings to use for the scenarios later when plotting. Must either be
 #' `NULL` or the same length as `fns`
@@ -52,7 +52,7 @@ run_mses <- function(ss_extdata_dir = NULL,
                      ...){
 
   verify_argument(ss_extdata_dir, "character", 1)
-  verify_argument(fns, chk_len = length(plotnames))
+  verify_argument(fns, chk_len = length(plot_names))
   verify_argument(tacs, "numeric")
   verify_argument(c_increases, "numeric")
   verify_argument(m_increases, "numeric")
@@ -65,7 +65,7 @@ run_mses <- function(ss_extdata_dir = NULL,
   stopifnot(length(sel_changes) == 1 | length(sel_changes) == length(fns))
   stopifnot(is.null(n_surveys) | length(n_surveys) == length(fns))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
-  browser()
+
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
     ifelse(str_ends(.x, pattern = "\\.rds"), .x, paste0(.x, ".rds"))
@@ -85,41 +85,40 @@ run_mses <- function(ss_extdata_dir = NULL,
                    verbose = FALSE)
 
   # Prepare data for operating model
-
   df <- load_data_seasons(...)
 
   # Run the operating model
   sim.data <- run_agebased_true_catch(df, om_params_seed)
 
-  seeds <- floor(runif(n = nruns, min = 1, max = 1e6))
+  seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
   tic()
   map2(fns, 1:length(fns), function(.x, .y, ...){
-    ls_save <- map(1:nruns, function(run = .x, ...){
+    ls_save <- map(1:n_runs, function(run = .x, ...){
       if(length(sel_changes) != 1 || sel_changes != 0){
         df <- load_data_seasons(...,
                                 selectivity_change = ifelse(length(sel_changes) == 1,
                                                             sel_changes,
                                                             sel_changes[.y]))
       }
-      if(is.null(nsurveys)){
-        df$nsurvey <- 2
+      if(is.null(n_surveys)){
+        df$n_survey <- 2
       }else{
-        df$nsurvey <- nsurveys[.y]
+        df$n_survey <- n_surveys[.y]
       }
 
       if(is.null(multiple_season_data)){
         tmp <- run_multiple_MSEs(
           df = df,
-          simyears = simyears,
+          n_sim_yrs = n_sim_yrs,
           seed = seeds[run],
           TAC = if(length(tacs) == 1) tacs else tacs[.y],
-          cincrease = ifelse(length(cincreases) == 1, cincreases, cincreases[.y]),
-          mincrease = ifelse(length(mincreases) == 1, mincreases, mincreases[.y]))
+          c_increase = ifelse(length(c_increases) == 1, c_increases, c_increases[.y]),
+          m_increase = ifelse(length(m_increases) == 1, m_increases, m_increases[.y]))
       }else{
         dfs <- map(multiple_season_data, ~{
           do.call(load_data_seasons, as.list(.x))
         })
-        tmp <- run_multiple_OMs(simyears = simyears,
+        tmp <- run_multiple_OMs(n_sim_yrs = n_sim_yrs,
                                 seed = seeds[run],
                                 df = dfs[[.y]],
                                 Catchin = 0,
@@ -127,7 +126,7 @@ run_mses <- function(ss_extdata_dir = NULL,
       }
       if(is.list(tmp)) tmp else NA
     }, ...)
-    attr(ls_save, "plotname") <- plotnames[.y]
+    attr(ls_save, "plotname") <- plot_names[.y]
     saveRDS(ls_save, file = file.path(results_dir, .x))
   }, ...)
   toc()
