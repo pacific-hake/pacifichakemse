@@ -6,11 +6,14 @@
 \usage{
 load_data_seasons(
   n_season = 4,
+  season_names = NULL,
   n_space = 2,
+  space_names = NULL,
   n_survey = 2,
   s_yr = 1966,
   m_yr = 2018,
   ages = 0:20,
+  age_names = paste0("age", ages),
   rdev_sd = 1.4,
   move_init = NULL,
   move_max_init = 0.35,
@@ -31,7 +34,11 @@ load_data_seasons(
 \arguments{
 \item{n_season}{Number of seasons}
 
+\item{season_names}{A vector of names for the seasons. Length must equal \code{n_season}}
+
 \item{n_space}{Number of spatial areas}
+
+\item{space_names}{A vector of names for the spaces. Length must equal \code{n_space}}
 
 \item{n_survey}{Survey frequency}
 
@@ -40,6 +47,8 @@ load_data_seasons(
 \item{m_yr}{Last year of historical simulations}
 
 \item{ages}{A vector of ages}
+
+\item{age_names}{A vector of names for the ages. Length must equal length of \code{ages}}
 
 \item{rdev_sd}{Recruitment deviation Standard deviation}
 

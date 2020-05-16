@@ -1,10 +1,13 @@
 #' Prepare the data for the operating model
 #'
 #' @param n_season Number of seasons
+#' @param season_names A vector of names for the seasons. Length must equal `n_season`
 #' @param n_space Number of spatial areas
+#' @param space_names A vector of names for the spaces. Length must equal `n_space`
 #' @param s_yr First year of historical simulations
 #' @param m_yr Last year of historical simulations
 #' @param ages A vector of ages
+#' @param age_names A vector of names for the ages. Length must equal length of `ages`
 #' @param sel_change_yr A year in which a selectivity change took place
 #' @param move_max_init Maximum movement rate
 #' @param move_fifty_init Age at 50 percent maximum movement rate
@@ -33,11 +36,14 @@
 #' df <- load_data_seasons(n_season = 2, n_space = 2)
 #' }
 load_data_seasons <- function(n_season = 4,
+                              season_names = NULL,
                               n_space = 2,
+                              space_names = NULL,
                               n_survey = 2,
                               s_yr = 1966,
                               m_yr = 2018,
                               ages = 0:20,
+                              age_names = paste0("age", ages),
                               rdev_sd = 1.4,
                               move_init = NULL,
                               move_max_init = 0.35,
@@ -55,11 +61,14 @@ load_data_seasons <- function(n_season = 4,
                               catch_props_space_season = NULL){
 
   verify_argument(n_season, c("numeric", "integer"), 1, 1:4)
+  verify_argument(season_names, "character", n_season)
   verify_argument(n_space, c("numeric", "integer"), 1, 1:2)
+  verify_argument(space_names, "character", n_space)
   verify_argument(s_yr, c("numeric", "integer"), 1)
   verify_argument(m_yr, c("numeric", "integer"), 1)
   if(!is.null(ages)){
     verify_argument(ages, c("numeric", "integer"))
+    verify_argument(age_names, "character", length(ages))
   }
   verify_argument(rdev_sd, c("numeric", "integer"), 1)
   if(!is.null(move_init)){
@@ -100,6 +109,8 @@ load_data_seasons <- function(n_season = 4,
     # n_space must be 2 due to error check above
     move_init <-  c(0.25, 0.75)
   }
+  names(move_init) <- space_names
+
   yrs <- s_yr:(m_yr + yr_future)
   n_yr <- length(yrs)
   t_end <- length(yrs) * n_season
@@ -108,21 +119,20 @@ load_data_seasons <- function(n_season = 4,
   n_age <- length(ages)
   m_sel <- rep(1, n_age)
 
-  # TODO: for later use
-  # 4 is seasonality
-  recruit_mat <- matrix(0, n_space)
-  # 10 percent change of spawning north
-  recruit_mat[1] <- 1
-  # 90 percent of spawning south
-  recruit_mat[2] <- 1
+  recruit_mat <- rep(1, n_space)
+  names(recruit_mat) <- space_names
 
   # Maturity
   move_fifty <- move_fifty_init
   move_max <- rep(move_max_init, n_season)
+  names(move_max) <- season_names
   # Initialize the movement matrix
   move_mat_obj <- init_movement_mat(n_space,
+                                    space_names,
                                     n_season,
+                                    season_names,
                                     n_yr,
+                                    yrs,
                                     move_max,
                                     move_slope,
                                     move_fifty,
@@ -131,11 +141,13 @@ load_data_seasons <- function(n_season = 4,
                                     move_init,
                                     ages_no_move,
                                     ages,
+                                    age_names,
                                     f_space)
   move_mat <- move_mat_obj$move_mat
   move_init <- move_mat_obj$move_init
   f_space <- move_mat_obj$f_space
-
+  names(f_space) <- space_names
+  browser()
   # weight at age
   wage_ss <- lst$wage_ss %>%
     filter(Yr %in% yrs)
@@ -335,9 +347,11 @@ load_data_seasons <- function(n_season = 4,
 #' written if changes are required to the initialization assumptions
 #'
 #' @param n_space See [load_data_seasons()]
-#' @param n_age The number of `ages`
+#' @param space_names See [load_data_seasons()]
 #' @param n_season See [load_data_seasons()]
-#' @param n_yr Th number of years
+#' @param season_names See [load_data_seasons()]
+#' @param n_yr The number of years
+#' @param yrs A vector of names for the years. Length must equal `n_yr`
 #' @param move_max A vector of the maximum movement rate, one for each of `n_seasons`
 #' @param move_slope  See [load_data_seasons()]
 #' @param move_fifty Age at 50 percent movement rate
@@ -346,14 +360,18 @@ load_data_seasons <- function(n_season = 4,
 #' @param move_init  See [load_data_seasons()]
 #' @param ages_no_move See [load_data_seasons()]
 #' @param ages See [load_data_seasons()]
+#' @param age_names See [load_data_seasons()]
 #' @param f_space See [load_data_seasons()]
 #'
 #' @return A list of 3 elements: The `move_mat` matrix for movement, the `move_init`
 #' vector of length `n_space` and the `f_space` vector of length `n_space`
 #' @export
 init_movement_mat <- function(n_space = NULL,
+                              space_names = NULL,
                               n_season = NULL,
+                              season_names = NULL,
                               n_yr = NULL,
+                              yrs = NULL,
                               move_max = NULL,
                               move_slope = NULL,
                               move_fifty = NULL,
@@ -362,11 +380,15 @@ init_movement_mat <- function(n_space = NULL,
                               move_init = NULL,
                               ages_no_move = NULL,
                               ages = NULL,
+                              age_names = NULL,
                               f_space = NULL){
 
   verify_argument(n_space, c("numeric", "integer"), 1)
+  verify_argument(space_names, "character", n_space)
   verify_argument(n_season, c("numeric", "integer"), 1)
+  verify_argument(season_names, "character", n_season)
   verify_argument(n_yr, c("numeric", "integer"), 1)
+  verify_argument(yrs, c("numeric", "integer"), n_yr)
   verify_argument(move_max, "numeric", n_season)
   verify_argument(move_slope, "numeric", 1)
   verify_argument(move_fifty, "numeric", 1)
@@ -375,10 +397,16 @@ init_movement_mat <- function(n_space = NULL,
   verify_argument(move_init, "numeric", n_space)
   verify_argument(ages_no_move, c("numeric", "integer"))
   verify_argument(ages, c("numeric", "integer"))
+  verify_argument(age_names, "character", length(ages))
   verify_argument(f_space, "numeric", n_space)
 
   n_age <- length(ages)
-  move_mat <- array(0, dim = c(n_space, n_age, n_season, n_yr))
+  move_mat <- array(0,
+                    dim = c(n_space, n_age, n_season, n_yr),
+                    dimnames = list(space_names,
+                                    age_names,
+                                    season_names,
+                                    yrs))
   for(i in 1:n_space){
     for(j in 1:n_season){
       move_mat[i, , j, ] <- move_max[j] / (1 + exp(-move_slope * (ages - move_fifty)))

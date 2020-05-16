@@ -7,8 +7,11 @@ written if changes are required to the initialization assumptions}
 \usage{
 init_movement_mat(
   n_space = NULL,
+  space_names = NULL,
   n_season = NULL,
+  season_names = NULL,
   n_yr = NULL,
+  yrs = NULL,
   move_max = NULL,
   move_slope = NULL,
   move_fifty = NULL,
@@ -17,15 +20,22 @@ init_movement_mat(
   move_init = NULL,
   ages_no_move = NULL,
   ages = NULL,
+  age_names = NULL,
   f_space = NULL
 )
 }
 \arguments{
 \item{n_space}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
+\item{space_names}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
+
 \item{n_season}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
-\item{n_yr}{Th number of years}
+\item{season_names}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
+
+\item{n_yr}{The number of years}
+
+\item{yrs}{A vector of names for the years. Length must equal \code{n_yr}}
 
 \item{move_max}{A vector of the maximum movement rate, one for each of \code{n_seasons}}
 
@@ -43,9 +53,9 @@ init_movement_mat(
 
 \item{ages}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
-\item{f_space}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
+\item{age_names}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
-\item{n_age}{The number of \code{ages}}
+\item{f_space}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 }
 \value{
 A list of 3 elements: The \code{move_mat} matrix for movement, the \code{move_init}
