@@ -7,7 +7,6 @@ written if changes are required to the initialization assumptions}
 \usage{
 init_movement_mat(
   n_space = NULL,
-  n_age = NULL,
   n_season = NULL,
   n_yr = NULL,
   move_max = NULL,
@@ -16,14 +15,13 @@ init_movement_mat(
   move_south = NULL,
   move_out = NULL,
   move_init = NULL,
+  ages_no_move = NULL,
   ages = NULL,
   f_space = NULL
 )
 }
 \arguments{
 \item{n_space}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
-
-\item{n_age}{The number of \code{ages}}
 
 \item{n_season}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
@@ -41,9 +39,13 @@ init_movement_mat(
 
 \item{move_init}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
+\item{ages_no_move}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
+
 \item{ages}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
 \item{f_space}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
+
+\item{n_age}{The number of \code{ages}}
 }
 \value{
 A list of 3 elements: The \code{move_mat} matrix for movement, the \code{move_init}

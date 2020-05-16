@@ -15,11 +15,13 @@
 #' @param move_south Fraction of individuals that move south during the year
 #' @param move_init Initial distribution of fish
 #' @param move_slope Slope of the movement function
+#' @param ages_no_move Ages of fish which do not move in the movement model
 #' @param selectivity_change Should selectivity change?
 #' @param yr_future How many years into the future should there be stochastic values
 #' @param sel_hist Use historical selectivity?
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
+#' @param catch_props_space_season Proportion of catch to take by season and space
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
 #' @importFrom purrr map_dfr map_dfc
@@ -43,25 +45,23 @@ load_data_seasons <- function(n_season = 4,
                               move_out = 0.85,
                               move_south = 0.05,
                               move_slope = 0.9,
+                              ages_no_move = c(0, 1),
                               selectivity_change = 0,
                               b_future = 0.5,
                               yr_future  = 0,
                               sel_change_yr = 1991,
                               sel_hist = TRUE,
-                              f_space = c(0.2612, 0.7388)){
+                              f_space = c(0.2612, 0.7388),
+                              catch_props_space_season = NULL){
 
-  verify_argument(n_season, "numeric", 1, 1:4)
-  verify_argument(n_space, "numeric", 1, 1:2)
-  verify_argument(s_yr, "numeric", 1)
-  verify_argument(m_yr, "numeric", 1)
+  verify_argument(n_season, c("numeric", "integer"), 1, 1:4)
+  verify_argument(n_space, c("numeric", "integer"), 1, 1:2)
+  verify_argument(s_yr, c("numeric", "integer"), 1)
+  verify_argument(m_yr, c("numeric", "integer"), 1)
   if(!is.null(ages)){
-    if(length(ages) == 1){
-      verify_argument(ages, "numeric")
-    }else{
-      verify_argument(ages, "integer")
-    }
+    verify_argument(ages, c("numeric", "integer"))
   }
-  verify_argument(rdev_sd, "numeric", 1)
+  verify_argument(rdev_sd, c("numeric", "integer"), 1)
   if(!is.null(move_init)){
     stopifnot(class(move_init) == "numeric")
     stopifnot(length(move_init) == 1)
@@ -71,12 +71,23 @@ load_data_seasons <- function(n_season = 4,
   verify_argument(move_out, "numeric", 1)
   verify_argument(move_south, "numeric", 1)
   verify_argument(move_slope, "numeric", 1)
+  verify_argument(ages_no_move, c("numeric", "integer"))
   verify_argument(selectivity_change, "numeric", 1)
   verify_argument(b_future, "numeric", 1)
   verify_argument(yr_future, "numeric", 1)
-  verify_argument(sel_change_yr, "numeric", 1)
+  verify_argument(sel_change_yr, c("numeric", "integer"), 1)
   verify_argument(sel_hist, "logical", 1)
   verify_argument(f_space, "numeric", n_space)
+  if(!is.null(catch_props_space_season)){
+    verify_argument(catch_props_space_season, "list", n_space)
+    map(catch_props_space_season, ~{
+      verify_argument(.x, "numeric", n_season)
+    })
+    if(!(n_space == 2 && n_season == 4)){
+      stop("`catch_props_space_season` must be NULL unless `n_season` = 4 and `n_space` = 2",
+           call. = FALSE)
+    }
+  }
 
   # Throw error if yr_future is exactly 1
   stopifnot(yr_future == 0 | yr_future > 1)
@@ -108,7 +119,7 @@ load_data_seasons <- function(n_season = 4,
   # Maturity
   move_fifty <- move_fifty_init
   move_max <- rep(move_max_init, n_season)
-  # Chances of moving in to the other grid cell
+  # Initialize the movement matrix
   move_mat_obj <- init_movement_mat(n_space,
                                     n_season,
                                     n_yr,
@@ -118,12 +129,13 @@ load_data_seasons <- function(n_season = 4,
                                     move_south,
                                     move_out,
                                     move_init,
+                                    ages_no_move,
                                     ages,
                                     f_space)
   move_mat <- move_mat_obj$move_mat
   move_init <- move_mat_obj$move_init
   f_space <- move_mat_obj$f_space
-browser()
+
   # weight at age
   wage_ss <- lst$wage_ss %>%
     filter(Yr %in% yrs)
@@ -137,11 +149,12 @@ browser()
     filter(Fleet == 2)
   # Maturity from first year only
   mat <- wage_ssb[1,] %>% select(-c(Yr, Fleet))
-  # Age comps
+  # Set up age comps
   age_survey_df <- lst$age_survey_df %>%
     mutate(flag = 1)
   age_catch_df <- lst$age_catch_df %>%
     mutate(flag = 1)
+  # Set up survey season
   if(n_season == 1){
     survey_season <-  1
   }else if(n_season == 4){
@@ -149,31 +162,39 @@ browser()
   }else{
     survey_season <- floor(n_season / 2)
   }
+  # Set up selectivity
   p_sel <- lst$p_sel
   if(!sel_hist){
-    p_sel <- matrix(0, 5, 28)
+    n_surv_yrs <- nrow(lst$parms_sel %>% filter(source == "survey")) + 1
+    n_sel_yrs <- sum(sel_change_yr <= yrs)
+    p_sel <- matrix(0, n_surv_yrs, n_sel_yrs)
   }
 
   if(n_season == 4 & n_space == 2){
-    # Add new rows or columns to the data here
-    catch_props_season <- list(c(0.001, 0.188, 0.603, 0.208),
-                               c(0.000, 0.317, 0.382, 0.302))
-    # Rows must sum to 1
-    catch_props_season <- map(catch_props_season, ~{
+    # Standardize row values to equal 1
+    catch_props_space_season <- map(catch_props_space_season, ~{
       .x / sum(.x)
     }) %>%
       set_names(seq_along(.)) %>%
       bind_rows() %>%
       t()
   }else{
-    catch_props_season <- matrix(NA, n_space, n_season)
+    catch_props_space_season <- matrix(NA, n_space, n_season)
     # Equally distributed catch
-    catch_props_season[1:n_space,] <- 1 / n_season
+    catch_props_space_season[1:n_space,] <- 1 / n_season
   }
   r_mul <- ifelse(n_space == 2, 1.1, 1)
 
   # Just start all the simulations with the same initial conditions
-  lst$r_dev <- lst$r_dev %>% as.data.frame() %>% mutate(yr = yrs) %>% select(yr, everything())
+  lst$r_dev <- lst$r_dev %>%
+    as.data.frame() %>%
+    mutate(yr = yrs) %>%
+    select(yr, everything())
+  lst$init_n <- lst$init_n %>%
+    as.data.frame() %>%
+    mutate(age = ages[-which(ages_no_move %in% ages)]) %>%
+    select(age, everything()) %>%
+    rename(val = 2)
   parms_init <- list(log_r_init = lst$parms_scalar$logRinit + log(r_mul),
                      log_h = lst$parms_scalar$logh,
                      log_m_init = lst$parms_scalar$logMinit,
@@ -260,7 +281,7 @@ browser()
             sum_zero = 0,
             n_space = n_space,
             recruit_mat = recruit_mat,
-            move = move,
+            move = ifelse(n_space == 1, FALSE, TRUE),
             move_mat = move_mat,
             move_init = move_init,
             move_fifty = move_fifty,
@@ -268,7 +289,7 @@ browser()
             move_south = move_south,
             move_out = move_out,
             move_slope = move_slope,
-            catch_props_season = catch_props_season,
+            catch_props_space_season = catch_props_space_season,
             catch = lst$catch,
             p_sel = p_sel,
             f_space = f_space)
@@ -323,6 +344,7 @@ browser()
 #' @param move_south  See [load_data_seasons()]
 #' @param move_out  See [load_data_seasons()]
 #' @param move_init  See [load_data_seasons()]
+#' @param ages_no_move See [load_data_seasons()]
 #' @param ages See [load_data_seasons()]
 #' @param f_space See [load_data_seasons()]
 #'
@@ -338,19 +360,21 @@ init_movement_mat <- function(n_space = NULL,
                               move_south = NULL,
                               move_out = NULL,
                               move_init = NULL,
+                              ages_no_move = NULL,
                               ages = NULL,
                               f_space = NULL){
 
-  verify_argument(n_space, "numeric", 1)
-  verify_argument(n_season, "numeric", 1)
-  verify_argument(n_yr, "integer", 1)
+  verify_argument(n_space, c("numeric", "integer"), 1)
+  verify_argument(n_season, c("numeric", "integer"), 1)
+  verify_argument(n_yr, c("numeric", "integer"), 1)
   verify_argument(move_max, "numeric", n_season)
   verify_argument(move_slope, "numeric", 1)
   verify_argument(move_fifty, "numeric", 1)
   verify_argument(move_south, "numeric", 1)
   verify_argument(move_out, "numeric", 1)
   verify_argument(move_init, "numeric", n_space)
-  verify_argument(ages, "integer")
+  verify_argument(ages_no_move, c("numeric", "integer"))
+  verify_argument(ages, c("numeric", "integer"))
   verify_argument(f_space, "numeric", n_space)
 
   n_age <- length(ages)
@@ -360,8 +384,8 @@ init_movement_mat <- function(n_space = NULL,
       move_mat[i, , j, ] <- move_max[j] / (1 + exp(-move_slope * (ages - move_fifty)))
     }
   }
-  # Recruits (age 0) and 1 year olds don't move
-  move_mat[, 1:2, , ] <- 0
+  # Some ages don't move
+  move_mat[, which(ages_no_move %in% ages), , ] <- 0
   if(n_season == 4){
     # Don't move south during the year
     move_mat[1, 3:n_age, 2:3,] <- move_south

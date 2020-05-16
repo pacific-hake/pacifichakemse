@@ -541,15 +541,20 @@ verify_argument <- function(arg = NULL,
                             chk_len = NULL,
                             chk_is_in = NULL){
 
-  stopifnot(!is.null(arg))
-  stopifnot(is.null(chk_class) | length(chk_class) == 1)
-  stopifnot(is.null(chk_len) | length(chk_len) == 1)
-
   calling_func_name <- func_name(levels_up = 2)
+
+  if(is.null(arg)){
+    message("Error from calling function ", calling_func_name, ":")
+    stop("is.null(arg) is TRUE")
+  }
+  if(!is.null(chk_len) & length(chk_len) != 1){
+    message("Error from calling function ", calling_func_name, ":")
+    stop("length(chk_len) is not equal to 1")
+  }
   if(!is.null(chk_class)){
-    if(class(arg) != chk_class){
+    if(!class(arg) %in% chk_class){
       message("Error from calling function ", calling_func_name, ":")
-      stop("class(arg) == chk_class is not TRUE")
+      stop("class(arg) is not in chk_class")
     }
   }
   if(!is.null(chk_len)){

@@ -18,12 +18,14 @@ load_data_seasons(
   move_out = 0.85,
   move_south = 0.05,
   move_slope = 0.9,
+  ages_no_move = c(0, 1),
   selectivity_change = 0,
   b_future = 0.5,
   yr_future = 0,
   sel_change_yr = 1991,
   sel_hist = TRUE,
-  f_space = c(0.2612, 0.7388)
+  f_space = c(0.2612, 0.7388),
+  catch_props_space_season = NULL
 )
 }
 \arguments{
@@ -53,6 +55,8 @@ load_data_seasons(
 
 \item{move_slope}{Slope of the movement function}
 
+\item{ages_no_move}{Ages of fish which do not move in the movement model}
+
 \item{selectivity_change}{Should selectivity change?}
 
 \item{b_future}{Bias adjustment in the future}
@@ -65,6 +69,8 @@ load_data_seasons(
 
 \item{f_space}{The proportion of TAC given to each country. First value is Canada,
 the second is the US}
+
+\item{catch_props_space_season}{Proportion of catch to take by season and space}
 }
 \value{
 A list of Parameters, Input parameters, Survey, Catch, and others
