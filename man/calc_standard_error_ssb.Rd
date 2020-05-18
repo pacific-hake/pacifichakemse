@@ -15,6 +15,8 @@ calc_standard_error_ssb(
 \arguments{
 \item{lst}{list of MSE results}
 
+\item{col}{Column to calculate the quantiles on}
+
 \item{quants}{A vector of quantiles to pass to \code{\link[stats:quantile]{stats::quantile()}}}
 
 \item{inc_mean}{Logical. Include the mean (as column \code{avg})}

@@ -425,9 +425,13 @@ test_that("init_movement_mat() - Tests for argument errors", {
 })
 
 test_that("init_movement_mat() - Tests for correct output", {
+  ages <- 0:4
   out <- init_movement_mat(n_space = 2,
+                           space_names = c("Canada", "US"),
                            n_season = 4,
+                           season_names = c("Season1", "Season2", "Season3", "Season4"),
                            n_yr = 2,
+                           yrs = 2000:2001,
                            move_max = rep(0.35, 4),
                            move_slope = 0.9,
                            move_fifty = 6,
@@ -435,7 +439,8 @@ test_that("init_movement_mat() - Tests for correct output", {
                            move_out = 0.85,
                            move_init = c(0.25, 0.75),
                            ages_no_move = c(0, 1),
-                           ages = 0:4,
+                           ages = ages,
+                           age_names = paste("age", ages),
                            f_space = c(0.26, 0.74))
   expect_equivalent(names(out), c("move_mat", "move_init", "f_space"))
   expect_equivalent(dim(out$move_mat), c(2, 5, 4, 2))

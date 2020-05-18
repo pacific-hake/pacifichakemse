@@ -22,7 +22,7 @@
 #' If `NULL`, 2 will be used for every scenario
 #' @param multiple_season_data A list of the same length as `fns`, with each element being a vector of
 #' three items, `nseason`, `nspace`, and `bfuture`. If NULL, biasadjustment will not be incorporated
-#' @param om_params_seed A seed value to use when calling the [run.agebased.true.catch()] function
+#' @param om_params_seed A seed value to use when calling the [run_agebased_true_catch()] function
 #' @param results_root_dir The results root directory
 #' @param results_dir The results directory
 #' @param ... Arguments passed to [load_data_seasons()]
@@ -86,7 +86,7 @@ run_mses <- function(ss_extdata_dir = NULL,
 
   # Prepare data for operating model
   df <- load_data_seasons(...)
-
+browser()
   # Run the operating model
   sim.data <- run_agebased_true_catch(df, om_params_seed)
 
@@ -121,7 +121,7 @@ run_mses <- function(ss_extdata_dir = NULL,
         tmp <- run_multiple_OMs(n_sim_yrs = n_sim_yrs,
                                 seed = seeds[run],
                                 df = dfs[[.y]],
-                                Catchin = 0,
+                                catch_in = 0,
                                 ...)
       }
       if(is.list(tmp)) tmp else NA

@@ -5,27 +5,27 @@
 \title{Run the Operating Models}
 \usage{
 run_multiple_OMs(
-  simyears = 30,
+  n_sim_yrs = 30,
   seed = 12345,
   df,
-  Catchin,
-  cincrease = 0,
-  mincrease = 0,
+  catch_in,
+  c_increase = 0,
+  m_increase = 0,
   sel_change = 0
 )
 }
 \arguments{
-\item{simyears}{number of years to simulate}
+\item{n_sim_yrs}{number of years to simulate}
 
 \item{seed}{set the seed}
 
 \item{df}{data frame of parameters}
 
-\item{Catchin}{catches in the future}
+\item{catch_in}{catches in the future}
 
-\item{cincrease}{increase in movement due to climate change}
+\item{c_increase}{increase in movement due to climate change}
 
-\item{mincrease}{increase in the number of returning spawners}
+\item{m_increase}{increase in the number of returning spawners}
 
 \item{sel_change}{should selectivity be time varying?}
 }

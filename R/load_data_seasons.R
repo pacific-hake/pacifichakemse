@@ -147,7 +147,7 @@ load_data_seasons <- function(n_season = 4,
   move_init <- move_mat_obj$move_init
   f_space <- move_mat_obj$f_space
   names(f_space) <- space_names
-  browser()
+
   # weight at age
   wage_ss <- lst$wage_ss %>%
     filter(Yr %in% yrs)
@@ -161,6 +161,7 @@ load_data_seasons <- function(n_season = 4,
     filter(Fleet == 2)
   # Maturity from first year only
   mat <- wage_ssb[1,] %>% select(-c(Yr, Fleet))
+  browser()
   # Set up age comps
   age_survey_df <- lst$age_survey_df %>%
     mutate(flag = 1)

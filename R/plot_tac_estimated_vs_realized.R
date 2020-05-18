@@ -14,8 +14,7 @@ plot_tac_est_vs_real <- function(df){
 
 #' Plot estimated vs realized TAC (called Catch in plot) by Harvest Control Rule
 #'
-#' @param df A [data.frame] as output by [calc_tac_est_vs_real()]
-#' @param labels A vector of labels to use for the plot.
+#' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom dplyr rename

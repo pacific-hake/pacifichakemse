@@ -15,8 +15,11 @@ plotSelectivity <- function(df.new,
   yr.idx <- seq(1,nyrs*length(psel_fish), by = length(psel_fish))
   par(mfrow = c(ceiling(sqrt(nyrs)), floor(sqrt(nyrs))), mar = c(1,1,1,1))
   for(i in 1:(nyrs-1)){
-    psel <- PSEL[yr.idx[i]:(yr.idx[i+1]-1)]
-    tmpsel <- getSelec(df.new$age, psel = psel, Smin = df.new$Smin, Smax =df.new$Smax)
-    plot(df.new$age,tmpsel, type = 'l')
+    p_sel <- PSEL[yr.idx[i]:(yr.idx[i+1]-1)]
+    tmpsel <- get_select(df.new$age,
+                         p_sel = p_sel,
+                         s_min = df.new$s_min,
+                         s_max =df.new$s_max)
+    plot(df.new$age, tmpsel, type = 'l')
   }
 }

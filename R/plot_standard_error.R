@@ -2,7 +2,7 @@
 #' the Estimation model
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
-#' #' @param ci A vector of length two of the lower and upper credible interval values.
+#' @param ci A vector of length two of the lower and upper credible interval values.
 #' These values will be passed to [stats::quantile()]
 #'
 #' @return A [ggplot2::ggplot()] object

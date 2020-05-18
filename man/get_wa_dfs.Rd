@@ -12,7 +12,7 @@ get_wa_dfs(lst, yr)
 \item{yr}{The year to fetch}
 }
 \value{
-A list of 4 \link{data.frames}: \code{catch}, \code{surv}, \code{mid}, and \code{ssb}
+A list of 4 \link{data.frame}: \code{catch}, \code{surv}, \code{mid}, and \code{ssb}
 }
 \description{
 Get the weight-at-X data for a particular year

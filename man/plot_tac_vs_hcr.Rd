@@ -7,9 +7,7 @@
 plot_tac_vs_hcr(ps = NULL)
 }
 \arguments{
-\item{df}{A \link{data.frame} as output by \code{\link[=calc_tac_est_vs_real]{calc_tac_est_vs_real()}}}
-
-\item{labels}{A vector of labels to use for the plot.}
+\item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

@@ -10,7 +10,8 @@
 #' \dontrun{
 #' runfuture_OM(df, 10) #  makes 10 iterations
 #' }
-runfuture_OM <- function(df,nruns = 100){
+runfuture_OM <- function(df,
+                         nruns = 100){
   AC <- function(x){
     sum(1:df$age_maxage*x)
   }
@@ -25,7 +26,7 @@ runfuture_OM <- function(df,nruns = 100){
   #   return(ans)
   # }
   seedz <- round(runif(n = nruns, min = 1, max = 1e6))
-  #sim.data <- run.agebased.true.catch(df,seed =  56)
+  #sim.data <- run_agebased_true_catch(df,seed =  56)
   SSB.save <- array(NA,dim = c(nruns, df$nyear,  df$nspace))
   SSB.tot <- array(NA, dim = c(nruns, df$nyear))
   SSB.weight <- array(NA, dim = c(nruns, df$nyear))
@@ -43,7 +44,7 @@ runfuture_OM <- function(df,nruns = 100){
   start.time <- Sys.time()
   for(i in 1:nruns){
     set.seed(seedz[i])
-    sim.data <- run.agebased.true.catch(df, seeds =  seedz[i])
+    sim.data <- run_agebased_true_catch(df, seed =  seedz[i])
     if(is.list(sim.data)){
       SSB.save[i,,] <- sim.data$SSB.all[,,df$surveyseason]
       SSB.tot[i,] <- rowSums(sim.data$SSB)

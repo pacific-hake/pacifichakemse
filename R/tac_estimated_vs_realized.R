@@ -18,8 +18,8 @@ calc_tac_est_vs_real <- function(catch_floor = 180000){
               package = "PacifichakeMSE",
               mustWork = TRUE)
   df_tac <- read_csv(tac_fn, col_types = cols())
-  df <- load_data_seasons(nseason = 1, nspace = 1)
-  sim_data <- run.agebased.true.catch(df)
+  df <- load_data_seasons(n_season = 1, n_space = 1)
+  sim_data <- run_agebased_true_catch(df)
 
   # Calculate the theoretical TAC
   ssb <- seq(0, sum(sim_data$SSB0) * 2, length.out = nrow(df_tac))

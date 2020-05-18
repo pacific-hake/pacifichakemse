@@ -21,6 +21,8 @@ df_lists(
 \item{can.prop}{The proportion of TAC that Canada gets each year}
 
 \item{us.prop}{The proportion of TAC that the US gets each year}
+
+\item{quants}{The quantile values to use when calling \code{\link[stats:quantile]{stats::quantile()}}}
 }
 \value{
 A list of 3 lists of \link{data.frame}s containing key values of interest output from the

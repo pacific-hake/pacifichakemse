@@ -23,6 +23,8 @@ the constraints given; FALSE is not returned
 Verify that the argument \code{arg} is valid in the context of the arguments given
 }
 \examples{
+\dontrun{
 verify_argument(23, "numeric", 1) # Succeeds
 verify_argument(23, "numeric", 1, 1:20) # Fails
+}
 }

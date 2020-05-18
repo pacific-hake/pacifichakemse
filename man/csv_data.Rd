@@ -10,7 +10,7 @@ csv_data(sel_hist = TRUE)
 \item{sel_hist}{Logical. Load the PSEL file?}
 }
 \value{
-A list of the loaded data.frames
+A list of the loaded \link{data.frame}s
 }
 \description{
 Load data from CSV files

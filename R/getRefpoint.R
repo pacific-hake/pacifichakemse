@@ -1,28 +1,32 @@
 #' Get reference points (TODO: improve docs on this function)
 #'
-#' @param par.fixed estimated parameters
+#' @param par_fixed estimated parameters
 #' @param df data frame of non-estimated parameters
-#' @param SSBy Spawning biomass
-#' @param Fin Fishing mortality
-#' @param Nend Numbers at age
-#' @param TAC which TAC function to use?
-#' @param Vreal Vulnerable biomass in OM
+#' @param ssb_y Spawning biomass
+#' @param f_in Fishing mortality
+#' @param n_end Numbers at age
+#' @param tac which tac function to use?
+#' @param v_real Vulnerable biomass in OM
 #'
 #' @return A list of reference points
 #' @export
-getRefpoint <- function(par.fixed,
+getRefpoint <- function(par_fixed,
                         df,
-                        SSBy,
-                        Fin = NA,
-                        Nend,
-                        TAC = 1,
-                        Vreal = NA){
+                        ssb_y,
+                        f_in = NA,
+                        n_end,
+                        tac = 1,
+                        v_real = NA){
 
-  R0 <- as.numeric(exp(par.fixed)['logRinit'])
-  Mest <- as.numeric(exp(par.fixed)['logMinit'])
-  h <- as.numeric(exp(par.fixed)['logh'])
-  psel <- as.numeric(par.fixed[which(names(par.fixed) == 'psel_fish')])
-  sel <- getSelec(df$age,psel,df$Smin,df$Smax)
+  R0 <- as.numeric(exp(par_fixed)['logRinit'])
+  Mest <- as.numeric(exp(par_fixed)['logMinit'])
+  h <- as.numeric(exp(par_fixed)['logh'])
+  p_sel <- as.numeric(par_fixed[which(names(par_fixed) == 'psel_fish')])
+  f_sel <- get_select(df$age,
+                      p_sel,
+                      df$s_min,
+                      df$s_max)
+
 
   Cw <- as.numeric(df$wage_catch[,dim(df$wage_catch)[2]])
 
@@ -51,14 +55,14 @@ getRefpoint <- function(par.fixed,
   SBeq <- 4*h*R0*0.4*SSB_0-SSB_0*(1-h)/(5*h-1)
   #
   #
-  # Z <- M+Fin*sel
-  # Zage <- Z#cumsum(M)+cumsum(Fin*sel)
+  # Z <- M+f_in*sel
+  # Zage <- Z#cumsum(M)+cumsum(f_in*sel)
   # N1 <- NA
   # N1[1] <- R0
   # N1[2:(nage-1)] <-R0 * exp(-Zage[2:(nage-1)]*age[2:(nage-1)])
   # N1[nage] <- R0*exp(-(Zage[nage-1]*age[nage-1]))/(1-exp(-Z[nage]))# Plus group (ignore recruitment dev's in first year )
 
-  Z <- M+Fin*sel
+  Z <- M+f_in*sel
   Zage <- Z
   N1 <- NA
   N1[1] <- R0
@@ -71,7 +75,7 @@ getRefpoint <- function(par.fixed,
   SSB_eq <- sum(df$Matsel*N1)*0.5
 
   SPR <- SSB_eq/SSB_0
-  #SPR <- SSBy/SSB_0
+  #SPR <- ssb_y/SSB_0
   #print(SPR)
   # ## Calculate the F40 reference point
 
@@ -100,8 +104,8 @@ getRefpoint <- function(par.fixed,
     ans <- (SSB_eq/SSB_0-0.4)^2
     return(ans)
   }
-  F40 <- optim(par = 0.1, fn =getF, method = 'Brent', lower = 0, upper = 4)
-  Z <- M+Fin*sel
+  F40 <- optim(par = 0.1, fn = get_f, method = 'Brent', lower = 0, upper = 4)
+  Z <- M+f_in*sel
   Zage <- Z
   Neq <- NA
   Neq[1] <- R0
@@ -113,39 +117,39 @@ getRefpoint <- function(par.fixed,
   SSB_new <- sum(df$Matsel*Neq)*0.5
   SPR_new <- SSB_new/SSB_0
   Fnew <- F40$par
-  V <- sum(Nend*Cw*sel)
+  V <- sum(n_end*Cw*sel)
   Fx <- 1-exp(-Fnew) # Convert to harvest rate
 
   #print(Fx/0.18)
   #Fx <- 0.18
 
-  if((SSBy/SSB_0) < 0.1){
-    Cnew <- 0.05*Vreal # add a very low catch (fix later)
+  if((ssb_y/SSB_0) < 0.1){
+    Cnew <- 0.05*v_real # add a very low catch (fix later)
   }
 
-  if((SSBy/SSB_0) > 0.4){
+  if((ssb_y/SSB_0) > 0.4){
     Cnew <- Fx*V
   }
 
-  if(((SSBy/SSB_0) <= 0.4) & ((SSBy/SSB_0) >= 0.1)){
-    Cnew <- Fx*V*((SSBy-0.1*SSB_0)*((0.4*SSB_0/SSBy)/(0.4*SSB_0-0.1*SSB_0)))
+  if(((ssb_y/SSB_0) <= 0.4) & ((ssb_y/SSB_0) >= 0.1)){
+    Cnew <- Fx*V*((ssb_y-0.1*SSB_0)*((0.4*SSB_0/ssb_y)/(0.4*SSB_0-0.1*SSB_0)))
   }
   #
   # if (Cnew > 500000){
   #   Cnew <- 500000
   # }
-  # Adjust TAC by JMC/Utilization
-  TAC.obs <- read.csv(system.file("extdata/adjusted_tac_fn.csv",
+  # Adjust tac by JMC/Utilization
+  tac.obs <- read.csv(system.file("extdata/adjusted_tac_fn.csv",
                                   package = "PacifichakeMSE",
                                   mustWork = TRUE))
 
-  if(TAC == 1){
+  if(tac == 1){
     Cexp <- Cnew
-  }else if(TAC == 2){
-    Cexp <- TAC.obs$incpt[1]+TAC.obs$slp[1]*Cnew
-  }else if(TAC == 3){
-    Cexp <- TAC.obs$incpt[2]+TAC.obs$slp[2]*Cnew
-  }else if(TAC == 4){ # Half the treaty specified and with a lower floor
+  }else if(tac == 2){
+    Cexp <- tac.obs$incpt[1]+tac.obs$slp[1]*Cnew
+  }else if(tac == 3){
+    Cexp <- tac.obs$incpt[2]+tac.obs$slp[2]*Cnew
+  }else if(tac == 4){ # Half the treaty specified and with a lower floor
     Cexp <- Cnew*0.5
 
     if(Cexp < 180000){
@@ -154,8 +158,8 @@ getRefpoint <- function(par.fixed,
   }
 
   # Do a test run
-  # print(paste('JTC TAC = ', Cnew))
-  # print(paste('JMC  TAC = ', Cexp))
+  # print(paste('JTC tac = ', Cnew))
+  # print(paste('JMC  tac = ', Cexp))
 
   if(Cexp > Cnew){ # Never go over the JTC recommendation
     Cexp <- Cnew

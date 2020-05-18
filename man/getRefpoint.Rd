@@ -4,22 +4,22 @@
 \alias{getRefpoint}
 \title{Get reference points (TODO: improve docs on this function)}
 \usage{
-getRefpoint(par.fixed, df, SSBy, Fin = NA, Nend, TAC = 1, Vreal = NA)
+getRefpoint(par_fixed, df, ssb_y, f_in = NA, n_end, tac = 1, v_real = NA)
 }
 \arguments{
-\item{par.fixed}{estimated parameters}
+\item{par_fixed}{estimated parameters}
 
 \item{df}{data frame of non-estimated parameters}
 
-\item{SSBy}{Spawning biomass}
+\item{ssb_y}{Spawning biomass}
 
-\item{Fin}{Fishing mortality}
+\item{f_in}{Fishing mortality}
 
-\item{Nend}{Numbers at age}
+\item{n_end}{Numbers at age}
 
-\item{TAC}{which TAC function to use?}
+\item{tac}{which tac function to use?}
 
-\item{Vreal}{Vulnerable biomass in OM}
+\item{v_real}{Vulnerable biomass in OM}
 }
 \value{
 A list of reference points

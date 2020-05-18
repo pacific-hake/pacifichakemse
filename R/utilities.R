@@ -171,6 +171,7 @@ calc_term_quantiles <- function(df = NULL,
 #' @param inc_mean Logical. Include the mean (as column `avg`)
 #'
 #' @return A [data.frame] containing the year, run, value, and possibly country as columns
+#' @importFrom rlang :=
 #' @export
 conv_vec_to_mse_df <- function(vec = NULL,
                                col = NULL,
@@ -253,7 +254,7 @@ get_yrs_mse_list <- function(lst){
 #'
 #' @param sel_hist Logical. Load the PSEL file?
 #'
-#' @return A list of the loaded data.frames
+#' @return A list of the loaded [data.frame]s
 #' @importFrom readr read_csv cols
 #' @export
 csv_data <- function(sel_hist = TRUE){
@@ -534,8 +535,10 @@ get_age_dat <- function(d = NULL,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' verify_argument(23, "numeric", 1) # Succeeds
 #' verify_argument(23, "numeric", 1, 1:20) # Fails
+#' }
 verify_argument <- function(arg = NULL,
                             chk_class = NULL,
                             chk_len = NULL,

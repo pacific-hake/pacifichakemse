@@ -8,8 +8,9 @@ the Estimation model}
 plot_standard_error(ps = NULL, ci = c(0.05, 0.95))
 }
 \arguments{
-\item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}
-#' @param ci A vector of length two of the lower and upper credible interval values.
+\item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
+
+\item{ci}{A vector of length two of the lower and upper credible interval values.
 These values will be passed to \code{\link[stats:quantile]{stats::quantile()}}}
 }
 \value{

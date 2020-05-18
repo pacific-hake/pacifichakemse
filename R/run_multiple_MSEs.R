@@ -1,11 +1,11 @@
 #' Run/Iterate the Pacific hake MSE
 #'
-#' @param simyears Number of years to simulate
+#' @param sim_years Number of years to simulate
 #' @param seed The random number seed to use
 #' @param tac Which harvest control rule should the model use
 #' @param df Data frame of parameters as output by [load_data_seasons()]
-#' @param cincrease Increase in max movement
-#' @param mincrease Decrease of spawners returning south
+#' @param c_increase Increase in max movement
+#' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
 #' @param ... Absorb arguments intended for other functions
 #'
@@ -16,37 +16,36 @@
 #' @importFrom utils read.csv read.table
 #' @export
 run_multiple_MSEs <- function(df = NULL,
-                              simyears = NULL,
+                              sim_years = NULL,
                               seed = 12345,
                               tac = 1,
-                              cincrease = 0,
-                              mincrease = 0,
+                              c_increase = 0,
+                              m_increase = 0,
                               sel_change = 0,
                               ...){
   stopifnot(!is.null(df))
-  stopifnot(!is.null(simyears))
+  stopifnot(!is.null(sim_years))
 
-  browser()
   time <- 1
   yrinit <- df$nyear
 
-  year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
+  year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+sim_years))
   N0 <- NA
 
-  sim.data <- run.agebased.true.catch(df,seeds)
+  sim.data <- run_agebased_true_catch(df,seeds)
   simdata0 <- sim.data # The other one is gonna get overwritten.
 
-  F40.save<- array(NA,simyears)
+  F40.save<- array(NA,sim_years)
 
   # Save some stuff
   SSB.save <- list()
   R.save <- list()
   Catch.save <- list()
-  S.year.future <- seq(2019,2019+simyears, by = df$nsurvey)
+  S.year.future <- seq(2019,2019+sim_years, by = df$nsurvey)
   # Save som OM stuff
 
   # Save the estimated parameters from the EM (exclude time varying)
-  parms.save <- array(NA, dim = c(simyears, 4))
+  parms.save <- array(NA, dim = c(sim_years, 4))
 
   # Before the MSE starts
   F0.save <- df$fmort
@@ -58,10 +57,10 @@ run_multiple_MSEs <- function(df = NULL,
   SSB.test.om <- list() # Test if SSB is the same in the OM
   start.time <- Sys.time()
   df0 <- df # For debugging
-  #mconverge <- rep(NA, simyears)
+  #mconverge <- rep(NA, sim_years)
   df0 <- df
 
-  for (time in 1:simyears){
+  for (time in 1:sim_years){
 
     year <- yrinit+(time-1)
     #print(year.future[year])
@@ -130,11 +129,11 @@ run_multiple_MSEs <- function(df = NULL,
       movefifty <- df$movefifty
 
       if(time == 2){
-        movemaxtmp <- (movemax[1]+cincrease)
-        df$moveout <- df$moveout-mincrease
+        movemaxtmp <- (movemax[1]+c_increase)
+        df$moveout <- df$moveout-m_increase
       }else{
-        movemaxtmp <- movemaxtmp+cincrease
-        df$moveout <- df$moveout-mincrease
+        movemaxtmp <- movemaxtmp+c_increase
+        df$moveout <- df$moveout-m_increase
 
       }
 
@@ -184,7 +183,7 @@ run_multiple_MSEs <- function(df = NULL,
       }
 
       #print(df$moveout)
-      sim.data <- run.agebased.true.catch(df, seeds)
+      sim.data <- run_agebased_true_catch(df, seeds)
 
     }
 
@@ -308,7 +307,7 @@ run_multiple_MSEs <- function(df = NULL,
     # # # #Uncertainty
 
 
-    if(time == simyears){
+    if(time == sim_years){
       rep <- sdreport(obj)
       sdrep <- summary(rep)
       rep.values<-rownames(sdrep)
@@ -349,7 +348,12 @@ run_multiple_MSEs <- function(df = NULL,
                    matrix(rep(df$wage_catch[,df$nyear-1],df$nspace), ncol = df$nspace)*(sim.data$Fsel[,df$nyear,]))
 
     Nend <- N[,dim(N)[2]]
-    Fnew <- getRefpoint(opt$par, df,SSBy = SSB[length(SSB)], Fin=Fyear[length(Fyear)], Nend, tac = tac,
+    Fnew <- getRefpoint(opt$par,
+                        df,
+                        ssb_y = SSB[length(SSB)],
+                        f_in =Fyear[length(Fyear)],
+                        Nend,
+                        tac = tac,
                         Vreal)
     #Fnew <- 0.3
     # Update the data data frame

@@ -2,6 +2,7 @@
 #' for all runs in the list
 #'
 #' @param lst list of MSE results
+#' @param col Column to calculate the quantiles on
 #' @param quants A vector of quantiles to pass to [stats::quantile()]
 #' @param inc_mean Logical. Include the mean (as column `avg`)
 #'

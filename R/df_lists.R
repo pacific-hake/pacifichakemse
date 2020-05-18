@@ -10,6 +10,7 @@
 #' @param max_yr The last year before simulations start
 #' @param can.prop The proportion of TAC that Canada gets each year
 #' @param us.prop The proportion of TAC that the US gets each year
+#' @param quants The quantile values to use when calling [stats::quantile()]
 #'
 #' @return A list of 3 lists of [data.frame]s containing key values of interest output from the
 #' MSE run provided.

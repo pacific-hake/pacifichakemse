@@ -5,7 +5,10 @@
 #'
 #' @return Nothing
 .onLoad <- function(lib, pkg) {
-  message("Loading runHakeassessment dynamic link (shared object) library...")
-  message("Pass DLL = 'runHakeassessment' to all 'MakeADFun()' calls.")
   library.dynam("runHakeassessment", package = pkg, lib.loc = .libPaths())
+}
+
+.onAttach <- function(libname, pkgname) {
+  packageStartupMessage("Loading runHakeassessment dynamic link (shared object) library...\n",
+                        "Pass DLL = 'runHakeassessment' to all 'MakeADFun()' calls.")
 }

@@ -53,7 +53,7 @@ If \code{NULL}, 2 will be used for every scenario}
 \item{multiple_season_data}{A list of the same length as \code{fns}, with each element being a vector of
 three items, \code{nseason}, \code{nspace}, and \code{bfuture}. If NULL, biasadjustment will not be incorporated}
 
-\item{om_params_seed}{A seed value to use when calling the \code{\link[=run.agebased.true.catch]{run.agebased.true.catch()}} function}
+\item{om_params_seed}{A seed value to use when calling the \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}} function}
 
 \item{results_root_dir}{The results root directory}
 

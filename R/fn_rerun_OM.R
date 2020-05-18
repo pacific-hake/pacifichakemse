@@ -15,7 +15,10 @@ fn_rerun_OM <- function(folders, df){
       if(is.null(ls.JMC[[i]])){
         ls.tmp[[i]] <- NULL
       }else{
-        tmp <- run_multiple_OMs(simyears = 30, seeds[i],df, Catchin = ls.JMC[[i]]$Catch[(df$nyear+1):(length(year.future)-1)])
+        tmp <- run_multiple_OMs(n_sim_yrs = 30,
+                                seeds[i],
+                                df,
+                                catch_in = ls.JMC[[i]]$Catch[(df$nyear+1):(length(year.future)-1)])
         ls.JMC.s[[i]] <- tmp
       }
     }

@@ -20,6 +20,4 @@ test_that("func_name() - Tests for calling inside bar()", {
   expect_equal(foo(1), "freddy")
   expect_equal(foo(2), "bar")
   expect_equal(foo(3), "foo")
-  # There are many calls due to testing so the 17th is back to Global
-  expect_error(foo(17))
 })

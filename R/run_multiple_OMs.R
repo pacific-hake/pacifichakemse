@@ -1,11 +1,11 @@
 #' Run the Operating Models
 #'
-#' @param simyears number of years to simulate
+#' @param n_sim_yrs number of years to simulate
 #' @param seed  set the seed
 #' @param df data frame of parameters
-#' @param Catchin catches in the future
-#' @param cincrease increase in movement due to climate change
-#' @param mincrease increase in the number of returning spawners
+#' @param catch_in catches in the future
+#' @param c_increase increase in movement due to climate change
+#' @param m_increase increase in the number of returning spawners
 #' @param sel_change should selectivity be time varying?
 #'
 #' @return A list of results
@@ -15,37 +15,37 @@
 #' \dontrun{
 #' run_multiple_OMs(df, 100) Catch is 100 kg in the future
 #' }
-run_multiple_OMs <- function(simyears = 30,
+run_multiple_OMs <- function(n_sim_yrs = 30,
                              seed = 12345,
                              df,
-                             Catchin,
-                             cincrease = 0,
-                             mincrease = 0,
+                             catch_in,
+                             c_increase = 0,
+                             m_increase = 0,
                              sel_change = 0){
 
-  if(is.null(simyears)){
+  if(is.null(n_sim_yrs)){
     print('Number of years to simulate not specified. Simulating 30 years into the future')
-    simyears <- 30
+    n_sim_yrs <- 30
   }
 
   time <- 1
   yrinit <- df$nyear
-  year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+simyears))
+  year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+n_sim_yrs))
   N0 <- NA
-  sim.data <- run.agebased.true.catch(df,seed)
+  sim.data <- run_agebased_true_catch(df,seed)
   simdata0 <- sim.data # The other one is gonna get overwritten.
 
   # save(sim.data,file = 'simulated_space_OM.Rdata')
   # save(df,file = 'sim_data_parms.Rdata')
 
-  S.year.future <- seq(2019,2019+simyears, by = 2)
+  S.year.future <- seq(2019,2019+n_sim_yrs, by = 2)
   # Save som OM stuff
-  # SSB.save.om <- array(NA, df$nyear+simyears)
-  # R.save.om <- array(NA, df$nyear+simyears)
-  # Catch.save.om <- array(NA, df$nyear+simyears)
+  # SSB.save.om <- array(NA, df$nyear+n_sim_yrs)
+  # R.save.om <- array(NA, df$nyear+n_sim_yrs)
+  # Catch.save.om <- array(NA, df$nyear+n_sim_yrs)
 
   # Save the estimated parameters from the EM (exclude time varying)
-  parms.save <- array(NA, dim = c(simyears, 4))
+  parms.save <- array(NA, dim = c(n_sim_yrs, 4))
 
   # Before the MSE starts
   # SSB.save.om[1:df$tEnd] <- sim.data$SSB
@@ -55,10 +55,10 @@ run_multiple_OMs <- function(simyears = 30,
   years <- df$years
   model.save <- list()
 
-  if(length(Catchin) == 1){
-    Catchin <- as.matrix(rep(Catchin, simyears-1))
+  if(length(catch_in) == 1){
+    catch_in <- as.matrix(rep(catch_in, n_sim_yrs-1))
   }
-  for (time in 1:(simyears-1)){
+  for (time in 1:(n_sim_yrs-1)){
     year <- yrinit+(time-1)
     #print(year.future[year])
     if (time > 1){
@@ -88,11 +88,11 @@ run_multiple_OMs <- function(simyears = 30,
       df$wage_mid <- cbind(df.new$wage_mid,df.new$wage_mid[,1])
       df$wage_ssb <- cbind(df.new$wage_ssb,df.new$wage_ssb[,1])
 
-      if(ncol(Catchin) == 1){
-      df$Catch <- c(df$Catch, Catchin[time])
+      if(ncol(catch_in) == 1){
+      df$Catch <- c(df$Catch, catch_in[time])
       }else{
-      df$Catch.country <- rbind(df$Catch.country, Catchin[time,])
-      df$Catch <- c(df$Catch,sum(Catchin[time,]))
+      df$Catch.country <- rbind(df$Catch.country, catch_in[time,])
+      df$Catch <- c(df$Catch,sum(catch_in[time,]))
       }
       ## Add a survey if catches are 0
       if(df$Catch[time] == 0 & df$flag_survey[time] == -1){
@@ -120,11 +120,11 @@ run_multiple_OMs <- function(simyears = 30,
       movefifty <- df$movefifty
 
       if(time == 2){
-        movemaxtmp <- (movemax[1]+cincrease)
-        df$moveout <- df$moveout-mincrease
+        movemaxtmp <- (movemax[1]+c_increase)
+        df$moveout <- df$moveout-m_increase
       }else{
-        movemaxtmp <- movemaxtmp+cincrease
-        df$moveout <- df$moveout-mincrease
+        movemaxtmp <- movemaxtmp+c_increase
+        df$moveout <- df$moveout-m_increase
 
       }
 
@@ -172,7 +172,7 @@ run_multiple_OMs <- function(simyears = 30,
         df$flag_sel <- c(df$flag_sel,1)
         df$parms$PSEL <- rbind(df$parms$PSEL,rep(0,nrow(df$parms$PSEL)))
       }
-      sim.data <- run.agebased.true.catch(df, seed)
+      sim.data <- run_agebased_true_catch(df, seed)
     }
     df.new <- create_TMB_data(sim.data, df)
   }

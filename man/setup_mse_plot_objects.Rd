@@ -28,7 +28,7 @@ each scenario, and each containing a list of length 3, which is the output of \c
 (8) A list of data frames, which are the scenario-aggregated data frames from \code{mse_out_data[[N]][[3]]},
 (9) A list of length = number of scenarios, containing three-column \link{data.frame}s with \code{run}, \code{SE.SSB},
 and \code{year} as columns/ SE.SSB is the standard error between the OM and EM, (10) \code{sim_data} - output
-from the function \code{\link[=run.agebased.true.catch]{run.agebased.true.catch()}} (the operating model output)
+from the function \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}} (the operating model output)
 }
 \description{
 Setup MSE plot data frames, colors, and plot names

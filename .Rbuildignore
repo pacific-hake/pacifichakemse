@@ -1,5 +1,7 @@
 ^PacifichakeMSE\.Rproj$
 ^\.Rproj\.user$
+^src/.gitignore$
+^.o$
 ^.dll$
 ^.here$
 ^.travis.yml$

@@ -6,11 +6,11 @@
 \usage{
 run_multiple_MSEs(
   df = NULL,
-  simyears = NULL,
+  sim_years = NULL,
   seed = 12345,
   tac = 1,
-  cincrease = 0,
-  mincrease = 0,
+  c_increase = 0,
+  m_increase = 0,
   sel_change = 0,
   ...
 )
@@ -18,15 +18,15 @@ run_multiple_MSEs(
 \arguments{
 \item{df}{Data frame of parameters as output by \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
-\item{simyears}{Number of years to simulate}
+\item{sim_years}{Number of years to simulate}
 
 \item{seed}{The random number seed to use}
 
 \item{tac}{Which harvest control rule should the model use}
 
-\item{cincrease}{Increase in max movement}
+\item{c_increase}{Increase in max movement}
 
-\item{mincrease}{Decrease of spawners returning south}
+\item{m_increase}{Decrease of spawners returning south}
 
 \item{sel_change}{Time varying selectivity}
 
