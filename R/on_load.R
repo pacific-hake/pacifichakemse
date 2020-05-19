@@ -5,8 +5,15 @@
 #'
 #' @return Nothing
 .onLoad <- function(lib, pkg) {
-  #library.dynam("runHakeassessment", package = pkg, lib.loc = .libPaths())
-  library.dynam("runHakeassessment", package = pkg, lib.loc = lib)
+  # For a list of Travis-CI environment variables:
+  # https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+  is_travis <- Sys.getenv("TRAVIS") != ""
+  is_ci <- Sys.getenv("CI") != ""
+  if(is_travis || is_ci){
+    library.dynam("runHakeassessment", package = pkg, lib.loc = lib)
+  }else{
+    library.dynam("runHakeassessment", package = pkg, lib.loc = .libPaths())
+  }
 }
 
 .onAttach <- function(libname, pkgname) {
