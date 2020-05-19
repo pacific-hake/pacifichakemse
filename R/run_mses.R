@@ -86,7 +86,7 @@ run_mses <- function(ss_extdata_dir = NULL,
 
   # Prepare data for operating model
   df <- load_data_seasons(...)
-browser()
+
   # Run the operating model
   sim.data <- run_agebased_true_catch(df, om_params_seed)
 

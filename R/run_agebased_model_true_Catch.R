@@ -29,94 +29,28 @@ run_agebased_true_catch <- function(df = NULL,
   if(!df$move){
     recruit_mat <- 1
   }
+  # Set up indices for season 1 for each year
+  idx_save <- seq(1, df$t_end, by = df$n_season)
+
   move_mat <- df$move_mat
   move_init <- df$move_init
-  # M selectivity
-  m_sel <- df$m_sel # no difference between males and females
-  m0 <- exp(df$parms_init$log_m_init)
-  M <- m0 * m_sel # Natural mortality at age
-  rdev_sd <- exp(df$rdev_sd)
   b <- rep(1, n_yr)
-  # Survey selectivity - constant over time
-  surv_sel <- get_select(df$ages,
-                         df$parms_init$p_sel_surv,
-                         df$s_min_survey,
-                         df$s_max_survey)
-  # Catchability
-  q <- exp(df$log_q) # Constant over time
-  surv_sd <- exp(df$parms_init$log_sd_surv) # Survey error
-  # Maturity and fecundity
-  mat_sel <- df$mat_sel
-  h <- exp(df$parms_init$log_h)
-  # Age
-  n_age <- df$n_age
-  age <- df$ages
-  r0 <- exp(df$parms_init$log_r_init)
-  m_age <- c(0, cumsum(M[1:(n_age - 1)]))
-  # Calculate n0 based on r0
-  n0 <- NULL
-  n0[1:(n_age - 1)] <- r0 * exp(-df$ages[1:(n_age - 1)] * m0)
-  n0[n_age] <- r0 * exp(-m0 * df$ages[n_age]) / (1 - exp(-m0))
-
-  r0_space <- r0 * move_init
-
-  wage_ssb <- get_age_dat(df$wage_ssb, df$s_yr)
-  ssb_0 <- map_dbl(seq_len(n_space), ~{
-    sum(n0 * move_init[.x] * wage_ssb) * 0.5
-  }) %>% set_names(paste0(rep('space', each = df$n_space), seq_len(n_space)))
+  # Contribution of Total catch (add to one) # Z <- (Fyrs + m_yrs)
+  catch_props_season <- df$catch_props_season
+  #pope_mul <- n_season / 1 * 0.5
+  pope_mul <- 0.50
 
   lst <- setup_blank_om_objects(yrs = yrs,
                                 ages = df$ages,
                                 n_space = n_space,
                                 n_season = n_season)
-
-  lst$z_save[, 1, 1, 1] <- M
-  # Assumed no fishing before data started
-  lst$catch_age[, 1] <- 0
-  lst$catch[1] <- 0
-  lst$catch_n[1] <- 0
-  lst$catch_n_age[, 1] <- 0
-  # Surveys start later
-  lst$survey[1] <- 1
-  idx_save <- seq(1, t_end, by = n_season)
-  # Distribute over space
-  n_init <- NULL
-  n_init_dev <- (df$parms_init$init_n)
-  age_1_ind <- which(df$ages == 1)
-
-  n_init[age_1_ind:(n_age - 1)] <- r0 * exp(-m_age[age_1_ind:(n_age - 1)]) *
-    exp(-0.5 * rdev_sd ^ 2 * 0 + n_init_dev[1:(n_age - 2)])
-  # Plus group (ignore recruitment dev's in first yrs )
-  n_init[n_age] <- r0 * exp(-(M[n_age] * df$ages[n_age])) / (1 - exp(-M[n_age])) *
-    exp(-0.5 * rdev_sd ^ 2 * 0 + n_init_dev[n_age - 1])
-
-  for(space in seq_len(n_space)){
-    # Initialize only
-    lst$n_save_age[, 1, space, 1] <- n_init * move_init[space]
-    lst$n_save_age_mid[, 1, space, 1] <- lst$n_save_age[, 1, space, 1] * exp(-0.5 * (M / n_season))
-    wage_survey <- get_age_dat(df$wage_survey, df$s_yr)
-    lst$survey_true[space, 1] <- sum(lst$n_save_age[, 1, space, df$survey_season] *
-                                       surv_sel * q * wage_survey)
-  }
-  # Contribution of Total catch (add to one) # Z <- (Fyrs + m_yrs)
-  catch_props_season <- df$catch_props_season
-  #pope_mul <- n_season / 1 * 0.5
-  pope_mul <- 0.50
-  # if(n_season == 1){
-  #   catch_props_season <- matrix(rep(1, df$n_space))
-  # }
-  # map(yrs, ~{
-  #   map(seq_len(n_season), ~{
-  #     map(seq_len(n_space), ~{
-  #
-  #     })
-  #   })
-  # })
+  lst <- init_agebased_model(df, lst)
+browser()
   for(yr in yrs){
     yr_ind <- which(yr == yrs)
     wage <- get_wa_dfs(df, yr)
     r_y <- df$parms_init$r_in %>% filter(yr == !!yr) %>% pull(x)
-    m_yrs <- M
+    m_yrs <- m
     # M is distributed throughout the yrs
     m_season <- m_yrs / n_season
     # fix SSB and recruitment in all areas

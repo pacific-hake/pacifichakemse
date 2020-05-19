@@ -13,7 +13,7 @@ load_data_seasons(
   s_yr = 1966,
   m_yr = 2018,
   ages = 0:20,
-  age_names = paste0("age", ages),
+  age_names = NULL,
   rdev_sd = 1.4,
   move_init = NULL,
   move_max_init = 0.35,
