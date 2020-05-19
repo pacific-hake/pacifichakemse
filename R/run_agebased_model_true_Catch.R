@@ -17,18 +17,21 @@ run_agebased_true_catch <- function(df = NULL,
   verify_argument(seed, "numeric", 1)
 
   set.seed(seed)
+  pope_mul <- 0.5
 
   lst <- setup_blank_om_objects(yrs = df$yrs,
                                 ages = df$ages,
                                 n_space = df$n_space,
                                 n_season = df$n_season)
   lst <- init_agebased_model(df, lst)
+
+  out <- run_year_loop_om(df, lst)
 browser()
   for(yr in df$yrs){
     yr_ind <- which(yr == df$yrs)
     wage <- get_wa_dfs(df, yr)
     r_y <- df$parms_init$r_in %>% filter(yr == !!yr) %>% pull(x)
-    m_yrs <- m
+    m_yrs <- m_age
     # M is distributed throughout the yrs
     m_season <- m_yrs / df$n_season
     # fix SSB and recruitment in all areas
@@ -65,7 +68,7 @@ browser()
                              rep(0, df$s_max_survey - 2 * df$s_min_survey + 1))
             }
           }
-          if(df$selectivity_change == 2){
+          if(df$selectivit@y_change == 2){
             p_sel_tmp <- df$p_sel[2,] + df$parms_init$p_sel[,ncol(df$parms_init$p_sel)] * df$sigma_p_sel
           }
         }
@@ -88,7 +91,7 @@ browser()
         }
         browser()
         E.temp <- Catch_space*df$catch_props_season[space, season]#*df$f_space[space] # Catch distribution in the yrs
-        B.tmp <-  sum(N.save.age[,yr,space,season]*exp(-m_season*pope.mul)*wage$catch*f_sel) # Get biomass from previous yrs
+        B.tmp <-  sum(N.save.age[,yr,space,season]*exp(-m_season*pope_mul)*wage$catch*f_sel) # Get biomass from previous yrs
         N.tmp <- N.save.age[,yr,space,season]#
         V.save[yr,space,season] <- B.tmp
         Catch.quota[yr,space,season] <- E.temp

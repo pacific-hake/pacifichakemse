@@ -12,38 +12,38 @@ init_agebased_model <- function(df = NULL,
   verify_argument(lst, "list")
 
   # Natural mortality - males = females
-  m_sel <- df$m_sel
-  m0 <- exp(df$parms_init$log_m_init)
-  m_age <- m0 * m_sel
-  m_cumu_age <- c(0, cumsum(m_age[1:(df$n_age - 1)]))
+  lst$m_sel <- df$m_sel
+  lst$m0 <- exp(df$parms_init$log_m_init)
+  lst$m_age <- lst$m0 * lst$m_sel
+  lst$m_cumu_age <- c(0, cumsum(lst$m_age[1:(df$n_age - 1)]))
   # Recruitment
-  r0 <- exp(df$parms_init$log_r_init)
-  rdev_sd <- exp(df$rdev_sd)
-  r0_space <- r0 * df$move_init
+  lst$r0 <- exp(df$parms_init$log_r_init)
+  lst$rdev_sd <- exp(df$rdev_sd)
+  lst$r0_space <- lst$r0 * df$move_init
   # Survey selectivity - constant over time
-  surv_sel <- get_select(df$ages,
-                         df$parms_init$p_sel_surv,
-                         df$s_min_survey,
-                         df$s_max_survey)
-  surv_sd <- exp(df$parms_init$log_sd_surv) # Survey error
+  lst$surv_sel <- get_select(df$ages,
+                             df$parms_init$p_sel_surv,
+                             df$s_min_survey,
+                             df$s_max_survey)
+  lst$surv_sd <- exp(df$parms_init$log_sd_surv) # Survey error
   # Catchability -  constant over time
-  q <- exp(df$log_q)
+  lst$q <- exp(df$log_q)
   # Maturity and fecundity
-  mat_sel <- df$mat_sel
-  h <- exp(df$parms_init$log_h)
+  lst$mat_sel <- df$mat_sel
+  lst$h <- exp(df$parms_init$log_h)
   # Numbers-at-age - calculate n0 based on r0
-  n0 <- NULL
-  n0[1:(df$n_age - 1)] <- r0 * exp(-df$ages[1:(df$n_age - 1)] * m0)
+  lst$n0 <- NULL
+  lst$n0[1:(df$n_age - 1)] <- lst$r0 * exp(-df$ages[1:(df$n_age - 1)] * lst$m0)
   # Weight-at-age
-  wage_ssb <- get_age_dat(df$wage_ssb, df$s_yr)
-  wage_survey <- get_age_dat(df$wage_survey, df$s_yr)
+  lst$wage_ssb <- get_age_dat(df$wage_ssb, df$s_yr)
+  lst$wage_survey <- get_age_dat(df$wage_survey, df$s_yr)
   # Initial biomass
-  ssb_0 <- map_dbl(seq_len(df$n_space), ~{
-    sum(n0 * df$move_init[.x] * wage_ssb) * 0.5
+  lst$ssb_0 <- map_dbl(seq_len(df$n_space), ~{
+    sum(lst$n0 * df$move_init[.x] * lst$wage_ssb) * 0.5
   }) %>% set_names(paste0(rep("space", each = df$n_space), seq_len(df$n_space)))
 
   # Set m-at-age for year 1, space 1, season 1
-  lst$z_save[, 1, 1, 1] <- m_age
+  lst$z_save[, 1, 1, 1] <- lst$m_age
   # Assumed no fishing before data started
   # An alternate way of doing it, where the year column is used
   #  instead of the first column:
@@ -58,31 +58,32 @@ init_agebased_model <- function(df = NULL,
   # Set first survey year to 1, surveys start later
   lst$survey[1] <- 1
   # Distribute over space
-  n_init <- rep(NA, df$n_age)
-  n_init_dev <- df$parms_init$init_n
-  age_1_ind <- which(df$ages == 1)
+  lst$n_init <- rep(NA, df$n_age)
+  lst$n_init_dev <- df$parms_init$init_n
+  lst$age_1_ind <- which(df$ages == 1)
 
   # Initial numbers-at-age for all older than age 0
-  n_init[age_1_ind:(df$n_age - 1)] <- r0 * exp(-m_cumu_age[age_1_ind:(df$n_age - 1)]) *
-    exp(-0.5 * rdev_sd ^ 2 * 0 + n_init_dev[1:(df$n_age - 2),]$val)
+  lst$n_init[lst$age_1_ind:(df$n_age - 1)] <- lst$r0 *
+    exp(-lst$m_cumu_age[lst$age_1_ind:(df$n_age - 1)]) *
+    exp(-0.5 * lst$rdev_sd ^ 2 * 0 + lst$n_init_dev[1:(df$n_age - 2),]$val)
 
   # Plus group (ignore recruitment devs in first yrs )
-  n_init[df$n_age] <- r0 * exp(-(m_age[df$n_age] * df$ages[df$n_age])) / (1 - exp(-m_age[df$n_age])) *
-    exp(-0.5 * rdev_sd ^ 2 * 0 + n_init_dev[df$n_age - age_1_ind - 1,]$val)
+  lst$n_init[df$n_age] <- lst$r0 *
+    exp(-(lst$m_age[df$n_age] * df$ages[df$n_age])) / (1 - exp(-lst$m_age[df$n_age])) *
+    exp(-0.5 * lst$rdev_sd ^ 2 * 0 + lst$n_init_dev[df$n_age - lst$age_1_ind - 1,]$val)
 
   for(space in seq_len(df$n_space)){
     # Initialize only
     # Set numbers-at-age for year 1, space, season 1
-    lst$n_save_age[, 1, space, 1] <- n_init * df$move_init[space]
+    lst$n_save_age[, 1, space, 1] <- lst$n_init * df$move_init[space]
     # Set mid-year numbers-at-age by equally partitioning M across
     #  seasons and dividing by 2
     lst$n_save_age_mid[, 1, space, 1] <- lst$n_save_age[, 1, space, 1] *
-      exp(-0.5 * (m_age / df$n_season))
+      exp(-0.5 * (lst$m_age / df$n_season))
     # Survey value in the first year will be NA because surveys
     # don't start until later years
     lst$survey_true[space, 1] <- sum(lst$n_save_age[, 1, space, df$survey_season] *
-                                       surv_sel * q * wage_survey)
+                                       lst$surv_sel * lst$q * lst$wage_survey)
   }
-  lst$n_init <- n_init
   lst
 }

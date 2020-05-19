@@ -340,6 +340,10 @@ load_data_seasons <- function(n_season = 4,
     # Bias adjustment
     df$b <- c(df$b, rep(df$b_future, yr_future))
   }
+  # Add names for dimensions
+  df$space_names <- space_names
+  df$season_names <- season_names
+  df$age_names <- age_names
   df
 }
 
