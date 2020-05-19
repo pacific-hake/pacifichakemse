@@ -5,7 +5,8 @@
 #'
 #' @return Nothing
 .onLoad <- function(lib, pkg) {
-  library.dynam("runHakeassessment", package = pkg, lib.loc = .libPaths())
+  #library.dynam("runHakeassessment", package = pkg, lib.loc = .libPaths())
+  library.dynam("runHakeassessment", package = pkg, lib.loc = lib)
 }
 
 .onAttach <- function(libname, pkgname) {
