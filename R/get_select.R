@@ -12,21 +12,34 @@ get_select <- function(ages = NULL,
                        p_sel = NULL,
                        s_min = NULL,
                        s_max = NULL){
+  # TODO: Check this code again with the original. ptmp is possibly assigned on a previous iteration in a for loop
+  # in the original
   verify_argument(ages, "integer")
-  verify_argument(p_sel, "numeric")
+  verify_argument(p_sel, "tbl_df")
   verify_argument(s_min, "numeric", 1)
   verify_argument(s_max, "numeric", 1)
   stopifnot(s_min < s_max)
   stopifnot(sum(!is.na(match(s_min:s_max, ages))) == length(s_min:s_max))
-
+browser()
+  sel_ages <- p_sel$age
   p_sel <- c(0, p_sel)
-  nage <- length(ages)
-  kk <- sel <- rep(NA, nage)
+
+  n_age <- length(ages)
+  sel <- rep(NA, n_age)
   p_max <- max(cumsum(p_sel))
 
-  sel[1:(s_min - 1)] <- 0
-  sel[(s_max + 1):nage] <- 1
-  sel[is.na(sel)] <- exp(p_sel - p_max)
-
+  for(i in seq_along(ages)){
+    if(ages[i] < s_min){
+      sel[i] <- 0
+    }else if(ages[i] == s_min){
+      p_tmp <- p_sel[i - s_min]
+      sel[i] <- exp(p_tmp - p_max)
+    }else if(ages[i] > s_min && ages[i] <= s_max){
+      p_tmp <- p_sel[i - s_min] + p_tmp
+      sel[i] <- exp(p_tmp - p_max)
+    }else{
+      sel[i] <- sel[s_max + 1]
+    }
+  }
   sel
 }

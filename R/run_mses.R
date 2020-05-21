@@ -88,7 +88,7 @@ run_mses <- function(ss_extdata_dir = NULL,
   df <- load_data_seasons(...)
 
   # Run the operating model
-  sim.data <- run_agebased_true_catch(df, om_params_seed)
+  sim.data <- run_agebased_true_catch(df, om_params_seed, ...)
 
   seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
   tic()

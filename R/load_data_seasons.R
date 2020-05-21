@@ -58,7 +58,8 @@ load_data_seasons <- function(n_season = 4,
                               sel_change_yr = 1991,
                               sel_hist = TRUE,
                               f_space = c(0.2612, 0.7388),
-                              catch_props_space_season = NULL){
+                              catch_props_space_season = NULL,
+                              ...){
 
   verify_argument(n_season, c("numeric", "integer"), 1, 1:4)
   verify_argument(season_names, "character", n_season)
@@ -213,8 +214,8 @@ load_data_seasons <- function(n_season = 4,
                      log_sd_surv = lst$parms_scalar$logSDsurv,
                      log_phi_catch = lst$parms_scalar$logphi_catch,
                      # Selectivity parameters
-                     p_sel_fish = lst$parms_sel %>% filter(source == "fish") %>% pull("value"),
-                     p_sel_surv = lst$parms_sel %>% filter(source == "survey") %>% pull("value"),
+                     p_sel_fish = lst$parms_sel %>% filter(source == "fish"),
+                     p_sel_surv = lst$parms_sel %>% filter(source == "survey"),
                      init_n = lst$init_n,
                      r_in = lst$r_dev,
                      p_sel = p_sel)
@@ -223,7 +224,7 @@ load_data_seasons <- function(n_season = 4,
   # psel[i,] <- c(2.8476, 0.973, 0.3861, 0.1775, 0.5048)
   d_sel <- matrix(NA, 5, n_space)
   d_sel <- map(seq_len(ncol(d_sel)), ~{
-     d_sel[,.x] = parms_init$p_sel_fish
+     d_sel[,.x] = parms_init$p_sel_fish$value
    }) %>%
     set_names(seq_along(.)) %>%
     bind_rows() %>%
@@ -307,9 +308,9 @@ load_data_seasons <- function(n_season = 4,
             f_space = f_space)
 
   df$catch_country <- lst$catch_country %>%
-    select(Can, US) %>%
-    mutate(tot = rowSums(.))
-  df$catch <- df$catch_country$tot
+    select(year, Can, US) %>%
+    mutate(total = rowSums(.)) %>% set_names(c("year", "space1", "space2", "total"))
+  df$catch <- df$catch_country$total
   # If n_yr greater than the number of catch observations, append the mean catch across
   # time series to the end yrs
   if(n_yr > length(df$catch)){

@@ -28,7 +28,8 @@ load_data_seasons(
   sel_change_yr = 1991,
   sel_hist = TRUE,
   f_space = c(0.2612, 0.7388),
-  catch_props_space_season = NULL
+  catch_props_space_season = NULL,
+  ...
 )
 }
 \arguments{

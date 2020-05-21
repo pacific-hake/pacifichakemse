@@ -4,22 +4,30 @@
 \alias{get_f}
 \title{Calculate the fishing mortality based on catch}
 \usage{
-get_f(e_temp, b_temp, m_season, f_sel, n_temp, w_catch, method = "Pope")
+get_f(
+  e_tmp = NULL,
+  b_tmp = NULL,
+  m_season = NULL,
+  f_sel = NULL,
+  n_tmp = NULL,
+  wage_catch = NULL,
+  method = "Pope"
+)
 }
 \arguments{
-\item{e_temp}{Catch}
+\item{e_tmp}{Catch}
 
-\item{b_temp}{Biomass}
+\item{b_tmp}{Biomass}
 
-\item{m_season}{natural mortality}
+\item{m_season}{Natural mortality}
 
 \item{f_sel}{Fisheries selectivity}
 
-\item{n_temp}{Numbers at age}
+\item{n_tmp}{Numbers at age}
 
-\item{w_catch}{weight at age}
+\item{wage_catch}{Weight at age}
 
-\item{method}{'Pope' or 'Hybrid' method?}
+\item{method}{One of 'Pope' or 'Hybrid'}
 }
 \value{
 The fishing mortality value

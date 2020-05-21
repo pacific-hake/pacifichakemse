@@ -368,22 +368,22 @@ setup_blank_om_objects <- function(yrs,
                         n_yr,
                         dimnames = list(ages = ages,
                                         yrs = yrs))
-  fsel_save <- array(NA,
-                     dim = c(n_age, n_yr, n_space),
-                     dimnames = list(ages = ages,
-                                     yrs = yrs,
-                                     space = seq_len(n_space)))
-  fseason_save <- array(NA,
-                        dim = c(n_age, n_yr, n_space, n_season),
-                        dimnames = list(ages = ages,
-                                        yrs = yrs,
-                                        space = seq_len(n_space),
-                                        season = seq_len(n_season)))
-  fout_save <- array(NA,
-                     dim = c(n_yr, n_season, n_space),
-                     dimnames = list(yrs = yrs,
-                                     season = seq_len(n_season),
-                                     space = seq_len(n_space)))
+  f_sel_save <- array(NA,
+                      dim = c(n_age, n_yr, n_space),
+                      dimnames = list(ages = ages,
+                                      yrs = yrs,
+                                      space = seq_len(n_space)))
+  f_season_save <- array(NA,
+                         dim = c(n_age, n_yr, n_space, n_season),
+                         dimnames = list(ages = ages,
+                                         yrs = yrs,
+                                         space = seq_len(n_space),
+                                         season = seq_len(n_season)))
+  f_out_save <- array(NA,
+                      dim = c(n_yr, n_season, n_space),
+                      dimnames = list(yrs = yrs,
+                                      season = seq_len(n_season),
+                                      space = seq_len(n_space)))
   n_save_age <- array(NA,
                       dim = c(n_age, n_yr + 1, n_space, n_season),
                       dimnames = list(ages = ages,
@@ -410,6 +410,7 @@ setup_blank_om_objects <- function(yrs,
                                           yrs = yrs,
                                           space = seq_len(n_space),
                                           season = seq_len(n_season)))
+
   catch_n_save_age <- array(NA,
                             dim = c(n_age, n_yr, n_space, n_season),
                             dimnames = list(ages = ages,
@@ -480,9 +481,9 @@ setup_blank_om_objects <- function(yrs,
        catch_age = catch_age,
        catch_n = catch_n,
        catch_n_age = catch_n_age,
-       fsel_save = fsel_save,
-       fseason_save = fseason_save,
-       fout_save = fout_save,
+       f_sel_save = f_sel_save,
+       f_season_save = f_season_save,
+       f_out_save = f_out_save,
        n_save_age = n_save_age,
        n_save_age_mid = n_save_age_mid,
        r_save = r_save,
@@ -548,28 +549,33 @@ verify_argument <- function(arg = NULL,
 
   if(is.null(arg)){
     message("Error from calling function ", calling_func_name, ":")
-    stop("is.null(arg) is TRUE")
+    stop("is.null(arg) is TRUE",
+         call. = FALSE)
   }
   if(!is.null(chk_len) & length(chk_len) != 1){
     message("Error from calling function ", calling_func_name, ":")
-    stop("length(chk_len) is not equal to 1")
+    stop("length(chk_len) is not equal to 1",
+         call. = FALSE)
   }
   if(!is.null(chk_class)){
-    if(!class(arg) %in% chk_class){
+    if(!any(class(arg) %in% chk_class)){
       message("Error from calling function ", calling_func_name, ":")
-      stop("class(arg) is not in chk_class")
+      stop("None of ", chk_class, " are in the class description: ", class(arg),
+           call. = FALSE)
     }
   }
   if(!is.null(chk_len)){
     if(length(arg) != chk_len){
       message("Error from calling function ", calling_func_name, ":")
-      stop("length(arg) == chk_len is not TRUE")
+      stop("length(arg) == chk_len is not TRUE",
+           call. = FALSE)
     }
   }
   if(!is.null(chk_is_in)){
     if(sum(!is.na(match(chk_is_in, arg))) != length(arg)){
       message("Error from calling function ", calling_func_name, ":")
-      stop("Not all values in arg are in chk_is_in")
+      stop("Not all values in arg are in chk_is_in",
+           call. = FALSE)
     }
   }
   invisible(TRUE)
