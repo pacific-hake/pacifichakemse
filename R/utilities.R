@@ -262,7 +262,8 @@ csv_data <- function(sel_hist = TRUE){
     read_csv(system.file(file.path("extdata", file),
                          package = "PacifichakeMSE",
                          mustWork = TRUE),
-             col_types = cols())
+             col_types = cols(),
+             comment = "#")
   }
 
   wage_ss <- load_from_csv("wage_ss.csv")

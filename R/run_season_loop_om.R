@@ -20,30 +20,27 @@ run_season_loop_om <- function(df,
                                ...){
   map(seq_len(df$n_season), function(season = .x){
     map(seq_len(df$n_space), function(space = .x){
-      p_sel <- df$p_sel[space,]
+      p_sel <- df$p_sel %>% filter(!!space == space)
+      p_sel_tmp <- p_sel
       if(df$flag_sel[yr_ind] == 1){
-        p_sel_tmp <- p_sel + df$parms_init$p_sel[, yr_ind - df$sel_idx + 1] * df$sigma_p_sel
-      }else{
-        p_sel_tmp <- p_sel
+        p_sel_tmp$value <- df$parms_init$p_sel[, yr_ind - df$sel_idx + 1] * df$sigma_p_sel
       }
       if(df$yrs[yr_ind] > df$m_yr){
         if(df$selectivity_change == 1){
-          if(space == 1){
-            p_sel_tmp <- rep(1, df$s_max_survey - df$s_min_survey + 1)
-          }else{
-            p_sel_tmp <- c(rep(0.05, df$s_min_survey),
-                           rep(0, df$s_max_survey - 2 * df$s_min_survey + 1))
+          if(space != 1){
+            p_sel_tmp$value <- c(rep(0.05, df$s_min_survey),
+                                 rep(0, df$s_max_survey - 2 * df$s_min_survey + 1))
           }
         }else if(df$selectivity_change == 2){
-          p_sel_tmp <- df$p_sel[2,] + df$parms_init$p_sel[,ncol(df$parms_init$p_sel)] * df$sigma_p_sel
+          p_sel_tmp$value <- df$parms_init$p_sel[,ncol(df$parms_init$p_sel)] * df$sigma_p_sel
         }
       }
+
       # Constant over space
       f_sel <- get_select(df$ages,
                           p_sel_tmp,
                           df$s_min,
                           df$s_max)
-
       lst$f_sel_save[, yr_ind, space] <<- f_sel
       if(df$n_space > 1){
         if(df$yrs[yr_ind] <= df$m_yr){
@@ -64,7 +61,7 @@ run_season_loop_om <- function(df,
       b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel)
       lst$v_save[yr_ind, space, season] <<- b_tmp
       lst$catch_quota[yr_ind, space, season] <<- e_tmp
-      if(season == 2  && space == 2) browser()
+
       if(e_tmp / b_tmp >= 0.9){
         if(df$yrs[yr_ind] < df$m_yr){
           # Stop if in the past

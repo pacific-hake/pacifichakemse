@@ -31,6 +31,7 @@ Imports:
     purrr,
     stringr,
     tictoc,
+    tibble,
     TMB,
     Rcpp
 Remotes:

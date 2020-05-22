@@ -20,13 +20,19 @@
 #' @param move_slope Slope of the movement function
 #' @param ages_no_move Ages of fish which do not move in the movement model
 #' @param selectivity_change Should selectivity change?
+#' @param s_min Minimum age in fishery selectivity
+#' @param s_max Maximum age in fishery selectivity
+#' @param s_min_survey Minimum age in survey selectivity
+#' @param s_max_survey Maximum age in survey selectivity
 #' @param yr_future How many years into the future should there be stochastic values
 #' @param sel_hist Use historical selectivity?
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
 #' @param catch_props_space_season Proportion of catch to take by season and space
+#' @param ... Absorb arguments destined for other functions
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
+#' @importFrom tibble tibble
 #' @importFrom purrr map_dfr map_dfc
 #' @importFrom dplyr pull summarize_all summarize_at
 #' @export
@@ -53,6 +59,10 @@ load_data_seasons <- function(n_season = 4,
                               move_slope = 0.9,
                               ages_no_move = c(0, 1),
                               selectivity_change = 0,
+                              s_min = 1,
+                              s_max = 6,
+                              s_min_survey = 2,
+                              s_max_survey = 6,
                               b_future = 0.5,
                               yr_future  = 0,
                               sel_change_yr = 1991,
@@ -177,10 +187,10 @@ load_data_seasons <- function(n_season = 4,
   }
   # Set up selectivity
   p_sel <- lst$p_sel
+  n_sel_ages_fish <- s_min:s_max
   if(!sel_hist){
-    n_surv_yrs <- nrow(lst$parms_sel %>% filter(source == "survey")) + 1
     n_sel_yrs <- sum(sel_change_yr <= yrs)
-    p_sel <- matrix(0, n_surv_yrs, n_sel_yrs)
+    p_sel <- matrix(0, length(n_sel_ages_fish), n_sel_yrs)
   }
 
   if(n_season == 4 & n_space == 2){
@@ -222,15 +232,14 @@ load_data_seasons <- function(n_season = 4,
 
   # USA selectivity
   # psel[i,] <- c(2.8476, 0.973, 0.3861, 0.1775, 0.5048)
-  d_sel <- matrix(NA, 5, n_space)
-  d_sel <- map(seq_len(ncol(d_sel)), ~{
-     d_sel[,.x] = parms_init$p_sel_fish$value
-   }) %>%
-    set_names(seq_along(.)) %>%
-    bind_rows() %>%
-    t()
-  if(n_space == 2){
-    d_sel[1,] <- rep(1, ncol(d_sel))
+  d_sel <- parms_init$p_sel_fish %>% mutate(space = 2)
+  if(n_space == 1){
+    d_sel <- d_sel %>% mutate(space = 1)
+  }else{
+    d_sel <- tibble(value = rep(1, length(s_min:s_max)),
+                    source = "fish",
+                    space = 1,
+                    age = s_min:s_max) %>% bind_rows(d_sel)
   }
 
   # Selectivity change in that year
@@ -257,10 +266,10 @@ load_data_seasons <- function(n_season = 4,
             log_q = log(1.14135),
             # Selectivity
             selectivity_change = selectivity_change,
-            s_min = 1,
-            s_min_survey = 2,
-            s_max = 6,
-            s_max_survey = 6,
+            s_min = s_min,
+            s_max = s_max,
+            s_min_survey = s_min_survey,
+            s_max_survey = s_max_survey,
             flag_sel = flag_sel,
             survey_season = survey_season,
             # Frequency of survey yrs (e.g., 2 is every second year)
@@ -304,7 +313,7 @@ load_data_seasons <- function(n_season = 4,
             move_slope = move_slope,
             catch_props_space_season = catch_props_space_season,
             catch = lst$catch,
-            p_sel = p_sel,
+            p_sel = d_sel,
             f_space = f_space)
 
   df$catch_country <- lst$catch_country %>%
