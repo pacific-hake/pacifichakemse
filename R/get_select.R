@@ -32,7 +32,11 @@ get_select <- function(ages = NULL,
       p_tmp <- p_sel %>% filter(age == ages[i]) %>% pull(value) + p_tmp
       sel[i] <- exp(p_tmp - p_sum)
     }else{
-      sel[i] <- sel[s_max + 1]
+      if(is.na(sel[s_max + 1])){
+        sel[i] <- sel[s_max]
+      }else{
+        sel[i] <- sel[s_max + 1]
+      }
     }
   }
   sel

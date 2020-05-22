@@ -23,6 +23,10 @@ load_data_seasons(
   move_slope = 0.9,
   ages_no_move = c(0, 1),
   selectivity_change = 0,
+  s_min = 1,
+  s_max = 6,
+  s_min_survey = 2,
+  s_max_survey = 6,
   b_future = 0.5,
   yr_future = 0,
   sel_change_yr = 1991,
@@ -69,6 +73,14 @@ load_data_seasons(
 
 \item{selectivity_change}{Should selectivity change?}
 
+\item{s_min}{Minimum age in fishery selectivity}
+
+\item{s_max}{Maximum age in fishery selectivity}
+
+\item{s_min_survey}{Minimum age in survey selectivity}
+
+\item{s_max_survey}{Maximum age in survey selectivity}
+
 \item{b_future}{Bias adjustment in the future}
 
 \item{yr_future}{How many years into the future should there be stochastic values}
@@ -81,6 +93,8 @@ load_data_seasons(
 the second is the US}
 
 \item{catch_props_space_season}{Proportion of catch to take by season and space}
+
+\item{...}{Absorb arguments destined for other functions}
 }
 \value{
 A list of Parameters, Input parameters, Survey, Catch, and others
