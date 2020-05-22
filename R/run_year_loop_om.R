@@ -48,95 +48,94 @@ run_year_loop_om <- function(df = NULL,
     lst$r_save[yr_ind, ] <- rec
 
     # -------------------------------------------------------------------------
-    run_season_loop_om(df, lst, yr, yr_ind, m_season, ...)
-browser()
+    lst <- run_season_loop_om(df, lst, yr, yr_ind, m_season, ...)
 
-  #   if(df$n_season > 1){
-  #     Catch.age[,yr] <- apply(Catch.save.age[,yr,,],MARGIN = 1,FUN = sum)
-  #     Catch[yr] <- sum(Catch.save.age[,yr,,])
-  #
-  #     CatchN.age[,yr] <- apply(CatchN.save.age[,yr,,],MARGIN = 1,FUN = sum)
-  #     CatchN[yr] <- sum(CatchN.save.age[,yr,,])
-  #   }else{
-  #
-  #     if(df$n_space == 1){
-  #       Catch.age[,yr] <- Catch.save.age[,yr,,]
-  #       Catch[yr] <- sum(Catch.save.age[,yr,,])
-  #
-  #       CatchN.age[,yr] <- CatchN.save.age[,yr,,]
-  #       CatchN[yr] <- sum(CatchN.save.age[,yr,,])
-  #     }else{
-  #       Catch.age[,yr] <- rowSums(Catch.save.age[,yr,,])
-  #       Catch[yr] <- sum(Catch.save.age[,yr,,])
-  #
-  #       CatchN.age[,yr] <- rowSums(CatchN.save.age[,yr,,])
-  #       CatchN[yr] <- sum(CatchN.save.age[,yr,,])
-  #     }
-  #   }
-  #   if(df$n_season == 1){
-  #     Msurveymul <- 0.5
-  #   }else{
-  #     Msurveymul <- 0
-  #   }
-  #   for (space in 1:df$n_space){
-  #     survey.true[space,yr] <- sum(N.save.age[,yr,space,df$surveyseason]*
-  #                                    exp(-Msurveymul*Z.save[,yr,space,df$surveyseason])*surv_sel*q*wage$surv)
-  #   }
-  #   #  }
-  #   # Save the survey
-  #   # Survey is conducted in the start of the yrs
-  #   # }else{
-  #   #   Msurveymul <- 0.5
-  #   # }
+    if(df$n_season > 1){
+      lst$catch_age[, yr_ind] <- apply(lst$catch_n_save_age[, yr_ind,,],
+                                       MARGIN = 1,
+                                       FUN = sum)
+      lst$catch[yr_ind] <- sum(lst$catch_n_save_age[,yr_ind,,])
+
+      lst$catch_n_age[, yr_ind] <- apply(lst$catch_n_save_age[,yr_ind,,],
+                                         MARGIN = 1,
+                                         FUN = sum)
+      lst$catch_n[yr_ind] <- sum(lst$catch_n_save_age[,yr_ind,,])
+    }else{
+      if(df$n_space == 1){
+        lst$catch_age[,yr_ind] <- lst$catch_n_save_age[,yr_ind,,]
+        lst$catch[yr_ind] <- sum(lst$catch_n_save_age[,yr_ind,,])
+        lst$catch_n_age[,yr_ind] <- lst$catch_n_save_age[,yr_ind,,]
+        lst$catch_n[yr_ind] <- sum(lst$catch_n_save_age[,yr_ind,,])
+      }else{
+        lst$catch_age[,yr_ind] <- rowSums(lst$catch_n_save_age[,yr_ind,,])
+        lst$catch[yr_ind] <- sum(lst$catch_n_save_age[,yr_ind,,])
+        lst$catch_n_age[,yr_ind] <- rowSums(lst$catch_n_save_age[,yr_ind,,])
+        lst$catch_n[yr_ind] <- sum(lst$catch_n_save_age[,yr_ind,,])
+      }
+    }
+
+    m_surv_mul <- 0
+    if(df$n_season == 1){
+      m_surv_mul <- 0.5
+    }
+
+    # Calculate survey biomass for all spaces
+    lst$survey_true[,yr_ind] <- map_dbl(seq_len(df$n_space), ~{
+        sum(lst$n_save_age[, yr_ind, .x, df$survey_season] *
+              exp(-m_surv_mul * lst$z_save[, yr_ind, .x, df$survey_season]) *
+              lst$surv_sel * lst$q * df$wage_survey)
+      })
+    browser()
+
   #   if(!df$move){
-  #     Nsurv <- N.save.age[,yr,,df$surveyseason]*
-  #       exp(-Msurveymul*Z.save[,yr,space,df$surveyseason])
+  #     Nsurv <- N.save.age[,yr_ind,,df$surveyseason]*
+  #       exp(-m_surv_mul*Z.save[,yr_ind,space,df$surveyseason])
   #   }else{
-  #     Nsurv <- rowSums(N.save.age[,yr,,df$surveyseason]*
-  #                        exp(-Msurveymul*Z.save[,yr,space,df$surveyseason]))
+  #     Nsurv <- rowSums(N.save.age[,yr_ind,,df$surveyseason]*
+  #                        exp(-m_surv_mul*Z.save[,yr_ind,space,df$surveyseason]))
   #   }
-  #   if (df$flag_survey[yr] == 1){
+  #   if (df$flag_survey[yr_ind] == 1){
   #     if(df$yrs[yr] > 2018){
   #       err <- rnorm(n = 1,mean = 0, sd = surv_sd)
   #       surv <- exp(log(sum(Nsurv*surv_sel*q*wage$surv))+err) # If the xtra factor is not included the mean is > 1
   #     }else{
   #       surv <- sum(Nsurv*surv_sel*q*wage$surv)
   #     }
-  #     survey[yr] <- surv
+  #     survey[yr_ind] <- surv
   #   }else{
-  #     survey[yr] <- 1
+  #     survey[yr_ind] <- 1
   #   }
   #   Ntot.yrs <- Nsurv
   #   surv.tmp <- sum(Ntot.yrs*surv_sel*q)
-  #   if(df$flag_survey[yr] == 1){
-  #     age_comps_surv[1,yr] <- 0 # No yrs 1 recorded
-  #     age_comps_surv[1:(df$age_maxage-1),yr] <-  (Ntot.yrs[2:(df$age_maxage)]*surv_sel[2:(df$age_maxage)]*q)/surv.tmp
-  #     age_comps_surv[df$age_maxage,yr] <- sum(Ntot.yrs[(df$age_maxage+1):n_age]*surv_sel[(df$age_maxage+1):n_age]*q)/surv.tmp
+  #   if(df$flag_survey[yr_ind] == 1){
+  #     age_comps_surv[1,yr_ind] <- 0 # No yrs 1 recorded
+  #     age_comps_surv[1:(df$age_maxage-1),yr_ind] <-  (Ntot.yrs[2:(df$age_maxage)]*surv_sel[2:(df$age_maxage)]*q)/surv.tmp
+  #     age_comps_surv[df$age_maxage,yr_ind] <- sum(Ntot.yrs[(df$age_maxage+1):n_age]*surv_sel[(df$age_maxage+1):n_age]*q)/surv.tmp
   #   }else{
-  #     age_comps_surv[,yr] <- NA
+  #     age_comps_surv[,yr_ind] <- NA
   #   }
   #   for(space in 1:df$n_space){
-  #     Ntot.yrs <- N.save.age[,yr,space,df$surveyseason]
-  #     surv.tot[yr,space]  <- sum(Ntot.yrs*surv_sel*q*exp(-Msurveymul*Z.save[,yr,space,df$surveyseason]))
-  #     age_comps_surv_space[1,yr,space] <- 0 # No yrs 1 recorded
-  #     age_comps_surv_space[1:(df$age_maxage-1),yr,space] <-
-  #       (Ntot.yrs[2:(df$age_maxage)]*surv_sel[2:(df$age_maxage)]*q)/surv.tot[yr,space]
-  #     age_comps_surv_space[df$age_maxage,yr,space] <-
-  #       sum(Ntot.yrs[(df$age_maxage+1):n_age]*surv_sel[(df$age_maxage+1):n_age]*q)/surv.tot[yr,space]
+  #     Ntot.yrs <- N.save.age[,yr_ind,space,df$surveyseason]
+  #     surv.tot[yr_ind,space]  <- sum(Ntot.yrs*surv_sel*q*exp(-m_surv_mul*Z.save[,yr_ind,space,df$surveyseason]))
+  #     age_comps_surv_space[1,yr_ind,space] <- 0 # No yrs 1 recorded
+  #     age_comps_surv_space[1:(df$age_maxage-1),yr_ind,space] <-
+  #       (Ntot.yrs[2:(df$age_maxage)]*surv_sel[2:(df$age_maxage)]*q)/surv.tot[yr_ind,space]
+  #     age_comps_surv_space[df$age_maxage,yr_ind,space] <-
+  #       sum(Ntot.yrs[(df$age_maxage+1):n_age]*surv_sel[(df$age_maxage+1):n_age]*q)/surv.tot[yr_ind,space]
   #     if(df$n_season>1){
-  #       Catch.tmp <- rowSums(CatchN.save.age[, yr,space,])
+  #       Catch.tmp <- rowSums(lst$catch_n_save_age[, yr_ind,space,])
   #     }else{
-  #       Catch.tmp <- CatchN.save.age[, yr,space,]
+  #       Catch.tmp <- lst$catch_n_save_age[, yr_ind,space,]
   #     }
-  #     Catch.tot <- sum(CatchN.save.age[,yr,space,])
-  #     age_comps_catch_space[1:(df$age_maxage-1),yr,space] <- Catch.tmp[2:(df$age_maxage)]/Catch.tot
-  #     age_comps_catch_space[df$age_maxage,yr,space] <- sum(Catch.tmp[(df$age_maxage+1):n_age])/Catch.tot
+  #     Catch.tot <- sum(lst$catch_n_save_age[,yr_ind,space,])
+  #     age_comps_catch_space[1:(df$age_maxage-1),yr_ind,space] <- Catch.tmp[2:(df$age_maxage)]/Catch.tot
+  #     age_comps_catch_space[df$age_maxage,yr_ind,space] <- sum(Catch.tmp[(df$age_maxage+1):n_age])/Catch.tot
   #   }
-  #   if(df$flag_catch[yr] == 1){
-  #     age_comps_catch[1:(df$age_maxage-1),yr] <-  CatchN.age[2:(df$age_maxage),yr]/CatchN[yr]
-  #     age_comps_catch[df$age_maxage,yr] <- sum(CatchN.age[(df$age_maxage+1):n_age,yr])/CatchN[yr]
+  #   if(df$flag_catch[yr_ind] == 1){
+  #     age_comps_catch[1:(df$age_maxage-1),yr_ind] <-  lst$catch_n_age[2:(df$age_maxage),yr_ind]/lst$catch_n[yr_ind]
+  #     age_comps_catch[df$age_maxage,yr_ind] <- sum(lst$catch_n_age[(df$age_maxage+1):n_age,yr_ind])/lst$catch_n[yr_ind]
   #   }else{
-  #     age_comps_catch[,yr] <- NA
+  #     age_comps_catch[,yr_ind] <- NA
   #   }
   # }# End of yrs loop
   # if(!df$move){
@@ -154,10 +153,10 @@ browser()
   #                  R.save = R.save,
   #                  V.save = V.save,
   #                  SSB.all = SSB.all,
-  #                  Catch.save.age = Catch.save.age,
-  #                  CatchN.save.age = CatchN.save.age,
+  #                  catch_n_save_age = lst$catch_n_save_age,
+  #                  lst$catch_n_save_age = lst$catch_n_save_age,
   #                  Catch = Catch,
-  #                  Catch.age = Catch.age,
+  #                  catch_age = lst$catch_age,
   #                  Catch.quota = Catch.quota,
   #                  Catch.quota.N = Catch.quota.N,
   #                  Fout = Fout.save,
