@@ -124,8 +124,7 @@ run_season_loop_om <- function(df,
           lst$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (df$move_mat[space_idx, , season, yr_ind])
       }else{
         lst$n_save_age[2:(df$n_age - 1), yr_ind + 1, space, 1] <<- lst$n_save_age[1:(df$n_age - 2), yr_ind, space, season] *
-          exp(-z[1:(df$n_age - 2)]) -
-          lst$n_save_age[1:(df$n_age - 2), yr_ind, space, season] *
+          exp(-z[1:(df$n_age - 2)]) - lst$n_save_age[1:(df$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave
           exp(-z[1:(df$n_age - 2)]) * (df$move_mat[space, 1:(df$n_age - 2), season, yr_ind]) +
           # Add the ones come to the surrounding areas
@@ -155,5 +154,6 @@ run_season_loop_om <- function(df,
       }
     })
   })
+  #if(yr == 1995) browser()
   lst
 }
