@@ -10,6 +10,7 @@
 #'
 #' @return A modified version of `lst` with the current data for `yr` populated
 #' in all it's arrays and other objects
+#' @importFrom crayon red yellow
 #' @export
 run_season_loop_om <- function(df,
                                lst,
@@ -17,9 +18,16 @@ run_season_loop_om <- function(df,
                                yr_ind,
                                m_season,
                                pope_mul = 0.5,
+                               verbose = TRUE,
                                ...){
   map(seq_len(df$n_season), function(season = .x){
+    if(verbose){
+      cat(red(paste0("Season: ", season, "\n")))
+    }
     map(seq_len(df$n_space), function(space = .x){
+      if(verbose){
+        cat(yellow(paste0("      Space: ", space, "\n")))
+      }
       p_sel <- df$p_sel %>% filter(!!space == space)
       p_sel_tmp <- p_sel
       if(df$flag_sel[yr_ind] == 1){

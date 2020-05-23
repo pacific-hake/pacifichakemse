@@ -17,6 +17,7 @@ LinkingTo:
     Rcpp
 Imports:
     cowplot,
+    crayon,
     data.table,
     dplyr,
     ggplot2,

@@ -4,7 +4,7 @@
 \alias{run_year_loop_om}
 \title{Run the Operating model for all years}
 \usage{
-run_year_loop_om(df = NULL, lst = NULL, ...)
+run_year_loop_om(df = NULL, lst = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{df}{See \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}

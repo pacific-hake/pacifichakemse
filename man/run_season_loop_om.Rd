@@ -4,7 +4,16 @@
 \alias{run_season_loop_om}
 \title{Run the Operating model for all seasons and spaces in one year}
 \usage{
-run_season_loop_om(df, lst, yr, yr_ind, m_season, pope_mul = 0.5, ...)
+run_season_loop_om(
+  df,
+  lst,
+  yr,
+  yr_ind,
+  m_season,
+  pope_mul = 0.5,
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{df}{See \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
