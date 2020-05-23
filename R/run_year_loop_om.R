@@ -54,7 +54,7 @@ run_year_loop_om <- function(df = NULL,
 
     # -------------------------------------------------------------------------
     lst <<- run_season_loop_om(df, lst, yr, yr_ind, m_season, verbose, ...)
-    #if(yr == 1995) browser()
+
     if(df$n_season > 1){
       lst$catch_age[, yr_ind] <<- apply(lst$catch_n_save_age[, yr_ind,,],
                                        MARGIN = 1,
@@ -105,13 +105,14 @@ run_year_loop_om <- function(df = NULL,
     }
 
     if(df$flag_survey[yr_ind] == 1){
-if(yr == 1995) browser()
       if(yr > df$m_yr){
         err <- rnorm(n = 1, mean = 0, sd = lst$surv_sd)
         # If the extra factor is not included the mean is > 1
-        surv <- exp(log(sum(n_surv * lst$surv_sel * lst$q * df$wage_surv %>% get_age_dat(yr = yr))) + err)
+        surv <- exp(log(sum(n_surv  %>% pull(sum) * lst$surv_sel *
+                              lst$q * df$wage_surv %>% get_age_dat(yr = yr))) + err)
       }else{
-        surv <- sum(n_surv * lst$surv_sel * lst$q * df$wage_surv %>% get_age_dat(yr = yr))
+        surv <- sum(n_surv %>% pull(sum) * lst$surv_sel *
+                      lst$q * df$wage_surv %>% get_age_dat(yr = yr))
       }
       lst$survey[yr_ind] <<- surv
     }else{
@@ -128,8 +129,8 @@ if(yr == 1995) browser()
            lst$surv_sel[age_1_ind:(df$age_max_age)] * lst$q) / surv_tmp
 
       lst$age_comps_surv[df$age_maxage, yr_ind] <<-
-        sum(n_tot_yrs[(df$age_max_age + 1):n_age] *
-              lst$surv_sel[(df$age_max_age + 1):n_age] * lst$q) / surv_tmp
+        sum(n_tot_yrs[(df$age_max_age + 1):df$n_age] *
+              lst$surv_sel[(df$age_max_age + 1):df$n_age] * lst$q) / surv_tmp
     }else{
       lst$age_comps_surv[,yr_ind] <<- NA
     }
