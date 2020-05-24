@@ -4,14 +4,14 @@
 \alias{create_TMB_data}
 \title{Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 \usage{
-create_TMB_data(sim.data, df, history = FALSE)
+create_TMB_data(sim_data = NULL, df = NULL, history = FALSE)
 }
 \arguments{
-\item{sim.data}{Operating model}
+\item{sim_data}{Operating model}
 
 \item{df}{input parameters}
 
-\item{history}{Use historical real data or OM data?}
+\item{history}{Logical. If TRUE use historical data. If FALSE, use simulated OM data}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

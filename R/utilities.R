@@ -643,3 +643,24 @@ func_name <- function(levels_up = 1){
   fn_name <- gsub("\ +", "", fn_name)
   fn_name
 }
+
+#' Add a new row to the bottom of the `wage` [data.frame], which is a copy of the
+#' last row with the `Yr` value being one more than the last row's
+#'
+#' @param wage A weight-at-age [data.frame] as created by [load_data_ss()]
+#'
+#' @return The same `wage` [data.frame] with a new row added to the bottom,
+#' which is a copy of the last row with the `Yr` value being one more than
+#' the last row's
+#' @export
+wage_add_yr <- function(wage = NULL){
+  verify_argument(wage, "data.frame")
+  stopifnot(nrow(wage) >= 1)
+  stopifnot("Yr" %in% names(wage))
+
+  last_wage_yr <- wage[nrow(wage),]$Yr
+  wage <- wage %>%
+    bind_rows(wage[nrow(wage),])
+  wage[nrow(wage),]$Yr <- last_wage_yr + 1
+  wage
+}

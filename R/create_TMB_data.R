@@ -1,48 +1,37 @@
 #' Create the data for [TMB::MakeADFun()]
 #'
-#' @param sim.data Operating model
+#' @param sim_data Operating model
 #' @param df input parameters
-#' @param history Use historical real data or OM data?
+#' @param history Logical. If TRUE use historical data. If FALSE, use simulated OM data
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
 #' @export
-create_TMB_data <- function(sim.data, df,
-                             history = FALSE){
+create_TMB_data <- function(sim_data = NULL,
+                            df = NULL,
+                            history = FALSE){
+  verify_argument(sim_data, "list")
+  verify_argument(df, "list")
+  verify_argument(history, "logical", 1)
 
-  years <- df$years
-  tEnd <- length(df$years)
-  nyear <- tEnd
-  age <- df$age
-
-
-  nage <- length(age)
-  msel <- rep(1,nage)
+  msel <- rep(1, df$n_age)
   # Maturity
-  mat <- df$Matsel
+  mat <- df$mat_sel
 
-  # weight at age
-  wage_catch <- df$wage_catch
-  wage_survey <- df$wage_survey
-  wage_ssb <- df$wage_ssb
-  wage_mid <- df$wage_mid
-
-
-  if (max(years) > 2018){
-  wage_catch <- cbind(wage_catch,wage_catch[,1])
-  wage_survey <- cbind(wage_survey,wage_survey[,1])
-  wage_mid <- cbind(wage_mid,wage_mid[,1])
-  wage_ssb <- cbind(wage_ssb,wage_ssb[,1])
-
+  if(max(df$yrs) > df$m_yr){
+    # Copy last year of weight-at-age data and use that as the simulated year
+    df$wage_catch <- wage_add_yr(df$wage_catch)
+    df$wage_survey <- wage_add_yr(df$wage_survey)
+    df$wage_mid <- wage_add_yr(df$wage_mid)
+    df$wage_ssb <- wage_add_yr(df$wage_ssb)
   }
-   # names(wage)[3:23] <- 0:20
-  # wage <- melt(wage, id = c("year", "fleet"), value.name = 'growth', variable.name = 'age')
 
   # Catch
-  catch <- sim.data$Catch
+  browser()
+  catch <- sim_data$Catch
 
   # Survey abundance
-  df.survey <- sim.data$survey
-  Fnew <- sim.data$F0
+  df.survey <- sim_data$survey
+  Fnew <- sim_data$F0
 
   # Bias adjustment factor
   # Parameters
@@ -83,18 +72,18 @@ create_TMB_data <- function(sim.data, df,
                   Smax_survey = df$Smax_survey,
                   b = b,
                   # survey
-                  survey = sim.data$survey,#df.survey, # Make sure the survey has the same length as the catch time series
+                  survey = sim_data$survey,#df.survey, # Make sure the survey has the same length as the catch time series
                   survey_x = df$survey_x, # Is there a survey in that year?
                   ss_survey = df$ss_survey,
                   flag_survey =df$flag_survey,
-                  age_survey = sim.data$age_comps_surv,
+                  age_survey = sim_data$age_comps_surv,
                   age_maxage = df$age_maxage, # Max age for age comps
                   # Catch
-                  Catchobs = sim.data$Catch,
+                  Catchobs = sim_data$Catch,
                   #                Catchobs = catch$Fishery, # Convert to kg
                   ss_catch = df$ss_catch,
                   flag_catch =df$flag_catch,
-                  age_catch = sim.data$age_catch,
+                  age_catch = sim_data$age_catch,
                   # variance parameters
                   logSDcatch = df$logSDcatch,
                   logSDR = df$logSDR, # Fixed in stock assessment ,
@@ -108,10 +97,7 @@ create_TMB_data <- function(sim.data, df,
 
   )
 
-
-  # Add historical data if needed
-
-  if(history == TRUE){
+  if(history){
     df.new$survey <- df$survey[,1]
 
     if(length(df$survey[,1]) != length(df.new$survey)){

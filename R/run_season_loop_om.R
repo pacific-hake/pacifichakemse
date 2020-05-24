@@ -154,6 +154,5 @@ run_season_loop_om <- function(df,
       }
     })
   })
-  #if(yr == 1995) browser()
   lst
 }

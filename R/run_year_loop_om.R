@@ -192,7 +192,7 @@ run_year_loop_om <- function(df = NULL,
       cat("\n")
     }
   })
-
+  lst
   # if(!df$move){
   #   Nsave <- lst$n_save_age[,,,df$n_space]
   #   SSB.save <- SSB

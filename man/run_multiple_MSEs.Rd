@@ -6,7 +6,9 @@
 \usage{
 run_multiple_MSEs(
   df = NULL,
-  sim_years = NULL,
+  sim_data = NULL,
+  om_params_seed = NULL,
+  n_sim_yrs = NULL,
   seed = 12345,
   tac = 1,
   c_increase = 0,
@@ -18,7 +20,7 @@ run_multiple_MSEs(
 \arguments{
 \item{df}{Data frame of parameters as output by \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
-\item{sim_years}{Number of years to simulate}
+\item{n_sim_yrs}{Number of years to simulate}
 
 \item{seed}{The random number seed to use}
 
