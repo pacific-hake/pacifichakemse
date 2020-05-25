@@ -6,8 +6,9 @@
 \usage{
 run_multiple_MSEs(
   df = NULL,
+  ss_model = NULL,
   sim_data = NULL,
-  om_params_seed = NULL,
+  om_params_seed = 12345,
   n_sim_yrs = NULL,
   seed = 12345,
   tac = 1,
@@ -20,9 +21,17 @@ run_multiple_MSEs(
 \arguments{
 \item{df}{Data frame of parameters as output by \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
+\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}
+and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+
+\item{sim_data}{Operating model as created by \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+
+\item{om_params_seed}{Seed for running the OM if it needs to be run (if \code{sim_data}
+is \code{NULL})}
+
 \item{n_sim_yrs}{Number of years to simulate}
 
-\item{seed}{The random number seed to use}
+\item{seed}{The random number seed to use for the MSE run}
 
 \item{tac}{Which harvest control rule should the model use}
 

@@ -1,7 +1,12 @@
 #' Run/Iterate the Pacific hake MSE
 #'
 #' @param n_sim_yrs Number of years to simulate
-#' @param seed The random number seed to use
+#' @param ss_model SS3 model output as created by [create_rds_file()]
+#' and loaded by [load_ss_model_from_rds()]
+#' @param sim_data Operating model as created by [run_agebased_true_catch()]
+#' @param om_params_seed Seed for running the OM if it needs to be run (if `sim_data`
+#' is `NULL`)
+#' @param seed The random number seed to use for the MSE run
 #' @param tac Which harvest control rule should the model use
 #' @param df Data frame of parameters as output by [load_data_seasons()]
 #' @param c_increase Increase in max movement
@@ -16,8 +21,9 @@
 #' @importFrom utils read.csv read.table
 #' @export
 run_multiple_MSEs <- function(df = NULL,
+                              ss_model = NULL,
                               sim_data = NULL,
-                              om_params_seed = NULL,
+                              om_params_seed = 12345,
                               n_sim_yrs = NULL,
                               seed = 12345,
                               tac = 1,
@@ -25,8 +31,16 @@ run_multiple_MSEs <- function(df = NULL,
                               m_increase = 0,
                               sel_change = 0,
                               ...){
-  stopifnot(!is.null(df))
-  stopifnot(!is.null(n_sim_yrs))
+  verify_argument(df, "list")
+  verify_argument(ss_model, "list")
+  verify_argument(om_params_seed, "numeric", 1)
+  verify_argument(n_sim_yrs, "numeric", 1)
+  verify_argument(seed, "numeric", 1)
+  verify_argument(tac, "numeric", 1)
+  verify_argument(c_increase, "numeric", 1)
+  verify_argument(m_increase, "numeric", 1)
+  verify_argument(sel_change, "numeric", 1)
+
   if(is.null(sim_data)){
     if(is.null(om_params_seed)){
       stop("To run the agebased OM, you must supply `om_params_seed`",
@@ -57,11 +71,10 @@ run_multiple_MSEs <- function(df = NULL,
   #   yr_ind <- which(yr == yr_all)
   #
   # }
-  df_new <- create_TMB_data(sim_data, df)
-browser()
+  df_new <- create_TMB_data(sim_data, df, ss_model)
+
   for(yr in yr_sims){
     yr_ind <- which(yr == yr_sims)
-    browser()
     df$flag_survey <- c(df$flag_survey, ifelse(yr %in% yr_survey_sims, 1, -1))
     df$survey_x <- c(df$survey_x, ifelse(yr %in% yr_survey_sims, 2, -2))
     df$ss_survey <- c(df$ss_survey, ifelse(yr %in% yr_survey_sims,

@@ -3,8 +3,8 @@
 #' @details Saves the output of the MSE runs to the files specified in `fns`, in the directories
 #' specified in `results_root_dir` and `results_dir`
 #'
-#' @param ss_extdata_dir A directory in the PacifichakeMSE package extdata directory
-#' which contains SS3 model run output
+#' @param ss_model_output_dir A directory which contains SS3 model run output. Used to import
+#' estimates from the SS3 model
 #' @param n_runs Then number of runs to do for each simulation
 #' @param n_sim_yrs The number of years to simulate into the future
 #' @param fns A vector of file names for the scenarios (.rds files). .rds extension is optional
@@ -35,7 +35,7 @@
 #' @importFrom stringr str_ends
 #' @importFrom tictoc tic toc
 #' @export
-run_mses <- function(ss_extdata_dir = NULL,
+run_mses <- function(ss_model_output_dir = NULL,
                      n_runs = 10,
                      n_sim_yrs = NULL,
                      fns = NULL,
@@ -51,7 +51,14 @@ run_mses <- function(ss_extdata_dir = NULL,
                      results_dir = here("results", "default"),
                      ...){
 
-  verify_argument(ss_extdata_dir, "character", 1)
+  verify_argument(ss_model_output_dir, "character", 1)
+  if(!dir.exists(ss_model_output_dir)){
+    stop("The directory name you set for the SS3 model output ",
+    "(ss_model_output_dir) does not exist:\n",
+    ss_model_output_dir,
+    call. = FALSE)
+  }
+  #verify_argument(ss_extdata_dir, "character", 1)
   verify_argument(fns, chk_len = length(plot_names))
   verify_argument(tacs, "numeric")
   verify_argument(c_increases, "numeric")
@@ -78,11 +85,7 @@ run_mses <- function(ss_extdata_dir = NULL,
     dir.create(results_dir)
   }
 
-  mod <- SS_output(system.file(file.path("extdata", ss_extdata_dir),
-                               package = "PacifichakeMSE",
-                               mustWork = TRUE),
-                   printstats = FALSE,
-                   verbose = FALSE)
+  ss_model <- load_ss_model_from_rds(ss_model_output_dir)
 
   # Prepare data for operating model
   df <- load_data_seasons(...)
@@ -109,6 +112,7 @@ run_mses <- function(ss_extdata_dir = NULL,
       if(is.null(multiple_season_data)){
         tmp <- run_multiple_MSEs(
           df = df,
+          ss_model = ss_model,
           sim_data = sim_data,
           om_params_seed = om_params_seed,
           n_sim_yrs = n_sim_yrs,

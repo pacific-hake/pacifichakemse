@@ -4,12 +4,15 @@
 \alias{create_TMB_data}
 \title{Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 \usage{
-create_TMB_data(sim_data = NULL, df = NULL, history = FALSE)
+create_TMB_data(sim_data = NULL, df = NULL, ss_model = NULL, history = FALSE)
 }
 \arguments{
 \item{sim_data}{Operating model}
 
 \item{df}{input parameters}
+
+\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}
+and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
 
 \item{history}{Logical. If TRUE use historical data. If FALSE, use simulated OM data}
 }

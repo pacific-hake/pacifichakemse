@@ -5,7 +5,7 @@
 \title{Run the MSE for a number of runs for any scenarios}
 \usage{
 run_mses(
-  ss_extdata_dir = NULL,
+  ss_model_output_dir = NULL,
   n_runs = 10,
   n_sim_yrs = NULL,
   fns = NULL,
@@ -23,8 +23,8 @@ run_mses(
 )
 }
 \arguments{
-\item{ss_extdata_dir}{A directory in the PacifichakeMSE package extdata directory
-which contains SS3 model run output}
+\item{ss_model_output_dir}{A directory which contains SS3 model run output. Used to import
+estimates from the SS3 model}
 
 \item{n_runs}{Then number of runs to do for each simulation}
 

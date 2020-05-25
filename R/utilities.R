@@ -547,35 +547,37 @@ verify_argument <- function(arg = NULL,
                             chk_is_in = NULL){
 
   calling_func_name <- func_name(levels_up = 2)
-
+  calling_args <- get_args()
   if(is.null(arg)){
     message("Error from calling function ", calling_func_name, ":")
-    stop("is.null(arg) is TRUE",
+    stop("is.null(", calling_args$arg, ") is TRUE",
          call. = FALSE)
   }
   if(!is.null(chk_len) & length(chk_len) != 1){
     message("Error from calling function ", calling_func_name, ":")
-    stop("length(chk_len) is not equal to 1",
+    stop("length(", calling_args$chk_len, ") is not equal to 1",
          call. = FALSE)
   }
   if(!is.null(chk_class)){
     if(!any(class(arg) %in% chk_class)){
       message("Error from calling function ", calling_func_name, ":")
-      stop("None of ", chk_class, " are in the class description: ", class(arg),
+      stop("Class requirements (", calling_args$chk_class,
+           ") do not include the actual class of ", calling_args$arg, " (",
+           class(arg), ")",
            call. = FALSE)
     }
   }
   if(!is.null(chk_len)){
     if(length(arg) != chk_len){
       message("Error from calling function ", calling_func_name, ":")
-      stop("length(arg) == chk_len is not TRUE",
+      stop("length(", calling_args$arg, ") == ", calling_args$chk_len, " is not TRUE",
            call. = FALSE)
     }
   }
   if(!is.null(chk_is_in)){
     if(sum(!is.na(match(chk_is_in, arg))) != length(arg)){
       message("Error from calling function ", calling_func_name, ":")
-      stop("Not all values in arg are in chk_is_in",
+      stop("Not all values in ", calling_args$arg, " are in ", calling_args$chk_is_in,
            call. = FALSE)
     }
   }
@@ -663,4 +665,15 @@ wage_add_yr <- function(wage = NULL){
     bind_rows(wage[nrow(wage),])
   wage[nrow(wage),]$Yr <- last_wage_yr + 1
   wage
+}
+
+#' Get the arguments of the calling function
+#'
+#' @return a list of the arguments
+#' @export
+get_args <- function(){
+  cl <- sys.call(-1)
+  f <- get(as.character(cl[[1]]), mode = "function", sys.frame(-2))
+  cl <- match.call(definition = f, call = cl)
+  as.list(cl)[-1]
 }
