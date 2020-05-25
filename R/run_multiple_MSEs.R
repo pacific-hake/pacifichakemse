@@ -67,14 +67,10 @@ run_multiple_MSEs <- function(df = NULL,
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
 
-  # map(yr_sims, function(yr = .x){
-  #   yr_ind <- which(yr == yr_all)
-  #
-  # }
-  df_new <- create_TMB_data(sim_data, df, ss_model)
+  df <- create_TMB_data(sim_data, df, ss_model)
 
-  for(yr in yr_sims){
-    yr_ind <- which(yr == yr_sims)
+  # modify survey objects in the simulated survey years
+  map(yr_sims, function(yr = .x){
     df$flag_survey <- c(df$flag_survey, ifelse(yr %in% yr_survey_sims, 1, -1))
     df$survey_x <- c(df$survey_x, ifelse(yr %in% yr_survey_sims, 2, -2))
     df$ss_survey <- c(df$ss_survey, ifelse(yr %in% yr_survey_sims,
@@ -83,19 +79,13 @@ run_multiple_MSEs <- function(df = NULL,
     df$survey_err <- c(df$survey_err, ifelse(yr %in% yr_survey_sims,
                                              mean(df$survey_err[df$survey_err < 1]),
                                              1))
-
-      df$ss_catch <- c(df$ss_catch,ceiling(mean(df$ss_catch[df$ss_catch > 0])))
-      df$flag_catch <- c(df$flag_catch,1)
-      df$years <- yr_all[1:year]
-      df$nyear <- length(df$years)
-      #df$tEnd <- df$tEnd+1 # Just run one more year in subsequent runs
-      browser()
-      df$wage_catch <- cbind(df_new$wage_catch,df_new$wage_catch[,1])
-      df$wage_survey <- cbind(df_new$wage_survey,df_new$wage_survey[,1])
-      df$wage_mid <- cbind(df_new$wage_mid,df_new$wage_mid[,1])
-      df$wage_ssb <- cbind(df_new$wage_ssb,df_new$wage_ssb[,1])
-  }
+  })
+  df$ss_catch <- c(df$ss_catch, ceiling(mean(df$ss_catch[df$ss_catch > 0])))
+  df$flag_catch <- c(df$flag_catch, 1)
 }
+browser()
+
+
 #
 #       df$Catch <- c(df$Catch, Fnew[[1]])
 #
