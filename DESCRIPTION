@@ -32,6 +32,7 @@ Imports:
     purrr,
     stringr,
     tictoc,
+    tidyselect,
     tibble,
     TMB,
     Rcpp
@@ -45,5 +46,4 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,
-    tibble,
     vdiffr

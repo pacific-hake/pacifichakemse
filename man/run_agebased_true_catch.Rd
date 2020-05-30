@@ -10,6 +10,8 @@ run_agebased_true_catch(df = NULL, seed = 100, ...)
 \item{df}{data frame of parameters and life history values}
 
 \item{seed}{seed for survey error and recruitment deviations}
+
+\item{...}{Arguments passed to \code{\link[=run_year_loop_om]{run_year_loop_om()}}}
 }
 \value{
 A list of model outputs (TODO)

@@ -38,7 +38,7 @@ test_that("extract_age_comps() - Tests for argument errors", {
                                  m_yr = 2002,
                                  fill = NULL))
   j <- ss_agecomps
-  names(j) <- c("Yrs", "FltSvy", "a1", "a2", "a3", "a4", "a5")
+  names(j) <- c("Wrong", "FltSvy", "a1", "a2", "a3", "a4", "a5")
   j_model <- NULL
   j_model$dat$agecomp <- j
   expect_error(extract_age_comps(ss_model = j_model,
@@ -48,7 +48,7 @@ test_that("extract_age_comps() - Tests for argument errors", {
                                  fill = -1))
 
   j <- ss_agecomps
-  names(j) <- c("Yr", "FltsSvy", "a1", "a2", "a3", "a4", "a5")
+  names(j) <- c("Yr", "Wrong", "a1", "a2", "a3", "a4", "a5")
   j_model <- NULL
   j_model$dat$agecomp <- j
   expect_error(extract_age_comps(ss_model = j_model,

@@ -28,6 +28,8 @@ run_season_loop_om(
 
 \item{pope_mul}{Multiplier used in Pope's method}
 
+\item{verbose}{Print the loop information to the console}
+
 \item{...}{Absorbs additional arguments meant for other functions}
 }
 \value{

@@ -39,6 +39,9 @@ load_data_seasons(
 )
 }
 \arguments{
+\item{ss_model}{A model input/output list representing the SS model as returned from
+\code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+
 \item{n_season}{Number of seasons}
 
 \item{season_names}{A vector of names for the seasons. Length must equal \code{n_season}}

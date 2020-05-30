@@ -32,10 +32,9 @@ create_rds_file <- function(model_dir = NULL){
 #'
 #' @details Load an SS3 model from an RDS file and return as a [list]
 #'
-#' @param model_dirs A [vector] of model directory names
-#' @param ret_single_list See details
+#' @param model_dir A [vector] of model directory names
 #'
-#' @return A [list] of model objects
+#' @return A [list] of model inputs/outputs for the requested model
 #' @export
 load_ss_model_from_rds <- function(model_dir = NULL){
 

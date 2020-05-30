@@ -11,6 +11,8 @@ run_year_loop_om(df = NULL, lst = NULL, verbose = TRUE, ...)
 
 \item{lst}{See \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
 
+\item{verbose}{Print the loop information to the console}
+
 \item{...}{Additional arguments to be passed to \code{\link[=run_season_loop_om]{run_season_loop_om()}}}
 }
 \value{

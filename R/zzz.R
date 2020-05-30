@@ -122,5 +122,8 @@ globalVariables(c(
 "pope.mul",
 "R.save",
 "SSB.weight",
-"sel"
+"sel",
+"row_sum",
+"val",
+".x"
 ))

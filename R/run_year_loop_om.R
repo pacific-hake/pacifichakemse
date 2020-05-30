@@ -2,6 +2,7 @@
 #'
 #' @param df See [run_agebased_true_catch()]
 #' @param lst See [run_agebased_true_catch()]
+#' @param verbose Print the loop information to the console
 #' @param ... Additional arguments to be passed to [run_season_loop_om()]
 #'
 #' @return A list

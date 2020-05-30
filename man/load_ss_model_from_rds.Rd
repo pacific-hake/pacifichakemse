@@ -7,12 +7,10 @@
 load_ss_model_from_rds(model_dir = NULL)
 }
 \arguments{
-\item{model_dirs}{A \link{vector} of model directory names}
-
-\item{ret_single_list}{See details}
+\item{model_dir}{A \link{vector} of model directory names}
 }
 \value{
-A \link{list} of model objects
+A \link{list} of model inputs/outputs for the requested model
 }
 \description{
 Load models from files created using \code{\link[=create_rds_file]{create_rds_file()}}

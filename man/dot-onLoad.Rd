@@ -17,3 +17,7 @@ Nothing
 \description{
 Load the dynamic library when the package is loaded
 }
+\details{
+If running \code{\link[devtools:check]{devtools::check()}}, be sure to call it as: \code{devtools::check(cran = FALSE)}
+to avoid a major error about the DLL not being able to be found
+}

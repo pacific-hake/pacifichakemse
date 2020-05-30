@@ -1,5 +1,7 @@
 #' Prepare the data for the operating model
 #'
+#' @param ss_model A model input/output list representing the SS model as returned from
+#' [load_ss_model_from_rds()]
 #' @param n_season Number of seasons
 #' @param season_names A vector of names for the seasons. Length must equal `n_season`
 #' @param n_space Number of spatial areas

@@ -6,11 +6,13 @@
 #' @param yr_ind The index of `yr` in the `df$yrs` vector
 #' @param m_season A vector of natural mortality-at-age
 #' @param pope_mul Multiplier used in Pope's method
+#' @param verbose Print the loop information to the console
 #' @param ... Absorbs additional arguments meant for other functions
 #'
 #' @return A modified version of `lst` with the current data for `yr` populated
 #' in all it's arrays and other objects
 #' @importFrom crayon red yellow
+#' @importFrom tidyselect contains
 #' @export
 run_season_loop_om <- function(df,
                                lst,

@@ -698,6 +698,7 @@ get_args <- function(){
 #' @return The matrix representing all years from `s_yr` to `m_yr` with data included
 #' for years which are found in the `ss_model` data. Years not in the `ss_model` data
 #' will be filled with the value of `fill`
+#' @importFrom tidyselect matches
 #' @export
 extract_age_comps <- function(ss_model = NULL,
                               fleet = 1,

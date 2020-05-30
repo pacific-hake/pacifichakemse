@@ -2,6 +2,7 @@
 #'
 #' @param df data frame of parameters and life history values
 #' @param seed seed for survey error and recruitment deviations
+#' @param ... Arguments passed to [run_year_loop_om()]
 #'
 #' @return A list of model outputs (TODO)
 #' @importFrom purrr map_dbl
