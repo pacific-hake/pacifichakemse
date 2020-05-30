@@ -703,6 +703,7 @@ get_args <- function(){
 #' for years which are found in the `ss_model` data. Years not in the `ss_model` data
 #' will be filled with the value of `fill`
 #' @importFrom tidyselect matches
+#' @importFrom tidyr complete
 #' @export
 extract_age_comps <- function(ss_model = NULL,
                               fleet = 1,
@@ -747,7 +748,7 @@ extract_age_comps <- function(ss_model = NULL,
     select(-row_sum) %>%
     mutate(yr = age_comps_yrs) %>%
     select(yr, everything()) %>%
-    tidyr::complete(yr = seq(s_yr, m_yr)) %>%
+    complete(yr = seq(s_yr, m_yr)) %>%
     replace(is.na(.), fill) %>%
     t()
   colnames(age_comps) <- age_comps[1,]

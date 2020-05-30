@@ -10,7 +10,7 @@ extract_age_comps(
   fleet = 1,
   s_yr = NULL,
   m_yr = NULL,
-  fill = -1,
+  fill = NA,
   yr_col = "Yr",
   fleet_col = "FltSvy"
 )

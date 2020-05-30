@@ -32,6 +32,7 @@ Imports:
     purrr,
     stringr,
     tictoc,
+    tidyr,
     tidyselect,
     tibble,
     TMB,
