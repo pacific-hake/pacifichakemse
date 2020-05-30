@@ -96,7 +96,6 @@ run_year_loop_om <- function(df = NULL,
     n_surv <- map(seq_len(df$n_space), ~{
       lst$n_save_age[, yr_ind, .x, df$survey_season] *
         exp(-m_surv_mul * lst$z_save[, yr_ind, .x, df$survey_season])
-
     })
     if(df$move){
       n_surv <- n_surv %>%
@@ -135,6 +134,7 @@ run_year_loop_om <- function(df = NULL,
     }else{
       lst$age_comps_surv[,yr_ind] <<- NA
     }
+    #lst$age_comps_surv[is.na(lst$age_comps_surv)] <<- -1
 
     lst$surv_tot[yr_ind,] <<- map_dbl(seq_len(df$n_space), ~{
       n_tot_yrs <- lst$n_save_age[,yr_ind, .x, df$survey_season]
@@ -183,12 +183,14 @@ run_year_loop_om <- function(df = NULL,
       bind_rows() %>%
       as.matrix()
 
-   if(df$flag_catch[yr_ind] == 1){
-     lst$age_comps_catch[1:(df$age_max_age - 1), yr_ind] <<-
-       lst$catch_n_age[age_1_ind:(df$age_max_age), yr_ind] / lst$catch_n[yr_ind]
-     lst$age_comps_catch[df$age_max_age, yr_ind] <<-
-       sum(lst$catch_n_age[(df$age_max_age + 1):df$n_age, yr_ind]) / lst$catch_n[yr_ind]
-   }
+    if(df$flag_catch[yr_ind] == 1){
+      lst$age_comps_catch[1:(df$age_max_age - 1), yr_ind] <<-
+        lst$catch_n_age[age_1_ind:(df$age_max_age), yr_ind] / lst$catch_n[yr_ind]
+      lst$age_comps_catch[df$age_max_age, yr_ind] <<-
+        sum(lst$catch_n_age[(df$age_max_age + 1):df$n_age, yr_ind]) / lst$catch_n[yr_ind]
+    }
+    #lst$age_comps_catch[is.na(lst$age_comps_catch)] <<- -1
+
     if(verbose){
       cat("\n")
     }

@@ -46,7 +46,6 @@ create_TMB_data <- function(sim_data = NULL,
   # Logical must be changed to integer
   df$flag_sel <- df$flag_sel %>% as.integer()
   df$s_min <- 1
-  df$survey <- df$survey %>% pull(x) %>% as.vector()
   # This needs to be an index, not the year
   df$sel_change_yr <- which(df$sel_change_yr == df$yrs)
 

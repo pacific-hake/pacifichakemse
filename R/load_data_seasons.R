@@ -130,7 +130,7 @@ load_data_seasons <- function(ss_model = NULL,
                                         fleet = 1,
                                         s_yr = s_yr,
                                         m_yr = m_yr)
-browser()
+
   if(is.null(move_init)){
     # n_space must be 2 due to error check above
     move_init <-  c(0.25, 0.75)
@@ -188,16 +188,12 @@ browser()
   # Maturity from first year only
   mat <- wage_ssb[1,] %>% select(-c(Yr, Fleet))
   # Set up age comps
-  age_survey_df <- lst$age_survey_df %>%
-    mutate(flag = 1)
-  tmp_surv_ages <- names(age_survey_df)
-  tmp_surv_ages <- tmp_surv_ages[grep("^a.*$", tmp_surv_ages)]
+  age_survey_df <- lst$age_survey_df
+  tmp_surv_ages <- rownames(age_survey_df)
   age_max_survey <- max(as.numeric(gsub("a", "", tmp_surv_ages)))
 
-  age_catch_df <- lst$age_catch_df %>%
-    mutate(flag = 1)
-  tmp_catch_ages <- names(age_catch_df)
-  tmp_catch_ages <- tmp_catch_ages[grep("^a.*$", tmp_catch_ages)]
+  age_catch_df <- lst$age_catch_df
+  tmp_catch_ages <- rownames(age_catch_df)
   age_max_catch <- max(as.numeric(gsub("a", "", tmp_catch_ages)))
   if(age_max_survey != age_max_catch){
     stop("Check the survey and catch age comp files from the assessment model input. ",

@@ -269,11 +269,13 @@ csv_data <- function(sel_hist = TRUE){
   wage_ss <- load_from_csv("wage_ss.csv")
   wage_unfished <- load_from_csv("unfished_waa.csv")
   catch <- load_from_csv("hake_totcatch.csv")
+
   # Survey abundance
   df_survey <- load_from_csv("acoustic_survey.csv")
   age_survey_df <- load_from_csv("agecomps_survey.csv")
   age_catch_df <- load_from_csv("agecomps_fishery.csv")
-  survey <- load_from_csv("survey.csv")
+  survey <- load_from_csv("survey.csv") %>% pull()
+
   # Load the age comps
   age_survey_tmp <- load_from_csv("age_survey_ss.csv")
   age_catch_tmp <- load_from_csv("age_catch_ss.csv")
@@ -430,9 +432,10 @@ setup_blank_om_objects <- function(yrs,
                          dimnames = list(yrs = yrs,
                                          space = seq_len(n_space),
                                          season = seq_len(n_season)))
-  survey <- array(NA,
-                  dim = c(n_yr),
-                  dimnames = list(yrs = yrs))
+  # survey <- array(NA,
+  #                 dim = c(n_yr),
+  #                 dimnames = list(yrs = yrs))
+  survey <- NULL
   survey_true <- array(NA,
                        dim = c(n_space, n_yr),
                        dimnames = list(space = seq_len(n_space),
@@ -442,6 +445,7 @@ setup_blank_om_objects <- function(yrs,
                      n_space,
                      dimnames = list(yrs = yrs,
                                      space = seq_len(n_space)))
+
   age_comps_surv <- array(NA,
                           dim = c(max_surv_age, n_yr),
                           dimnames = list(ages = seq_len(max_surv_age),
@@ -704,7 +708,7 @@ extract_age_comps <- function(ss_model = NULL,
                               fleet = 1,
                               s_yr = NULL,
                               m_yr = NULL,
-                              fill = -1,
+                              fill = NA,
                               yr_col = "Yr",
                               fleet_col = "FltSvy"){
 
