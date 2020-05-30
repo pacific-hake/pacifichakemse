@@ -28,6 +28,7 @@
 #' @param sel_hist Use historical selectivity?
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
+#' @param log_phi_survey Survey phi parameter value
 #' @param catch_props_space_season Proportion of catch to take by season and space
 #' @param ... Absorb arguments destined for other functions
 #'
@@ -41,7 +42,8 @@
 #' \dontrun{
 #' df <- load_data_seasons(n_season = 2, n_space = 2)
 #' }
-load_data_seasons <- function(n_season = 4,
+load_data_seasons <- function(ss_model = NULL,
+                              n_season = 4,
                               season_names = NULL,
                               n_space = 2,
                               space_names = NULL,
@@ -68,6 +70,7 @@ load_data_seasons <- function(n_season = 4,
                               sel_change_yr = 1991,
                               sel_hist = TRUE,
                               f_space = c(0.2612, 0.7388),
+                              log_phi_survey = log(11.46),
                               catch_props_space_season = NULL,
                               ...){
 
@@ -98,6 +101,7 @@ load_data_seasons <- function(n_season = 4,
   verify_argument(sel_change_yr, c("numeric", "integer"), 1)
   verify_argument(sel_hist, "logical", 1)
   verify_argument(f_space, "numeric", n_space)
+  verify_argument(log_phi_survey, "numeric", 1)
   if(!is.null(catch_props_space_season)){
     verify_argument(catch_props_space_season, "list", n_space)
     map(catch_props_space_season, ~{
@@ -116,6 +120,15 @@ load_data_seasons <- function(n_season = 4,
 
   lst <- csv_data(sel_hist)
 
+  lst$age_survey_df <- extract_age_comps(ss_model,
+                                         fleet = 2,
+                                         s_yr = s_yr,
+                                         m_yr = m_yr)
+  lst$age_catch_df <- extract_age_comps(ss_model,
+                                        fleet = 1,
+                                        s_yr = s_yr,
+                                        m_yr = m_yr)
+browser()
   if(is.null(move_init)){
     # n_space must be 2 due to error check above
     move_init <-  c(0.25, 0.75)
@@ -124,7 +137,7 @@ load_data_seasons <- function(n_season = 4,
 
   yrs <- s_yr:(m_yr + yr_future)
   n_yr <- length(yrs)
-  t_end <- length(yrs) * n_season
+  t_end <- n_yr * n_season
 
   # Age stuff
   n_age <- length(ages)
@@ -175,8 +188,22 @@ load_data_seasons <- function(n_season = 4,
   # Set up age comps
   age_survey_df <- lst$age_survey_df %>%
     mutate(flag = 1)
+  tmp_surv_ages <- names(age_survey_df)
+  tmp_surv_ages <- tmp_surv_ages[grep("^a.*$", tmp_surv_ages)]
+  age_max_survey <- max(as.numeric(gsub("a", "", tmp_surv_ages)))
+
   age_catch_df <- lst$age_catch_df %>%
     mutate(flag = 1)
+  tmp_catch_ages <- names(age_catch_df)
+  tmp_catch_ages <- tmp_catch_ages[grep("^a.*$", tmp_catch_ages)]
+  age_max_catch <- max(as.numeric(gsub("a", "", tmp_catch_ages)))
+  if(age_max_survey != age_max_catch){
+    stop("Check the survey and catch age comp files from the assessment model input. ",
+         "They must have the same number of ages for the TMB assessment model to work. ",
+         "The max age in the survey file is ", age_max_survey, ". The maximum age in the ",
+         "catch file is ", age_max_catch,
+         call. = FALSE)
+  }
   # Set up survey season
   if(n_season == 1){
     survey_season <-  1
@@ -222,6 +249,7 @@ load_data_seasons <- function(n_season = 4,
                      log_h = lst$parms_scalar$logh,
                      log_m_init = lst$parms_scalar$logMinit,
                      log_sd_surv = lst$parms_scalar$logSDsurv,
+                     log_phi_survey = log_phi_survey,
                      log_phi_catch = lst$parms_scalar$logphi_catch,
                      # Selectivity parameters
                      p_sel_fish = lst$parms_sel %>% filter(source == "fish"),
@@ -251,7 +279,7 @@ load_data_seasons <- function(n_season = 4,
             wage_survey = wage_survey,
             wage_mid = wage_mid,
             sel_idx = which(yrs == sel_change_yr),
-            year_sel = length(sel_change_yr:max(yrs)),
+            yr_sel = length(sel_change_yr:max(yrs)),
             m_sel = m_sel,
             mat_sel = as.numeric(mat),
             n_season = n_season,
@@ -265,6 +293,7 @@ load_data_seasons <- function(n_season = 4,
             # Analytical solution
             log_q = log(1.14135),
             # Selectivity
+            sel_change_yr = sel_change_yr,
             selectivity_change = selectivity_change,
             s_min = s_min,
             s_max = s_max,
@@ -282,8 +311,8 @@ load_data_seasons <- function(n_season = 4,
             survey_err = lst$ac_data$ss.error,
             ss_survey = lst$ac_data$ss.survey,
             flag_survey = lst$ac_data$sflag,
-            age_survey = lst$age_survey_tmp,
-            age_max_age = 15,
+            age_survey = age_survey_df,
+            age_max_age = age_max_survey,
             ss_catch = lst$ac_data$ss.catch,
             flag_catch = lst$ac_data$cflag,
             age_catch = lst$age_catch_tmp,
@@ -312,8 +341,9 @@ load_data_seasons <- function(n_season = 4,
             move_out = move_out,
             move_slope = move_slope,
             catch_props_space_season = catch_props_space_season,
-            catch = lst$catch,
+            catch_obs = lst$catch,
             p_sel = d_sel,
+            log_phi_survey = log_phi_survey,
             f_space = f_space)
 
   df$catch_country <- lst$catch_country %>%

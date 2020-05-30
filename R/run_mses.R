@@ -88,7 +88,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   ss_model <- load_ss_model_from_rds(ss_model_output_dir)
 
   # Prepare data for operating model
-  df <- load_data_seasons(...)
+  df <- load_data_seasons(ss_model, ...)
 
   # Run the operating model
   sim_data <- run_agebased_true_catch(df, om_params_seed, ...)

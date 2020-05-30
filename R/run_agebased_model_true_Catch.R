@@ -21,6 +21,7 @@ run_agebased_true_catch <- function(df = NULL,
 
   lst <- setup_blank_om_objects(yrs = df$yrs,
                                 ages = df$ages,
+                                max_surv_age = df$age_max_age,
                                 n_space = df$n_space,
                                 n_season = df$n_season)
 

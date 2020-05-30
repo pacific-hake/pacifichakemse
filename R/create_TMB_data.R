@@ -25,6 +25,30 @@ create_TMB_data <- function(sim_data = NULL,
     df$wage_mid <- wage_add_yr(df$wage_mid)
     df$wage_ssb <- wage_add_yr(df$wage_ssb)
   }
+  df$wage_catch <- df$wage_catch %>%
+    select(-c(Yr, Fleet)) %>%
+    as.matrix() %>%
+    t()
+  df$wage_survey <- df$wage_survey %>%
+    select(-c(Yr, Fleet)) %>%
+    as.matrix() %>%
+    t()
+  df$wage_mid <- df$wage_mid %>%
+    select(-c(Yr, Fleet)) %>%
+    as.matrix() %>%
+    t()
+  df$wage_ssb <- df$wage_ssb %>%
+    select(-c(Yr, Fleet)) %>%
+    as.matrix() %>%
+    t()
+
+  # Make tibbles into matrices or vectors for TMB input
+  # Logical must be changed to integer
+  df$flag_sel <- df$flag_sel %>% as.integer()
+  df$s_min <- 1
+  df$survey <- df$survey %>% pull(x) %>% as.vector()
+  # This needs to be an index, not the year
+  df$sel_change_yr <- which(df$sel_change_yr == df$yrs)
 
   # Load parameters from the assessment
   # Steepness prior distribution
@@ -54,6 +78,12 @@ create_TMB_data <- function(sim_data = NULL,
   df$age_survey <- sim_data$age_comps_surv
   df$catch_obs <- sim_data$catch
   df$age_catch <- sim_data$catch_age
+
+  # Remove elements that will cause failure in the TMB code
+  keep <- !names(df) %in% c("space_names",
+                            "season_names",
+                            "age_names")
+  df <- df[keep]
 
   # if(history){
   #   df$survey <- df$survey[,1]

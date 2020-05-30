@@ -128,7 +128,7 @@ run_year_loop_om <- function(df = NULL,
         (n_tot_yrs[age_1_ind:(df$age_max_age)] *
            lst$surv_sel[age_1_ind:(df$age_max_age)] * lst$q) / surv_tmp
 
-      lst$age_comps_surv[df$age_maxage, yr_ind] <<-
+      lst$age_comps_surv[df$age_max_age, yr_ind] <<-
         sum(n_tot_yrs[(df$age_max_age + 1):df$n_age] *
               lst$surv_sel[(df$age_max_age + 1):df$n_age] * lst$q) / surv_tmp
     }else{

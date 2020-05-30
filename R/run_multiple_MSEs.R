@@ -16,7 +16,7 @@
 #'
 #' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
 #' F0, parms, N, converge, ams, amc, V
-#' @importFrom TMB sdreport
+#' @importFrom TMB sdreport MakeADFun
 #' @importFrom stats rnorm nlminb runif predict lm median optim setNames
 #' @importFrom utils read.csv read.table
 #' @export
@@ -55,11 +55,11 @@ run_multiple_MSEs <- function(df = NULL,
   yr_all <- c(df$yrs, yr_sims)
 
   # Save the estimated parameters from the EM (exclude time varying)
-  em_parms_save <- array(NA, dim = c(n_sim_yrs, 4))
-  f40_save <- array(NA, n_sim_yrs)
-  ssb_save <- list()
-  r_save <- list()
-  catch_save <- list()
+  # em_parms_save <- array(NA, dim = c(n_sim_yrs, 4))
+  # f40_save <- array(NA, n_sim_yrs)
+  # ssb_save <- list()
+  # r_save <- list()
+  # catch_save <- list()
 
   # Calculate survey years, where odd years are survey years
   first_sim_surv_yr <- ifelse(yr_start %% 2 == 1, yr_start, yr_start + 1)
@@ -69,8 +69,32 @@ run_multiple_MSEs <- function(df = NULL,
 
   df <- create_TMB_data(sim_data, df, ss_model)
 
-  # modify survey objects in the simulated survey years
+  params_new <- df$parms_init
+  params_new$f_0 <- sim_data$f_out_save
+  params_new$r_dev <- df$parms_init$r_in
+  if(df$catch[df$n_yr] == 0){
+    params_new$f_0[length(params_new$f_0)] <- 0
+  }
+  # Convert some parameter objects to base types
+  params_new$p_sel_fish <- params_new$p_sel_fish %>%
+    pull(value)
+  params_new$p_sel_surv <- params_new$p_sel_surv %>%
+    pull(value)
+  params_new$init_n <- params_new$init_n %>%
+    pull(val)
+  params_new$r_in <- params_new$r_in %>%
+    pull(x)
+  params_new$r_dev <- params_new$r_dev %>%
+    pull(x)
+  # Remove `age` column
+  params_new$p_sel <- params_new$p_sel[, -1]
+
+browser()
+  obj <-MakeADFun(df, params_new, DLL = "runHakeassessment", silent = TRUE)
+browser()
+  # Modify survey objects in the simulated survey years and add catch for new year
   map(yr_sims, function(yr = .x){
+    yr_ind <- which(yr == yr_all)
     df$flag_survey <- c(df$flag_survey, ifelse(yr %in% yr_survey_sims, 1, -1))
     df$survey_x <- c(df$survey_x, ifelse(yr %in% yr_survey_sims, 2, -2))
     df$ss_survey <- c(df$ss_survey, ifelse(yr %in% yr_survey_sims,
@@ -79,26 +103,26 @@ run_multiple_MSEs <- function(df = NULL,
     df$survey_err <- c(df$survey_err, ifelse(yr %in% yr_survey_sims,
                                              mean(df$survey_err[df$survey_err < 1]),
                                              1))
+    df$ss_catch <- c(df$ss_catch, ceiling(mean(df$ss_catch[df$ss_catch > 0])))
+    df$flag_catch <- c(df$flag_catch, 1)
+    # Add a survey if catches are 0
+    browser()
+    if(df$catch[yr_ind] == 0 & df$flag_survey[yr_ind] == -1){
+      message("Stock in peril! Conducting emergency survey")
+      df$flag_survey[df$catch == 0] <- 1
+      # Emergency survey adds more 200 age samples
+      df$ss_survey[df$catch == 0] <- ceiling(mean(df$ss_survey[df$ss_survey > 0])) + 200
+      df$survey_x[df$catch == 0] <- 2
+      df$survey_err[df$catch == 0] <- mean(df$survey_err[df$survey_err < 1])
+    }
   })
-  df$ss_catch <- c(df$ss_catch, ceiling(mean(df$ss_catch[df$ss_catch > 0])))
-  df$flag_catch <- c(df$flag_catch, 1)
+
+  #       From getRefPoint()
+  #       df$Catch <- c(df$Catch, Fnew[[1]])
+  #
+  browser()
 }
-browser()
 
-
-#
-#       df$Catch <- c(df$Catch, Fnew[[1]])
-#
-#       ## Add a survey if catches are 0
-#       if(df$Catch[yr] == 0 & df$flag_survey[yr] == -1){
-#         print('Stock in peril! Conducting emergency survey')
-#
-#
-#         df$flag_survey[df$Catch == 0] <- 1
-#         df$ss_survey[df$Catch == 0] <- ceiling(mean(df$ss_survey[df$ss_survey > 0]))+200 # emergency survey adds more 200 age samples!
-#         df$survey_x[df$Catch == 0] <- 2
-#         df$survey_err[df$Catch == 0] <- mean(df$survey_err[df$survey_err < 1])
-#       }
 #
 #       df$b[length(df$b)] <- df$bfuture
 #       df$b <- c(df$b,df$bfuture)

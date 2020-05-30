@@ -5,6 +5,7 @@
 \title{Prepare the data for the operating model}
 \usage{
 load_data_seasons(
+  ss_model = NULL,
   n_season = 4,
   season_names = NULL,
   n_space = 2,
@@ -32,6 +33,7 @@ load_data_seasons(
   sel_change_yr = 1991,
   sel_hist = TRUE,
   f_space = c(0.2612, 0.7388),
+  log_phi_survey = log(11.46),
   catch_props_space_season = NULL,
   ...
 )
@@ -91,6 +93,8 @@ load_data_seasons(
 
 \item{f_space}{The proportion of TAC given to each country. First value is Canada,
 the second is the US}
+
+\item{log_phi_survey}{Survey phi parameter value}
 
 \item{catch_props_space_season}{Proportion of catch to take by season and space}
 

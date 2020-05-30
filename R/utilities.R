@@ -320,6 +320,7 @@ csv_data <- function(sel_hist = TRUE){
 #'
 #' @param yrs A vector of years
 #' @param ages A vector of ages
+#' @param max_surv_age The maximum age in the survey age comp data
 #' @param n_space The number of spaces in the movement model
 #' @param n_season The number of seasons in the movement model
 #'
@@ -327,6 +328,7 @@ csv_data <- function(sel_hist = TRUE){
 #' @export
 setup_blank_om_objects <- function(yrs,
                                    ages,
+                                   max_surv_age,
                                    n_space,
                                    n_season){
 
@@ -441,8 +443,8 @@ setup_blank_om_objects <- function(yrs,
                      dimnames = list(yrs = yrs,
                                      space = seq_len(n_space)))
   age_comps_surv <- array(NA,
-                          dim = c(max(ages), n_yr),
-                          dimnames = list(ages = seq_len(max(ages)),
+                          dim = c(max_surv_age, n_yr),
+                          dimnames = list(ages = seq_len(max_surv_age),
                                           yrs = yrs))
   age_comps_surv_space <- array(NA,
                                 dim = c(max(ages), n_yr, n_space),
@@ -454,8 +456,8 @@ setup_blank_om_objects <- function(yrs,
                      dimnames = list(ages = seq_len(max(ages)),
                                      yrs= yrs))
   age_comps_catch <- array(NA,
-                           dim = c(max(ages), n_yr),
-                           dimnames = list(ages = seq_len(max(ages)),
+                           dim = c(max_surv_age, n_yr),
+                           dimnames = list(ages = seq_len(max_surv_age),
                                            yrs = yrs))
   age_comps_catch_space <- array(NA,
                                  dim = c(max(ages), n_yr, n_space),
@@ -676,4 +678,74 @@ get_args <- function(){
   f <- get(as.character(cl[[1]]), mode = "function", sys.frame(-2))
   cl <- match.call(definition = f, call = cl)
   as.list(cl)[-1]
+}
+
+#' Extract the age comps from the SS assessment model output into a format
+#' required for input into the TMB assessment model
+#'
+#' @details Proportions at age for each year are calculated and returned
+#'
+#' @param ss_model SS model input/output as read in by [load_ss_model_from_rds()]
+#' @param fleet 1 for fishery, 2 for survey
+#' @param s_yr See [load_data_seasons()]
+#' @param m_yr See [load_data_seasons()]
+#' @param fill Value to replace NAs in the table, it can also be NA, but not NULL
+#' @param yr_col The name of the column in `ss_model$dat$agecomp` that contains
+#' the year
+#' @param fleet_col The name of the column in `ss_model$dat$agecomp` that contains
+#' the fleet code
+#'
+#' @return The matrix representing all years from `s_yr` to `m_yr` with data included
+#' for years which are found in the `ss_model` data. Years not in the `ss_model` data
+#' will be filled with the value of `fill`
+#' @export
+extract_age_comps <- function(ss_model = NULL,
+                              fleet = 1,
+                              s_yr = NULL,
+                              m_yr = NULL,
+                              fill = -1,
+                              yr_col = "Yr",
+                              fleet_col = "FltSvy"){
+
+  verify_argument(ss_model, "list")
+  verify_argument(fleet, "numeric", 1)
+  stopifnot(fleet %in% c(1, 2))
+  verify_argument(s_yr, "numeric", 1)
+  verify_argument(m_yr, "numeric", 1)
+  if(is.na(fill)){
+    fill <- NA_real_
+  }
+  verify_argument(fill, "numeric", 1)
+  verify_argument(yr_col, "character", 1)
+  verify_argument(fleet_col, "character", 1)
+
+  age_comp_data <- ss_model$dat$agecomp
+  if(!yr_col %in% names(age_comp_data)){
+    stop("The column `", yr_col, "` does not exist in the SS age comp data table.",
+         call. = FALSE)
+  }
+  if(!fleet_col %in% names(age_comp_data)){
+    stop("The column `", fleet_col, "` does not exist in the SS age comp data table.",
+         call. = FALSE)
+  }
+  age_comps <- age_comp_data %>%
+    filter(!!sym(fleet_col) == fleet)
+  if(nrow(age_comps) == 0){
+    stop("The fleet number `", fleet, "` was not found in the SS age comp data table. ",
+         call. = FALSE)
+  }
+  age_comps_yrs <- age_comps %>% select(!!sym(yr_col)) %>% pull()
+  age_comps <- age_comps %>%
+    select(matches("^a\\d+$")) %>%
+    mutate(row_sum = rowSums(.)) %>%
+    mutate_at(.vars = vars(-row_sum), .funs = list(~ . / row_sum)) %>%
+    select(-row_sum) %>%
+    mutate(yr = age_comps_yrs) %>%
+    select(yr, everything()) %>%
+    tidyr::complete(yr = seq(s_yr, m_yr)) %>%
+    replace(is.na(.), fill) %>%
+    t()
+  colnames(age_comps) <- age_comps[1,]
+  age_comps <- age_comps[-1,]
+  age_comps
 }

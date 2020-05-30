@@ -4,12 +4,14 @@
 \alias{setup_blank_om_objects}
 \title{Construct blank objects for Operating model outputs}
 \usage{
-setup_blank_om_objects(yrs, ages, n_space, n_season)
+setup_blank_om_objects(yrs, ages, max_surv_age, n_space, n_season)
 }
 \arguments{
 \item{yrs}{A vector of years}
 
 \item{ages}{A vector of ages}
+
+\item{max_surv_age}{The maximum age in the survey age comp data}
 
 \item{n_space}{The number of spaces in the movement model}
 
