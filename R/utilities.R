@@ -290,7 +290,6 @@ csv_data <- function(sel_hist = TRUE){
   # PSEL <- as.matrix(load_from_csv("p_MLE.csv")
   b <- as.matrix(load_from_csv("b_input.csv"))
   # load parameters specifically for hake
-  parms_sel <- load_from_csv("selectivity.csv")
   init_n <- as.matrix(load_from_csv("initN.csv"))
   r_dev <- as.matrix(load_from_csv("Rdev.csv"))
   p_sel <- NA
@@ -825,4 +824,50 @@ load_parameters <- function(ss_model = NULL){
        log_sd_surv = log_sd_surv,
        log_sd_r = log_sd_r,
        log_phi_catch = log_phi_catch)
+}
+
+#' Load a selectivity parameter estimates from the SS model output
+#'
+#' @param ss_model SS3 model output as created by [create_rds_file()]
+#'
+#' @return A [data.frame] of estimates, age, and source (fishery and survey)
+#' @export
+load_sel_parameters <- function(ss_model = NULL,
+                                fish_ages = NULL,
+                                survey_ages = NULL){
+
+  verify_argument(ss_model, "list")
+  verify_argument(fish_ages, c("integer", "numeric"))
+  verify_argument(survey_ages, c("integer", "numeric"))
+
+  parm_tbl <- ss_model$parameters %>% as_tibble()
+  if(!"Value" %in% names(parm_tbl)){
+    stop("The column `Value` does not exist in the SS output parameter table.",
+         call. = FALSE)
+  }
+  if(!length(grepl("^SR_LN", parm_tbl$Label))){
+    stop("The `log_r_init` parameter was not found in the SS model output. ",
+         "The regular expression on the parameter label is `^SR_LN`.",
+         call. = FALSE)
+  }
+  # assume the parameters start at 0
+  fish <- parm_tbl %>%
+    filter(grepl("^AgeSel_.*_Fishery", Label))
+  fish <- fish[-(1:min(fish_ages)),]
+  fish <- fish[-(max(fish_ages):nrow(fish)),]
+  fish <- fish %>%
+    transmute(value = Value) %>%
+    mutate(source = "fish") %>%
+    mutate(age = fish_ages)
+
+  survey <- parm_tbl %>%
+    filter(grepl("^AgeSel_.*_Acoustic_Survey", Label))
+  survey <- survey[-(1:min(survey_ages)),]
+  survey <- survey[-(max(survey_ages):nrow(survey)),]
+  survey <- survey %>%
+    transmute(value = Value) %>%
+    mutate(source = "survey") %>%
+    mutate(age = survey_ages)
+
+  bind_rows(fish, survey)
 }

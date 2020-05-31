@@ -245,6 +245,9 @@ load_data_seasons <- function(ss_model = NULL,
     rename(value = 2)
 
   lst$parms_scalar <- load_parameters(ss_model)
+  lst$parms_sel <- load_sel_parameters(ss_model,
+                                       fish_ages = s_min:s_max,
+                                       survey_ages = s_min_survey:s_max_survey)
   browser()
   parms_init <- list(log_r_init = lst$parms_scalar$log_r_init + log(r_mul),
                      log_h = lst$parms_scalar$log_h,

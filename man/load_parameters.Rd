@@ -4,7 +4,7 @@
 \alias{load_parameters}
 \title{Load a list of parameter estimates from the SS model output}
 \usage{
-load_parameters(ss_model)
+load_parameters(ss_model = NULL)
 }
 \arguments{
 \item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}}
