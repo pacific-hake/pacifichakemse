@@ -22,7 +22,7 @@ load_data_seasons(
   move_out = 0.85,
   move_south = 0.05,
   move_slope = 0.9,
-  ages_no_move = c(0, 1),
+  ages_no_move = 0,
   selectivity_change = 0,
   s_min = 1,
   s_max = 6,

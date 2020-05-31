@@ -268,7 +268,8 @@ csv_data <- function(sel_hist = TRUE){
 
   wage_ss <- load_from_csv("wage_ss.csv")
   wage_unfished <- load_from_csv("unfished_waa.csv")
-  catch <- load_from_csv("hake_totcatch.csv")
+  catch <- load_from_csv("hake_totcatch.csv") %>%
+    transmute(year, value = Fishery)
 
   # Survey abundance
   df_survey <- load_from_csv("acoustic_survey.csv")
@@ -289,7 +290,6 @@ csv_data <- function(sel_hist = TRUE){
   # PSEL <- as.matrix(load_from_csv("p_MLE.csv")
   b <- as.matrix(load_from_csv("b_input.csv"))
   # load parameters specifically for hake
-  parms_scalar <- load_from_csv("parms_scalar.csv")
   parms_sel <- load_from_csv("selectivity.csv")
   init_n <- as.matrix(load_from_csv("initN.csv"))
   r_dev <- as.matrix(load_from_csv("Rdev.csv"))
@@ -310,7 +310,6 @@ csv_data <- function(sel_hist = TRUE){
        age_catch_tmp = age_catch_tmp,
        ac_data = ac_data,
        b = b,
-       parms_scalar = parms_scalar,
        parms_sel = parms_sel,
        init_n = init_n,
        r_dev = r_dev,
@@ -754,4 +753,76 @@ extract_age_comps <- function(ss_model = NULL,
   colnames(age_comps) <- age_comps[1,]
   age_comps <- age_comps[-1,]
   age_comps
+}
+
+#' Load a list of parameter estimates from the SS model output
+#'
+#' @param ss_model SS3 model output as created by [create_rds_file()]
+#'
+#' @return A named [list] of parameter estimates
+#' @importFrom tibble as_tibble
+#' @export
+load_parameters <- function(ss_model = NULL){
+
+  verify_argument(ss_model, "list")
+  parm_tbl <- ss_model$parameters %>% as_tibble()
+  if(!"Value" %in% names(parm_tbl)){
+    stop("The column `Value` does not exist in the SS output parameter table.",
+         call. = FALSE)
+  }
+  if(!length(grepl("^SR_LN", parm_tbl$Label))){
+    stop("The `log_r_init` parameter was not found in the SS model output. ",
+         "The regular expression on the parameter label is `^SR_LN`.",
+         call. = FALSE)
+  }
+
+  if(!length(grepl("^SR_BH", parm_tbl$Label))){
+    stop("The `log_h` parameter was not found in the SS model output. ",
+         "The regular expression on the parameter label is `^SR_BH`.",
+         call. = FALSE)
+  }
+
+  if(!length(grepl("^NatM", parm_tbl$Label))){
+    stop("The `log_m_init` parameter was not found in the SS model output. ",
+         "The regular expression on the parameter label is `^NatM`.",
+         call. = FALSE)
+  }
+
+  if(!length(grepl("^NatM", parm_tbl$Label))){
+    stop("The `log_sd_surv` parameter was not found in the SS model output. ",
+         "The regular expression on the parameter label is `^Q_extraSD_Acoustic_Survey`.",
+         call. = FALSE)
+  }
+
+  if(!length(grepl("^SR_sigmaR", parm_tbl$Label))){
+    stop("The `log_sd_r` parameter was not found in the SS model output. ",
+         "The regular expression on the parameter label is `^SR_sigmaR`.",
+         call. = FALSE)
+  }
+
+  if(!length(grepl("^ln\\(EffN_mult\\)_1$", parm_tbl$Label))){
+    stop("The `log_phi_catch` parameter was not found in the SS model output. ",
+         "The regular expression on the parameter label is `^ln\\(EffN_mult\\)_1$`.",
+         call. = FALSE)
+  }
+
+  log_r_init <- parm_tbl %>% filter(grepl("^SR_LN", Label)) %>%
+    pull(Value)
+  log_h <- parm_tbl %>% filter(grepl("^SR_BH", Label)) %>%
+    pull(Value) %>% log()
+  log_m_init <- parm_tbl %>% filter(grepl("^NatM", Label)) %>%
+    pull(Value) %>% log()
+  log_sd_surv <- parm_tbl %>% filter(grepl("^Q_extraSD_Acoustic_Survey", Label)) %>%
+    pull(Value) %>% log()
+  log_sd_r <- parm_tbl %>% filter(grepl("^SR_sigmaR", Label)) %>%
+    pull(Value) %>% log()
+  log_phi_catch <- parm_tbl %>% filter(grepl("^ln\\(EffN_mult\\)_1$", Label)) %>%
+    pull(Value)
+
+  list(log_r_init = log_r_init,
+       log_h = log_h,
+       log_m_init = log_m_init,
+       log_sd_surv = log_sd_surv,
+       log_sd_r = log_sd_r,
+       log_phi_catch = log_phi_catch)
 }

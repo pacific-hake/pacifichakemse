@@ -22,7 +22,7 @@ run_year_loop_om <- function(df = NULL,
     # Extract data for the year
     yr_ind <- which(yr == df$yrs)
     wage <- get_wa_dfs(df, yr)
-    r_y <- df$parms_init$r_in %>% filter(yr == !!yr) %>% pull(x)
+    r_y <- df$parms_init$r_in %>% filter(yr == !!yr) %>% pull(value)
     m_yrs <- lst$m_age
     # M is distributed throughout the yrs
     m_season <- m_yrs / df$n_season

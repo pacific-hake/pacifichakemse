@@ -48,6 +48,12 @@ create_TMB_data <- function(sim_data = NULL,
   df$s_min <- 1
   # This needs to be an index, not the year
   df$sel_change_yr <- which(df$sel_change_yr == df$yrs)
+  # Remove age column
+  df$parms_init$init_n <- df$parms_init$init_n %>% select(value)
+  df$parms_init$r_in <- df$parms_init$r_in %>% pull(value)
+  df$parms_init$p_sel <- df$parms_init$p_sel[, -1]
+  df$parms_init$f_0 <- sim_data$f_out_save
+browser()
 
   # Load parameters from the assessment
   # Steepness prior distribution
@@ -75,7 +81,8 @@ create_TMB_data <- function(sim_data = NULL,
   # Move things from sim_data into output list
   df$survey <- sim_data$survey
   df$age_survey <- sim_data$age_comps_surv
-  df$catch_obs <- sim_data$catch
+  #df$catch_obs <- sim_data$catch
+  df$catch_obs <- df$catch_obs %>% select(value) %>% as.matrix()
   df$age_catch <- sim_data$catch_age
 
   # Remove elements that will cause failure in the TMB code

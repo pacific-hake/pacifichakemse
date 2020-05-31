@@ -83,9 +83,9 @@ run_multiple_MSEs <- function(df = NULL,
   params_new$init_n <- params_new$init_n %>%
     pull(val)
   params_new$r_in <- params_new$r_in %>%
-    pull(x)
+    pull(value)
   params_new$r_dev <- params_new$r_dev %>%
-    pull(x)
+    pull(value)
   # Remove `age` column
   params_new$p_sel <- params_new$p_sel[, -1]
 

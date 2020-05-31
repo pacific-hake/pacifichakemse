@@ -35,7 +35,7 @@
 #' @param ... Absorb arguments destined for other functions
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
-#' @importFrom tibble tibble
+#' @importFrom tibble tibble as_tibble
 #' @importFrom purrr map_dfr map_dfc
 #' @importFrom dplyr pull summarize_all summarize_at
 #' @export
@@ -61,7 +61,7 @@ load_data_seasons <- function(ss_model = NULL,
                               move_out = 0.85,
                               move_south = 0.05,
                               move_slope = 0.9,
-                              ages_no_move = c(0, 1),
+                              ages_no_move = 0,
                               selectivity_change = 0,
                               s_min = 1,
                               s_max = 6,
@@ -242,13 +242,16 @@ load_data_seasons <- function(ss_model = NULL,
     as.data.frame() %>%
     mutate(age = ages[-which(ages_no_move %in% ages)]) %>%
     select(age, everything()) %>%
-    rename(val = 2)
-  parms_init <- list(log_r_init = lst$parms_scalar$logRinit + log(r_mul),
-                     log_h = lst$parms_scalar$logh,
-                     log_m_init = lst$parms_scalar$logMinit,
-                     log_sd_surv = lst$parms_scalar$logSDsurv,
+    rename(value = 2)
+
+  lst$parms_scalar <- load_parameters(ss_model)
+  browser()
+  parms_init <- list(log_r_init = lst$parms_scalar$log_r_init + log(r_mul),
+                     log_h = lst$parms_scalar$log_h,
+                     log_m_init = lst$parms_scalar$log_m_init,
+                     log_sd_surv = lst$parms_scalar$log_sd_surv,
                      log_phi_survey = log_phi_survey,
-                     log_phi_catch = lst$parms_scalar$logphi_catch,
+                     log_phi_catch = lst$parms_scalar$log_phi_catch,
                      # Selectivity parameters
                      p_sel_fish = lst$parms_sel %>% filter(source == "fish"),
                      p_sel_surv = lst$parms_sel %>% filter(source == "survey"),
