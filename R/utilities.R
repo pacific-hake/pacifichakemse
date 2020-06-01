@@ -309,7 +309,6 @@ csv_data <- function(sel_hist = TRUE){
        age_catch_tmp = age_catch_tmp,
        ac_data = ac_data,
        b = b,
-       parms_sel = parms_sel,
        init_n = init_n,
        r_dev = r_dev,
        p_sel = p_sel,

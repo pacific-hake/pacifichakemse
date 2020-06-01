@@ -70,7 +70,7 @@ run_multiple_MSEs <- function(df = NULL,
   df <- create_TMB_data(sim_data, df, ss_model)
 
   params_new <- df$parms_init
-  params_new$f_0 <- sim_data$f_out_save
+  params_new$f_0 <- rowSums(sim_data$f_out_save)
   params_new$r_dev <- df$parms_init$r_in
   if(df$catch[df$n_yr] == 0){
     params_new$f_0[length(params_new$f_0)] <- 0
@@ -81,13 +81,7 @@ run_multiple_MSEs <- function(df = NULL,
   params_new$p_sel_surv <- params_new$p_sel_surv %>%
     pull(value)
   params_new$init_n <- params_new$init_n %>%
-    pull(val)
-  params_new$r_in <- params_new$r_in %>%
     pull(value)
-  params_new$r_dev <- params_new$r_dev %>%
-    pull(value)
-  # Remove `age` column
-  params_new$p_sel <- params_new$p_sel[, -1]
 
 browser()
   obj <-MakeADFun(df, params_new, DLL = "runHakeassessment", silent = TRUE)

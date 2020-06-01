@@ -75,10 +75,10 @@ run_season_loop_om <- function(df,
       if(e_tmp / b_tmp >= 0.9){
         if(df$yrs[yr_ind] < df$m_yr){
           # Stop if in the past
-          stop("Catch exceeds available biomass in yrs: ",
-               df$yrs[yr_ind], " and season ",
-               season, " , space ", space,
-          call. = FALSE)
+          # stop("Catch exceeds available biomass in yrs: ",
+          #      df$yrs[yr_ind], " and season ",
+          #      season, " , space ", space,
+          # call. = FALSE)
         }
         e_tmp <- 0.75 * b_tmp
         lst$catch_quota_n[yr_ind, space, season] <<- 1
