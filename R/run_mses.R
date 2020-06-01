@@ -84,7 +84,8 @@ run_mses <- function(ss_model_output_dir = NULL,
     dir.create(results_dir)
   }
 
-  ss_model <- load_ss_model_from_rds(ss_model_output_dir)
+  # Load the SS model inputs and outputs in the formats required
+  ss_model <- load_ss_model_from_rds(ss_model_output_dir, ...)
   ss_model_data <- load_ss_model_data(ss_model, ...)
 
   # Prepare data for operating model

@@ -4,10 +4,12 @@
 \alias{create_rds_file}
 \title{Create an rds file to hold an SS model's data and outputs.}
 \usage{
-create_rds_file(model_dir = NULL)
+create_rds_file(model_dir = NULL, ...)
 }
 \arguments{
 \item{model_dir}{Directory name of model to be loaded}
+
+\item{...}{Absorb arguments destined for other functions}
 }
 \value{
 \code{\link[base:invisible]{base::invisible()}}

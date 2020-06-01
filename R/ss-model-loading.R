@@ -1,10 +1,13 @@
 #' Create an rds file to hold an SS model's data and outputs.
 #'
 #' @param model_dir Directory name of model to be loaded
+#' @param ... Absorb arguments destined for other functions
 #'
 #' @return [base::invisible()]
+#' @importFrom r4ss SSgetMCMC
 #' @export
-create_rds_file <- function(model_dir = NULL){
+create_rds_file <- function(model_dir = NULL,
+                            ...){
 
   verify_argument(model_dir, "character", 1)
 
@@ -23,6 +26,11 @@ create_rds_file <- function(model_dir = NULL){
 
   # If this point is reached, no RDS file exists so it has to be built from scratch
   model <- load_ss_files(model_dir)
+  mcmc_dir <- file.path(model_dir, "mcmc")
+  if(dir.exists(mcmc_dir)){
+    mcmc_out <- SSgetMCMC(dir = mcmc_dir, writecsv = FALSE, verbose = TRUE)
+    model$mcmccalcs <- calc_mcmc(mcmc_out, ...)
+  }
 
   saveRDS(model, file = rds_file)
   invisible()
@@ -33,16 +41,18 @@ create_rds_file <- function(model_dir = NULL){
 #' @details Load an SS3 model from an RDS file and return as a [list]
 #'
 #' @param model_dir A [vector] of model directory names
+#' @param ... Arguments to be passed to [create_rds_file()]
 #'
 #' @return A [list] of model inputs/outputs for the requested model
 #' @export
-load_ss_model_from_rds <- function(model_dir = NULL){
+load_ss_model_from_rds <- function(model_dir = NULL,
+                                   ...){
 
   verify_argument(model_dir, "character", 1)
 
   model_rds_file <- file.path(model_dir, paste0(basename(model_dir), ".rds"))
   if(!file.exists(model_rds_file)){
-    create_rds_file(model_dir)
+    create_rds_file(model_dir, ...)
   }
   readRDS(model_rds_file)
 }
@@ -114,6 +124,156 @@ load_ss_files <- function(model_dir = NULL,
   model$par <- readLines(par_fn)
 
   model
+}
+
+#' Return a list of mcmc calculations, e.g. quantiles for various values
+#'
+#' @param mcmc The output of the [r4ss::SSgetMCMC()] function as a data.frame
+#' @param lower Lower quantile value
+#' @param upper Upper quantile value
+#' @param biomass_scale Scale the biomass by this amount. The default is 2e6 because
+#' biomass will be shown in the millions of tonnes and it is female only
+#' @param recruitment_scale Scale the recruitment by this amount. The default is 1e6
+#' because recruitment will be shown in millions of tonnes
+#' @param ... Absorb arguments destined for other functions
+#'
+#' @return
+#' @importFrom r4ss SSgetMCMC
+#' @importFrom dplyr mutate_all
+#' @export
+calc_mcmc <- function(mcmc,
+                      ss_mcmc_quants = NULL,
+                      biomass_scale = 2e6,
+                      recruitment_scale = 1e6,
+                      ...){
+
+  verify_argument(mcmc, "data.frame")
+  verify_argument(ss_mcmc_quants, "numeric", 3)
+  verify_argument(biomass_scale, "numeric", 1)
+  verify_argument(recruitment_scale, "numeric", 1)
+  if(ss_mcmc_quants[1] > ss_mcmc_quants[2] || ss_mcmc_quants[2] > ss_mcmc_quants[3]){
+    stop("`ss_mcmc_quants` must be in ascending order",
+         call. = FALSE)
+  }
+  lower <- ss_mcmc_quants[1]
+  med <- ss_mcmc_quants[2]
+  upper <- ss_mcmc_quants[3]
+
+  lst <- NULL
+  mcmc <- as_tibble(mcmc)
+
+  ssb <- mcmc %>%
+    select(contains("SSB"))
+  ssb <- ssb / biomass_scale
+  ssb <- ssb %>%
+    set_names(gsub("SSB_", "", names(.)))
+
+  lst$svirg <- quantile(ssb %>% select(Virgin) %>% pull(),
+                        ss_mcmc_quants)
+  lst$sinit <- quantile(ssb %>% select(Initial) %>% pull(),
+                        ss_mcmc_quants)
+
+  # sinit_post exists so that depletion calculations can be done for each posterior
+  sinit_post <- ssb %>% select(Initial)
+
+  ssb <- ssb %>% select(-c("Virgin", "unfished", "Btgt", "SPR", "MSY", "B_MSY/unfished"))
+  lst$slower <- apply(ssb, 2, quantile, prob = lower)
+  lst$smed   <- apply(ssb, 2, quantile, prob = med)
+  lst$supper <- apply(ssb, 2, quantile, prob = upper)
+
+  depl <- ssb %>%
+    mutate_at(.vars = vars(-Initial), .funs = ~{. / Initial}) %>%
+    select(-Initial)
+  lst$dlower <- apply(depl, 2, quantile, prob = lower)
+  lst$dmed   <- apply(depl, 2, quantile, prob = med)
+  lst$dupper <- apply(depl, 2, quantile, prob = upper)
+
+  recr <- mcmc %>%
+    select(contains("Recr_"))
+  recr <- recr / recruitment_scale
+  recr <- recr %>%
+    set_names(gsub("Recr_", "", names(.)))
+  recr <- recr %>% select(-starts_with("Fore"))
+  lst$rvirg <- quantile(recr %>% select(Virgin) %>% pull(),
+                        ss_mcmc_quants)
+  lst$rinit <- quantile(recr %>% select(Initial) %>% pull(),
+                        ss_mcmc_quants)
+  lst$runfished <- quantile(recr %>% select(unfished) %>% pull(),
+                            ss_mcmc_quants)
+  recr <- recr %>% select(-c("Virgin", "Initial", "unfished"))
+  lst$rmed <- apply(recr, 2, quantile, prob = med)
+  lst$rmean <- apply(recr, 2, mean)
+  lst$rlower <- apply(recr, 2, quantile, prob = lower)
+  lst$rupper <- apply(recr, 2, quantile, prob = upper)
+
+  dev <- mcmc %>%
+    select(starts_with(c("Early_InitAge_",
+                         "Early_RecrDev_",
+                         "Main_RecrDev_",
+                         "Late_RecrDev_",
+                         "ForeRecr_")))
+  names(dev) <- gsub("Early_RecrDev_", "", names(dev))
+  names(dev) <- gsub("Main_RecrDev_", "", names(dev))
+  names(dev) <- gsub("Late_RecrDev_", "", names(dev))
+  names(dev) <- gsub("ForeRecr_", "", names(dev))
+
+  # Change the Early_Init names to be the correct preceding years
+  start_yr <- as.numeric(min(names(dev)))
+  early <- grep("Early_InitAge_", names(dev))
+  num_early_yrs <- length(early)
+  early_yrs <- seq(start_yr - num_early_yrs, start_yr - 1, 1)
+  late_yrs <- names(dev[-early])
+  names(dev) <- c(as.character(early_yrs), late_yrs)
+
+  lst$devlower <- apply(dev, 2, quantile, prob = lower)
+  lst$devmed <- apply(dev, 2, quantile, prob = med)
+  lst$devupper <- apply(dev, 2, quantile, prob = upper)
+
+  spr <- mcmc %>%
+    select(contains("SPRratio_"))
+  spr <- spr %>%
+    set_names(gsub("SPRratio_", "", names(.)))
+  lst$plower <- apply(spr, 2, quantile, prob = lower)
+  lst$pmed <- apply(spr, 2, quantile, prob = med)
+  lst$pupper <- apply(spr, 2, quantile, prob = upper)
+
+  f <- mcmc %>%
+    select(contains("F_"))
+  f <- f %>%
+    set_names(gsub("F_", "", names(.)))
+  lst$flower <- apply(f, 2, quantile, prob = lower)
+  lst$fmed   <- apply(f, 2, quantile, prob = med)
+  lst$fupper <- apply(f, 2, quantile, prob = upper)
+
+  # Reference point calculations
+  lst$unfish_fem_bio <- quantile(mcmc$SSB_Virgin,
+                                 prob = ss_mcmc_quants) / biomass_scale * 1000
+  lst$unfish_recr <- quantile(mcmc$Recr_Virgin,
+                              prob = ss_mcmc_quants) / recruitment_scale * 1000
+  lst$f_spawn_bio_bf40 <- quantile(mcmc$SSB_SPR,
+                                   prob = ss_mcmc_quants) / biomass_scale * 1000
+  lst$exp_frac_spr <- quantile(mcmc$Fstd_SPR,
+                               prob = ss_mcmc_quants)
+  lst$yield_bf40 <- quantile(mcmc$Dead_Catch_SPR,
+                             prob = ss_mcmc_quants) / recruitment_scale * 1000
+  lst$fem_spawn_bio_b40 <- quantile(mcmc$SSB_Btgt,
+                                    prob = ss_mcmc_quants) / biomass_scale * 1000
+  lst$spr_b40 <- quantile(mcmc$SPR_Btgt,
+                          prob = ss_mcmc_quants)
+  lst$exp_frac_b40 <- quantile(mcmc$Fstd_Btgt,
+                               prob = ss_mcmc_quants)
+  lst$yield_b40 <- quantile(mcmc$Dead_Catch_Btgt,
+                            prob = ss_mcmc_quants) / recruitment_scale * 1000
+  lst$fem_spawn_bio_bmsy <- quantile(mcmc$SSB_MSY,
+                                     prob = ss_mcmc_quants) / biomass_scale * 1000
+  lst$spr_msy <- quantile(mcmc$SPR_MSY,
+                          prob = ss_mcmc_quants)
+  lst$exp_frac.sprmsy <- quantile(mcmc$Fstd_MSY,
+                                  prob = ss_mcmc_quants)
+  lst$msy <- quantile(mcmc$Dead_Catch_MSY,
+                      prob = ss_mcmc_quants) / recruitment_scale * 1000
+
+  lst
 }
 
 #' Load the SS model input and output data needed by this package in correct format
