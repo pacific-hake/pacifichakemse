@@ -58,7 +58,6 @@ run_mses <- function(ss_model_output_dir = NULL,
     ss_model_output_dir,
     call. = FALSE)
   }
-  #verify_argument(ss_extdata_dir, "character", 1)
   verify_argument(fns, chk_len = length(plot_names))
   verify_argument(tacs, "numeric")
   verify_argument(c_increases, "numeric")
@@ -86,6 +85,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   }
 
   ss_model <- load_ss_model_from_rds(ss_model_output_dir)
+  ss_model_data <- load_ss_model_data(ss_model, ...)
 
   # Prepare data for operating model
   df <- load_data_seasons(ss_model, ...)
