@@ -16,6 +16,7 @@ LinkingTo:
     RcppEigen,
     Rcpp
 Imports:
+    clisymbols,
     cowplot,
     crayon,
     data.table,

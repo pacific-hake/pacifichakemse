@@ -34,6 +34,7 @@
 #' @importFrom r4ss SS_output
 #' @importFrom stringr str_ends
 #' @importFrom tictoc tic toc
+#' @importFrom clisymbols symbol
 #' @export
 run_mses <- function(ss_model_output_dir = NULL,
                      n_runs = 10,
@@ -54,7 +55,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   verify_argument(ss_model_output_dir, "character", 1)
   if(!dir.exists(ss_model_output_dir)){
     stop("The directory name you set for the SS3 model output ",
-    "(ss_model_output_dir) does not exist:\n",
+         "(ss_model_output_dir) does not exist:\n",
     ss_model_output_dir,
     call. = FALSE)
   }
@@ -87,6 +88,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   # Load the SS model inputs and outputs in the formats required
   ss_model <- load_ss_model_from_rds(ss_model_output_dir, ...)
   ss_model_data <- load_ss_model_data(ss_model, ...)
+  cat(green(symbol$tick), green(" SS model output succefully loaded\n"))
 
   # Prepare data for operating model
   df <- load_data_seasons(ss_model, ...)

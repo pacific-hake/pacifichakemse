@@ -24,11 +24,11 @@ run_season_loop_om <- function(df,
                                ...){
   map(seq_len(df$n_season), function(season = .x){
     if(verbose){
-      cat(red(paste0("Season: ", season, "\n")))
+      cat(red("Season:", season, "\n"))
     }
     map(seq_len(df$n_space), function(space = .x){
       if(verbose){
-        cat(yellow(paste0("      Space: ", space, "\n")))
+        cat(yellow("      Space:", space, "\n"))
       }
       p_sel <- df$p_sel %>% filter(!!space == space)
       p_sel_tmp <- p_sel

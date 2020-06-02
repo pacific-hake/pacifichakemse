@@ -4,10 +4,12 @@
 \alias{load_ss_model_from_rds}
 \title{Load models from files created using \code{\link[=create_rds_file]{create_rds_file()}}}
 \usage{
-load_ss_model_from_rds(model_dir = NULL, ...)
+load_ss_model_from_rds(model_dir = NULL, overwrite_ss_rds = TRUE, ...)
 }
 \arguments{
 \item{model_dir}{A \link{vector} of model directory names}
+
+\item{overwrite_ss_rds}{Logical. Overwrite the RDS file if it exists}
 
 \item{...}{Arguments to be passed to \code{\link[=create_rds_file]{create_rds_file()}}}
 }

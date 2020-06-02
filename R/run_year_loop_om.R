@@ -17,7 +17,7 @@ run_year_loop_om <- function(df = NULL,
 
   map(df$yrs, function(yr = .x){
     if(verbose){
-      cat(green(paste0(yr, ": ")))
+      cat(green(paste0(yr, ":\n")))
     }
     # Extract data for the year
     yr_ind <- which(yr == df$yrs)

@@ -4,10 +4,22 @@
 \alias{load_ss_model_data}
 \title{Load the SS model input and output data needed by this package in correct format}
 \usage{
-load_ss_model_data(ss_model, ...)
+load_ss_model_data(
+  ss_model,
+  s_yr = NULL,
+  m_yr = NULL,
+  weight_factor = 1000,
+  ...
+)
 }
 \arguments{
 \item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}}
+
+\item{s_yr}{Start year}
+
+\item{m_yr}{End year}
+
+\item{weight_factor}{A factor to multiply and divide SSB values by}
 
 \item{...}{Arguments to be passed to \code{\link[=load_ss_sel_parameters]{load_ss_sel_parameters()}}}
 }
