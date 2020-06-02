@@ -76,6 +76,7 @@ load_data_seasons <- function(ss_model = NULL,
                               catch_props_space_season = NULL,
                               ...){
 
+  verify_argument(ss_model, "list")
   verify_argument(n_season, c("numeric", "integer"), 1, 1:4)
   verify_argument(season_names, "character", n_season)
   verify_argument(n_space, c("numeric", "integer"), 1, 1:2)
@@ -121,15 +122,6 @@ load_data_seasons <- function(ss_model = NULL,
   stopifnot(!is.null(move_init) | (is.null(move_init) & n_space == 2))
 
   lst <- csv_data(sel_hist)
-
-  lst$age_survey_df <- extract_age_comps(ss_model,
-                                         fleet = 2,
-                                         s_yr = s_yr,
-                                         m_yr = m_yr)
-  lst$age_catch_df <- extract_age_comps(ss_model,
-                                        fleet = 1,
-                                        s_yr = s_yr,
-                                        m_yr = m_yr)
 
   if(is.null(move_init)){
     # n_space must be 2 due to error check above
@@ -187,21 +179,7 @@ load_data_seasons <- function(ss_model = NULL,
     filter(Fleet == 2)
   # Maturity from first year only
   mat <- wage_ssb[1,] %>% select(-c(Yr, Fleet))
-  # Set up age comps
-  age_survey_df <- lst$age_survey_df
-  tmp_surv_ages <- rownames(age_survey_df)
-  age_max_survey <- max(as.numeric(gsub("a", "", tmp_surv_ages)))
 
-  age_catch_df <- lst$age_catch_df
-  tmp_catch_ages <- rownames(age_catch_df)
-  age_max_catch <- max(as.numeric(gsub("a", "", tmp_catch_ages)))
-  if(age_max_survey != age_max_catch){
-    stop("Check the survey and catch age comp files from the assessment model input. ",
-         "They must have the same number of ages for the TMB assessment model to work. ",
-         "The max age in the survey file is ", age_max_survey, ". The maximum age in the ",
-         "catch file is ", age_max_catch,
-         call. = FALSE)
-  }
   # Set up survey season
   if(n_season == 1){
     survey_season <-  1
@@ -234,7 +212,6 @@ load_data_seasons <- function(ss_model = NULL,
   r_mul <- ifelse(n_space == 2, 1.1, 1)
 
   # Just start all the simulations with the same initial conditions
-  browser()
   lst$r_dev <- lst$r_dev %>%
     as.data.frame() %>%
     mutate(yr = yrs) %>%
@@ -245,20 +222,15 @@ load_data_seasons <- function(ss_model = NULL,
     select(age, everything()) %>%
     rename(value = 2)
 
-  lst$parms_scalar <- load_parameters(ss_model)
-  lst$parms_sel <- load_sel_parameters(ss_model,
-                                       fish_ages = s_min:s_max,
-                                       survey_ages = s_min_survey:s_max_survey)
-  browser()
-  parms_init <- list(log_r_init = lst$parms_scalar$log_r_init + log(r_mul),
-                     log_h = lst$parms_scalar$log_h,
-                     log_m_init = lst$parms_scalar$log_m_init,
-                     log_sd_surv = lst$parms_scalar$log_sd_surv,
+  parms_init <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(r_mul),
+                     log_h = ss_model$parms_scalar$log_h,
+                     log_m_init = ss_model$parms_scalar$log_m_init,
+                     log_sd_surv = ss_model$parms_scalar$log_sd_surv,
                      log_phi_survey = log_phi_survey,
-                     log_phi_catch = lst$parms_scalar$log_phi_catch,
+                     log_phi_catch = ss_model$parms_scalar$log_phi_catch,
                      # Selectivity parameters
-                     p_sel_fish = lst$parms_sel %>% filter(source == "fish"),
-                     p_sel_surv = lst$parms_sel %>% filter(source == "survey"),
+                     p_sel_fish = ss_model$parms_sel %>% filter(source == "fish"),
+                     p_sel_surv = ss_model$parms_sel %>% filter(source == "survey"),
                      init_n = lst$init_n,
                      r_in = lst$r_dev,
                      p_sel = p_sel)
@@ -316,11 +288,11 @@ load_data_seasons <- function(ss_model = NULL,
             survey_err = lst$ac_data$ss.error,
             ss_survey = lst$ac_data$ss.survey,
             flag_survey = lst$ac_data$sflag,
-            age_survey = age_survey_df,
-            age_max_age = age_max_survey,
+            age_survey = ss_model$age_survey_df,
+            age_max_age = max(as.numeric(gsub("a", "", rownames(lst$age_survey_df)))),
             ss_catch = lst$ac_data$ss.catch,
             flag_catch = lst$ac_data$cflag,
-            age_catch = lst$age_catch_tmp,
+            age_catch = ss_model$age_catch_df,
             # variance parameters
             log_sd_catch = log(0.01),
             # Fixed in stock assessment

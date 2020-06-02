@@ -86,9 +86,9 @@ run_mses <- function(ss_model_output_dir = NULL,
   }
 
   # Load the SS model inputs and outputs in the formats required
-  ss_model <- load_ss_model_from_rds(ss_model_output_dir, ...)
-  ss_model_data <- load_ss_model_data(ss_model, ...)
-  cat(green(symbol$tick), green(" SS model output succefully loaded\n"))
+  ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir, ...)
+  ss_model <- load_ss_model_data(ss_model_raw, ...)
+  cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
   # Prepare data for operating model
   df <- load_data_seasons(ss_model, ...)

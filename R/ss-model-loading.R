@@ -336,6 +336,15 @@ load_ss_model_data <- function(ss_model,
                                         s_yr = s_yr,
                                         m_yr = m_yr,
                                         ...)
+  age_max_survey <- max(as.numeric(gsub("a", "", rownames(lst$age_survey_df))))
+  age_max_catch <- max(as.numeric(gsub("a", "", rownames(lst$age_catch_df))))
+  if(age_max_survey != age_max_catch){
+    stop("There was a problem loading the survey and catch age proportions from the SS model. ",
+         "The maximum ages do not match. ",
+         "The max age in the survey file is ", age_max_survey, ". The maximum age in the ",
+         "catch file is ", age_max_catch,
+         call. = FALSE)
+  }
 
   # The following is shown in a table in the assessment doc and made by the
   # make.median.posterior.table() function in the hake-assessment repository
