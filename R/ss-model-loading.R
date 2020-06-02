@@ -24,6 +24,7 @@ create_rds_file <- function(model_dir = NULL,
   if(file.exists(rds_file) && overwrite_ss_rds){
     unlink(rds_file, force = TRUE)
   }
+
   if(!file.exists(rds_file)){
     cat(green("Creating a new RDS file in", model_dir, "\n"))
     # If this point is reached, no RDS file exists so it has to be built from scratch
@@ -194,8 +195,12 @@ calc_mcmc <- function(mcmc,
 
   # ssb_initial is added back later so that depletion calculations can be done
   ssb_initial <- ssb %>% select(Initial) %>% pull()
-
-  ssb <- ssb %>% select(-c("Virgin", "Initial", "unfished", "Btgt", "SPR", "MSY", "B_MSY/unfished"))
+  names_to_remove <- c("Virgin", "Initial", "unfished", "Btgt", "SPR", "MSY")
+  if("B_MSY/unfished" %in% names(ssb)){
+    # Only in post-2018 SS3 outputs
+    names_to_remove <- c(names_to_remove, "B_MSY/unfished")
+  }
+  ssb <- ssb %>% select(-names_to_remove)
   lst$slower <- apply(ssb, 2, quantile, prob = lower)
   lst$smed   <- apply(ssb, 2, quantile, prob = med)
   lst$supper <- apply(ssb, 2, quantile, prob = upper)
@@ -356,6 +361,13 @@ load_ss_model_data <- function(ss_model,
   ncol_p <- ncol(lst$med_popests)
   lst$med_popests[nrow_p, ncol_p - 1] <- NA
   lst$med_popests[nrow_p, ncol_p] <- NA
+
+  # Recruitment deviations
+  lst$r_dev <- ss_model$recruitpars %>%
+    as_tibble() %>%
+    filter(grepl("RecrDev", type)) %>%
+    filter(!grepl("^Late_", type)) %>%
+    select(yr = Yr, value = Value)
 
   lst
 }
@@ -657,6 +669,7 @@ fetch_extra_mcmc <- function(model = NULL,
   }
 
   ## Load all report files into a list, 1 element for each report file. Elements that are NA had no file found
+
   reps <- map(1:nrow(from_to), ~{
     inds <- as.numeric(from_to[.x, 1]):as.numeric(from_to[.x, 2])
     map(inds, ~{
@@ -684,6 +697,7 @@ fetch_extra_mcmc <- function(model = NULL,
 
   cat(green(symbol$tick),
       green("Finished loading extra MCMC report files\n"))
+  cat(green("Extracting outputs from extra MCMC report data frames\n"))
 
   ## Make custom reps_ objects for each output. Only relevant portions of the report file will be passed to
   ## the table-making map2() calls later (speeds up the map2() calls)
@@ -889,6 +903,8 @@ fetch_extra_mcmc <- function(model = NULL,
   extra_mcmc$agedbase$Pearson.025 <- pearson_table[1,]
   extra_mcmc$agedbase$Pearson <- pearson_table[2,]
   extra_mcmc$agedbase$Pearson.975 <- pearson_table[3,]
+  cat(green(symbol$tick),
+      green("Finished extracting outputs from extra MCMC report data frames\n"))
 
   extra_mcmc
 }

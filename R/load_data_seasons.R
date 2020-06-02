@@ -234,6 +234,7 @@ load_data_seasons <- function(ss_model = NULL,
   r_mul <- ifelse(n_space == 2, 1.1, 1)
 
   # Just start all the simulations with the same initial conditions
+  browser()
   lst$r_dev <- lst$r_dev %>%
     as.data.frame() %>%
     mutate(yr = yrs) %>%
