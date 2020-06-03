@@ -100,7 +100,7 @@ browser()
     df$ss_catch <- c(df$ss_catch, ceiling(mean(df$ss_catch[df$ss_catch > 0])))
     df$flag_catch <- c(df$flag_catch, 1)
     # Add a survey if catches are 0
-    browser()
+
     if(df$catch[yr_ind] == 0 & df$flag_survey[yr_ind] == -1){
       message("Stock in peril! Conducting emergency survey")
       df$flag_survey[df$catch == 0] <- 1
@@ -114,7 +114,7 @@ browser()
   #       From getRefPoint()
   #       df$Catch <- c(df$Catch, Fnew[[1]])
   #
-  browser()
+
 }
 
 #

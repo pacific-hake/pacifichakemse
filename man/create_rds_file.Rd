@@ -4,10 +4,17 @@
 \alias{create_rds_file}
 \title{Create an rds file to hold an SS model's data and outputs.}
 \usage{
-create_rds_file(model_dir = NULL, ...)
+create_rds_file(
+  model_dir = NULL,
+  overwrite_ss_rds = TRUE,
+  load_extra_mcmc = TRUE,
+  ...
+)
 }
 \arguments{
 \item{model_dir}{Directory name of model to be loaded}
+
+\item{overwrite_ss_rds}{Logical. Overwrite the RDS file if it exists}
 
 \item{...}{Absorb arguments destined for other functions}
 }

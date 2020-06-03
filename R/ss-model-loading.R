@@ -9,6 +9,7 @@
 #' @export
 create_rds_file <- function(model_dir = NULL,
                             overwrite_ss_rds = TRUE,
+                            load_extra_mcmc = TRUE,
                             ...){
 
   verify_argument(model_dir, "character", 1)
@@ -42,15 +43,17 @@ create_rds_file <- function(model_dir = NULL,
       cat(red(symbol$cross),
           red(" MCMC posteriors not loaded (mcmc directory not found)\n"))
     }
-    model$extra_mcmc_dir <- file.path(model_dir, "extra-mcmc")
-    if(dir.exists(model$extra_mcmc_dir)){
-      cat(green("Loading extra MCMC outputs\n"))
-      model$extra_mcmc <- fetch_extra_mcmc(model, ...)
-      cat(green(symbol$tick),
-          green(" Finished loading extra MCMC output\n"))
-    }else{
-      cat(red(symbol$cross),
-          red(" Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
+    if(load_extra_mcmc){
+      model$extra_mcmc_dir <- file.path(model_dir, "extra-mcmc")
+      if(dir.exists(model$extra_mcmc_dir)){
+        cat(green("Loading extra MCMC outputs\n"))
+        model$extra_mcmc <- fetch_extra_mcmc(model, ...)
+        cat(green(symbol$tick),
+            green(" Finished loading extra MCMC output\n"))
+      }else{
+        cat(red(symbol$cross),
+            red(" Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
+      }
     }
     saveRDS(model, file = rds_file)
     cat(green(symbol$tick),
@@ -140,8 +143,10 @@ load_ss_files <- function(model_dir = NULL,
   model$dat <- SS_readdat(dat_fn, verbose = FALSE)
   model$ctl_file <- ctl_fn
   model$ctl <- readLines(ctl_fn)
-  model$par_file <- par_fn
-  model$par <- readLines(par_fn)
+  if(length(par_fn)){
+    model$par_file <- par_fn
+    model$par <- readLines(par_fn)
+  }
 
   model
 }
@@ -181,26 +186,34 @@ calc_mcmc <- function(mcmc,
 
   lst <- NULL
   mcmc <- as_tibble(mcmc)
+  # In 2018, SS changed from SPB to SSB in the MCMC reporting
+  names(mcmc) <- gsub("SPB", "SSB", names(mcmc))
 
   ssb <- mcmc %>%
     select(contains("SSB"))
   ssb <- ssb / biomass_scale
   ssb <- ssb %>%
     set_names(gsub("SSB_", "", names(.)))
-
   lst$svirg <- quantile(ssb %>% select(Virgin) %>% pull(),
                         ss_mcmc_quants)
   lst$sinit <- quantile(ssb %>% select(Initial) %>% pull(),
                         ss_mcmc_quants)
-
   # ssb_initial is added back later so that depletion calculations can be done
   ssb_initial <- ssb %>% select(Initial) %>% pull()
-  names_to_remove <- c("Virgin", "Initial", "unfished", "Btgt", "SPR", "MSY")
-  if("B_MSY/unfished" %in% names(ssb)){
-    # Only in post-2018 SS3 outputs
-    names_to_remove <- c(names_to_remove, "B_MSY/unfished")
-  }
-  ssb <- ssb %>% select(-names_to_remove)
+  names_to_remove <- c("Virgin",
+                       "Initial",
+                       "unfished",
+                       "Btgt",
+                       "SPR",
+                       "MSY",
+                       "SPRtgt",
+                       "B_MSY/unfished")
+  map(names_to_remove, ~{
+    if(.x %in% names(ssb)){
+      ssb <<- ssb %>% select(-.x)
+    }
+  })
+
   lst$slower <- apply(ssb, 2, quantile, prob = lower)
   lst$smed   <- apply(ssb, 2, quantile, prob = med)
   lst$supper <- apply(ssb, 2, quantile, prob = upper)
@@ -223,9 +236,19 @@ calc_mcmc <- function(mcmc,
                         ss_mcmc_quants)
   lst$rinit <- quantile(recr %>% select(Initial) %>% pull(),
                         ss_mcmc_quants)
-  lst$runfished <- quantile(recr %>% select(unfished) %>% pull(),
+  # nfished below covers unfished and Unfished. The capitalization changed in 2018
+  lst$runfished <- quantile(recr %>% select(contains("nfished")) %>% pull(),
                             ss_mcmc_quants)
-  recr <- recr %>% select(-c("Virgin", "Initial", "unfished"))
+  #recr <- recr %>% select(-c("Virgin", "Initial", "unfished"))
+  names_to_remove <- c("Virgin",
+                       "Initial",
+                       "unfished",
+                       "Unfished")
+  map(names_to_remove, ~{
+    if(.x %in% names(recr)){
+      recr <<- recr %>% select(-.x)
+    }
+  })
   lst$rmed <- apply(recr, 2, quantile, prob = med)
   lst$rmean <- apply(recr, 2, mean)
   lst$rlower <- apply(recr, 2, quantile, prob = lower)
@@ -275,28 +298,63 @@ calc_mcmc <- function(mcmc,
                                  prob = ss_mcmc_quants) / biomass_scale * 1000
   lst$unfish_recr <- quantile(mcmc$Recr_Virgin,
                               prob = ss_mcmc_quants) / recruitment_scale * 1000
-  lst$f_spawn_bio_bf40 <- quantile(mcmc$SSB_SPR,
-                                   prob = ss_mcmc_quants) / biomass_scale * 1000
-  lst$exp_frac_spr <- quantile(mcmc$Fstd_SPR,
-                               prob = ss_mcmc_quants)
-  lst$yield_bf40 <- quantile(mcmc$Dead_Catch_SPR,
+  if(!"SSB_SPR" %in% names(mcmc)){
+    if("SSB_SPRtgt" %in% names(mcmc)){
+      mcmc <- mcmc %>% rename(SSB_SPR = SSB_SPRtgt)
+    }
+  }
+  if("SSB_SPR" %in% names(mcmc)){
+    lst$f_spawn_bio_bf40 <- quantile(mcmc$SSB_SPR,
+                                     prob = ss_mcmc_quants) / biomass_scale * 1000
+  }
+  if(!"Fstd_SPR" %in% names(mcmc)){
+    if("Fstd_SPRtgt" %in% names(mcmc)){
+      mcmc <- mcmc %>% rename(Fstd_SPR = Fstd_SPRtgt)
+    }
+  }
+  if("Fstd_SPR" %in% names(mcmc)){
+    lst$exp_frac_spr <- quantile(mcmc$Fstd_SPR,
+                                 prob = ss_mcmc_quants)
+  }
+  if(!"Dead_Catch_SPR" %in% names(mcmc)){
+    if("TotYield_SPRtgt" %in% names(mcmc)){
+      mcmc <- mcmc %>% rename(Dead_Catch_SPR = TotYield_SPRtgt)
+    }
+  }
+  if("Dead_Catch_SPR" %in% names(mcmc)){
+    lst$yield_bf40 <- quantile(mcmc$Dead_Catch_SPR,
                              prob = ss_mcmc_quants) / recruitment_scale * 1000
+  }
   lst$fem_spawn_bio_b40 <- quantile(mcmc$SSB_Btgt,
                                     prob = ss_mcmc_quants) / biomass_scale * 1000
   lst$spr_b40 <- quantile(mcmc$SPR_Btgt,
                           prob = ss_mcmc_quants)
   lst$exp_frac_b40 <- quantile(mcmc$Fstd_Btgt,
                                prob = ss_mcmc_quants)
-  lst$yield_b40 <- quantile(mcmc$Dead_Catch_Btgt,
+  if(!"Dead_Catch_Btgt" %in% names(mcmc)){
+    if("TotYield_Btgt" %in% names(mcmc)){
+      mcmc <- mcmc %>% rename(Dead_Catch_Btgt = TotYield_Btgt)
+    }
+  }
+  if("Dead_Catch_Btgt" %in% names(mcmc)){
+    lst$yield_b40 <- quantile(mcmc$Dead_Catch_Btgt,
                             prob = ss_mcmc_quants) / recruitment_scale * 1000
+  }
   lst$fem_spawn_bio_bmsy <- quantile(mcmc$SSB_MSY,
                                      prob = ss_mcmc_quants) / biomass_scale * 1000
   lst$spr_msy <- quantile(mcmc$SPR_MSY,
                           prob = ss_mcmc_quants)
   lst$exp_frac.sprmsy <- quantile(mcmc$Fstd_MSY,
                                   prob = ss_mcmc_quants)
-  lst$msy <- quantile(mcmc$Dead_Catch_MSY,
+  if(!"Dead_Catch_MSY" %in% names(mcmc)){
+    if("TotYield_MSY" %in% names(mcmc)){
+      mcmc <- mcmc %>% rename(Dead_Catch_MSY = TotYield_MSY)
+    }
+  }
+  if("Dead_Catch_MSY" %in% names(mcmc)){
+    lst$msy <- quantile(mcmc$Dead_Catch_MSY,
                       prob = ss_mcmc_quants) / recruitment_scale * 1000
+  }
 
   lst
 }
@@ -336,31 +394,39 @@ load_ss_model_data <- function(ss_model,
                                         s_yr = s_yr,
                                         m_yr = m_yr,
                                         ...)
-  age_max_survey <- max(as.numeric(gsub("a", "", rownames(lst$age_survey_df))))
-  age_max_catch <- max(as.numeric(gsub("a", "", rownames(lst$age_catch_df))))
-  if(age_max_survey != age_max_catch){
-    stop("There was a problem loading the survey and catch age proportions from the SS model. ",
-         "The maximum ages do not match. ",
-         "The max age in the survey file is ", age_max_survey, ". The maximum age in the ",
-         "catch file is ", age_max_catch,
+  if(nrow(lst$age_survey_df) != nrow(lst$age_catch_df)){
+    stop("There was a problem loading the estimates of survey and catch age proportions ",
+         "from the SS model. The number of ages do not match. ",
+         "There are ", nrow(lst$age_survey_df), " ages in the survey output and ",
+         nrow(lst$age_catch_df), " ages in the catch output.",
          call. = FALSE)
   }
 
   # The following is shown in a table in the assessment doc and made by the
   # make.median.posterior.table() function in the hake-assessment repository
   mc <- ss_model$mcmccalcs
-  extra_mc <- ss_model$extra_mcmc$timeseries
   vals_mc <- mc[c("smed", "dmed", "rmed", "pmed", "fmed")]
   vals_mc <- map(vals_mc, ~{
     .x[names(.x) %in% yrs]
   })
-  b <- extra_mc$Bio_all[extra_mc$Yr %in% yrs] / weight_factor
-  lst$med_popests <-  tibble(f_ssb = vals_mc$smed * weight_factor,
-                             rel_ssb = vals_mc$dmed,
-                             b = b,
-                             r = vals_mc$rmed * weight_factor,
-                             spr_f = vals_mc$pmed,
-                             e = vals_mc$fmed) %>%
+
+  if(is.null(ss_model$extra_mcmc)){
+    lst$med_popests <-  tibble(f_ssb = vals_mc$smed * weight_factor,
+                               rel_ssb = vals_mc$dmed,
+                               r = vals_mc$rmed * weight_factor,
+                               spr_f = vals_mc$pmed,
+                               e = vals_mc$fmed)
+  }else{
+    extra_mc <- ss_model$extra_mcmc$timeseries
+    b <- extra_mc$Bio_all[extra_mc$Yr %in% yrs] / weight_factor
+    lst$med_popests <-  tibble(f_ssb = vals_mc$smed * weight_factor,
+                               rel_ssb = vals_mc$dmed,
+                               b = b,
+                               r = vals_mc$rmed * weight_factor,
+                               spr_f = vals_mc$pmed,
+                               e = vals_mc$fmed)
+  }
+  lst$med_popests <- lst$med_popests %>%
     mutate(yr = yrs) %>%
     select(yr, everything())
   # Make Relative fishing intensity and Exploitation fraction `NA` for the last year
@@ -378,10 +444,107 @@ load_ss_model_data <- function(ss_model,
     filter(!grepl("^Late_", type)) %>%
     select(yr = Yr, value = Value)
 
+  lst$ctl_file <- ss_model$ctl_file
+  lst$ctl <- ss_model$ctl
+  lst$dat_file <- ss_model$dat_file
+  lst$dat <- ss_model$dat
+
   lst
 }
 
-#' Extract the age comps from the SS assessment model output into a format
+#' Extract the age comp estimates from the SS assessment model output into a format
+#' required for input into the TMB assessment model
+#'
+#' @details Proportions at age for each year are calculated and returned
+#'
+#' @param ss_model SS model input/output as read in by [load_ss_model_from_rds()]
+#' @param age_comps_fleet 1 for fishery, 2 for survey
+#' @param s_yr See [load_data_seasons()]
+#' @param m_yr See [load_data_seasons()]
+#' @param age_comps_fill Value to replace NAs in the table, it can also be NA, but not NULL
+#' @param yr_col The name of the column in `ss_model$dat$agecomp` that contains
+#' the year
+#' @param age_comps_fleet_col The name of the column in `ss_model$dat$agecomp` that contains
+#' the fleet code
+#' @param ... Arguments absorbed which are meant for other functions
+#'
+#' @return The matrix representing all years from `s_yr` to `m_yr` with data included
+#' for years which are found in the `ss_model` data. Years not in the `ss_model` data
+#' will be filled with the value of `age_comps_fill`
+#' @importFrom tidyselect matches
+#' @importFrom tidyr complete
+#' @importFrom dplyr bind_cols
+#' @export
+extract_age_comps <- function(ss_model = NULL,
+                              age_comps_fleet = 1,
+                              s_yr = NULL,
+                              m_yr = NULL,
+                              age_comps_fill = -1,
+                              yr_col = "Yr",
+                              age_comps_fleet_col = "Fleet",
+                              ...){
+
+  verify_argument(ss_model, "list")
+  verify_argument(age_comps_fleet, "numeric", 1)
+  stopifnot(age_comps_fleet %in% c(1, 2))
+  verify_argument(s_yr, "numeric", 1)
+  verify_argument(m_yr, "numeric", 1)
+  if(is.na(age_comps_fill)){
+    age_comps_fill <- NA_real_
+  }
+  verify_argument(age_comps_fill, "numeric", 1)
+  verify_argument(yr_col, "character", 1)
+  verify_argument(age_comps_fleet_col, "character", 1)
+
+  age_comp_data <- ss_model$agedbase %>%
+    as_tibble()
+  if(!yr_col %in% names(age_comp_data)){
+    stop("The column `", yr_col, "` does not exist in the SS age comp data table.",
+         call. = FALSE)
+  }
+  if(!age_comps_fleet_col %in% names(age_comp_data)){
+    stop("The column `", age_comps_fleet_col, "` does not exist in the SS age comp data table.",
+         call. = FALSE)
+  }
+  age_comps <- age_comp_data %>%
+    filter(!!sym(age_comps_fleet_col) == age_comps_fleet)
+  if(nrow(age_comps) == 0){
+    stop("The fleet number `", age_comps_fleet, "` was not found in the SS age comp data table. ",
+         call. = FALSE)
+  }
+
+  # Reformat the age estimates into a table with ages as rows and years as columns
+  age_comps <- age_comps %>%
+    select(!!sym(yr_col), Obs) %>%
+    group_by(!!sym(yr_col)) %>%
+    group_nest()
+  age_comps_yrs <- age_comps[[yr_col]]
+  age_comps <- age_comps %>% select(-!!sym(yr_col))
+  age_comps <- map(age_comps$data, ~{
+    tibble(.x)
+  })
+  age_comps <- bind_cols(age_comps)
+  names(age_comps) <- age_comps_yrs
+  age_comps <- age_comps %>%
+    t() %>% as_tibble()
+
+  # Fill in missing years with `age_comps_fill` value and return a matrix type
+  age_comps <- age_comps %>%
+    mutate(row_sum = rowSums(.)) %>%
+    mutate_at(.vars = vars(-row_sum), .funs = list(~ . / row_sum)) %>%
+    select(-row_sum) %>%
+    mutate(yr = age_comps_yrs) %>%
+    select(yr, everything()) %>%
+    complete(yr = seq(s_yr, m_yr)) %>%
+    replace(is.na(.), age_comps_fill) %>%
+    t()
+  colnames(age_comps) <- age_comps[1,]
+  age_comps <- age_comps[-1,]
+
+  age_comps
+}
+
+#' Extract the age comp input data from the SS assessment model output into a format
 #' required for input into the TMB assessment model
 #'
 #' @details Proportions at age for each year are calculated and returned
@@ -403,14 +566,14 @@ load_ss_model_data <- function(ss_model,
 #' @importFrom tidyselect matches
 #' @importFrom tidyr complete
 #' @export
-extract_age_comps <- function(ss_model = NULL,
-                              age_comps_fleet = 1,
-                              s_yr = NULL,
-                              m_yr = NULL,
-                              age_comps_fill = NA,
-                              yr_col = "Yr",
-                              age_comps_fleet_col = "FltSvy",
-                              ...){
+extract_age_comp_data <- function(ss_model = NULL,
+                                  age_comps_fleet = 1,
+                                  s_yr = NULL,
+                                  m_yr = NULL,
+                                  age_comps_fill = -1,
+                                  yr_col = "Yr",
+                                  age_comps_fleet_col = "FltSvy",
+                                  ...){
 
   verify_argument(ss_model, "list")
   verify_argument(age_comps_fleet, "numeric", 1)
@@ -439,6 +602,7 @@ extract_age_comps <- function(ss_model = NULL,
     stop("The fleet number `", age_comps_fleet, "` was not found in the SS age comp data table. ",
          call. = FALSE)
   }
+
   age_comps_yrs <- age_comps %>% select(!!sym(yr_col)) %>% pull()
   age_comps <- age_comps %>%
     select(matches("^a\\d+$")) %>%

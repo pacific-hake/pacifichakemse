@@ -13,19 +13,9 @@ fetch_extra_mcmc(model = NULL, ss_mcmc_quants = NULL, ...)
 \item{ss_mcmc_quants}{Quantile probability values to use}
 
 \item{...}{Absorb arguments meant for other functions}
-
-\item{reps_lst}{A list of vectors, all the same length and structure,
-typically extracted as a portion of a Report.sso file}
-
-\item{header}{A vector of column names for the new table}
 }
 \value{
 
-
-A \code{\link[tibble:tibble]{tibble::tibble()}} representing one row for each of the list
-elements found in \code{reps_lst}. A new column called \code{Iter} is prepended and
-represents the list element number that the data for each row came from.
-List elements that are NA will not be included in the table.
 }
 \description{
 Create and return a list of stats to attach to the main model by

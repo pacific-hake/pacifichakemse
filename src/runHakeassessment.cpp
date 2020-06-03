@@ -38,11 +38,13 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(s_max);
   DATA_INTEGER(s_max_survey);
 // // // Survey
-  DATA_VECTOR(survey); // Acoustic survey
-  DATA_VECTOR(survey_x); // Flag if survey occured
-  DATA_VECTOR(survey_err);
+  DATA_VECTOR(survey); // Acoustic survey - TODO: numbers different
+  DATA_VECTOR(survey_x); // Flag if survey occurred
+  DATA_VECTOR(survey_err); // - TODO: numbers different
   DATA_VECTOR(ss_survey); // Age comp sample size
   DATA_VECTOR(flag_survey); // Were ages sampled this year
+
+// TODO: fix age_survey - need age 1-15 and replace NA with -1
   DATA_ARRAY(age_survey); // Age compositions
   DATA_INTEGER(age_max_age); // Last age included in age comps
   DATA_SCALAR(s_mul); // Multiplier for survey selectivity

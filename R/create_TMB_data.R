@@ -53,14 +53,13 @@ create_TMB_data <- function(sim_data = NULL,
   df$parms_init$r_in <- df$parms_init$r_in %>% pull(value)
   df$parms_init$p_sel <- df$parms_init$p_sel[, -1]
   df$parms_init$f_0 <- rowSums(sim_data$f_out_save)
-browser()
 
   # Load parameters from the assessment
   # Steepness prior distribution
   ctl <- ss_model$ctl
   h_grep <- grep("SR_BH_steep", ctl)
   if(length(h_grep) != 1){
-    stop("There were ", length(h_grep), " occurances of SR_BH_STEEP ",
+    stop("There were ", length(h_grep), " occurences of SR_BH_STEEP ",
          "in the control file when there should be only one. Control file location:\n",
          ss_model$ctl_file,
          call. = FALSE)
