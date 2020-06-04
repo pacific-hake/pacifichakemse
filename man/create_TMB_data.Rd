@@ -4,7 +4,13 @@
 \alias{create_TMB_data}
 \title{Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 \usage{
-create_TMB_data(sim_data = NULL, df = NULL, ss_model = NULL, history = FALSE)
+create_TMB_data(
+  sim_data = NULL,
+  df = NULL,
+  ss_model = NULL,
+  history = FALSE,
+  sim_age_comps = TRUE
+)
 }
 \arguments{
 \item{sim_data}{Operating model}
@@ -15,6 +21,9 @@ create_TMB_data(sim_data = NULL, df = NULL, ss_model = NULL, history = FALSE)
 and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
 
 \item{history}{Logical. If TRUE use historical data. If FALSE, use simulated OM data}
+
+\item{sim_age_comps}{Logical. If TRUE, include simulated age comps (\code{age_survey} and \code{age_catch}),
+If FALSE, leave them as-is}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

@@ -67,7 +67,7 @@ run_multiple_MSEs <- function(df = NULL,
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
 
-  df <- create_TMB_data(sim_data, df, ss_model)
+  df <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
 
   params_new <- df$parms_init
   params_new$f_0 <- rowSums(sim_data$f_out_save)

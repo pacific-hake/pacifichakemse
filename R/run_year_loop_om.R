@@ -22,6 +22,7 @@ run_year_loop_om <- function(df = NULL,
     # Extract data for the year
     yr_ind <- which(yr == df$yrs)
     wage <- get_wa_dfs(df, yr)
+
     r_y <- df$parms_init$r_in %>% filter(yr == !!yr) %>% pull(value)
     m_yrs <- lst$m_age
     # M is distributed throughout the yrs
@@ -89,7 +90,7 @@ run_year_loop_om <- function(df = NULL,
     lst$survey_true[,yr_ind] <<- map_dbl(seq_len(df$n_space), ~{
       sum(lst$n_save_age[, yr_ind, .x, df$survey_season] *
             exp(-m_surv_mul * lst$z_save[, yr_ind, .x, df$survey_season]) *
-            lst$surv_sel * lst$q * df$wage_survey)
+            lst$surv_sel * lst$q * wage$survey)
     })
 
     # Calculate numbers in the survey
@@ -109,10 +110,10 @@ run_year_loop_om <- function(df = NULL,
         err <- rnorm(n = 1, mean = 0, sd = lst$surv_sd)
         # If the extra factor is not included the mean is > 1
         surv <- exp(log(sum(n_surv  %>% pull(sum) * lst$surv_sel *
-                              lst$q * df$wage_surv %>% get_age_dat(yr = yr))) + err)
+                              lst$q * wage$survey)) + err)
       }else{
         surv <- sum(n_surv %>% pull(sum) * lst$surv_sel *
-                      lst$q * df$wage_surv %>% get_age_dat(yr = yr))
+                      lst$q * wage$survey)
       }
       lst$survey[yr_ind] <<- surv
     }else{

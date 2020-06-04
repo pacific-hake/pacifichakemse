@@ -166,20 +166,6 @@ load_data_seasons <- function(ss_model = NULL,
   f_space <- move_mat_obj$f_space
   names(f_space) <- space_names
 
-  # weight at age
-  wage_ss <- lst$wage_ss %>%
-    filter(Yr %in% yrs)
-  wage_mid <- wage_ss %>%
-    filter(Fleet == -1)
-  wage_ssb <- wage_ss %>%
-    filter(Fleet == -2)
-  wage_catch <- wage_ss %>%
-    filter(Fleet == 1)
-  wage_survey <- wage_ss %>%
-    filter(Fleet == 2)
-  # Maturity from first year only
-  mat <- wage_ssb[1,] %>% select(-c(Yr, Fleet))
-
   # Set up survey season
   if(n_season == 1){
     survey_season <-  1
@@ -251,14 +237,9 @@ load_data_seasons <- function(ss_model = NULL,
   flag_sel <- rep(FALSE, n_yr)
   flag_sel[which(yrs == sel_change_yr):which(yrs == m_yr)] <- TRUE
   df <-list(parms_init = parms_init,
-            wage_ssb = wage_ssb,
-            wage_catch = wage_catch,
-            wage_survey = wage_survey,
-            wage_mid = wage_mid,
             sel_idx = which(yrs == sel_change_yr),
             yr_sel = length(sel_change_yr:max(yrs)),
             m_sel = m_sel,
-            mat_sel = as.numeric(mat),
             n_season = n_season,
             s_yr = s_yr,
             m_yr = m_yr,
@@ -280,24 +261,10 @@ load_data_seasons <- function(ss_model = NULL,
             survey_season = survey_season,
             # Frequency of survey yrs (e.g., 2 is every second year)
             n_survey = n_survey,
-            # Make sure the survey has the same length as the catch time series
-            survey = lst$survey,
-            # Is there a survey in that year?
-            survey_x = lst$ac_data$survey_x,
-            # Make sure the survey has the same length as the catch time series
-            survey_err = lst$ac_data$ss.error,
-            ss_survey = lst$ac_data$ss.survey,
-            flag_survey = lst$ac_data$sflag,
-            age_survey = ss_model$age_survey_df,
-            age_max_age = max(as.numeric(gsub("a", "", rownames(lst$age_survey_df)))),
-            ss_catch = lst$ac_data$ss.catch,
-            flag_catch = lst$ac_data$cflag,
-            age_catch = ss_model$age_catch_df,
             # variance parameters
             log_sd_catch = log(0.01),
             # Fixed in stock assessment
             rdev_sd = log(rdev_sd),
-            log_phi_survey = log(11.46),
             yrs = yrs,
             b = lst$b,
             b_future = b_future,
@@ -343,8 +310,8 @@ load_data_seasons <- function(ss_model = NULL,
   if(yr_future > 1){
     # yrs where survey occurs
     idx_future <- length(s_yr:m_yr) + seq(2, yr_future, by = df$n_survey)
-    df$survey_x <- c(df$survey_x, rep(-2, yr_future))
-    df$survey_x[idx_future] <- 2
+    #df$survey_x <- c(df$survey_x, rep(-2, yr_future))
+    #df$survey_x[idx_future] <- 2
     df$survey_err <- c(df$survey_err, rep(1, yr_future))
     df$survey_err[idx_future] <- mean(df$survey_err[df$survey_err != 1])
     df$ss_survey <- c(df$ss_survey, rep(0,  yr_future))

@@ -34,7 +34,7 @@ load_data_ss <- function(mod,
                               N = survey.ss$N)
   age_survey.tmp <- matrix(-1,length(mod$agebins), tEnd)
   syears <- unique(survey.ss$Yr)
-  survey_x <- rep(-2, tEnd) #
+  #survey_x <- rep(-2, tEnd) #
   survey_flag <- rep(-1, tEnd)
   ss.survey <- rep(0, tEnd)
   for(i in 1:tEnd){

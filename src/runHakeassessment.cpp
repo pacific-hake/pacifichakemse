@@ -39,7 +39,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(s_max_survey);
 // // // Survey
   DATA_VECTOR(survey); // Acoustic survey - TODO: numbers different
-  DATA_VECTOR(survey_x); // Flag if survey occurred
+  //DATA_VECTOR(survey_x); // Flag if survey occurred - Replaced with flag_survey (only one instance in code)
   DATA_VECTOR(survey_err); // - TODO: numbers different
   DATA_VECTOR(ss_survey); // Age comp sample size
   DATA_VECTOR(flag_survey); // Were ages sampled this year
@@ -353,8 +353,8 @@ for(int time=0;time<(t_end);time++){ // Start time loop
 Type ans_survey=0.0;
 ////Save the observation model estimates
 for(int time=1;time<t_end;time++){ // Survey Surveyobs
-
-      if(survey_x(time) == 2){
+// Used to be survey_x
+      if(flag_survey(time) == 1){
         ans_survey += -dnorm(log(Surveyobs(time)), log(survey(time)), SDsurv+survey_err(time), TRUE);
     }
   }

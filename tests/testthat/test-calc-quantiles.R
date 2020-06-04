@@ -1,6 +1,5 @@
 context("Test the conv_vec_to_mse_df() function")
 
-
 pq <- tibble::tribble(
   ~year, ~grp, ~val,
    2000,    1,  2.1,

@@ -368,6 +368,7 @@ calc_mcmc <- function(mcmc,
 #' @param ... Arguments to be passed to [load_ss_sel_parameters()]
 #'
 #' @return A [list] with objects to be used throughout the package code
+#' @importFrom dplyr distinct
 load_ss_model_data <- function(ss_model,
                                s_yr = NULL,
                                m_yr = NULL,
@@ -380,6 +381,22 @@ load_ss_model_data <- function(ss_model,
 
   lst <- NULL
   yrs <- s_yr:m_yr
+
+  waa <- ss_model$wtatage %>%
+    as_tibble() %>%
+    select(-c(Seas, Sex, Bio_Pattern, BirthSeas)) %>%
+    filter(Yr %in% yrs)
+  lst$wage_catch_df <- format_wage_df(waa, 1)
+  lst$wage_catch <- format_wage_matrix(lst$wage_catch_df)
+  lst$wage_survey_df <- format_wage_df(waa, 2)
+  lst$wage_survey <- format_wage_matrix(lst$wage_survey_df)
+  lst$wage_mid_df <- format_wage_df(waa, -1)
+  lst$wage_mid <- format_wage_matrix(lst$wage_mid_df)
+  lst$wage_ssb_df <- format_wage_df(waa, -2)
+  lst$wage_ssb <- format_wage_matrix(lst$wage_ssb_df)
+
+  # Maturity from first year only
+  lst$mat_sel <- lst$wage_ssb[,1]
 
   lst$parms_scalar <- load_ss_parameters(ss_model)
   lst$parms_sel <- load_ss_sel_parameters(ss_model,
@@ -394,6 +411,7 @@ load_ss_model_data <- function(ss_model,
                                         s_yr = s_yr,
                                         m_yr = m_yr,
                                         ...)
+
   if(nrow(lst$age_survey_df) != nrow(lst$age_catch_df)){
     stop("There was a problem loading the estimates of survey and catch age proportions ",
          "from the SS model. The number of ages do not match. ",
@@ -401,6 +419,42 @@ load_ss_model_data <- function(ss_model,
          nrow(lst$age_catch_df), " ages in the catch output.",
          call. = FALSE)
   }
+  # Survey index and error (log SD)
+  surv <- ss_model$dat$CPUE
+  surv <- surv %>%
+    filter(index == 2) %>%
+    transmute(yr = year, value = obs, err = se_log) %>%
+    complete(yr = seq(s_yr, m_yr)) %>%
+    replace(is.na(.), 1)
+  lst$survey <- surv %>% pull(value)
+  lst$survey_err <- surv %>% pull(err)
+
+  # Sample sizes for fishery and survey
+  ss <- ss_model$agedbase %>%
+    transmute(yr = Yr, fleet = Fleet, ss = N) %>%
+    distinct()
+  ss_catch <- ss %>%
+    filter(fleet == 1) %>%
+    select(-fleet) %>%
+    mutate(flag = 1) %>%
+    complete(yr = seq(s_yr, m_yr)) %>%
+    replace(is.na(.), 0) %>%
+    mutate(flag = ifelse(flag == 0, -1, flag))
+  lst$ss_catch <- ss_catch %>%
+    pull(ss)
+  lst$flag_catch <- ss_catch %>%
+    pull(flag)
+  ss_survey <- ss %>%
+    filter(fleet == 2) %>%
+    select(-fleet) %>%
+    mutate(flag = 1) %>%
+    complete(yr = seq(s_yr, m_yr)) %>%
+    replace(is.na(.), 0) %>%
+    mutate(flag = ifelse(flag == 0, -1, flag))
+  lst$ss_survey <- ss_survey %>%
+    pull(ss)
+  lst$flag_survey <- ss_survey %>%
+    pull(flag)
 
   # The following is shown in a table in the assessment doc and made by the
   # make.median.posterior.table() function in the hake-assessment repository

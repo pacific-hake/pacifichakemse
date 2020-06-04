@@ -35,8 +35,8 @@ init_agebased_model <- function(df = NULL,
   lst$n0 <- NULL
   lst$n0[1:(df$n_age - 1)] <- lst$r0 * exp(-df$ages[1:(df$n_age - 1)] * lst$m0)
   # Weight-at-age
-  lst$wage_ssb <- get_age_dat(df$wage_ssb, df$s_yr)
-  lst$wage_survey <- get_age_dat(df$wage_survey, df$s_yr)
+  lst$wage_ssb <- get_age_dat(df$wage_ssb_df, df$s_yr)
+  lst$wage_survey <- get_age_dat(df$wage_survey_df, df$s_yr)
   # Initial biomass
   lst$ssb_0 <- map_dbl(seq_len(df$n_space), ~{
     sum(lst$n0 * df$move_init[.x] * lst$wage_ssb) * 0.5

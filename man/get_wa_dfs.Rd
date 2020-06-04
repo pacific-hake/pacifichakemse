@@ -2,9 +2,9 @@
 % Please edit documentation in R/get_weight_dataframes.R
 \name{get_wa_dfs}
 \alias{get_wa_dfs}
-\title{Get the weight-at-X data for a particular year}
+\title{Get the weight-at-age data for a particular year}
 \usage{
-get_wa_dfs(lst, yr)
+get_wa_dfs(lst = NULL, yr = NULL)
 }
 \arguments{
 \item{lst}{A list returned from \code{\link[=load_data_seasons]{load_data_seasons()}}}
@@ -12,8 +12,8 @@ get_wa_dfs(lst, yr)
 \item{yr}{The year to fetch}
 }
 \value{
-A list of 4 \link{data.frame}: \code{catch}, \code{surv}, \code{mid}, and \code{ssb}
+A list of 4 \link{data.frame}s: \code{catch}, \code{surv}, \code{mid}, and \code{ssb}
 }
 \description{
-Get the weight-at-X data for a particular year
+Get the weight-at-age data for a particular year
 }

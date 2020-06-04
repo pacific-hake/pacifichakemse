@@ -139,6 +139,7 @@ load_data <- function(){
             # survey
             survey = c(rep(1,df.survey$Year[1]-years[1]),df.survey$obs), # Make sure the survey has the same length as the catch time series
             survey_err = c(rep(1,df.survey$Year[1]-years[1]),df.survey$se.log.), # Make sure the survey has the same length as the catch time series
+            # TODO: when time comes, survey_x was replced with df$flag_survey
             survey_x = c(rep(-2,df.survey$Year[1]-years[1]),df.survey$fleet), # Is there a survey in that year?
             ss_survey = age_survey$nTrips,
             flag_survey =age_survey$flag,

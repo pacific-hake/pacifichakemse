@@ -93,6 +93,31 @@ run_mses <- function(ss_model_output_dir = NULL,
 
   # Prepare data for operating model
   df <- load_data_seasons(ss_model, ...)
+  # Merge the SS model output list with the OM outputs
+  #df <- c(ss_model, df)
+  age_max_age <- nrow(ss_model$age_survey)
+  df <- append_objs_to_list(df,
+                            ss_model$wage_catch_df,
+                            ss_model$wage_catch,
+                            ss_model$wage_survey_df,
+                            ss_model$wage_survey,
+                            ss_model$wage_ssb_df,
+                            ss_model$wage_ssb,
+                            ss_model$wage_mid_df,
+                            ss_model$wage_mid,
+                            ss_model$mat_sel,
+                            # Make sure the survey has the same length as the catch time series
+                            ss_model$survey,
+                            # Make sure the survey has the same length as the catch time series
+                            ss_model$survey_err,
+                            ss_model$ss_survey,
+                            # Is there a survey in that year?
+                            ss_model$flag_survey,
+                            ss_model$age_survey_df,
+                            age_max_age,
+                            ss_model$ss_catch,
+                            ss_model$flag_catch,
+                            ss_model$age_catch_df)
 
   # Run the operating model
   sim_data <- run_agebased_true_catch(df, om_params_seed, ...)

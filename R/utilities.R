@@ -265,54 +265,21 @@ csv_data <- function(sel_hist = TRUE){
              col_types = cols(),
              comment = "#")
   }
-
-  wage_ss <- load_from_csv("wage_ss.csv")
-  wage_unfished <- load_from_csv("unfished_waa.csv")
-  catch <- load_from_csv("hake_totcatch.csv") %>%
+  lst <- NULL
+  lst$wage_ss <- load_from_csv("wage_ss.csv")
+  lst$wage_unfished <- load_from_csv("unfished_waa.csv")
+  lst$catch <- load_from_csv("hake_totcatch.csv") %>%
     transmute(year, value = Fishery)
-
-  # Survey abundance
-  df_survey <- load_from_csv("acoustic_survey.csv")
-  age_survey_df <- load_from_csv("agecomps_survey.csv")
-  age_catch_df <- load_from_csv("agecomps_fishery.csv")
-  survey <- load_from_csv("survey.csv") %>% pull()
-
-  # Load the age comps
-  age_survey_tmp <- load_from_csv("age_survey_ss.csv")
-  age_catch_tmp <- load_from_csv("age_catch_ss.csv")
-  ac_data <- load_from_csv("ac_data.csv")
-  # Load parameters from the assessment
-  # Not used
-  # init_n <- rev(load_from_csv("Ninit_MLE.csv")[,1])
-  # Not used
-  # r_dev <- load_from_csv("Rdev_MLE.csv")[,1]
-  # Not used
-  # PSEL <- as.matrix(load_from_csv("p_MLE.csv")
-  b <- as.matrix(load_from_csv("b_input.csv"))
-  # load parameters specifically for hake
-  init_n <- as.matrix(load_from_csv("initN.csv"))
-  r_dev <- as.matrix(load_from_csv("Rdev.csv"))
-  p_sel <- NA
+  lst$b <- as.matrix(load_from_csv("b_input.csv"))
+  lst$init_n <- as.matrix(load_from_csv("initN.csv"))
+  lst$r_dev <- as.matrix(load_from_csv("Rdev.csv"))
+  lst$p_sel <- NA
   if(sel_hist){
-    p_sel <- as.matrix(load_from_csv("PSEL.csv"))
+    lst$p_sel <- as.matrix(load_from_csv("PSEL.csv"))
   }
-  catch_country <- load_from_csv("catch_per_country.csv")
+  lst$catch_country <- load_from_csv("catch_per_country.csv")
 
-  list(wage_ss = wage_ss,
-       wage_unfished = wage_unfished,
-       catch = catch,
-       df_survey = df_survey,
-       age_survey_df = age_survey_df,
-       age_catch_df = age_catch_df,
-       survey = survey,
-       age_survey_tmp = age_survey_tmp,
-       age_catch_tmp = age_catch_tmp,
-       ac_data = ac_data,
-       b = b,
-       init_n = init_n,
-       r_dev = r_dev,
-       p_sel = p_sel,
-       catch_country = catch_country)
+  lst
 }
 
 #' Construct blank objects for Operating model outputs
@@ -518,14 +485,12 @@ setup_blank_om_objects <- function(yrs,
 #' @export
 get_age_dat <- function(d = NULL,
                         yr = NULL){
-  stopifnot(!is.null(d))
-  stopifnot(!is.null(yr))
-  stopifnot(is.numeric(yr))
-  stopifnot("data.frame" %in% class(d))
-  stopifnot("Fleet" %in% names(d))
+
+  verify_argument(d, "data.frame")
+  verify_argument(yr, c("integer", "numeric"))
   stopifnot("Yr" %in% names(d))
 
-  d %>% filter(Yr %in% yr) %>% select(-c(Yr, Fleet))
+  d %>% filter(Yr %in% yr) %>% select(-c(Yr))
 }
 
 #' Verify that the argument `arg` is valid in the context of the arguments given
@@ -659,6 +624,7 @@ func_name <- function(levels_up = 1){
 #' the last row's
 #' @export
 wage_add_yr <- function(wage = NULL){
+
   verify_argument(wage, "data.frame")
   stopifnot(nrow(wage) >= 1)
   stopifnot("Yr" %in% names(wage))
@@ -712,4 +678,61 @@ extract_rep_table <- function(reps_lst, header){
   })
   do.call(rbind, lst) %>%
     as_tibble(.name_repair = "unique")
+}
+
+#' Append objects to list
+#'
+#' @param lst The list to append to
+#' @param ... The objects to append
+#'
+#' @importFrom purrr map_chr
+#' @return The modified list
+append_objs_to_list <- function(lst = NULL,
+                           ...){
+  verify_argument(lst, "list")
+
+  ellipsis <- list(...)
+  arg_names <- get_args()[-1]
+  nms <- map_chr(arg_names, ~{
+    nm <- .x %>% as.character() %>% tail(1)
+  })
+  names(ellipsis) <- nms
+  lst <- c(lst, ellipsis)
+  new_lst_names <- names(lst)[names(lst) != ""]
+  if(length(unique(new_lst_names)) != length(new_lst_names)){
+    stop("List contains multiple elements with the same name. The duplicated names are:\n",
+         paste(new_lst_names[duplicated(new_lst_names)], collapse = " "),
+         call. = FALSE)
+  }
+  lst
+}
+
+#' Extract the weight-at-age data for the given Fleet
+#'
+#' @param df A weight-at-age [data.frame]
+#' @param fleet The fleet number to extract
+#'
+#' @return A [data.frame]
+format_wage_df <- function(df = NULL,
+                           fleet = NULL){
+
+  verify_argument(df, "data.frame")
+  verify_argument(fleet, c("integer", "numeric"), 1)
+
+  df %>%
+    filter(Fleet == fleet) %>%
+    select(-Fleet)
+}
+
+#' Convert the output of [format_wage_df()] into a matrix of correct dimensions
+#' for the TMB input
+#'
+#' @param df  A weight-at-age [data.frame] as output from [format_wage_df()]
+#'
+#' @return A [matrix]
+format_wage_matrix <- function(df = NULL){
+  df %>%
+    select(-Yr) %>%
+    as.matrix() %>%
+    t()
 }

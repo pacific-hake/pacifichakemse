@@ -5,6 +5,8 @@
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' and loaded by [load_ss_model_from_rds()]
 #' @param history Logical. If TRUE use historical data. If FALSE, use simulated OM data
+#' @param sim_age_comps Logical. If TRUE, include simulated age comps (`age_survey` and `age_catch`),
+#' If FALSE, leave them as-is
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
@@ -12,7 +14,8 @@
 create_TMB_data <- function(sim_data = NULL,
                             df = NULL,
                             ss_model = NULL,
-                            history = FALSE){
+                            history = FALSE,
+                            sim_age_comps = TRUE){
   verify_argument(sim_data, "list")
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
@@ -20,27 +23,15 @@ create_TMB_data <- function(sim_data = NULL,
 
   if(max(df$yrs) > df$m_yr){
     # Copy last year of weight-at-age data and use that as the simulated year
-    df$wage_catch <- wage_add_yr(df$wage_catch)
-    df$wage_survey <- wage_add_yr(df$wage_survey)
-    df$wage_mid <- wage_add_yr(df$wage_mid)
-    df$wage_ssb <- wage_add_yr(df$wage_ssb)
+    df$wage_catch_df <- wage_add_yr(df$wage_catch_df)
+    df$wage_catch <- format_wage_matrix(df$wage_catch_df)
+    df$wage_survey_df <- wage_add_yr(df$wage_survey_df)
+    df$wage_survey <- format_wage_matrix(df$wage_survey_df)
+    df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
+    df$wage_mid <- format_wage_matrix(df$wage_mid_df)
+    df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
+    df$wage_ssb <- format_wage_matrix(df$wage_ssb_df)
   }
-  df$wage_catch <- df$wage_catch %>%
-    select(-c(Yr, Fleet)) %>%
-    as.matrix() %>%
-    t()
-  df$wage_survey <- df$wage_survey %>%
-    select(-c(Yr, Fleet)) %>%
-    as.matrix() %>%
-    t()
-  df$wage_mid <- df$wage_mid %>%
-    select(-c(Yr, Fleet)) %>%
-    as.matrix() %>%
-    t()
-  df$wage_ssb <- df$wage_ssb %>%
-    select(-c(Yr, Fleet)) %>%
-    as.matrix() %>%
-    t()
 
   # Make tibbles into matrices or vectors for TMB input
   # Logical must be changed to integer
@@ -78,12 +69,16 @@ create_TMB_data <- function(sim_data = NULL,
   df$a_prior <- df$tau * (1 - df$mu)
 
   # Move things from sim_data into output list
+  df$catch_obs <- df$catch_obs %>%
+    select(value) %>%
+    as.matrix() %>%
+    `rownames<-`(df$catch_obs$year)
   df$survey <- sim_data$survey
-  df$age_survey <- sim_data$age_comps_surv
-  #df$catch_obs <- sim_data$catch
-  df$catch_obs <- df$catch_obs %>% select(value) %>% as.matrix()
-  df$age_catch <- sim_data$catch_age
-
+  if(sim_age_comps){
+    df$age_survey <- sim_data$age_comps_surv
+    #df$catch_obs <- sim_data$catch
+    df$age_catch <- sim_data$catch_age
+  }
   # Remove elements that will cause failure in the TMB code
   keep <- !names(df) %in% c("space_names",
                             "season_names",
