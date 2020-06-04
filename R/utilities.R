@@ -677,7 +677,7 @@ extract_rep_table <- function(reps_lst, header){
       add_column(Iter = .y, .before = 1)
   })
   do.call(rbind, lst) %>%
-    as_tibble(.name_repair = "unique")
+    as_tibble(.name_repair = "minimal")
 }
 
 #' Append objects to list

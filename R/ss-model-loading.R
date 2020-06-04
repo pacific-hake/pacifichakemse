@@ -555,6 +555,7 @@ extract_age_comps <- function(ss_model = NULL,
 
   age_comp_data <- ss_model$agedbase %>%
     as_tibble()
+  ages <- unique(age_comp_data$Bin)
   if(!yr_col %in% names(age_comp_data)){
     stop("The column `", yr_col, "` does not exist in the SS age comp data table.",
          call. = FALSE)
@@ -582,8 +583,11 @@ extract_age_comps <- function(ss_model = NULL,
   })
   age_comps <- bind_cols(age_comps)
   names(age_comps) <- as.character(age_comps_yrs)
+
   age_comps <- age_comps %>%
-    t() %>% as_tibble(.name_repair = "unique")
+    t() %>%
+    as_tibble(.name_repair = "minimal") %>%
+    set_names(ages)
 
   # Fill in missing years with `age_comps_fill` value and return a matrix type
   age_comps <- age_comps %>%
