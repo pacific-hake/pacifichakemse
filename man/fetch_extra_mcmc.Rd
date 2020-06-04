@@ -15,7 +15,7 @@ fetch_extra_mcmc(model = NULL, ss_mcmc_quants = NULL, ...)
 \item{...}{Absorb arguments meant for other functions}
 }
 \value{
-
+A \link{list} of values ectracted and calculed from the extra MCMC runs
 }
 \description{
 Create and return a list of stats to attach to the main model by

@@ -16,6 +16,9 @@ create_rds_file(
 
 \item{overwrite_ss_rds}{Logical. Overwrite the RDS file if it exists}
 
+\item{load_extra_mcmc}{Logical. If TRUE, attempt to load the extra-MCMC
+runs from the model. The model_dir must contain an \code{extra-mcmc} directory}
+
 \item{...}{Absorb arguments destined for other functions}
 }
 \value{

@@ -2,6 +2,8 @@
 #'
 #' @param model_dir Directory name of model to be loaded
 #' @param overwrite_ss_rds Logical. Overwrite the RDS file if it exists
+#' @param load_extra_mcmc Logical. If TRUE, attempt to load the extra-MCMC
+#' runs from the model. The model_dir must contain an `extra-mcmc` directory
 #' @param ... Absorb arguments destined for other functions
 #'
 #' @return [base::invisible()]
@@ -154,17 +156,18 @@ load_ss_files <- function(model_dir = NULL,
 #' Return a list of mcmc calculations, e.g. quantiles for various values
 #'
 #' @param mcmc The output of the [r4ss::SSgetMCMC()] function as a data.frame
-#' @param lower Lower quantile value
-#' @param upper Upper quantile value
+#' @param ss_mcmc_quants Quantile probability value. See the `probs` argument in [stats::quantile()].
+#' The vector must have 3 values and be in ascending order
 #' @param biomass_scale Scale the biomass by this amount. The default is 2e6 because
 #' biomass will be shown in the millions of tonnes and it is female only
 #' @param recruitment_scale Scale the recruitment by this amount. The default is 1e6
 #' because recruitment will be shown in millions of tonnes
 #' @param ... Absorb arguments destined for other functions
 #'
-#' @return
+#' @return A [list] of MCMC calculated values
 #' @importFrom r4ss SSgetMCMC
 #' @importFrom dplyr mutate_all
+#' @importFrom tidyselect starts_with
 #' @export
 calc_mcmc <- function(mcmc,
                       ss_mcmc_quants = NULL,
@@ -578,9 +581,9 @@ extract_age_comps <- function(ss_model = NULL,
     tibble(.x)
   })
   age_comps <- bind_cols(age_comps)
-  names(age_comps) <- age_comps_yrs
+  names(age_comps) <- as.character(age_comps_yrs)
   age_comps <- age_comps %>%
-    t() %>% as_tibble()
+    t() %>% as_tibble(.name_repair = "unique")
 
   # Fill in missing years with `age_comps_fill` value and return a matrix type
   age_comps <- age_comps %>%
@@ -814,7 +817,8 @@ load_ss_sel_parameters <- function(ss_model = NULL,
 #' @param model The model object as output by [load_ss_files()]
 #' @param ss_mcmc_quants Quantile probability values to use
 #' @param ... Absorb arguments meant for other functions
-#' @return
+#'
+#' @return A [list] of values ectracted and calculed from the extra MCMC runs
 #' @importFrom readr read_table2 cols
 #' @importFrom purrr flatten
 #' @importFrom tibble add_column

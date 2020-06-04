@@ -15,6 +15,9 @@ calc_mcmc(
 \arguments{
 \item{mcmc}{The output of the \code{\link[r4ss:SSgetMCMC]{r4ss::SSgetMCMC()}} function as a data.frame}
 
+\item{ss_mcmc_quants}{Quantile probability value. See the \code{probs} argument in \code{\link[stats:quantile]{stats::quantile()}}.
+The vector must have 3 values and be in ascending order}
+
 \item{biomass_scale}{Scale the biomass by this amount. The default is 2e6 because
 biomass will be shown in the millions of tonnes and it is female only}
 
@@ -22,13 +25,9 @@ biomass will be shown in the millions of tonnes and it is female only}
 because recruitment will be shown in millions of tonnes}
 
 \item{...}{Absorb arguments destined for other functions}
-
-\item{lower}{Lower quantile value}
-
-\item{upper}{Upper quantile value}
 }
 \value{
-
+A \link{list} of MCMC calculated values
 }
 \description{
 Return a list of mcmc calculations, e.g. quantiles for various values
