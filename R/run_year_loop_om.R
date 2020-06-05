@@ -34,7 +34,7 @@ run_year_loop_om <- function(df = NULL,
     n_save_age <- lst$n_save_age[, yr_ind, , 1] %>% as.data.frame() %>% map(~{.x})
     # Calculate SSB for each space
     ssb_weight <- map(n_save_age, function(space_at_age = .x){
-      sum(space_at_age * as.numeric(wage$ssb), na.rm = TRUE) * 0.5
+      j <- sum(space_at_age * as.numeric(wage$ssb), na.rm = TRUE) * 0.5
     })
     ssb <- ssb_weight
     # Calculate SSB with selectivity applied for the year `yr_ind` in season 1
@@ -89,7 +89,7 @@ run_year_loop_om <- function(df = NULL,
     # Calculate survey biomass for all spaces
     lst$survey_true[,yr_ind] <<- map_dbl(seq_len(df$n_space), ~{
       sum(lst$n_save_age[, yr_ind, .x, df$survey_season] *
-            exp(-m_surv_mul * lst$z_save[, yr_ind, .x, df$survey_season]) *
+          exp(-m_surv_mul * lst$z_save[, yr_ind, .x, df$survey_season]) *
             lst$surv_sel * lst$q * wage$survey)
     })
 

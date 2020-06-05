@@ -404,22 +404,22 @@ load_ss_model_data <- function(ss_model,
   lst$parms_scalar <- load_ss_parameters(ss_model)
   lst$parms_sel <- load_ss_sel_parameters(ss_model,
                                           ...)
-  lst$age_survey_df <- extract_age_comps(ss_model,
-                                         age_comps_fleet = 2,
-                                         s_yr = s_yr,
-                                         m_yr = m_yr,
-                                         ...)
-  lst$age_catch_df <- extract_age_comps(ss_model,
-                                        age_comps_fleet = 1,
-                                        s_yr = s_yr,
-                                        m_yr = m_yr,
-                                        ...)
+  lst$age_survey <- extract_age_comps(ss_model,
+                                      age_comps_fleet = 2,
+                                      s_yr = s_yr,
+                                      m_yr = m_yr,
+                                      ...)
+  lst$age_catch <- extract_age_comps(ss_model,
+                                     age_comps_fleet = 1,
+                                     s_yr = s_yr,
+                                     m_yr = m_yr,
+                                     ...)
 
-  if(nrow(lst$age_survey_df) != nrow(lst$age_catch_df)){
+  if(nrow(lst$age_survey) != nrow(lst$age_catch)){
     stop("There was a problem loading the estimates of survey and catch age proportions ",
          "from the SS model. The number of ages do not match. ",
-         "There are ", nrow(lst$age_survey_df), " ages in the survey output and ",
-         nrow(lst$age_catch_df), " ages in the catch output.",
+         "There are ", nrow(lst$age_survey), " ages in the survey output and ",
+         nrow(lst$age_catch), " ages in the catch output.",
          call. = FALSE)
   }
   # Survey index and error (log SD)
@@ -429,6 +429,7 @@ load_ss_model_data <- function(ss_model,
     transmute(yr = year, value = obs, err = se_log) %>%
     complete(yr = seq(s_yr, m_yr)) %>%
     replace(is.na(.), 1)
+
   lst$survey <- surv %>% pull(value)
   lst$survey_err <- surv %>% pull(err)
 

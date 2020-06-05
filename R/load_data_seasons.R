@@ -61,7 +61,7 @@ load_data_seasons <- function(ss_model = NULL,
                               move_out = 0.85,
                               move_south = 0.05,
                               move_slope = 0.9,
-                              ages_no_move = 0,
+                              ages_no_move = c(0, 1),
                               selectivity_change = 0,
                               s_min = 1,
                               s_max = 6,
@@ -204,7 +204,7 @@ load_data_seasons <- function(ss_model = NULL,
     select(yr, everything())
   lst$init_n <- lst$init_n %>%
     as.data.frame() %>%
-    mutate(age = ages[-which(ages_no_move %in% ages)]) %>%
+    mutate(age = ages[-which(0 %in% ages)]) %>%
     select(age, everything()) %>%
     rename(value = 2)
 
@@ -400,6 +400,7 @@ init_movement_mat <- function(n_space = NULL,
       move_mat[i, , j, ] <- move_max[j] / (1 + exp(-move_slope * (ages - move_fifty)))
     }
   }
+
   # Some ages don't move
   move_mat[, which(ages_no_move %in% ages), , ] <- 0
   if(n_season == 4){

@@ -88,14 +88,13 @@ run_mses <- function(ss_model_output_dir = NULL,
   # Load the SS model inputs and outputs in the formats required
   ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir, ...)
   ss_model <- load_ss_model_data(ss_model_raw, ...)
-browser()
+
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
   # Prepare data for operating model
   df <- load_data_seasons(ss_model, ...)
-  # Merge the SS model output list with the OM outputs
-  #df <- c(ss_model, df)
   age_max_age <- nrow(ss_model$age_survey)
+  # Merge the SS model output list with the OM outputs
   df <- append_objs_to_list(df,
                             ss_model$wage_catch_df,
                             ss_model$wage_catch,
@@ -113,7 +112,7 @@ browser()
                             ss_model$ss_survey,
                             # Is there a survey in that year?
                             ss_model$flag_survey,
-                            ss_model$age_survey_df,
+                            ss_model$age_survey,
                             age_max_age,
                             ss_model$ss_catch,
                             ss_model$flag_catch,
