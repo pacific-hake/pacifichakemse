@@ -43,7 +43,7 @@ init_agebased_model <- function(df = NULL,
   lst$n0 <- matrix(NA, df$n_age)
   lst$n0[1:(df$n_age - 1)] <- n0_tmp[1:(df$n_age - 1)]
   lst$n0[df$n_age] <- sum(n0_tmp[df$n_age:n_age_3])
-  browser()
+
   # Weight-at-age
   lst$wage_ssb <- get_age_dat(df$wage_ssb_df, df$s_yr)
   lst$wage_survey <- get_age_dat(df$wage_survey_df, df$s_yr)
@@ -80,7 +80,7 @@ init_agebased_model <- function(df = NULL,
   # Plus group (ignore recruitment devs in first yrs )
   lst$n_init[df$n_age] <- lst$r0 *
     exp(-(lst$m_age[df$n_age] * df$ages[df$n_age])) / (1 - exp(-lst$m_age[df$n_age])) *
-    exp(-0.5 * lst$rdev_sd ^ 2 * 0 + lst$n_init_dev[df$n_age - lst$age_1_ind - 1,]$val)
+    exp(-0.5 * lst$rdev_sd ^ 2 * 0 + lst$n_init_dev[df$n_age - 1,]$value)
 
   for(space in seq_len(df$n_space)){
     # Initialize only

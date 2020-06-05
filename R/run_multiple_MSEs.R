@@ -71,7 +71,6 @@ run_multiple_MSEs <- function(df = NULL,
 
   params_new <- df$parms_init
   params_new$f_0 <- rowSums(sim_data$f_out_save)
-  params_new$r_dev <- df$parms_init$r_in
   if(df$catch[df$n_yr] == 0){
     params_new$f_0[length(params_new$f_0)] <- 0
   }

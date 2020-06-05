@@ -37,6 +37,7 @@ run_year_loop_om <- function(df = NULL,
       j <- sum(space_at_age * as.numeric(wage$ssb), na.rm = TRUE) * 0.5
     })
     ssb <- ssb_weight
+
     # Calculate SSB with selectivity applied for the year `yr_ind` in season 1
     ssb_all <- map(n_save_age, function(space_at_age = .x){
       sum(space_at_age * df$mat_sel, na.rm = TRUE) * 0.5

@@ -68,6 +68,8 @@ create_TMB_data <- function(sim_data = NULL,
   df$b_prior <- df$tau * df$mu
   df$a_prior <- df$tau * (1 - df$mu)
 
+  df$t_end <- length(df$yrs)
+
   # Move things from sim_data into output list
   df$catch_obs <- df$catch_obs %>%
     select(value) %>%
