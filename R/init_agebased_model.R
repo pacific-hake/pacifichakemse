@@ -32,8 +32,18 @@ init_agebased_model <- function(df = NULL,
   lst$mat_sel <- df$mat_sel
   lst$h <- exp(df$parms_init$log_h)
   # Numbers-at-age - calculate n0 based on r0
-  lst$n0 <- NULL
-  lst$n0[1:(df$n_age - 1)] <- lst$r0 * exp(-df$ages[1:(df$n_age - 1)] * lst$m0)
+  # Extrapolate the N0 out to three times the max age for sum for max age
+  ages_3 <- min(df$ages):(df$n_age * 3)
+  n_age_3 <- length(ages_3)
+
+  n0_tmp <- NULL
+  n0_tmp[1:(n_age_3 - 1)] = lst$r0 * exp(-ages_3[1:(n_age_3 - 1)] * lst$m0)
+  n0_tmp[n_age_3] =  lst$r0 * exp(-lst$m0 * ages_3[n_age_3]) / (1 - exp(-lst$m0))
+
+  lst$n0 <- matrix(NA, df$n_age)
+  lst$n0[1:(df$n_age - 1)] <- n0_tmp[1:(df$n_age - 1)]
+  lst$n0[df$n_age] <- sum(n0_tmp[df$n_age:n_age_3])
+  browser()
   # Weight-at-age
   lst$wage_ssb <- get_age_dat(df$wage_ssb_df, df$s_yr)
   lst$wage_survey <- get_age_dat(df$wage_survey_df, df$s_yr)
@@ -85,5 +95,6 @@ init_agebased_model <- function(df = NULL,
     lst$survey_true[space, 1] <- sum(lst$n_save_age[, 1, space, df$survey_season] *
                                        lst$surv_sel * lst$q * lst$wage_survey)
   }
+
   lst
 }
