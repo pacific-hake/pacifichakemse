@@ -77,8 +77,8 @@ create_TMB_data <- function(sim_data = NULL,
     `rownames<-`(df$catch_obs$year)
   df$survey <- sim_data$survey
 
+  df$age_survey <- sim_data$age_comps_surv
   if(sim_age_comps){
-    df$age_survey <- sim_data$age_comps_surv
     #df$catch_obs <- sim_data$catch
     df$age_catch <- sim_data$catch_age
   }

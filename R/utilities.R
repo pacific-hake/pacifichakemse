@@ -252,12 +252,10 @@ get_yrs_mse_list <- function(lst){
 
 #' Load data from CSV files
 #'
-#' @param sel_hist Logical. Load the PSEL file?
-#'
 #' @return A list of the loaded [data.frame]s
 #' @importFrom readr read_csv cols
 #' @export
-csv_data <- function(sel_hist = TRUE){
+csv_data <- function(){
   load_from_csv <- function(file){
     read_csv(system.file(file.path("extdata", file),
                          package = "PacifichakeMSE",
@@ -273,10 +271,6 @@ csv_data <- function(sel_hist = TRUE){
   lst$b <- as.matrix(load_from_csv("b_input.csv"))
   lst$init_n <- as.matrix(load_from_csv("initN.csv"))
   lst$r_dev <- as.matrix(load_from_csv("Rdev.csv"))
-  lst$p_sel <- NA
-  if(sel_hist){
-    lst$p_sel <- as.matrix(load_from_csv("PSEL.csv"))
-  }
   lst$catch_country <- load_from_csv("catch_per_country.csv")
 
   lst

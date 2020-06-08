@@ -24,6 +24,7 @@ get_select <- function(ages = NULL,
   n_age <- length(ages)
   sel <- rep(NA, n_age)
   p_sum <- sum(p_sel$value)
+
   for(i in seq_along(ages)){
     if(ages[i] < s_min){
       sel[i] <- 0

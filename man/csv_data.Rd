@@ -4,10 +4,7 @@
 \alias{csv_data}
 \title{Load data from CSV files}
 \usage{
-csv_data(sel_hist = TRUE)
-}
-\arguments{
-\item{sel_hist}{Logical. Load the PSEL file?}
+csv_data()
 }
 \value{
 A list of the loaded \link{data.frame}s

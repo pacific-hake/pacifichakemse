@@ -33,10 +33,9 @@ run_year_loop_om <- function(df = NULL,
     # Extract a list of ages for the year `yr_ind` in season 1
     n_save_age <- lst$n_save_age[, yr_ind, , 1] %>% as.data.frame() %>% map(~{.x})
     # Calculate SSB for each space
-    ssb_weight <- map(n_save_age, function(space_at_age = .x){
+    ssb <- map(n_save_age, function(space_at_age = .x){
       j <- sum(space_at_age * as.numeric(wage$ssb), na.rm = TRUE) * 0.5
     })
-    ssb <- ssb_weight
 
     # Calculate SSB with selectivity applied for the year `yr_ind` in season 1
     ssb_all <- map(n_save_age, function(space_at_age = .x){
@@ -44,10 +43,11 @@ run_year_loop_om <- function(df = NULL,
     })
     rec <- map_dbl(seq_len(df$n_space), function(space = .x){
       # Recruitment only in season 1
-      (4 * lst$h * lst$r0_space[space] * ssb[[space]] /
+      j <- (4 * lst$h * lst$r0_space[space] * ssb[[space]] /
           (lst$ssb_0[space] * (1 - lst$h) + ssb[[space]] *
              (5 * lst$h - 1))) * exp(-0.5 * df$b[yr_ind] *
                                        lst$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
+      j
     }) %>% set_names(df$space_names)
     # Sanity check
     # rec[[1]] / (rec[[1]] + rec[[2]])

@@ -31,9 +31,15 @@ run_season_loop_om <- function(df,
         cat(yellow("      Space:", space, "\n"))
       }
       p_sel <- df$p_sel %>% filter(!!space == space)
-      p_sel_tmp <- p_sel
+      browser()
+      p_sel_yrs <- df$parms_init$p_sel[,-1] # Remove age column
       if(df$flag_sel[yr_ind] == 1){
-        p_sel_tmp$value <- df$parms_init$p_sel[, yr_ind - df$sel_idx + 1] * df$sigma_p_sel
+        p_sel_tmp <- p_sel %>%
+            filter(age != 1)
+        p_sel_tmp$value <- p_sel_tmp$value +
+          p_sel_yrs[, yr_ind - df$sel_idx + 1] * df$sigma_p_sel
+      }else{
+        p_sel_tmp <- p_sel
       }
       if(df$yrs[yr_ind] > df$m_yr){
         if(df$selectivity_change == 1){
@@ -42,7 +48,7 @@ run_season_loop_om <- function(df,
                                  rep(0, df$s_max_survey - 2 * df$s_min_survey + 1))
           }
         }else if(df$selectivity_change == 2){
-          p_sel_tmp$value <- df$parms_init$p_sel[,ncol(df$parms_init$p_sel)] * df$sigma_p_sel
+          p_sel_tmp$value <- p_sel_yrs[,ncol(p_sel_yrs)] * df$sigma_p_sel
         }
       }
 
@@ -51,6 +57,7 @@ run_season_loop_om <- function(df,
                           p_sel_tmp,
                           df$s_min,
                           df$s_max)
+
       lst$f_sel_save[, yr_ind, space] <<- f_sel
       if(df$n_space > 1){
         if(df$yrs[yr_ind] <= df$m_yr){

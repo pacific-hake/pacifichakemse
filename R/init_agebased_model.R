@@ -25,6 +25,7 @@ init_agebased_model <- function(df = NULL,
                              df$parms_init$p_sel_surv,
                              df$s_min_survey,
                              df$s_max_survey)
+
   lst$surv_sd <- exp(df$parms_init$log_sd_surv) # Survey error
   # Catchability -  constant over time
   lst$q <- exp(df$log_q)

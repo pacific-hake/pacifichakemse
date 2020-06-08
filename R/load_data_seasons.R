@@ -121,7 +121,7 @@ load_data_seasons <- function(ss_model = NULL,
   # Throw error if move_init is NULL and n_space is not 2
   stopifnot(!is.null(move_init) | (is.null(move_init) & n_space == 2))
 
-  lst <- csv_data(sel_hist)
+  lst <- csv_data()
 
   if(is.null(move_init)){
     # n_space must be 2 due to error check above
@@ -175,12 +175,12 @@ load_data_seasons <- function(ss_model = NULL,
     survey_season <- floor(n_season / 2)
   }
   # Set up selectivity
-  p_sel <- lst$p_sel
+  p_sel <- ss_model$sel_by_yr
   n_sel_ages_fish <- s_min:s_max
-  if(!sel_hist){
-    n_sel_yrs <- sum(sel_change_yr <= yrs)
-    p_sel <- matrix(0, length(n_sel_ages_fish), n_sel_yrs)
-  }
+  # if(!sel_hist){
+  #   n_sel_yrs <- sum(sel_change_yr <= yrs)
+  #   p_sel <- matrix(0, length(n_sel_ages_fish), n_sel_yrs)
+  # }
 
   if(n_season == 4 & n_space == 2){
     # Standardize row values to equal 1
@@ -221,8 +221,7 @@ load_data_seasons <- function(ss_model = NULL,
                      r_in = lst$r_dev,
                      p_sel = p_sel)
 
-  # USA selectivity
-  # psel[i,] <- c(2.8476, 0.973, 0.3861, 0.1775, 0.5048)
+  # Add US selectivity (space == 2)
   d_sel <- parms_init$p_sel_fish %>% mutate(space = 2)
   if(n_space == 1){
     d_sel <- d_sel %>% mutate(space = 1)

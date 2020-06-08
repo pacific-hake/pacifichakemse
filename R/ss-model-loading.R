@@ -372,6 +372,7 @@ calc_mcmc <- function(mcmc,
 #'
 #' @return A [list] with objects to be used throughout the package code
 #' @importFrom dplyr distinct
+#' @importFrom reshape2 dcast
 load_ss_model_data <- function(ss_model,
                                s_yr = NULL,
                                m_yr = NULL,
@@ -414,6 +415,21 @@ load_ss_model_data <- function(ss_model,
                                      s_yr = s_yr,
                                      m_yr = m_yr,
                                      ...)
+
+  # Selectivity estimates - row names are the ages
+  sels <- ss_model$parameters %>%
+    filter(grepl("DEVadd", Label))
+  sels_lab <- sels$Label
+  sels_yrs <- as.numeric(str_extract(sels_lab, "[0-9]+$"))
+  sels_ages <- as.numeric(str_extract(sels_lab, "[0-9]+")) - 1
+  sels_vals <- sels$Value
+  lst$sel_by_yrs <- tibble(yr = sels_yrs,
+                           age = sels_ages,
+                           val = sels_vals) %>%
+    dcast(age ~ yr, value.var = "val")
+  rownames(lst$sel_by_yrs) <- lst$sel_by_yrs$age
+  lst$sel_by_yrs <- lst$sel_by_yrs %>%
+    select(-age)
 
   if(nrow(lst$age_survey) != nrow(lst$age_catch)){
     stop("There was a problem loading the estimates of survey and catch age proportions ",
@@ -484,6 +500,7 @@ load_ss_model_data <- function(ss_model,
                                spr_f = vals_mc$pmed,
                                e = vals_mc$fmed)
   }
+
   lst$med_popests <- lst$med_popests %>%
     mutate(yr = yrs) %>%
     select(yr, everything())
@@ -760,6 +777,7 @@ load_ss_parameters <- function(ss_model = NULL){
 #' @param ... Arguments absorbed which are meant for other functions
 #'
 #' @return A [data.frame] of estimates, age, and source (fishery and survey)
+#' @importFrom dplyr add_row
 #' @export
 load_ss_sel_parameters <- function(ss_model = NULL,
                                    s_min = NULL,
@@ -798,11 +816,16 @@ load_ss_sel_parameters <- function(ss_model = NULL,
   fish <- parm_tbl %>%
     filter(grepl("^AgeSel_.*_Fishery", Label))
   fish <- fish[-(1:min(fish_ages)),]
-  fish <- fish[-(max(fish_ages):nrow(fish)),]
+  fish <- fish[-((max(fish_ages) + 1):nrow(fish)),]
   fish <- fish %>%
     transmute(value = Value) %>%
     mutate(source = "fish") %>%
     mutate(age = fish_ages)
+
+  if(!1 %in% fish$age){
+    fish <- fish %>%
+      add_row(value = 0, source = "fish", age = 1, .before = 1)
+  }
 
   survey <- parm_tbl %>%
     filter(grepl("^AgeSel_.*_Acoustic_Survey", Label))
