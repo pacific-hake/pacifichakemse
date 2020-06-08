@@ -13,25 +13,26 @@ init_agebased_model <- function(df = NULL,
 
   # Natural mortality - males = females
   lst$m_sel <- df$m_sel
-  lst$m0 <- exp(df$parms_init$log_m_init)
+  lst$m0 <- exp(df$parameters$log_m_init)
   lst$m_age <- lst$m0 * lst$m_sel
   lst$m_cumu_age <- c(0, cumsum(lst$m_age[1:(df$n_age - 1)]))
   # Recruitment
-  lst$r0 <- exp(df$parms_init$log_r_init)
+  lst$r0 <- exp(df$parameters$log_r_init)
   lst$rdev_sd <- exp(df$rdev_sd)
   lst$r0_space <- lst$r0 * df$move_init
   # Survey selectivity - constant over time
+  browser()
   lst$surv_sel <- get_select(df$ages,
-                             df$parms_init$p_sel_surv,
+                             df$parameters$p_sel_surv,
                              df$s_min_survey,
                              df$s_max_survey)
 
-  lst$surv_sd <- exp(df$parms_init$log_sd_surv) # Survey error
+  lst$surv_sd <- exp(df$parameters$log_sd_surv) # Survey error
   # Catchability -  constant over time
   lst$q <- exp(df$log_q)
   # Maturity and fecundity
   lst$mat_sel <- df$mat_sel
-  lst$h <- exp(df$parms_init$log_h)
+  lst$h <- exp(df$parameters$log_h)
   # Numbers-at-age - calculate n0 based on r0
   # Extrapolate the N0 out to three times the max age for sum for max age
   ages_3 <- min(df$ages):(df$n_age * 3)
@@ -70,7 +71,7 @@ init_agebased_model <- function(df = NULL,
   lst$survey[1] <- 1
   # Distribute over space
   lst$n_init <- rep(NA, df$n_age)
-  lst$n_init_dev <- df$parms_init$init_n
+  lst$n_init_dev <- df$parameters$init_n
   lst$age_1_ind <- which(df$ages == 1)
 
   # Initial numbers-at-age for all older than age 0

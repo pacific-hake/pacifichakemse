@@ -42,7 +42,7 @@ create_TMB_data <- function(sim_data = NULL,
   # Remove age column
   df$parms_init$init_n <- df$parms_init$init_n %>% select(value)
   df$parms_init$r_in <- df$parms_init$r_in %>% pull(value)
-  df$parms_init$p_sel <- df$parms_init$p_sel[, -1]
+  df$parms_init$sel_by_yrs <- df$parms_init$sel_by_yrs
   df$parms_init$f_0 <- rowSums(sim_data$f_out_save)
 
   # Load parameters from the assessment

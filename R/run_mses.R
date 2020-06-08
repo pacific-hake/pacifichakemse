@@ -85,17 +85,36 @@ run_mses <- function(ss_model_output_dir = NULL,
     dir.create(results_dir)
   }
 
-  # Load the SS model inputs and outputs in the formats required
+  # Load the raw SS model inputs and outputs using the r4ss package and the same
+  # methods used in the `hake-assessment` package
   ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir, ...)
+  # create objects from the raw SS model inputs and outputs and
+  # only include those in this list. To add new SS model outputs,
+  # modify the `load_ss_model_data()` function
   ss_model <- load_ss_model_data(ss_model_raw, ...)
 
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
-  # Prepare data for operating model
+  # Prepare data for the OM. This includes initializing the movement model
   df <- load_data_seasons(ss_model, ...)
+
   age_max_age <- nrow(ss_model$age_survey)
-  # Merge the SS model output list with the OM outputs
+  # Parameters to initialize the OM with
+  parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + df$r_mul,
+                     log_h = ss_model$parms_scalar$log_h,
+                     log_m_init = ss_model$parms_scalar$log_m_init,
+                     log_sd_surv = ss_model$parms_scalar$log_sd_surv,
+                     log_phi_survey = ss_model$log_phi_survey,
+                     log_phi_catch = ss_model$parms_scalar$log_phi_catch,
+                     p_sel_fish = ss_model$p_sel_fish,
+                     p_sel_survey = ss_model$p_sel_surv,
+                     init_n = df$init_n,
+                     r_in = df$r_dev)
+
+  # Merge the SS model output list with the OM outputs, and the parameters to
+  # initialize the OM with
   df <- append_objs_to_list(df,
+                            parameters,
                             ss_model$wage_catch_df,
                             ss_model$wage_catch,
                             ss_model$wage_survey_df,
@@ -116,7 +135,8 @@ run_mses <- function(ss_model_output_dir = NULL,
                             age_max_age,
                             ss_model$ss_catch,
                             ss_model$flag_catch,
-                            ss_model$age_catch_df)
+                            ss_model$age_catch_df,
+                            ss_model$sel_by_yrs)
 
   # Run the operating model
   sim_data <- run_agebased_true_catch(df, om_params_seed, ...)

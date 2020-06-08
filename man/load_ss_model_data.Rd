@@ -8,7 +8,11 @@ load_ss_model_data(
   ss_model,
   s_yr = NULL,
   m_yr = NULL,
+  s_min = NULL,
+  s_max = NULL,
   weight_factor = 1000,
+  n_space = 1,
+  selex_fill_val = 1,
   ...
 )
 }
@@ -19,7 +23,19 @@ load_ss_model_data(
 
 \item{m_yr}{End year}
 
+\item{s_min}{Minimum age in fishery selectivity}
+
+\item{s_max}{Maximum age in fishery selectivity}
+
 \item{weight_factor}{A factor to multiply and divide SSB values by}
+
+\item{n_space}{The number of spaces (areas) in which fishing takes place
+and to which a selectivity-at-age is to be set. See the value of
+\code{p_sel_fish} in the returned list}
+
+\item{selex_fill_val}{The selectivity value to fill in for missing
+selectivity estimates, e.g. Used to fill in Canadian selectivity because the
+estimation model only estimates one selectivity which is used for the USA}
 
 \item{...}{Arguments to be passed to \code{\link[=load_ss_sel_parameters]{load_ss_sel_parameters()}}}
 }

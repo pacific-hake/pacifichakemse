@@ -22,8 +22,6 @@
 #' @param move_slope Slope of the movement function
 #' @param ages_no_move Ages of fish which do not move in the movement model
 #' @param selectivity_change Should selectivity change?
-#' @param s_min Minimum age in fishery selectivity
-#' @param s_max Maximum age in fishery selectivity
 #' @param s_min_survey Minimum age in survey selectivity
 #' @param s_max_survey Maximum age in survey selectivity
 #' @param yr_future How many years into the future should there be stochastic values
@@ -63,10 +61,6 @@ load_data_seasons <- function(ss_model = NULL,
                               move_slope = 0.9,
                               ages_no_move = c(0, 1),
                               selectivity_change = 0,
-                              s_min = 1,
-                              s_max = 6,
-                              s_min_survey = 2,
-                              s_max_survey = 6,
                               b_future = 0.5,
                               yr_future  = 0,
                               sel_change_yr = 1991,
@@ -123,84 +117,100 @@ load_data_seasons <- function(ss_model = NULL,
 
   lst <- csv_data()
 
-  if(is.null(move_init)){
-    # n_space must be 2 due to error check above
-    move_init <-  c(0.25, 0.75)
-  }
-  names(move_init) <- space_names
+  lst$yrs <- s_yr:(m_yr + yr_future)
+  lst$s_yr <- s_yr
+  lst$m_yr <- m_yr
+  lst$n_yr <- length(lst$yrs)
+  lst$t_end <- lst$n_yr * lst$n_season
+  lst$sel_change_yr <- sel_change_yr
+  lst$sel_idx <- which(lst$yrs == lst$sel_change_yr)
+  lst$yr_sel <- length(lst$sel_change_yr:max(lst$yrs))
+  lst$n_season <- n_season
+  lst$season_names <- season_names
+  lst$n_space <- n_space
+  lst$space_names <- space_names
+  lst$ages <- ages
+  lst$age_names <- age_names
+  lst$rdev_sd <- log(rdev_sd)
+  lst$log_q <- log(1.14135)
+  lst$log_sd_catch <- log(0.01)
+  lst$s_mul <- 0.5
+  lst$sigma_p_sel <- 1.4
+  lst$sum_zero <- 0
+  lst$move <- ifelse(lst$n_space == 1, FALSE, TRUE)
+  lst$log_phi_survey <- log_phi_survey
 
-  yrs <- s_yr:(m_yr + yr_future)
-  n_yr <- length(yrs)
-  t_end <- n_yr * n_season
+  lst$move_init <- move_init
+  if(is.null(lst$move_init)){
+    # lst$n_space must be 2 due to error check above
+    lst$move_init <-  c(0.25, 0.75)
+  }
+  names(lst$move_init) <- lst$space_names
 
   # Age stuff
-  n_age <- length(ages)
-  m_sel <- rep(1, n_age)
+  lst$n_age <- length(ages)
+  lst$m_sel <- rep(1, lst$n_age)
 
-  recruit_mat <- rep(1, n_space)
-  names(recruit_mat) <- space_names
+  lst$recruit_mat <- rep(1, lst$n_space)
+  names(lst$recruit_mat) <- lst$space_names
 
   # Maturity
-  move_fifty <- move_fifty_init
-  move_max <- rep(move_max_init, n_season)
-  names(move_max) <- season_names
+  lst$move_fifty <- move_fifty_init
+  lst$move_max <- rep(move_max_init, lst$n_season)
+  names(lst$move_max) <- lst$season_names
+  lst$move_south <- move_south
+  lst$move_out <- move_out
+  lst$move_slope <- move_slope
   # Initialize the movement matrix
-  move_mat_obj <- init_movement_mat(n_space,
-                                    space_names,
-                                    n_season,
-                                    season_names,
-                                    n_yr,
-                                    yrs,
-                                    move_max,
-                                    move_slope,
-                                    move_fifty,
-                                    move_south,
-                                    move_out,
-                                    move_init,
+  move_mat_obj <- init_movement_mat(lst$n_space,
+                                    lst$space_names,
+                                    lst$n_season,
+                                    lst$season_names,
+                                    lst$n_yr,
+                                    lst$yrs,
+                                    lst$move_max,
+                                    lst$move_slope,
+                                    lst$move_fifty,
+                                    lst$move_south,
+                                    lst$move_out,
+                                    lst$move_init,
                                     ages_no_move,
-                                    ages,
-                                    age_names,
+                                    lst$ages,
+                                    lst$age_names,
                                     f_space)
-  move_mat <- move_mat_obj$move_mat
-  move_init <- move_mat_obj$move_init
-  f_space <- move_mat_obj$f_space
-  names(f_space) <- space_names
+  lst$move_mat <- move_mat_obj$move_mat
+  lst$move_init <- move_mat_obj$move_init
+  lst$f_space <- move_mat_obj$f_space
+  names(lst$f_space) <- lst$space_names
 
   # Set up survey season
-  if(n_season == 1){
-    survey_season <-  1
-  }else if(n_season == 4){
-    survey_season <- 3
+  if(lst$n_season == 1){
+    lst$survey_season <-  1
+  }else if(lst$n_season == 4){
+    lst$survey_season <- 3
   }else{
-    survey_season <- floor(n_season / 2)
+    lst$survey_season <- floor(lst$n_season / 2)
   }
-  # Set up selectivity
-  p_sel <- ss_model$sel_by_yr
-  n_sel_ages_fish <- s_min:s_max
-  # if(!sel_hist){
-  #   n_sel_yrs <- sum(sel_change_yr <= yrs)
-  #   p_sel <- matrix(0, length(n_sel_ages_fish), n_sel_yrs)
-  # }
 
-  if(n_season == 4 & n_space == 2){
+  if(lst$n_season == 4 & lst$n_space == 2){
     # Standardize row values to equal 1
-    catch_props_space_season <- map(catch_props_space_season, ~{
+    lst$catch_props_space_season <- map(catch_props_space_season, ~{
       .x / sum(.x)
     }) %>%
       set_names(seq_along(.)) %>%
       bind_rows() %>%
       t()
   }else{
-    catch_props_space_season <- matrix(NA, n_space, n_season)
+    lst$catch_props_space_season <- matrix(NA, lst$n_space, lst$n_season)
     # Equally distributed catch
-    catch_props_space_season[1:n_space,] <- 1 / n_season
+    lst$catch_props_space_season[1:lst$n_space,] <- 1 / lst$n_season
   }
-  r_mul <- ifelse(n_space == 2, 1.1, 1)
+  lst$r_mul <- ifelse(lst$n_space == 2, 1.1, 1)
 
   # Just start all the simulations with the same initial conditions
   lst$r_dev <- lst$r_dev %>%
     as.data.frame() %>%
-    mutate(yr = yrs) %>%
+    mutate(yr = lst$yrs) %>%
     select(yr, everything())
   lst$init_n <- lst$init_n %>%
     as.data.frame() %>%
@@ -208,126 +218,47 @@ load_data_seasons <- function(ss_model = NULL,
     select(age, everything()) %>%
     rename(value = 2)
 
-  parms_init <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(r_mul),
-                     log_h = ss_model$parms_scalar$log_h,
-                     log_m_init = ss_model$parms_scalar$log_m_init,
-                     log_sd_surv = ss_model$parms_scalar$log_sd_surv,
-                     log_phi_survey = log_phi_survey,
-                     log_phi_catch = ss_model$parms_scalar$log_phi_catch,
-                     # Selectivity parameters
-                     p_sel_fish = ss_model$parms_sel %>% filter(source == "fish"),
-                     p_sel_surv = ss_model$parms_sel %>% filter(source == "survey"),
-                     init_n = lst$init_n,
-                     r_in = lst$r_dev,
-                     p_sel = p_sel)
-
-  # Add US selectivity (space == 2)
-  d_sel <- parms_init$p_sel_fish %>% mutate(space = 2)
-  if(n_space == 1){
-    d_sel <- d_sel %>% mutate(space = 1)
-  }else{
-    d_sel <- tibble(value = rep(1, length(s_min:s_max)),
-                    source = "fish",
-                    space = 1,
-                    age = s_min:s_max) %>% bind_rows(d_sel)
-  }
-
   # Selectivity change in that year
-  flag_sel <- rep(FALSE, n_yr)
-  flag_sel[which(yrs == sel_change_yr):which(yrs == m_yr)] <- TRUE
-  df <-list(parms_init = parms_init,
-            sel_idx = which(yrs == sel_change_yr),
-            yr_sel = length(sel_change_yr:max(yrs)),
-            m_sel = m_sel,
-            n_season = n_season,
-            s_yr = s_yr,
-            m_yr = m_yr,
-            n_yr = n_yr,
-            ages = ages,
-            n_age = n_age,
-            # The extra year is to initialize
-            t_end = t_end,
-            # Analytical solution
-            log_q = log(1.14135),
-            # Selectivity
-            sel_change_yr = sel_change_yr,
-            selectivity_change = selectivity_change,
-            s_min = s_min,
-            s_max = s_max,
-            s_min_survey = s_min_survey,
-            s_max_survey = s_max_survey,
-            flag_sel = flag_sel,
-            survey_season = survey_season,
-            # Frequency of survey yrs (e.g., 2 is every second year)
-            n_survey = n_survey,
-            # variance parameters
-            log_sd_catch = log(0.01),
-            # Fixed in stock assessment
-            rdev_sd = log(rdev_sd),
-            yrs = yrs,
-            b = lst$b,
-            b_future = b_future,
-            #logh = log(0.8),
-            # Space parameters
-            # Annual survey timing
-            s_mul = 0.5,
-            sigma_p_sel = 1.4,
-            sum_zero = 0,
-            n_space = n_space,
-            recruit_mat = recruit_mat,
-            move = ifelse(n_space == 1, FALSE, TRUE),
-            move_mat = move_mat,
-            move_init = move_init,
-            move_fifty = move_fifty,
-            move_max = move_max,
-            move_south = move_south,
-            move_out = move_out,
-            move_slope = move_slope,
-            catch_props_space_season = catch_props_space_season,
-            catch_obs = lst$catch,
-            p_sel = d_sel,
-            log_phi_survey = log_phi_survey,
-            f_space = f_space)
+  lst$flag_sel <- rep(FALSE, lst$n_yr)
+  lst$flag_sel[which(lst$yrs == lst$sel_change_yr):which(lst$yrs == m_yr)] <- TRUE
 
-  df$catch_country <- lst$catch_country %>%
+  lst$catch_country <- lst$catch_country %>%
     select(year, Can, US) %>%
     mutate(total = rowSums(.)) %>% set_names(c("year", "space1", "space2", "total"))
-  df$catch <- df$catch_country$total
+  lst$catch <- lst$catch_country$total
   # If n_yr greater than the number of catch observations, append the mean catch across
-  # time series to the end yrs
-  if(n_yr > length(df$catch)){
-    df$catch <- c(df$catch, rep(mean(df$catch), n_yr - length(df$catch)))
+  # time series to the end lst$yrs
+  if(lst$n_yr > length(lst$catch)){
+    lst$catch <- c(lst$catch, rep(mean(lst$catch), lst$n_yr - length(lst$catch)))
   }
 
-  if(n_yr > nrow(df$catch_country)){
-    means <- df$catch_country %>%
+  if(lst$n_yr > nrow(lst$catch_country)){
+    means <- lst$catch_country %>%
       summarize_all(mean)
-    df$catch_country <- df$catch_country %>%
+    lst$catch_country <- lst$catch_country %>%
       bind_rows(means)
   }
 
   if(yr_future > 1){
-    # yrs where survey occurs
-    idx_future <- length(s_yr:m_yr) + seq(2, yr_future, by = df$n_survey)
-    #df$survey_x <- c(df$survey_x, rep(-2, yr_future))
-    #df$survey_x[idx_future] <- 2
-    df$survey_err <- c(df$survey_err, rep(1, yr_future))
-    df$survey_err[idx_future] <- mean(df$survey_err[df$survey_err != 1])
-    df$ss_survey <- c(df$ss_survey, rep(0,  yr_future))
-    df$ss_survey[idx_future] <- mean(df$ss_survey[df$ss_survey != -1])
-    df$flag_survey <- c(df$flag_survey, rep(-1, yr_future))
-    df$flag_survey[idx_future] <- 1
-    df$flag_catch[yrs > m_yr] <- 1
-    r_devs <- rnorm(n = yr_future, mean = 0, sd = exp(df$rdev_sd))
-    df$parms_init$r_in <- c(df$parms_init$r_in, r_devs)
+    # TODO: Need to debug this, make sure it works
+    # lst$yrs where survey occurs
+    idx_future <- length(s_yr:m_yr) + seq(2, yr_future, by = lst$n_survey)
+    #lst$survey_x <- c(lst$survey_x, rep(-2, yr_future))
+    #lst$survey_x[idx_future] <- 2
+    lst$survey_err <- c(lst$survey_err, rep(1, yr_future))
+    lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
+    lst$ss_survey <- c(lst$ss_survey, rep(0,  yr_future))
+    lst$ss_survey[idx_future] <- mean(lst$ss_survey[lst$ss_survey != -1])
+    lst$flag_survey <- c(lst$flag_survey, rep(-1, yr_future))
+    lst$flag_survey[idx_future] <- 1
+    lst$flag_catch[lst$yrs > m_yr] <- 1
+    r_devs <- rnorm(n = yr_future, mean = 0, sd = exp(lst$rdev_sd))
+    lst$parameters$r_in <- c(lst$parameters$r_in, r_devs)
     # Bias adjustment
-    df$b <- c(df$b, rep(df$b_future, yr_future))
+    lst$b <- c(lst$b, rep(lst$b_future, yr_future))
   }
-  # Add names for dimensions
-  df$space_names <- space_names
-  df$season_names <- season_names
-  df$age_names <- age_names
-  df
+
+  lst
 }
 
 #' Initialize the movement model matrix. An alternative function should be

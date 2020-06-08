@@ -367,7 +367,15 @@ calc_mcmc <- function(mcmc,
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' @param s_yr Start year
 #' @param m_yr End year
+#' @param s_min Minimum age in fishery selectivity
+#' @param s_max Maximum age in fishery selectivity
 #' @param weight_factor A factor to multiply and divide SSB values by
+#' @param n_space The number of spaces (areas) in which fishing takes place
+#' and to which a selectivity-at-age is to be set. See the value of
+#' `p_sel_fish` in the returned list
+#' @param selex_fill_val The selectivity value to fill in for missing
+#' selectivity estimates, e.g. Used to fill in Canadian selectivity because the
+#' estimation model only estimates one selectivity which is used for the USA
 #' @param ... Arguments to be passed to [load_ss_sel_parameters()]
 #'
 #' @return A [list] with objects to be used throughout the package code
@@ -376,12 +384,19 @@ calc_mcmc <- function(mcmc,
 load_ss_model_data <- function(ss_model,
                                s_yr = NULL,
                                m_yr = NULL,
+                               s_min = NULL,
+                               s_max = NULL,
                                weight_factor = 1000,
+                               n_space = 1,
+                               selex_fill_val = 1,
                                ...){
 
   verify_argument(ss_model, "list")
-  verify_argument(s_yr, "numeric", 1)
-  verify_argument(m_yr, "numeric", 1)
+  verify_argument(s_yr, c("integer", "numeric"), 1)
+  verify_argument(m_yr, c("integer", "numeric"), 1)
+  verify_argument(s_min, c("integer", "numeric"), 1)
+  verify_argument(s_max, c("integer", "numeric"), 1)
+  verify_argument(n_space, c("integer", "numeric"), 1)
 
   lst <- NULL
   yrs <- s_yr:m_yr
@@ -403,8 +418,6 @@ load_ss_model_data <- function(ss_model,
   lst$mat_sel <- lst$wage_ssb[,1]
 
   lst$parms_scalar <- load_ss_parameters(ss_model)
-  lst$parms_sel <- load_ss_sel_parameters(ss_model,
-                                          ...)
   lst$age_survey <- extract_age_comps(ss_model,
                                       age_comps_fleet = 2,
                                       s_yr = s_yr,
@@ -430,6 +443,28 @@ load_ss_model_data <- function(ss_model,
   rownames(lst$sel_by_yrs) <- lst$sel_by_yrs$age
   lst$sel_by_yrs <- lst$sel_by_yrs %>%
     select(-age)
+
+  # Selectivity parameter estimates
+  sel_param_ests <- load_ss_sel_parameters(ss_model,
+                                           s_min = s_min,
+                                           s_max = s_max,
+                                           ...)
+  lst$p_sel_fish <- sel_param_ests %>% filter(source == "fish")
+  lst$p_sel_surv <- sel_param_ests %>% filter(source == "survey")
+browser()
+  # Add more selectivities by space (area). These are all set to
+  # a selectivity of `selex_fill_val`
+  lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 2)
+  if(n_space == 1){
+    lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 1)
+  }else{
+    lst$p_sel_fish <- tibble(value = rep(selex_fill_val,
+                                         length(s_min:s_max)),
+                             source = "fish",
+                             space = 1,
+                             age = s_min:s_max) %>%
+      bind_rows(lst$p_sel_fish)
+  }
 
   if(nrow(lst$age_survey) != nrow(lst$age_catch)){
     stop("There was a problem loading the estimates of survey and catch age proportions ",
