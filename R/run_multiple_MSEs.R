@@ -69,9 +69,12 @@ run_multiple_MSEs <- function(df = NULL,
 
   df <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
 
-  params_new <- df$parms_init
+  params_new <- df$parameters
   params_new$f_0 <- rowSums(sim_data$f_out_save)
-  if(df$catch[df$n_yr] == 0){
+  last_catch <- df$catch %>%
+    slice(n()) %>%
+    pull(value)
+  if(last_catch == 0){
     params_new$f_0[length(params_new$f_0)] <- 0
   }
   # Convert some parameter objects to base types
@@ -81,7 +84,7 @@ run_multiple_MSEs <- function(df = NULL,
     pull(value)
   params_new$init_n <- params_new$init_n %>%
     pull(value)
-
+stop()
 browser()
   obj <-MakeADFun(df, params_new, DLL = "runHakeassessment", silent = TRUE)
 browser()

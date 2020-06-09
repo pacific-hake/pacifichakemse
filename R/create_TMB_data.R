@@ -36,14 +36,12 @@ create_TMB_data <- function(sim_data = NULL,
   # Make tibbles into matrices or vectors for TMB input
   # Logical must be changed to integer
   df$flag_sel <- df$flag_sel %>% as.integer()
-  df$s_min <- 1
   # This needs to be an index, not the year
   df$sel_change_yr <- which(df$sel_change_yr == df$yrs)
   # Remove age column
-  df$parms_init$init_n <- df$parms_init$init_n %>% select(value)
-  df$parms_init$r_in <- df$parms_init$r_in %>% pull(value)
-  df$parms_init$sel_by_yrs <- df$parms_init$sel_by_yrs
-  df$parms_init$f_0 <- rowSums(sim_data$f_out_save)
+  df$parameters$init_n <- df$parameters$init_n %>% select(value)
+  df$parameters$r_in <- df$parameters$r_in %>% pull(value)
+  df$parameters$f_0 <- rowSums(sim_data$f_out_save)
 
   # Load parameters from the assessment
   # Steepness prior distribution
@@ -71,12 +69,7 @@ create_TMB_data <- function(sim_data = NULL,
   df$t_end <- length(df$yrs)
 
   # Move things from sim_data into output list
-  df$catch_obs <- df$catch_obs %>%
-    select(value) %>%
-    as.matrix() %>%
-    `rownames<-`(df$catch_obs$year)
   df$survey <- sim_data$survey
-
   df$age_survey <- sim_data$age_comps_surv
   if(sim_age_comps){
     #df$catch_obs <- sim_data$catch

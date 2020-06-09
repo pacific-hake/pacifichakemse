@@ -238,11 +238,11 @@ load_data_seasons <- function(ss_model = NULL,
   lst$catch_country <- lst$catch_country %>%
     select(year, Can, US) %>%
     mutate(total = rowSums(.)) %>% set_names(c("year", "space1", "space2", "total"))
-  lst$catch <- lst$catch_country$total
+  lst$catch_obs <- lst$catch_country %>% pull(total)
   # If n_yr greater than the number of catch observations, append the mean catch across
   # time series to the end lst$yrs
-  if(lst$n_yr > length(lst$catch)){
-    lst$catch <- c(lst$catch, rep(mean(lst$catch), lst$n_yr - length(lst$catch)))
+  if(lst$n_yr > length(lst$catch_obs)){
+    lst$catch_obs <- c(lst$catch_obs, rep(mean(lst$catch_obs), lst$n_yr - length(lst$catch_obs)))
   }
 
   if(lst$n_yr > nrow(lst$catch_country)){
