@@ -484,7 +484,9 @@ get_age_dat <- function(d = NULL,
   verify_argument(yr, c("integer", "numeric"))
   stopifnot("Yr" %in% names(d))
 
-  d %>% filter(Yr %in% yr) %>% select(-c(Yr))
+  # Using the pipes here significantly slows down the code, so use base code
+  #d %>% filter(Yr %in% yr) %>% select(-c(Yr))
+  d[d$Yr %in% yr, -1]
 }
 
 #' Verify that the argument `arg` is valid in the context of the arguments given

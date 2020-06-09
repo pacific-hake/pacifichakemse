@@ -30,7 +30,9 @@ get_select <- function(ages = NULL,
       sel[i] <- 0
       p_tmp <- 0
     }else if(ages[i] >= s_min && ages[i] <= s_max){
-      p_tmp <- p_sel %>% filter(age == ages[i]) %>% pull(value) + p_tmp
+      # Using pipes here significantly slows down the code, so use base code
+      #p_tmp <- p_sel %>% filter(age == ages[i]) %>% pull(value) + p_tmp
+      p_tmp <- p_tmp + p_sel[p_sel$age == ages[i],]$value
       sel[i] <- exp(p_tmp - p_sum)
     }else{
       if(is.na(sel[s_max + 1])){
