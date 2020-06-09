@@ -16,6 +16,7 @@
 #' @param n_survey Survey frequency
 #' @param rdev_sd Recruitment deviation Standard deviation
 #' @param b_future Bias adjustment in the future
+#' @param yr_future Years to go into the future
 #' @param move_out Fraction of individuals that travel south in the last season
 #' @param move_south Fraction of individuals that move south during the year
 #' @param move_init Initial distribution of fish
@@ -67,7 +68,7 @@ load_data_seasons <- function(ss_model = NULL,
                               s_min_survey = 2,
                               s_max_survey = 6,
                               b_future = 0.5,
-                              yr_future  = 0,
+                              yr_future = 0,
                               sel_change_yr = 1991,
                               sel_hist = TRUE,
                               f_space = c(0.2612, 0.7388),

@@ -153,5 +153,6 @@ globalVariables(c(
 "flag",
 "type",
 "Value",
-"Label"
+"Label",
+"total"
 ))

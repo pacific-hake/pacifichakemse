@@ -88,6 +88,8 @@ load_data_seasons(
 
 \item{b_future}{Bias adjustment in the future}
 
+\item{yr_future}{Years to go into the future}
+
 \item{sel_change_yr}{A year in which a selectivity change took place}
 
 \item{sel_hist}{Use historical selectivity?}
