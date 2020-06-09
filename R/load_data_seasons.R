@@ -22,9 +22,10 @@
 #' @param move_slope Slope of the movement function
 #' @param ages_no_move Ages of fish which do not move in the movement model
 #' @param selectivity_change Should selectivity change?
+#' @param s_min Minimum age in fishery selectivity
+#' @param s_max Maximum age in fishery selectivity
 #' @param s_min_survey Minimum age in survey selectivity
-#' @param s_max_survey Maximum age in survey selectivity
-#' @param yr_future How many years into the future should there be stochastic values
+#' @param s_max_survey Maximum age in survey selectivity#' @param yr_future How many years into the future should there be stochastic values
 #' @param sel_hist Use historical selectivity?
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
@@ -61,6 +62,10 @@ load_data_seasons <- function(ss_model = NULL,
                               move_slope = 0.9,
                               ages_no_move = c(0, 1),
                               selectivity_change = 0,
+                              s_min = 1,
+                              s_max = 6,
+                              s_min_survey = 2,
+                              s_max_survey = 6,
                               b_future = 0.5,
                               yr_future  = 0,
                               sel_change_yr = 1991,
@@ -93,6 +98,10 @@ load_data_seasons <- function(ss_model = NULL,
   verify_argument(move_slope, "numeric", 1)
   verify_argument(ages_no_move, c("numeric", "integer"))
   verify_argument(selectivity_change, "numeric", 1)
+  verify_argument(s_min, c("numeric", "integer"), 1)
+  verify_argument(s_max, c("numeric", "integer"), 1)
+  verify_argument(s_min_survey, c("numeric", "integer"), 1)
+  verify_argument(s_max_survey, c("numeric", "integer"), 1)
   verify_argument(b_future, "numeric", 1)
   verify_argument(yr_future, "numeric", 1)
   verify_argument(sel_change_yr, c("numeric", "integer"), 1)
@@ -139,6 +148,10 @@ load_data_seasons <- function(ss_model = NULL,
   lst$sum_zero <- 0
   lst$move <- ifelse(lst$n_space == 1, FALSE, TRUE)
   lst$log_phi_survey <- log_phi_survey
+  lst$s_min <- s_min
+  lst$s_max <- s_max
+  lst$s_min_survey <- s_min_survey
+  lst$s_max_survey <- s_max_survey
 
   lst$move_init <- move_init
   if(is.null(lst$move_init)){

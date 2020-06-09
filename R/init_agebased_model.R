@@ -21,7 +21,7 @@ init_agebased_model <- function(df = NULL,
   lst$rdev_sd <- exp(df$rdev_sd)
   lst$r0_space <- lst$r0 * df$move_init
   # Survey selectivity - constant over time
-  browser()
+
   lst$surv_sel <- get_select(df$ages,
                              df$parameters$p_sel_surv,
                              df$s_min_survey,

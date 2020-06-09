@@ -451,7 +451,7 @@ load_ss_model_data <- function(ss_model,
                                            ...)
   lst$p_sel_fish <- sel_param_ests %>% filter(source == "fish")
   lst$p_sel_surv <- sel_param_ests %>% filter(source == "survey")
-browser()
+
   # Add more selectivities by space (area). These are all set to
   # a selectivity of `selex_fill_val`
   lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 2)

@@ -30,9 +30,9 @@ run_season_loop_om <- function(df,
       if(verbose){
         cat(yellow("      Space:", space, "\n"))
       }
-      p_sel <- df$p_sel %>% filter(!!space == space)
       browser()
-      p_sel_yrs <- df$parms_init$sel_by_yrs
+      p_sel <- df$p_sel %>% filter(!!space == space)
+      p_sel_yrs <- df$parameters$sel_by_yrs
       if(df$flag_sel[yr_ind] == 1){
         p_sel_tmp <- p_sel %>%
             filter(age != 1)

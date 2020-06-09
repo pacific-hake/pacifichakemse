@@ -84,11 +84,9 @@ load_data_seasons(
 
 \item{s_min_survey}{Minimum age in survey selectivity}
 
-\item{s_max_survey}{Maximum age in survey selectivity}
+\item{s_max_survey}{Maximum age in survey selectivity#' @param yr_future How many years into the future should there be stochastic values}
 
 \item{b_future}{Bias adjustment in the future}
-
-\item{yr_future}{How many years into the future should there be stochastic values}
 
 \item{sel_change_yr}{A year in which a selectivity change took place}
 
