@@ -32,7 +32,6 @@ Imports:
     rlang,
     purrr,
     stringr,
-    tictoc,
     tidyr,
     tidyselect,
     tibble,
