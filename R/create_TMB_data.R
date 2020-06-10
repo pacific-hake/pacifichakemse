@@ -21,17 +21,10 @@ create_TMB_data <- function(sim_data = NULL,
   verify_argument(ss_model, "list")
   verify_argument(history, "logical", 1)
 
-  if(max(df$yrs) > df$m_yr){
-    # Copy last year of weight-at-age data and use that as the simulated year
-    df$wage_catch_df <- wage_add_yr(df$wage_catch_df)
-    df$wage_catch <- format_wage_matrix(df$wage_catch_df)
-    df$wage_survey_df <- wage_add_yr(df$wage_survey_df)
-    df$wage_survey <- format_wage_matrix(df$wage_survey_df)
-    df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
-    df$wage_mid <- format_wage_matrix(df$wage_mid_df)
-    df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
-    df$wage_ssb <- format_wage_matrix(df$wage_ssb_df)
-  }
+  df$wage_catch <- format_wage_matrix(df$wage_catch_df)
+  df$wage_survey <- format_wage_matrix(df$wage_survey_df)
+  df$wage_mid <- format_wage_matrix(df$wage_mid_df)
+  df$wage_ssb <- format_wage_matrix(df$wage_ssb_df)
 
   # Make tibbles into matrices or vectors for TMB input
   # Logical must be changed to integer
@@ -92,6 +85,15 @@ create_TMB_data <- function(sim_data = NULL,
     filter(age != 2) %>%
     pull(value)
 
+  params <- df$parameters
+  params$f_0 <- rowSums(sim_data$f_out_save)
+  last_catch <- df$catch %>%
+    slice(n()) %>%
+    pull(value)
+  if(last_catch == 0){
+    params$f_0[length(params$f_0)] <- 0
+  }
+
   # Remove elements that will cause failure in the TMB code
   keep <- !names(df) %in% c("space_names",
                             "season_names",
@@ -101,5 +103,5 @@ create_TMB_data <- function(sim_data = NULL,
   # if(history){
   #   df$survey <- df$survey[,1]
   # }
-  df
+  list(df = df, params = params)
 }

@@ -67,19 +67,11 @@ run_multiple_MSEs <- function(df = NULL,
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
 
-  df <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
-
-  params_new <- df$parameters
-  params_new$f_0 <- rowSums(sim_data$f_out_save)
-  last_catch <- df$catch %>%
-    slice(n()) %>%
-    pull(value)
-  if(last_catch == 0){
-    params_new$f_0[length(params_new$f_0)] <- 0
-  }
+  df <- update_om_data(sim_data, df, ss_model, sim_age_comps = FALSE)
+  lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
 
 browser()
-  obj <-MakeADFun(df, params_new, DLL = "runHakeassessment", silent = TRUE)
+  obj <-MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = TRUE)
 browser()
   # Modify survey objects in the simulated survey years and add catch for new year
   map(yr_sims, function(yr = .x){
