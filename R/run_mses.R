@@ -33,7 +33,6 @@
 #' @importFrom purrr map2 map map_chr
 #' @importFrom r4ss SS_output
 #' @importFrom stringr str_ends
-#' @importFrom tictoc tic toc
 #' @importFrom clisymbols symbol
 #' @export
 run_mses <- function(ss_model_output_dir = NULL,
