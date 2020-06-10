@@ -39,9 +39,16 @@ create_TMB_data <- function(sim_data = NULL,
   # This needs to be an index, not the year
   df$sel_change_yr <- which(df$sel_change_yr == df$yrs)
   # Remove age column
-  df$parameters$init_n <- df$parameters$init_n %>% select(value)
-  df$parameters$r_in <- df$parameters$r_in %>% pull(value)
+  df$parameters$init_n <- df$parameters$init_n %>%
+    select(value) %>%
+    as.matrix()
+  df$parameters$r_in <- df$parameters$r_in %>%
+    # Remove the final year
+    slice(-n()) %>%
+    pull(value)
   df$parameters$f_0 <- rowSums(sim_data$f_out_save)
+  df$parameters$p_sel <- df$sel_by_yrs %>%
+    as.matrix()
 
   # Load parameters from the assessment
   # Steepness prior distribution
@@ -75,6 +82,16 @@ create_TMB_data <- function(sim_data = NULL,
     #df$catch_obs <- sim_data$catch
     df$age_catch <- sim_data$catch_age
   }
+
+  # Convert some parameter objects to base types
+  df$parameters$p_sel_fish <- df$parameters$p_sel_fish %>%
+    filter(space == 2) %>%
+    filter(age != 1) %>%
+    pull(value)
+  df$parameters$p_sel_surv <- df$parameters$p_sel_surv %>%
+    filter(age != 2) %>%
+    pull(value)
+
   # Remove elements that will cause failure in the TMB code
   keep <- !names(df) %in% c("space_names",
                             "season_names",

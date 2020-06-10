@@ -77,14 +77,7 @@ run_multiple_MSEs <- function(df = NULL,
   if(last_catch == 0){
     params_new$f_0[length(params_new$f_0)] <- 0
   }
-  # Convert some parameter objects to base types
-  params_new$p_sel_fish <- params_new$p_sel_fish %>%
-    pull(value)
-  params_new$p_sel_surv <- params_new$p_sel_surv %>%
-    pull(value)
-  params_new$init_n <- params_new$init_n %>%
-    pull(value)
-stop()
+
 browser()
   obj <-MakeADFun(df, params_new, DLL = "runHakeassessment", silent = TRUE)
 browser()
