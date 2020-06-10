@@ -743,7 +743,8 @@ extract_age_comp_data <- function(ss_model = NULL,
 load_ss_parameters <- function(ss_model = NULL){
 
   verify_argument(ss_model, "list")
-  parm_tbl <- ss_model$parameters %>% as_tibble()
+  parm_tbl <- ss_model$parameters %>%
+    as_tibble()
   if(!"Value" %in% names(parm_tbl)){
     stop("The column `Value` does not exist in the SS output parameter table.",
          call. = FALSE)
@@ -786,17 +787,30 @@ load_ss_parameters <- function(ss_model = NULL){
 
   lst <- NULL
 
-  lst$log_r_init <- parm_tbl %>% filter(grepl("^SR_LN", Label)) %>%
+  lst$log_r_init <- parm_tbl %>%
+    filter(grepl("^SR_LN", Label)) %>%
     pull(Value)
-  lst$log_h <- parm_tbl %>% filter(grepl("^SR_BH", Label)) %>%
-    pull(Value) %>% log()
-  lst$log_m_init <- parm_tbl %>% filter(grepl("^NatM", Label)) %>%
-    pull(Value) %>% log()
-  lst$log_sd_surv <- parm_tbl %>% filter(grepl("^Q_extraSD_Acoustic_Survey", Label)) %>%
-    pull(Value) %>% log()
-  lst$log_sd_r <- parm_tbl %>% filter(grepl("^SR_sigmaR", Label)) %>%
-    pull(Value) %>% log()
-  lst$log_phi_catch <- parm_tbl %>% filter(grepl("^ln\\(EffN_mult\\)_1$", Label)) %>%
+  lst$log_h <- parm_tbl %>%
+    filter(grepl("^SR_BH", Label)) %>%
+    pull(Value) %>%
+    log()
+  lst$log_m_init <- parm_tbl %>%
+    filter(grepl("^NatM", Label)) %>%
+    pull(Value) %>%
+    log()
+  lst$log_sd_surv <- parm_tbl %>%
+    filter(grepl("^Q_extraSD_Acoustic_Survey", Label)) %>%
+    pull(Value) %>%
+    log()
+  lst$log_sd_r <- parm_tbl %>%
+    filter(grepl("^SR_sigmaR", Label)) %>%
+    pull(Value) %>%
+    log()
+  lst$log_phi_catch <- parm_tbl %>%
+    filter(grepl("^ln\\(EffN_mult\\)_1$", Label)) %>%
+    pull(Value)
+  lst$log_phi_survey <- parm_tbl %>%
+    filter(grepl("^ln\\(EffN_mult\\)_2$", Label)) %>%
     pull(Value)
 
   lst

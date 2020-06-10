@@ -100,14 +100,14 @@ run_mses <- function(ss_model_output_dir = NULL,
 
   age_max_age <- nrow(ss_model$age_survey)
   # Parameters to initialize the OM with
-  parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + df$r_mul,
+  parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(df$r_mul),
                      log_h = ss_model$parms_scalar$log_h,
                      log_m_init = ss_model$parms_scalar$log_m_init,
                      log_sd_surv = ss_model$parms_scalar$log_sd_surv,
-                     log_phi_survey = ss_model$log_phi_survey,
+                     log_phi_survey = ss_model$parms_scalar$log_phi_survey,
                      log_phi_catch = ss_model$parms_scalar$log_phi_catch,
                      p_sel_fish = ss_model$p_sel_fish,
-                     p_sel_survey = ss_model$p_sel_surv,
+                     p_sel_surv = ss_model$p_sel_surv,
                      init_n = df$init_n,
                      r_in = df$r_dev)
 
@@ -142,7 +142,6 @@ run_mses <- function(ss_model_output_dir = NULL,
   sim_data <- run_agebased_true_catch(df, om_params_seed, ...)
 
   seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
-  tic()
   map2(fns, 1:length(fns), function(.x, .y, ...){
     ls_save <- map(1:n_runs, function(run = .x, ...){
       if(length(sel_changes) != 1 || sel_changes != 0){
@@ -184,5 +183,4 @@ run_mses <- function(ss_model_output_dir = NULL,
     attr(ls_save, "plotname") <- plot_names[.y]
     saveRDS(ls_save, file = file.path(results_dir, .x))
   }, ...)
-  toc()
 }
