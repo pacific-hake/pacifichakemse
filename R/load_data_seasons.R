@@ -239,10 +239,12 @@ load_data_seasons <- function(ss_model = NULL,
   lst$catch_country <- lst$catch_country %>%
     select(year, Can, US) %>%
     mutate(total = rowSums(.)) %>% set_names(c("year", "space1", "space2", "total"))
-  lst$catch_obs <- lst$catch_country %>% pull(total)
+  # TODO: Check why the sum of the catch country file does not add up to the total in the SS data file
+  # lst$catch_obs <- lst$catch_country %>% pull(total)
   # If n_yr greater than the number of catch observations, append the mean catch across
   # time series to the end lst$yrs
-  if(lst$n_yr > length(lst$catch_obs)){
+  lst$catch_obs <- ss_model$catch_obs
+  if(lst$n_yr > nrow(lst$catch_obs)){
     lst$catch_obs <- c(lst$catch_obs, rep(mean(lst$catch_obs), lst$n_yr - length(lst$catch_obs)))
   }
 

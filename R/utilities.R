@@ -266,8 +266,6 @@ csv_data <- function(){
   lst <- NULL
   lst$wage_ss <- load_from_csv("wage_ss.csv")
   lst$wage_unfished <- load_from_csv("unfished_waa.csv")
-  lst$catch <- load_from_csv("hake_totcatch.csv") %>%
-    transmute(year, value = Fishery)
   lst$b <- as.matrix(load_from_csv("b_input.csv"))
   lst$init_n <- as.matrix(load_from_csv("initN.csv"))
   lst$r_dev <- as.matrix(load_from_csv("Rdev.csv"))

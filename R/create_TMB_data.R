@@ -21,6 +21,16 @@ create_TMB_data <- function(sim_data = NULL,
   verify_argument(ss_model, "list")
   verify_argument(history, "logical", 1)
 
+  # Catch Observations
+  df$catch_obs <- df$catch_obs %>%
+    pull(value)
+
+  # Maturity
+  df$mat_sel <- df$mat_sel %>%
+    select(-Yr) %>%
+    unlist(use.names = FALSE)
+
+  # Weight-at-age
   df$wage_catch <- format_wage_matrix(df$wage_catch_df)
   df$wage_survey <- format_wage_matrix(df$wage_survey_df)
   df$wage_mid <- format_wage_matrix(df$wage_mid_df)
@@ -68,13 +78,10 @@ create_TMB_data <- function(sim_data = NULL,
 
   df$t_end <- length(df$yrs)
 
-  # Move things from sim_data into output list
+  # Copy simulated data into output data
   df$survey <- sim_data$survey
   df$age_survey <- sim_data$age_comps_surv
-  if(sim_age_comps){
-    #df$catch_obs <- sim_data$catch
-    df$age_catch <- sim_data$catch_age
-  }
+  df$age_catch <- sim_data$catch_age
 
   # Convert some parameter objects to base types
   df$parameters$p_sel_fish <- df$parameters$p_sel_fish %>%
@@ -87,21 +94,20 @@ create_TMB_data <- function(sim_data = NULL,
 
   params <- df$parameters
   params$f_0 <- rowSums(sim_data$f_out_save)
-  last_catch <- df$catch %>%
-    slice(n()) %>%
-    pull(value)
+  last_catch <- df$catch_obs %>% tail(1)
   if(last_catch == 0){
     params$f_0[length(params$f_0)] <- 0
   }
 
-  # Remove elements that will cause failure in the TMB code
-  keep <- !names(df) %in% c("space_names",
-                            "season_names",
-                            "age_names")
+  # Include only what appears in the estimation model (runHakeassessment.cpp) - TODO age_catch
+  keep <- names(df) %in% c("wage_catch", "wage_survey", "wage_survey", "wage_ssb", "wage_mid", "yr_sel",
+                           "m_sel", "mat_sel", "n_age", "ages", "sel_change_yr", "yrs", "t_end",
+                           "log_q", "flag_sel", "s_min", "s_min_survey", "s_max", "s_max_survey",
+                           "b", "survey", "ss_survey", "flag_survey", "age_survey", "age_max_age",
+                           "catch_obs", "ss_catch", "flag_catch", "age_catch", "log_sd_catch",
+                           "rdev_sd", "log_phi_survey", "sigma_p_sel", "sum_zero", "s_mul", "b_prior",
+                           "a_prior", "survey_err")
   df <- df[keep]
 
-  # if(history){
-  #   df$survey <- df$survey[,1]
-  # }
   list(df = df, params = params)
 }

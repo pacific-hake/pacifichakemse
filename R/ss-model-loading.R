@@ -401,21 +401,24 @@ load_ss_model_data <- function(ss_model,
   lst <- NULL
   yrs <- s_yr:m_yr
 
+  # Catch observations
+  lst$catch_obs <- ss_model$dat$catch %>%
+    transmute(yr = year,
+              value = catch) %>%
+    filter(yr != -999)
+
+  # Weight-at-age data
   waa <- ss_model$wtatage %>%
     as_tibble() %>%
     select(-c(Seas, Sex, Bio_Pattern, BirthSeas)) %>%
     filter(Yr %in% yrs)
   lst$wage_catch_df <- format_wage_df(waa, 1)
-  lst$wage_catch <- format_wage_matrix(lst$wage_catch_df)
   lst$wage_survey_df <- format_wage_df(waa, 2)
-  lst$wage_survey <- format_wage_matrix(lst$wage_survey_df)
   lst$wage_mid_df <- format_wage_df(waa, -1)
-  lst$wage_mid <- format_wage_matrix(lst$wage_mid_df)
   lst$wage_ssb_df <- format_wage_df(waa, -2)
-  lst$wage_ssb <- format_wage_matrix(lst$wage_ssb_df)
 
   # Maturity from first year only
-  lst$mat_sel <- lst$wage_ssb[,1]
+  lst$mat_sel <- lst$wage_ssb[1,]
 
   lst$parms_scalar <- load_ss_parameters(ss_model)
   lst$age_survey <- extract_age_comps(ss_model,
