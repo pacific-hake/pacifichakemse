@@ -70,8 +70,29 @@ run_multiple_MSEs <- function(df = NULL,
   df <- update_om_data(sim_data, df, ss_model, sim_age_comps = FALSE)
   lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
 
-browser()
+  # Evaluate the Objective function
   obj <-MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = TRUE)
+  report <- obj$report()
+  pars <- extract_params_tmb(obj)
+  lower <- obj$par - Inf
+  upper <- obj$par + Inf
+  upper[names(upper) == "log_h"] <- log(0.999)
+  upper[names(upper) == "f_0"] <- 2
+  lower[names(lower) == "log_sd_surv"] <- log(0.01)
+  lower[names(lower) == "f_0"] <- 0.01
+  if(lst_tmb$df$catch_obs[length(lst_tmb$df$catch_obs)] == 1){
+    lower[names(lower) == "f_0"] <- 1e-10
+  }
+  # Minimize the Objective function
+  opt <- nlminb(obj$par,
+                obj$fn,
+                obj$gr,
+                lower = lower,
+                upper = upper,
+                control = list(iter.max = 1e6,
+                               # If error one of the random effects is unused
+                               eval.max = 1e6))
+
 browser()
   # Modify survey objects in the simulated survey years and add catch for new year
   map(yr_sims, function(yr = .x){

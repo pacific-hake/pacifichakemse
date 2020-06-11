@@ -154,5 +154,6 @@ globalVariables(c(
 "type",
 "Value",
 "Label",
-"total"
+"total",
+"catch"
 ))
