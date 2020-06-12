@@ -67,56 +67,51 @@ run_multiple_MSEs <- function(df = NULL,
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
 
-  df <- update_om_data(sim_data, df, ss_model, sim_age_comps = FALSE)
-  lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
-
-  # Evaluate the Objective function
-  obj <-MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = TRUE)
-  report <- obj$report()
-  pars <- extract_params_tmb(obj)
-  lower <- obj$par - Inf
-  upper <- obj$par + Inf
-  upper[names(upper) == "log_h"] <- log(0.999)
-  upper[names(upper) == "f_0"] <- 2
-  lower[names(lower) == "log_sd_surv"] <- log(0.01)
-  lower[names(lower) == "f_0"] <- 0.01
-  if(lst_tmb$df$catch_obs[length(lst_tmb$df$catch_obs)] == 1){
-    lower[names(lower) == "f_0"] <- 1e-10
-  }
-  # Minimize the Objective function
-  opt <- nlminb(obj$par,
-                obj$fn,
-                obj$gr,
-                lower = lower,
-                upper = upper,
-                control = list(iter.max = 1e6,
-                               # If error one of the random effects is unused
-                               eval.max = 1e6))
-
-browser()
   # Modify survey objects in the simulated survey years and add catch for new year
   map(yr_sims, function(yr = .x){
     yr_ind <- which(yr == yr_all)
-    df$flag_survey <- c(df$flag_survey, ifelse(yr %in% yr_survey_sims, 1, -1))
-    df$survey_x <- c(df$survey_x, ifelse(yr %in% yr_survey_sims, 2, -2))
-    df$ss_survey <- c(df$ss_survey, ifelse(yr %in% yr_survey_sims,
-                                           ceiling(mean(df$ss_survey[df$ss_survey > 0])),
-                                           0))
-    df$survey_err <- c(df$survey_err, ifelse(yr %in% yr_survey_sims,
-                                             mean(df$survey_err[df$survey_err < 1]),
-                                             1))
-    df$ss_catch <- c(df$ss_catch, ceiling(mean(df$ss_catch[df$ss_catch > 0])))
-    df$flag_catch <- c(df$flag_catch, 1)
-    # Add a survey if catches are 0
 
-    if(df$catch[yr_ind] == 0 & df$flag_survey[yr_ind] == -1){
-      message("Stock in peril! Conducting emergency survey")
-      df$flag_survey[df$catch == 0] <- 1
-      # Emergency survey adds more 200 age samples
-      df$ss_survey[df$catch == 0] <- ceiling(mean(df$ss_survey[df$ss_survey > 0])) + 200
-      df$survey_x[df$catch == 0] <- 2
-      df$survey_err[df$catch == 0] <- mean(df$survey_err[df$survey_err < 1])
+    df <- update_om_data(yr, yr_ind, yr_survey_sims, sim_data, df)
+    lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
+
+    # Evaluate the Objective function
+browser()
+    obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = TRUE)
+    report <- obj$report()
+    pars <- extract_params_tmb(obj)
+browser()
+    lower <- obj$par - Inf
+    upper <- obj$par + Inf
+    upper[names(upper) == "log_h"] <- log(0.999)
+    upper[names(upper) == "f_0"] <- 2
+    lower[names(lower) == "log_sd_surv"] <- log(0.01)
+    lower[names(lower) == "f_0"] <- 0.01
+    if(lst_tmb$df$catch_obs[length(lst_tmb$df$catch_obs)] == 1){
+      lower[names(lower) == "f_0"] <- 1e-10
     }
+    # Minimize the Objective function
+    opt <- nlminb(obj$par,
+                  obj$fn,
+                  obj$gr,
+                  lower = lower,
+                  upper = upper,
+                  control = list(iter.max = 1e6,
+                                 # If error one of the random effects is unused
+                                 eval.max = 1e6))
+
+    wage_catch <- df$wage_catch[nrow(df$wage_catch) - 1,] %>% select(-Yr) %>% unlist(use.names = FALSE)
+    v_real <- sum(sim_data$n_save_age[, df$n_yr,,df$n_season] *
+                    matrix(rep(wage_catch, df$n_space),
+                           ncol = df$n_space) * (sim_data$f_sel[, df$n_yr,]))
+browser()
+    f_new <- get_ref_point(pars,
+                           df,
+                           ssb_y = report$SSB %>% tail(1),
+                           f_in = report$Fyear %>% tail(1),
+                           n_end = report$N_beg[, dim(report$N_beg)[2]], # TODO: Not the same as old package
+                           tac = tac,
+                           v_real = v_real,
+                           ...)
   })
 
   #       From getRefPoint()

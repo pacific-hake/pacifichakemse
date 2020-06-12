@@ -483,7 +483,6 @@ load_ss_model_data <- function(ss_model,
     transmute(yr = year, value = obs, err = se_log) %>%
     complete(yr = seq(s_yr, m_yr)) %>%
     replace(is.na(.), 1)
-
   lst$survey <- surv %>% pull(value)
   lst$survey_err <- surv %>% pull(err)
 

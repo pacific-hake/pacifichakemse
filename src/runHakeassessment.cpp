@@ -500,6 +500,14 @@ REPORT(surveyselc)
 REPORT(N_beg)
 REPORT(N_mid)
 REPORT(Surveyobs)
+REPORT(ans_SDR)
+REPORT(ans_psel)
+REPORT(ans_catch)
+REPORT(ans_survey)
+REPORT(ans_survcomp)
+REPORT(ans_catchcomp)
+REPORT(ans_priors)
+
 
   return ans;
 }

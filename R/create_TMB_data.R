@@ -81,7 +81,7 @@ create_TMB_data <- function(sim_data = NULL,
   # Copy simulated data into output data
   df$survey <- sim_data$survey
   df$age_survey <- sim_data$age_comps_surv
-  df$age_catch <- sim_data$catch_age
+  df$age_catch <- sim_data$age_comps_catch
 
   # Convert some parameter objects to base types
   df$parameters$p_sel_fish <- df$parameters$p_sel_fish %>%

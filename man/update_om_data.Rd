@@ -4,23 +4,15 @@
 \alias{update_om_data}
 \title{Update the OM data for a new year}
 \usage{
-update_om_data(
-  sim_data = NULL,
-  df = NULL,
-  ss_model = NULL,
-  sim_age_comps = TRUE
-)
+update_om_data(yr = NULL, yr_ind, yr_survey_sims, sim_data = NULL, df = NULL)
 }
 \arguments{
+\item{yr}{The year to add}
+
 \item{sim_data}{Operating model}
 
-\item{df}{Input data and parameters}
-
-\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}
+\item{df}{Input data and parameters
 and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
-
-\item{sim_age_comps}{Logical. If TRUE, include simulated age comps (\code{age_survey} and \code{age_catch}),
-If FALSE, leave them as-is}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}
