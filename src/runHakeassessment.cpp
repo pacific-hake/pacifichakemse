@@ -38,7 +38,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(s_max);
   DATA_INTEGER(s_max_survey);
 // // // Survey
-  DATA_VECTOR(survey); // Acoustic survey - TODO: numbers different
+  DATA_VECTOR(survey); // Acoustic survey
   //DATA_VECTOR(survey_x); // Flag if survey occurred - Replaced with flag_survey (only one instance in code)
   DATA_VECTOR(survey_err); // - TODO: numbers different
   DATA_VECTOR(ss_survey); // Age comp sample size
@@ -158,7 +158,6 @@ for(int time=0;time<t_end;time++){ // Start time loop
     }
   }
 
-
 vector<Type> Nzero(n_age); // Numbers with no fishing
 //vector<Type>Meq = cumsum(M);
 //
@@ -265,7 +264,7 @@ for(int time=0;time<(t_end);time++){ // Start time loop
                  catchselec(j) = catchselec(s_max);
              }
            }
-         }
+    }
 
 
        Catch(time) = 0;
@@ -388,7 +387,6 @@ for(int time=1;time<t_end;time++){ // Loop over available years
           sum2(time) += lgamma(ss_survey(time)*age_survey(i,time) + phi_survey*ss_survey(time)*age_survey_est(i,time)) - lgamma(phi_survey*ss_survey(time)*age_survey_est(i,time));
         }
         ans_survcomp += lgamma(ss_survey(time)+1)-sum1(time)+lgamma(phi_survey*ss_survey(time))-lgamma(ss_survey(time)+phi_survey*ss_survey(time))+sum2(time);
-
       }
 
 }
@@ -452,19 +450,7 @@ if(sum_zero == 1){
 // ans_priors += -dnorm(log_m_init, log(Type(0.2)), Type(0.1), TRUE);
 ans_priors += 0.5*pow(log_m_init-log(Type(0.2)),2)/Type(0.01);
 
-
-vector<Type>ans_tot(7);
-ans_tot(0) = ans_SDR;
-ans_tot(1) = ans_psel;
-ans_tot(2) = ans_catch;
-ans_tot(3) = ans_survey;
-ans_tot(4) = ans_survcomp;
-ans_tot(5) = ans_catchcomp;
-ans_tot(6) = ans_priors;
-
 Type ans = ans_SDR+ans_psel+ans_catch+ans_survey-ans_survcomp-ans_catchcomp+ans_priors;
-//
-
 
 // Later Fix F in the likelihood and age comp in catch
 // Type ans = 0.0;
@@ -482,7 +468,6 @@ ADREPORT(age_catch)
 ADREPORT(age_catch_est)
 ADREPORT(age_survey)
 ADREPORT(age_survey_est)
-ADREPORT(ans_tot)
 ADREPORT(SSBzero)
 
 REPORT(SSB)
@@ -490,16 +475,19 @@ REPORT(Fyear)
 REPORT(Catch)
 REPORT(R)
 REPORT(Nzero)
-REPORT(ans_tot)
 REPORT(Zsave)
 REPORT(age_survey_est)
 REPORT(age_catch_est)
 REPORT(CatchN)
 REPORT(selectivity_save)
 REPORT(surveyselc)
+REPORT(catchselec)
 REPORT(N_beg)
 REPORT(N_mid)
 REPORT(Surveyobs)
+REPORT(Myear)
+REPORT(pmax_catch_save)
+
 REPORT(ans_SDR)
 REPORT(ans_psel)
 REPORT(ans_catch)
@@ -507,7 +495,8 @@ REPORT(ans_survey)
 REPORT(ans_survcomp)
 REPORT(ans_catchcomp)
 REPORT(ans_priors)
-
+REPORT(age_survey_est)
+REPORT(ans)
 
   return ans;
 }

@@ -24,7 +24,7 @@ get_select <- function(ages = NULL,
 
   n_age <- length(ages)
   sel <- rep(NA, n_age)
-  p_sum <- sum(p_sel$value)
+  p_max <- max(cumsum(p_sel$value))
 
   for(i in seq_along(ages)){
     if(ages[i] < s_min){
@@ -34,7 +34,7 @@ get_select <- function(ages = NULL,
       # Using pipes here significantly slows down the code, so use base code
       #p_tmp <- p_sel %>% filter(age == ages[i]) %>% pull(value) + p_tmp
       p_tmp <- p_tmp + p_sel[p_sel$age == ages[i],]$value
-      sel[i] <- exp(p_tmp - p_sum)
+      sel[i] <- exp(p_tmp - p_max)
     }else{
       if(is.na(sel[s_max + 1])){
         sel[i] <- sel[s_max]

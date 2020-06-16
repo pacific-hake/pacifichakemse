@@ -22,8 +22,14 @@ create_TMB_data <- function(sim_data = NULL,
   verify_argument(history, "logical", 1)
 
   # Catch Observations
+  catch_obs_yrs <- df$catch_obs %>% pull(yr)
+  if(!identical(df$yrs, catch_obs_yrs)){
+    stop("The years in the catch observations does not match the number of yrs in the OM")
+  }
   df$catch_obs <- df$catch_obs %>%
-    pull(value)
+    select(value) %>%
+    as.matrix() %>%
+    `rownames<-`(df$yrs)
 
   # Maturity
   df$mat_sel <- df$mat_sel %>%
@@ -70,6 +76,8 @@ create_TMB_data <- function(sim_data = NULL,
   h_init <- as.numeric(h_prior_vec[3])
   h_prior <- as.numeric(h_prior_vec[4])
   h_sd <- as.numeric(h_prior_vec[5])
+  # For testing. This value was used in the original but not what was in the assessment output
+  h_sd <- 0.117
 
   df$mu <- (h_prior - h_min) / (h_max - h_min)
   df$tau <- ((h_prior - h_min) * (h_max - h_prior)) / h_sd ^ 2 - 1
@@ -91,7 +99,6 @@ create_TMB_data <- function(sim_data = NULL,
   df$parameters$p_sel_surv <- df$parameters$p_sel_surv %>%
     filter(age != 2) %>%
     pull(value)
-
   params <- df$parameters
   params$f_0 <- rowSums(sim_data$f_out_save)
   last_catch <- df$catch_obs %>% tail(1)
@@ -105,9 +112,14 @@ create_TMB_data <- function(sim_data = NULL,
                            "log_q", "flag_sel", "s_min", "s_min_survey", "s_max", "s_max_survey",
                            "b", "survey", "ss_survey", "flag_survey", "age_survey", "age_max_age",
                            "catch_obs", "ss_catch", "flag_catch", "age_catch", "log_sd_catch",
-                           "rdev_sd", "log_phi_survey", "sigma_p_sel", "sum_zero", "s_mul", "b_prior",
-                           "a_prior", "survey_err")
+                           "rdev_sd", "sigma_p_sel", "sum_zero", "s_mul", "b_prior",
+                           "a_prior", "survey_err", "log_phi_survey")
   df <- df[keep]
+
+  # Make parameter order correct
+  ord <- c("log_r_init", "log_h", "log_m_init", "log_sd_surv", "log_phi_catch",
+           "p_sel_fish", "p_sel_surv", "init_n", "r_in", "p_sel", "f_0")
+  params <- params[ord]
 
   list(df = df, params = params)
 }

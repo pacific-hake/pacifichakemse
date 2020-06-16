@@ -29,12 +29,10 @@ get_ref_point <- function(pars,
   h <- exp(pars$log_h)
   p_sel <- df$parameters$p_sel_fish %>%
     filter(!!space == space)
-  browser()
   f_sel <- get_select(df$ages,
                       p_sel,
                       df$s_min,
                       df$s_max)
-
 
   c_w <- df$wage_catch[nrow(df$wage_catch),] %>% select(-Yr) %>% unlist(use.names = FALSE)
   m_age <- rep(m_est, df$n_age)
@@ -46,12 +44,13 @@ get_ref_point <- function(pars,
   # Adjust plus group sum of geometric series as a/(1-r)
   n_0[df$n_age] <- n_0[df$n_age] / (1 - m_age[df$n_age])
 
-  ssb_age <- df$mat_sel * n_0 * 0.5
+  mat_sel <- df$mat_sel %>% select(-Yr) %>% unlist(use.names = FALSE)
+  ssb_age <- mat_sel * n_0 * 0.5
   ssb_0 <- sum(ssb_age)
   #ssb_pr <- ssb_0 / r_0
   #sb_eq <- 4 * h * r_0 * 0.4 * ssb_0 - ssb_0 * (1 - h) / (5 * h - 1)
 
-  z_age <- m_age + f_in * sel
+  z_age <- m_age + f_in * f_sel
   n_1 <- NULL
   n_1[1] <- r_0
   for(a in 1:(df$n_age - 1)){
@@ -60,8 +59,9 @@ get_ref_point <- function(pars,
   # Adjust plus group sum of geometric series as a/(1-r)
   n_1[df$n_age] <- n_1[df$n_age] / (1 - z_age[df$n_age])
 
-  ssb_eq <- sum(df$mat_sel * n_1) * 0.5
+  ssb_eq <- sum(mat_sel * n_1) * 0.5
   spr <- ssb_eq / ssb_0
+  browser()
 
   # Calculate the F40 reference point
   get_f <- function(par){

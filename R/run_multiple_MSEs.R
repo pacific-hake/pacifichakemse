@@ -76,7 +76,7 @@ run_multiple_MSEs <- function(df = NULL,
 
     # Evaluate the Objective function
 browser()
-    obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = TRUE)
+    obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
 browser()

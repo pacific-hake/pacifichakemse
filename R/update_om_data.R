@@ -52,7 +52,7 @@ update_om_data <- function(yr = NULL,
   #Rdevs <- rep(0, yr.future)
   df$parms$Rin <- c(df$parms$Rin,Rdevs)
 
-
+  browser()
 ### Add movement to the new years
 move.tmp <- array(0, dim = c(df$nspace,df$nage, df$nseason, df$nyear))
 move.tmp[,,,1:df$nyear-1] <- df$movemat
