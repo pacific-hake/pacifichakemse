@@ -151,10 +151,12 @@ run_multiple_MSEs <- function(df = NULL,
                            df,
                            ssb_y = report$SSB %>% tail(1),
                            f_in = report$Fyear %>% tail(1),
-                           n_end = report$N_beg[, ncol(report$N_beg)], # TODO: Not the same as old package
+                           n_end = report$N_beg[, ncol(report$N_beg)],
                            tac = tac,
                            v_real = v_real,
                            ...)
+
+
     browser()
 
   })
