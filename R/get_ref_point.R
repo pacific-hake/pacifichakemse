@@ -29,6 +29,7 @@ get_ref_point <- function(pars,
   h <- exp(pars$log_h)
   p_sel <- df$parameters$p_sel_fish %>%
     filter(!!space == space)
+  p_sel$value <- c(0, pars$p_sel_fish)
   f_sel <- get_select(df$ages,
                       p_sel,
                       df$s_min,
@@ -61,11 +62,10 @@ get_ref_point <- function(pars,
 
   ssb_eq <- sum(mat_sel * n_1) * 0.5
   spr <- ssb_eq / ssb_0
-  browser()
 
   # Calculate the F40 reference point
   get_f <- function(par){
-    z_age <- M + par[1] * sel
+    z_age <- m_age + par[1] * f_sel
     n_1 <- NULL
     n_1[1] <- r_0
     for(a in 1:(df$n_age - 1)){
@@ -73,16 +73,16 @@ get_ref_point <- function(pars,
     }
     #adjust plus group sum of geometric series as a/(1-r)
     n_1[df$n_age] <- n_1[df$n_age] / (1 - z_age[df$n_age])
-
-    ssb_eq <- sum(df$mat_sel * n_1) * 0.5
+    ssb_eq <- sum(mat_sel * n_1) * 0.5
     (ssb_eq / ssb_0 - 0.4) ^ 2
   }
   f_40 <- optim(par = 0.1,
-               fn = get_f,
-               method = "Brent",
-               lower = 0,
-               upper = 4)
-  z_age <- M+f_in*sel
+                fn = get_f,
+                method = "Brent",
+                lower = 0,
+                upper = 4)
+
+  z_age <- m_age + f_in * f_sel
   n_eq <- NULL
   n_eq[1] <- r_0
   for(a in 1:(df$n_age - 1)){
@@ -91,10 +91,10 @@ get_ref_point <- function(pars,
   # adjust plus group sum of geometric series as a/(1-r)
   n_eq[df$n_age] <- n_eq[df$n_age] / (1 - z_age[df$n_age])
 
-  ssb_new <- sum(df$mat_sel * n_eq) * 0.5
+  ssb_new <- sum(mat_sel * n_eq) * 0.5
   spr_new <- ssb_new / ssb_0
   f_new <- f_40$par
-  v <- sum(n_end * c_w * sel)
+  v <- sum(n_end * c_w * f_sel)
   # Convert to harvest rate
   f_x <- 1 - exp(-f_new)
 
@@ -114,9 +114,10 @@ get_ref_point <- function(pars,
   }
 
   # Adjust tac by JMC/Utilization
-  tac_obs <- read.csv(system.file("extdata/adjusted_tac_fn.csv",
+  tac_obs <- read_csv(system.file("extdata/adjusted_tac_fn.csv",
                                   package = "PacifichakeMSE",
-                                  mustWork = TRUE))
+                                  mustWork = TRUE),
+                      col_types = cols())
 
   if(tac == 1){
     c_exp <- c_new
@@ -124,7 +125,8 @@ get_ref_point <- function(pars,
     c_exp <- tac_obs$incpt[1] + tac_obs$slp[1] * c_new
   }else if(tac == 3){
     c_exp <- tac_obs$incpt[2] + tac_obs$slp[2] * c_new
-  }else if(tac == 4){ # Half the treaty specified and with a lower floor
+  }else if(tac == 4){
+    # Half the treaty specified and with a lower floor
     c_exp <- c_new * 0.5
     c_exp <- ifelse(c_exp < catch_floor, catch_floor, c_exp)
   }

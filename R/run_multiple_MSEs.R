@@ -74,31 +74,38 @@ run_multiple_MSEs <- function(df = NULL,
     df <- update_om_data(yr, yr_ind, yr_survey_sims, sim_data, df)
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
 
+    if(yr_ind == df$n_yr + 1){
+      d1 <- readRDS("junk/d.rds")
+      p1 <- readRDS("junk/p.rds")
+      # Compare this package input data with the data from the original
+      # If this line passes without causing as error, then the data and parameters are
+      # almost identical. They are within tiny tolerances as found in the
+      # `compare_tmb_data()` function.
+      compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
+      # --------------------- Special debugging - set data and parameters to what they are in original
+      lst_tmb$df$catch_obs <- d1$Catchobs
+      lst_tmb$df$wage_catch <- d1$wage_catch
+      lst_tmb$df$wage_survey <- d1$wage_survey
+      lst_tmb$df$wage_mid <- d1$wage_mid
+      lst_tmb$df$wage_ssb <- d1$wage_ssb
+      lst_tmb$df$survey <- d1$survey
+      lst_tmb$df$survey_err <- d1$survey_err
+      lst_tmb$df$age_survey <- d1$age_survey
+      lst_tmb$df$age_catch <- d1$age_catch
+      lst_tmb$params$log_m_init <- p1$logMinit
+      lst_tmb$params$log_h <- p1$logh
+      lst_tmb$params$log_sd_surv <- p1$logSDsurv
+      lst_tmb$params$init_n <- p1$initN
+      lst_tmb$params$p_sel <- p1$PSEL
+      lst_tmb$params$f_0 <- p1$F0
+      # ---------------------
+    }
     # Evaluate the Objective function
-    d1 <- readRDS("junk/d.rds")
-    p1 <- readRDS("junk/p.rds")
-    compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
-    # --------------------- Special debugging - set data and parameters to what they are in original
-    lst_tmb$df$catch_obs <- d1$Catchobs
-    lst_tmb$df$wage_catch <- d1$wage_catch
-    lst_tmb$df$wage_survey <- d1$wage_survey
-    lst_tmb$df$wage_mid <- d1$wage_mid
-    lst_tmb$df$wage_ssb <- d1$wage_ssb
-    lst_tmb$df$survey <- d1$survey
-    lst_tmb$df$survey_err <- d1$survey_err
-    lst_tmb$df$age_survey <- d1$age_survey
-    lst_tmb$df$age_catch <- d1$age_catch
-    lst_tmb$params$log_m_init <- p1$logMinit
-    lst_tmb$params$log_h <- p1$logh
-    lst_tmb$params$log_sd_surv <- p1$logSDsurv
-    lst_tmb$params$init_n <- p1$initN
-    lst_tmb$params$p_sel <- p1$PSEL
-    lst_tmb$params$f_0 <- p1$F0
-    # ---------------------
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
-    browser()
+    # Check likelihood components using this line:
+    # map2(names(report), report, ~{if(length(grep("ans", .x))){ret <- .y;names(ret) <- .x;ret}}) %>% unlist() %>% `[`(!is.na(names(.)))
 
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -118,7 +125,6 @@ run_multiple_MSEs <- function(df = NULL,
                   control = list(iter.max = 1e6,
                                  # If error one of the random effects is unused
                                  eval.max = 1e6))
-    browser()
 
     wage_catch <- df$wage_catch[nrow(df$wage_catch) - 1,] %>% select(-Yr) %>% unlist(use.names = FALSE)
     v_real <- sum(sim_data$n_save_age[, df$n_yr,,df$n_season] *
@@ -140,7 +146,7 @@ run_multiple_MSEs <- function(df = NULL,
     #   browser()
     #   # TODO: Fill in this section once number of sim years is greater than 1
     # }
-    browser()
+
     f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),
