@@ -44,7 +44,9 @@ create_TMB_data <- function(sim_data = NULL,
 
   # Make tibbles into matrices or vectors for TMB input
   # Logical must be changed to integer
-  df$flag_sel <- df$flag_sel %>% as.integer()
+  df$flag_sel <- df$flag_sel %>% as.numeric()
+  df$flag_survey <- df$flag_survey %>% as.integer()
+  df$flag_catch <- df$flag_catch %>% as.integer()
   # This needs to be an index, not the year
   df$sel_change_yr <- which(df$sel_change_yr == df$yrs)
   # Remove age column

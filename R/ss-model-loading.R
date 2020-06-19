@@ -406,6 +406,29 @@ load_ss_model_data <- function(ss_model,
     transmute(yr = year,
               value = catch) %>%
     filter(yr != -999)
+  # TODO: This is to copy what is in the original MSE, from the table in the assessment.
+  # It is not exactly the same as what is in the SS data file and overwrites that which is
+  # loaded above.
+  lst$catch_obs <- read_csv(system.file("extdata/catches.csv",
+                                        package = "PacifichakeMSE",
+                                        mustWork = TRUE),
+                            col_types = cols("i", "i", "i", "i")) %>%
+    transmute(yr = Year,
+              value = Total) %>%
+    as.data.frame() %>%
+    add_row(lst$catch_obs %>% tail(1), .after = nrow(.))
+  lst$catch_obs[lst$catch_obs$yr == 1991,]$value <-
+    lst$catch_obs[lst$catch_obs$yr == 1991,]$value + 1
+  lst$catch_obs[lst$catch_obs$yr == 1992,]$value <-
+    lst$catch_obs[lst$catch_obs$yr == 1992,]$value + 1
+  lst$catch_obs[lst$catch_obs$yr == 1995,]$value <-
+    lst$catch_obs[lst$catch_obs$yr == 1995,]$value + 1
+  lst$catch_obs[lst$catch_obs$yr == 1996,]$value <-
+    lst$catch_obs[lst$catch_obs$yr == 1996,]$value - 1
+  lst$catch_obs[lst$catch_obs$yr == 2005,]$value <-
+    lst$catch_obs[lst$catch_obs$yr == 2005,]$value - 1
+  lst$catch_obs[lst$catch_obs$yr == 2008,]$value <-
+    lst$catch_obs[lst$catch_obs$yr == 2008,]$value + 1
 
   # Weight-at-age data
   waa <- ss_model$wtatage %>%

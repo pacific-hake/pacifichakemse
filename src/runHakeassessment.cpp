@@ -363,10 +363,6 @@ for(int time=0;time<t_end;time++){ // Total Catches
         ans_catch += -dnorm(log(Catch(time)+1e-6), log(catch_obs(time)+1e-6), SDcatch, TRUE);
 }
 
-
-
-
-REPORT(ans_catch)
 ////Likelihood function for age composition in survey
 //
 Type ans_survcomp = 0.0;

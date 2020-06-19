@@ -5,38 +5,42 @@
 #' @return Return a list of estimated parameters and uncertainty
 #' @importFrom stats optimHess
 #' @export
-Check_Identifiable_vs2 = function( obj ){
+Check_Identifiable_vs2 <- function(obj){
   # Finite-different hessian
-  ParHat = extract_initial_values( obj )
-  List = NULL
-  List[["Hess"]] = optimHess( par=ParHat, fn=obj$fn, gr=obj$gr )
+  par_hat <- extract_initial_values(obj)
+  lst <- NULL
+  lst$hess <- optimHess(par = par_hat,
+                        fn = obj$fn,
+                        gr = obj$gr)
 
   # Check eigendecomposition
-  if(is.nan(max(List[['Hess']]))){
-    print('model not converging')
+  if(is.nan(max(lst$hess))){
+    print("model not converging")
   }else{
-  List[["Eigen"]] = eigen( List[["Hess"]] )
-  List[["WhichBad"]] = which(List[["Eigen"]]$values < sqrt(.Machine$double.eps) )
+    lst$eigen <- eigen(lst$hess)
+    lst$which_bad <- which(lst$eigen$values < sqrt(.Machine$double.eps))
 
-  # Check for parameters
-  if(length( List[["Eigen"]]$vectors[,List[["WhichBad"]]])>0){
-    RowMax = apply(as.matrix(List[["Eigen"]]$vectors[,List[["WhichBad"]]]),
-                   MARGIN=1, FUN=function(vec){max(abs(vec))} )
-  }else{
-    RowMax <- rep(0,length(List[['Eigen']]$values))
+    # Check for parameters
+    if(length(lst$eigen$vectors[, lst$which_bad]) > 0){
+      row_max = apply(as.matrix(lst$eigen$vectors[, lst$which_bad]),
+                      MARGIN = 1,
+                      FUN = function(vec){max(abs(vec))})
+    }else{
+      row_max <- rep(0,length(lst$eigen$values))
+    }
+
+    browser()
+
+    lst$bad_params <- data.frame("Param" = names(obj$par),
+                                 "MLE" = par_hat,
+                                 "Param_check" = ifelse(row_max > 0.1, "Bad", "OK"))
+
+    # Message
+    if(length(lst$which_bad) == 0){
+      message("All parameters are identifiable")
+    }else{
+      print(lst$bad_params)
+    }
   }
-
-
-  List[["BadParams"]] = data.frame("Param"=names(obj$par), "MLE"=ParHat, "Param_check"=ifelse(RowMax>0.1, "Bad","OK"))
-
-  # Message
-  if( length(List[["WhichBad"]])==0 ){
-    message( "All parameters are identifiable" )
-  }else{
-    print( List[["BadParams"]] )
-  }
-
-  # Return
-  return( invisible(List) )
-  }
+  lst
 }

@@ -75,11 +75,31 @@ run_multiple_MSEs <- function(df = NULL,
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
 
     # Evaluate the Objective function
-browser()
+    d1 <- readRDS("junk/d.rds")
+    p1 <- readRDS("junk/p.rds")
+    compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
+    # --------------------- Special debugging - set data and parameters to what they are in original
+    lst_tmb$df$catch_obs <- d1$Catchobs
+    lst_tmb$df$wage_catch <- d1$wage_catch
+    lst_tmb$df$wage_survey <- d1$wage_survey
+    lst_tmb$df$wage_mid <- d1$wage_mid
+    lst_tmb$df$wage_ssb <- d1$wage_ssb
+    lst_tmb$df$survey <- d1$survey
+    lst_tmb$df$survey_err <- d1$survey_err
+    lst_tmb$df$age_survey <- d1$age_survey
+    lst_tmb$df$age_catch <- d1$age_catch
+    lst_tmb$params$log_m_init <- p1$logMinit
+    lst_tmb$params$log_h <- p1$logh
+    lst_tmb$params$log_sd_surv <- p1$logSDsurv
+    lst_tmb$params$init_n <- p1$initN
+    lst_tmb$params$p_sel <- p1$PSEL
+    lst_tmb$params$f_0 <- p1$F0
+    # ---------------------
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
-browser()
+    browser()
+
     lower <- obj$par - Inf
     upper <- obj$par + Inf
     upper[names(upper) == "log_h"] <- log(0.999)
@@ -98,20 +118,39 @@ browser()
                   control = list(iter.max = 1e6,
                                  # If error one of the random effects is unused
                                  eval.max = 1e6))
+    browser()
 
     wage_catch <- df$wage_catch[nrow(df$wage_catch) - 1,] %>% select(-Yr) %>% unlist(use.names = FALSE)
     v_real <- sum(sim_data$n_save_age[, df$n_yr,,df$n_season] *
                     matrix(rep(wage_catch, df$n_space),
                            ncol = df$n_space) * (sim_data$f_sel[, df$n_yr,]))
-browser()
+
+    report <- obj$report()
+    pars <- extract_params_tmb(opt)
+
+    # if(yr_ind == df$n_yr + n_sim_yrs){
+    #   browser()
+    #   rep <- sdreport(obj)
+    #   sdrep <- summary(rep)
+    #   rep_values <- rownames(sdrep)
+    #   #nyear <- df$tEnd
+    #
+    #   # Check convergence in last year
+    #   conv <- Check_Identifiable_vs2(obj)
+    #   browser()
+    #   # TODO: Fill in this section once number of sim years is greater than 1
+    # }
+    browser()
     f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),
                            f_in = report$Fyear %>% tail(1),
-                           n_end = report$N_beg[, dim(report$N_beg)[2]], # TODO: Not the same as old package
+                           n_end = report$N_beg[, ncol(report$N_beg)], # TODO: Not the same as old package
                            tac = tac,
                            v_real = v_real,
                            ...)
+    browser()
+
   })
 
   #       From getRefPoint()
