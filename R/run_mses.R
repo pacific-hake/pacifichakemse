@@ -95,7 +95,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
   # Prepare data for the OM. This includes initializing the movement model
-  df <- load_data_seasons(ss_model, ...)
+  df <- load_data_seasons(ss_model, n_sim_yrs, ...)
 
   age_max_age <- nrow(ss_model$age_survey)
   # Parameters to initialize the OM with

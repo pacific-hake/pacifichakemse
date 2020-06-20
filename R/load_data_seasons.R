@@ -45,6 +45,7 @@
 #' df <- load_data_seasons(n_season = 2, n_space = 2)
 #' }
 load_data_seasons <- function(ss_model = NULL,
+                              n_sim_yrs = NULL,
                               n_season = 4,
                               season_names = NULL,
                               n_space = 2,
@@ -77,6 +78,7 @@ load_data_seasons <- function(ss_model = NULL,
                               ...){
 
   verify_argument(ss_model, "list")
+  verify_argument(n_sim_yrs, "numeric", 1)
   verify_argument(n_season, c("numeric", "integer"), 1, 1:4)
   verify_argument(season_names, "character", n_season)
   verify_argument(n_space, c("numeric", "integer"), 1, 1:2)
@@ -175,13 +177,17 @@ load_data_seasons <- function(ss_model = NULL,
   lst$move_south <- move_south
   lst$move_out <- move_out
   lst$move_slope <- move_slope
+
   # Initialize the movement matrix
+  # Add the sim yrs in so that we don't have to redimension the array later. This makes it much faster
+  # and the code cleaner in the MSE loop later
+  yrs_all <- c(lst$yrs, (lst$yrs[length(lst$yrs)] + 1):(lst$yrs[length(lst$yrs)] + n_sim_yrs))
   move_mat_obj <- init_movement_mat(lst$n_space,
                                     lst$space_names,
                                     lst$n_season,
                                     lst$season_names,
-                                    lst$n_yr,
-                                    lst$yrs,
+                                    lst$n_yr + n_sim_yrs,
+                                    yrs_all,
                                     lst$move_max,
                                     lst$move_slope,
                                     lst$move_fifty,
@@ -192,6 +198,7 @@ load_data_seasons <- function(ss_model = NULL,
                                     lst$ages,
                                     lst$age_names,
                                     f_space)
+
   lst$move_mat <- move_mat_obj$move_mat
   lst$move_init <- move_mat_obj$move_init
   lst$f_space <- move_mat_obj$f_space
@@ -254,25 +261,26 @@ load_data_seasons <- function(ss_model = NULL,
     lst$catch_country <- lst$catch_country %>%
       bind_rows(means)
   }
+  lst$b_future <- b_future
 
-  if(yr_future > 1){
-    # TODO: Need to debug this, make sure it works
-    # lst$yrs where survey occurs
-    idx_future <- length(s_yr:m_yr) + seq(2, yr_future, by = lst$n_survey)
-    #lst$survey_x <- c(lst$survey_x, rep(-2, yr_future))
-    #lst$survey_x[idx_future] <- 2
-    lst$survey_err <- c(lst$survey_err, rep(1, yr_future))
-    lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
-    lst$ss_survey <- c(lst$ss_survey, rep(0,  yr_future))
-    lst$ss_survey[idx_future] <- mean(lst$ss_survey[lst$ss_survey != -1])
-    lst$flag_survey <- c(lst$flag_survey, rep(-1, yr_future))
-    lst$flag_survey[idx_future] <- 1
-    lst$flag_catch[lst$yrs > m_yr] <- 1
-    r_devs <- rnorm(n = yr_future, mean = 0, sd = exp(lst$rdev_sd))
-    lst$parameters$r_in <- c(lst$parameters$r_in, r_devs)
-    # Bias adjustment
-    lst$b <- c(lst$b, rep(lst$b_future, yr_future))
-  }
+  # if(yr_future > 1){
+  #   # TODO: Need to debug this, make sure it works
+  #   # lst$yrs where survey occurs
+  #   idx_future <- length(s_yr:m_yr) + seq(2, yr_future, by = lst$n_survey)
+  #   #lst$survey_x <- c(lst$survey_x, rep(-2, yr_future))
+  #   #lst$survey_x[idx_future] <- 2
+  #   lst$survey_err <- c(lst$survey_err, rep(1, yr_future))
+  #   lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
+  #   lst$ss_survey <- c(lst$ss_survey, rep(0,  yr_future))
+  #   lst$ss_survey[idx_future] <- mean(lst$ss_survey[lst$ss_survey != -1])
+  #   lst$flag_survey <- c(lst$flag_survey, rep(-1, yr_future))
+  #   lst$flag_survey[idx_future] <- 1
+  #   lst$flag_catch[lst$yrs > m_yr] <- 1
+  #   r_devs <- rnorm(n = yr_future, mean = 0, sd = exp(lst$rdev_sd))
+  #   lst$parameters$r_in <- c(lst$parameters$r_in, r_devs)
+  #   # Bias adjustment
+  #   lst$b <- c(lst$b, rep(lst$b_future, yr_future))
+  # }
 
   lst
 }
@@ -284,7 +292,7 @@ load_data_seasons <- function(ss_model = NULL,
 #' @param space_names See [load_data_seasons()]
 #' @param n_season See [load_data_seasons()]
 #' @param season_names See [load_data_seasons()]
-#' @param n_yr The number of years
+#' @param n_yr The number of years in the array dimension
 #' @param yrs A vector of names for the years. Length must equal `n_yr`
 #' @param move_max A vector of the maximum movement rate, one for each of `n_seasons`
 #' @param move_slope  See [load_data_seasons()]

@@ -4,15 +4,27 @@
 \alias{update_om_data}
 \title{Update the OM data for a new year}
 \usage{
-update_om_data(yr = NULL, yr_ind, yr_survey_sims, sim_data = NULL, df = NULL)
+update_om_data(
+  df = NULL,
+  sim_data = NULL,
+  yr = NULL,
+  yr_ind = NULL,
+  yr_survey_sims = NULL,
+  f_new = NULL
+)
 }
 \arguments{
+\item{df}{Input data as created by \code{\link[=create_TMB_data]{create_TMB_data()}}}
+
+\item{sim_data}{Operating model as created by \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+
 \item{yr}{The year to add}
 
-\item{sim_data}{Operating model}
+\item{yr_ind}{Index of the year to add}
 
-\item{df}{Input data and parameters
-and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+\item{yr_survey_sims}{Years in which a survey takes place}
+
+\item{f_new}{The output of the \code{\link[=get_ref_point]{get_ref_point()}} function from the previous year}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}
