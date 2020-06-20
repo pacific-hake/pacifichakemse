@@ -10,7 +10,10 @@ update_om_data(
   yr = NULL,
   yr_ind = NULL,
   yr_survey_sims = NULL,
-  f_new = NULL
+  f_new = NULL,
+  c_increase = NULL,
+  m_increase = NULL,
+  sel_change = NULL
 )
 }
 \arguments{
@@ -25,6 +28,12 @@ update_om_data(
 \item{yr_survey_sims}{Years in which a survey takes place}
 
 \item{f_new}{The output of the \code{\link[=get_ref_point]{get_ref_point()}} function from the previous year}
+
+\item{c_increase}{Increase in max movement}
+
+\item{m_increase}{Decrease of spawners returning south}
+
+\item{sel_change}{Time varying selectivity}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

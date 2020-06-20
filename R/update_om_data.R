@@ -8,6 +8,7 @@
 #' @param f_new The output of the [get_ref_point()] function from the previous year
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
+#' @param sel_change Time varying selectivity
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
@@ -19,7 +20,8 @@ update_om_data <- function(df = NULL,
                            yr_survey_sims = NULL,
                            f_new = NULL,
                            c_increase = NULL,
-                           m_increase = NULL){
+                           m_increase = NULL,
+                           sel_change = NULL){
 
   verify_argument(df, "list")
   verify_argument(sim_data, "list")
@@ -27,6 +29,9 @@ update_om_data <- function(df = NULL,
   verify_argument(yr_ind, c("integer", "numeric"), 1)
   verify_argument(yr_survey_sims, c("integer", "numeric"))
   verify_argument(f_new, "list", 2)
+  verify_argument(c_increase, "numeric", 1)
+  verify_argument(m_increase, "numeric", 1)
+  verify_argument(sel_change, "numeric", 1)
 
   df$catch_obs <- df$catch_obs %>% add_row(yr = yr, value = f_new$c_new)
 
@@ -60,7 +65,6 @@ update_om_data <- function(df = NULL,
   r_devs <- rnorm(n = 1,
                   mean = 0,
                   sd = exp(df$rdev_sd))
-
   df$parameters$r_in <- df$parameters$r_in %>% add_row(yr = yr, value = r_devs)
 
   # Add movement to the new years
@@ -78,7 +82,8 @@ update_om_data <- function(df = NULL,
   df$move_out <- ifelse(df$move_out <= 0.5, 0.5, df$move_out)
   for(i in 1:df$n_space){
     for(j in 1:df$n_season){
-      df$move_mat[i, , j, yr_ind] <- move_max_tmp/(1 + exp(-df$move_slope * (df$ages - df$move_fifty)))
+      df$move_mat[i, , j, yr_ind] <- move_max_tmp /
+        (1 + exp(-df$move_slope * (df$ages - df$move_fifty)))
     }
   }
   # For the standard model
@@ -92,25 +97,17 @@ update_om_data <- function(df = NULL,
     # Proportion to move South for age 3 and up out for the final season (4)
     df$move_mat[2, 3:df$n_age, 4, yr_ind] <- df$move_south
   }
-  browser()
 
-# Fix the selectivity
-if(sel_change == 0){
-  df$flag_sel <- c(df$flag_sel,0)
-}
-if(sel_change == 1){
-  flag.tmp <- c(df$flag_sel,1)
-  idx <- which.min(df$flag_sel[df$flag_sel == 1])
-  flag.tmp[idx] <- 0
-  df$flag_sel <- flag.tmp
-  df$selidx <- df$selidx+1
-
-}
-if(sel_change == 2){
-  df$flag_sel <- c(df$flag_sel,1)
-  df$parms$PSEL <- rbind(df$parms$PSEL,rep(0,nrow(df$parms$PSEL)))
-}
-
+  # Selectivity modifications
+  if(sel_change == 0){
+    df$flag_sel <- c(df$flag_sel, FALSE)
+  }else if(sel_change == 1){
+    df$flag_sel <- c(df$flag_sel, TRUE)
+  }else if(sel_change == 2){
+    df$flag_sel <- c(df$flag_sel, TRUE)
+    df$sel_by_yrs <- cbind(df$sel_by_yrs, rep(0, nrow(df$sel_by_yrs)))
+    names(df$sel_by_yrs)[ncol(df$sel_by_yrs)] <- yr
+  }
 
   df
 }

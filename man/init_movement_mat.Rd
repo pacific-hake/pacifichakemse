@@ -33,7 +33,7 @@ init_movement_mat(
 
 \item{season_names}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
 
-\item{n_yr}{The number of years}
+\item{n_yr}{The number of years in the array dimension}
 
 \item{yrs}{A vector of names for the years. Length must equal \code{n_yr}}
 

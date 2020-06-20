@@ -6,6 +6,7 @@
 \usage{
 load_data_seasons(
   ss_model = NULL,
+  n_sim_yrs = NULL,
   n_season = 4,
   season_names = NULL,
   n_space = 2,

@@ -83,7 +83,8 @@ run_multiple_MSEs <- function(df = NULL,
                            yr_survey_sims,
                            f_new,
                            c_increase,
-                           m_increase)
+                           m_increase,
+                           sel_change)
     }
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
     if(yr == yr_start){
