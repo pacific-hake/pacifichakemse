@@ -138,7 +138,7 @@ run_mses <- function(ss_model_output_dir = NULL,
                             ss_model$sel_by_yrs)
 
   # Run the operating model
-  sim_data <- run_agebased_true_catch(df, om_params_seed, ...)
+  sim_data <- run_agebased_true_catch(df, om_params_seed, n_sim_yrs, ...)
 
   seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
   map2(fns, 1:length(fns), function(.x, .y, ...){

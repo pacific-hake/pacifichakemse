@@ -130,8 +130,8 @@ run_multiple_MSEs <- function(df = NULL,
         `[`(!is.na(names(.)))
     }
 
-    lower <- obj$par - Inf
-    upper <- obj$par + Inf
+      lower <- obj$par - Inf
+      upper <- obj$par + Inf
     upper[names(upper) == "log_h"] <- log(0.999)
     upper[names(upper) == "f_0"] <- 2
     lower[names(lower) == "log_sd_surv"] <- log(0.01)

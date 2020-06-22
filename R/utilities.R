@@ -293,178 +293,153 @@ setup_blank_om_objects <- function(yrs,
   n_yr <- length(yrs)
   n_age <- length(ages)
 
-  ssb <- matrix(NA,
-                n_yr,
-                n_space,
-                dimnames = list(yrs = yrs,
-                                space = seq_len(n_space)))
-  ssb_all <- array(NA,
-                   dim = c(n_yr, n_space, n_season),
-                   dimnames = list(yrs = yrs,
-                                   space = seq_len(n_space),
-                                   season = seq_len(n_season)))
-  ssb_weight <- matrix(NA,
-                       n_yr,
-                       n_space,
-                       dimnames = list(yrs = yrs,
-                                       space = seq_len(n_space)))
-  biomass_save <- matrix(NA,
-                         n_yr,
-                         n_space,
-                         dimnames = list(yrs = yrs,
-                                         space = seq_len(n_space)))
-  catch <- matrix(NA,
-                  n_yr,
-                  dimnames = list(yrs = yrs))
-  catch_age <- matrix(NA,
-                      n_age,
-                      n_yr,
-                      dimnames = list(ages = ages,
-                                      yrs = yrs))
-  catch_n <- matrix(NA,
+  lst <- NULL
+
+  lst$ssb <- matrix(NA,
                     n_yr,
-                    dimnames = list(yrs = yrs))
-  catch_n_age <- matrix(NA,
-                        n_age,
+                    n_space,
+                    dimnames = list(yrs = yrs,
+                                    space = seq_len(n_space)))
+  lst$ssb_all <- array(NA,
+                       dim = c(n_yr, n_space, n_season),
+                       dimnames = list(yrs = yrs,
+                                       space = seq_len(n_space),
+                                       season = seq_len(n_season)))
+  lst$ssb_weight <- matrix(NA,
+                           n_yr,
+                           n_space,
+                           dimnames = list(yrs = yrs,
+                                           space = seq_len(n_space)))
+  lst$biomass_save <- matrix(NA,
+                             n_yr,
+                             n_space,
+                             dimnames = list(yrs = yrs,
+                                             space = seq_len(n_space)))
+  lst$catch <- matrix(NA,
+                      n_yr,
+                      dimnames = list(yrs = yrs))
+  lst$catch_age <- matrix(NA,
+                          n_age,
+                          n_yr,
+                          dimnames = list(ages = ages,
+                                          yrs = yrs))
+  lst$catch_n <- matrix(NA,
                         n_yr,
-                        dimnames = list(ages = ages,
-                                        yrs = yrs))
-  f_sel_save <- array(NA,
-                      dim = c(n_age, n_yr, n_space),
-                      dimnames = list(ages = ages,
-                                      yrs = yrs,
-                                      space = seq_len(n_space)))
-  f_season_save <- array(NA,
-                         dim = c(n_age, n_yr, n_space, n_season),
-                         dimnames = list(ages = ages,
-                                         yrs = yrs,
-                                         space = seq_len(n_space),
-                                         season = seq_len(n_season)))
-  f_out_save <- array(NA,
-                      dim = c(n_yr, n_season, n_space),
-                      dimnames = list(yrs = yrs,
-                                      season = seq_len(n_season),
-                                      space = seq_len(n_space)))
-  n_save_age <- array(NA,
-                      dim = c(n_age, n_yr + 1, n_space, n_season),
-                      dimnames = list(ages = ages,
-                                      yrs = c(yrs, max(yrs) + 1),
-                                      space = seq_len(n_space),
-                                      season = seq_len(n_season)))
-  n_save_age_mid <- array(NA,
+                        dimnames = list(yrs = yrs))
+  lst$catch_n_age <- matrix(NA,
+                            n_age,
+                            n_yr,
+                            dimnames = list(ages = ages,
+                                            yrs = yrs))
+  lst$f_sel_save <- array(NA,
+                          dim = c(n_age, n_yr, n_space),
+                          dimnames = list(ages = ages,
+                                          yrs = yrs,
+                                          space = seq_len(n_space)))
+  lst$f_season_save <- array(NA,
+                             dim = c(n_age, n_yr, n_space, n_season),
+                             dimnames = list(ages = ages,
+                                             yrs = yrs,
+                                             space = seq_len(n_space),
+                                             season = seq_len(n_season)))
+  lst$f_out_save <- array(NA,
+                          dim = c(n_yr, n_season, n_space),
+                          dimnames = list(yrs = yrs,
+                                          season = seq_len(n_season),
+                                          space = seq_len(n_space)))
+  lst$n_save_age <- array(NA,
                           dim = c(n_age, n_yr + 1, n_space, n_season),
                           dimnames = list(ages = ages,
                                           yrs = c(yrs, max(yrs) + 1),
                                           space = seq_len(n_space),
                                           season = seq_len(n_season)))
-  r_save <- matrix(NA,
-                   n_yr,
-                   n_space)
-  v_save <- array(NA,
-                  dim = c(n_yr, n_space, n_season),
-                  dimnames = list(yrs = yrs,
-                                  space = seq_len(n_space),
-                                  season = seq_len(n_season)))
-  catch_save_age <- array(NA,
-                          dim = c(n_age, n_yr, n_space, n_season),
-                          dimnames = list(ages = ages,
-                                          yrs = yrs,
-                                          space = seq_len(n_space),
-                                          season = seq_len(n_season)))
+  lst$n_save_age_mid <- array(NA,
+                              dim = c(n_age, n_yr + 1, n_space, n_season),
+                              dimnames = list(ages = ages,
+                                              yrs = c(yrs, max(yrs) + 1),
+                                              space = seq_len(n_space),
+                                              season = seq_len(n_season)))
+  lst$r_save <- matrix(NA,
+                       n_yr,
+                       n_space)
+  lst$v_save <- array(NA,
+                      dim = c(n_yr, n_space, n_season),
+                      dimnames = list(yrs = yrs,
+                                      space = seq_len(n_space),
+                                      season = seq_len(n_season)))
+  lst$catch_save_age <- array(NA,
+                              dim = c(n_age, n_yr, n_space, n_season),
+                              dimnames = list(ages = ages,
+                                              yrs = yrs,
+                                              space = seq_len(n_space),
+                                              season = seq_len(n_season)))
 
-  catch_n_save_age <- array(NA,
-                            dim = c(n_age, n_yr, n_space, n_season),
-                            dimnames = list(ages = ages,
-                                            yrs = yrs,
-                                            space = seq_len(n_space),
-                                            season = seq_len(n_season)))
-  catch_quota <- array(NA,
-                       dim = c(n_yr, n_space, n_season),
-                       dimnames = list(yrs = yrs,
-                                       space = seq_len(n_space),
-                                       season = seq_len(n_season)))
-  catch_quota_n <- array(0,
-                         dim = c(n_yr, n_space, n_season),
-                         dimnames = list(yrs = yrs,
-                                         space = seq_len(n_space),
-                                         season = seq_len(n_season)))
-  # survey <- array(NA,
+  lst$catch_n_save_age <- array(NA,
+                                dim = c(n_age, n_yr, n_space, n_season),
+                                dimnames = list(ages = ages,
+                                                yrs = yrs,
+                                                space = seq_len(n_space),
+                                                season = seq_len(n_season)))
+  lst$catch_quota <- array(NA,
+                           dim = c(n_yr, n_space, n_season),
+                           dimnames = list(yrs = yrs,
+                                           space = seq_len(n_space),
+                                           season = seq_len(n_season)))
+  lst$catch_quota_n <- array(0,
+                             dim = c(n_yr, n_space, n_season),
+                             dimnames = list(yrs = yrs,
+                                             space = seq_len(n_space),
+                                             season = seq_len(n_season)))
+  # lst$survey <- array(NA,
   #                 dim = c(n_yr),
   #                 dimnames = list(yrs = yrs))
-  survey <- NULL
-  survey_true <- array(NA,
-                       dim = c(n_space, n_yr),
-                       dimnames = list(space = seq_len(n_space),
-                                       yrs = yrs))
-  surv_tot <- matrix(NA,
-                     n_yr,
-                     n_space,
-                     dimnames = list(yrs = yrs,
-                                     space = seq_len(n_space)))
-
-  age_comps_surv <- array(NA,
-                          dim = c(max_surv_age, n_yr),
-                          dimnames = list(ages = seq_len(max_surv_age),
-                                          yrs = yrs))
-  age_comps_surv_space <- array(NA,
-                                dim = c(max(ages), n_yr, n_space),
-                                dimnames = list(ages = seq_len(max(ages)),
-                                                yrs = yrs))
-  n_survey <- matrix(NA,
-                     max(ages),
-                     n_yr,
-                     dimnames = list(ages = seq_len(max(ages)),
-                                     yrs= yrs))
-  age_comps_catch <- array(NA,
-                           dim = c(max_surv_age, n_yr),
-                           dimnames = list(ages = seq_len(max_surv_age),
+  lst$survey <- NULL
+  lst$survey_true <- array(NA,
+                           dim = c(n_space, n_yr),
+                           dimnames = list(space = seq_len(n_space),
                                            yrs = yrs))
-  age_comps_catch_space <- array(NA,
-                                 dim = c(max(ages), n_yr, n_space),
-                                 dimnames = list(ages = seq_len(max(ages)),
-                                                 yrs = yrs,
-                                                 space = seq_len(n_space)))
-  age_comps_om <- array(NA,
-                        dim = c(n_age, n_yr, n_space,n_season),
-                        dimnames = list(ages = ages,
-                                        yrs= yrs,
-                                        space = seq_len(n_space),
-                                        season = seq_len(n_season)))
-  z_save <- array(NA,
-                  dim = c(n_age, n_yr, n_space, n_season),
-                  dimnames = list(ages = ages,
-                                  yrs = yrs,
-                                  space = seq_len(n_space),
-                                  season = seq_len(n_season)))
-  list(ssb = ssb,
-       ssb_all = ssb_all,
-       ssb_weight = ssb_weight,
-       biomass_save = biomass_save,
-       catch = catch,
-       catch_age = catch_age,
-       catch_n = catch_n,
-       catch_n_age = catch_n_age,
-       f_sel_save = f_sel_save,
-       f_season_save = f_season_save,
-       f_out_save = f_out_save,
-       n_save_age = n_save_age,
-       n_save_age_mid = n_save_age_mid,
-       r_save = r_save,
-       v_save = v_save,
-       catch_save_age = catch_save_age,
-       catch_n_save_age = catch_n_save_age,
-       catch_quota = catch_quota,
-       catch_quota_n = catch_quota_n,
-       survey = survey,
-       survey_true = survey_true,
-       surv_tot = surv_tot,
-       age_comps_surv = age_comps_surv,
-       age_comps_surv_space = age_comps_surv_space,
-       n_survey = n_survey,
-       age_comps_catch = age_comps_catch,
-       age_comps_catch_space = age_comps_catch_space,
-       age_comps_om = age_comps_om,
-       z_save = z_save)
+  lst$surv_tot <- matrix(NA,
+                         n_yr,
+                         n_space,
+                         dimnames = list(yrs = yrs,
+                                         space = seq_len(n_space)))
+
+  lst$age_comps_surv <- array(NA,
+                              dim = c(max_surv_age, n_yr),
+                              dimnames = list(ages = seq_len(max_surv_age),
+                                              yrs = yrs))
+  lst$age_comps_surv_space <- array(NA,
+                                    dim = c(max(ages), n_yr, n_space),
+                                    dimnames = list(ages = seq_len(max(ages)),
+                                                    yrs = yrs))
+  lst$n_survey <- matrix(NA,
+                         max(ages),
+                         n_yr,
+                         dimnames = list(ages = seq_len(max(ages)),
+                                         yrs= yrs))
+  lst$age_comps_catch <- array(NA,
+                               dim = c(max_surv_age, n_yr),
+                               dimnames = list(ages = seq_len(max_surv_age),
+                                               yrs = yrs))
+  lst$age_comps_catch_space <- array(NA,
+                                     dim = c(max(ages), n_yr, n_space),
+                                     dimnames = list(ages = seq_len(max(ages)),
+                                                     yrs = yrs,
+                                                     space = seq_len(n_space)))
+  lst$age_comps_om <- array(NA,
+                            dim = c(n_age, n_yr, n_space,n_season),
+                            dimnames = list(ages = ages,
+                                            yrs= yrs,
+                                            space = seq_len(n_space),
+                                            season = seq_len(n_season)))
+  lst$z_save <- array(NA,
+                      dim = c(n_age, n_yr, n_space, n_season),
+                      dimnames = list(ages = ages,
+                                      yrs = yrs,
+                                      space = seq_len(n_space),
+                                      season = seq_len(n_season)))
+
+  lst
 }
 
 #' Extract row(s) of age data from a [data.frame]

@@ -4,12 +4,14 @@
 \alias{run_agebased_true_catch}
 \title{Run an agebased model}
 \usage{
-run_agebased_true_catch(df = NULL, seed = 100, ...)
+run_agebased_true_catch(df = NULL, seed = 100, n_sim_yrs = NULL, ...)
 }
 \arguments{
 \item{df}{data frame of parameters and life history values}
 
 \item{seed}{seed for survey error and recruitment deviations}
+
+\item{n_sim_yrs}{The number of years to simulate into the future.}
 
 \item{...}{Arguments passed to \code{\link[=run_year_loop_om]{run_year_loop_om()}}}
 }
