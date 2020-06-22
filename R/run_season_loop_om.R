@@ -5,6 +5,10 @@
 #' @param yr The year to run the operating model for
 #' @param yr_ind The index of `yr` in the `df$yrs` vector
 #' @param m_season A vector of natural mortality-at-age
+#' @param init_ssb The initial spawning biomass for each space. List of 2.
+#' This is numbers-at-age in year 1 multiplied by the weight-at-age
+#' @param init_ssb_all The initial biomass for each space. List of 2.
+#' This is numbers-at-age in year 1 multiplied by the maturity/selectivity vector
 #' @param pope_mul Multiplier used in Pope's method
 #' @param verbose Print the loop information to the console
 #' @param ... Absorbs additional arguments meant for other functions
@@ -19,9 +23,13 @@ run_season_loop_om <- function(df,
                                yr,
                                yr_ind,
                                m_season,
+                               init_ssb,
+                               init_ssb_all,
                                pope_mul = 0.5,
                                verbose = TRUE,
                                ...){
+
+  mat_sel <- lst$mat_sel %>% select(-Yr)
   map(seq_len(df$n_season), function(season = .x){
     if(verbose){
       cat(red("Season:", season, "\n"))
@@ -154,7 +162,11 @@ run_season_loop_om <- function(df,
         lst$n_save_age[df$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
       }
       lst$age_comps_om[, yr_ind, space, season] <<- lst$n_save_age[, yr_ind, space, season] / sum(lst$n_save_age[, yr_ind, space, season])
-      lst$ssb_all[yr_ind, space, season] <<- sum(lst$n_save_age[, yr_ind, space, season] * lst$mat_sel, na.rm = TRUE)
+      if(yr_ind == 1 && season == 1){
+        lst$ssb_all[1, space, season] <<- init_ssb_all[[space]]
+      }else{
+        lst$ssb_all[yr_ind, space, season] <<- sum(lst$n_save_age[, yr_ind, space, season] * mat_sel, na.rm = TRUE)
+      }
       lst$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * lst$n_save_age[, yr_ind, space, season] * wage_catch
       lst$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * lst$n_save_age[, yr_ind, space, season]
       if(lst$catch_quota[yr_ind, space, season] > 0){

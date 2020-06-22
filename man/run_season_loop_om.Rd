@@ -10,6 +10,8 @@ run_season_loop_om(
   yr,
   yr_ind,
   m_season,
+  init_ssb,
+  init_ssb_all,
   pope_mul = 0.5,
   verbose = TRUE,
   ...
@@ -25,6 +27,12 @@ run_season_loop_om(
 \item{yr_ind}{The index of \code{yr} in the \code{df$yrs} vector}
 
 \item{m_season}{A vector of natural mortality-at-age}
+
+\item{init_ssb}{The initial spawning biomass for each space. List of 2.
+This is numbers-at-age in year 1 multiplied by the weight-at-age}
+
+\item{init_ssb_all}{The initial biomass for each space. List of 2.
+This is numbers-at-age in year 1 multiplied by the maturity/selectivity vector}
 
 \item{pope_mul}{Multiplier used in Pope's method}
 

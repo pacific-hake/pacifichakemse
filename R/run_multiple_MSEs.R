@@ -85,6 +85,9 @@ run_multiple_MSEs <- function(df = NULL,
                            c_increase,
                            m_increase,
                            sel_change)
+      browser()
+      sim_data <- run_agebased_true_catch(df, om_params_seed, ...)
+      browser()
     }
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
     if(yr == yr_start){

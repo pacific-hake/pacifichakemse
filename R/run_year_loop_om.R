@@ -15,6 +15,8 @@ run_year_loop_om <- function(df = NULL,
   verify_argument(df, "list")
   verify_argument(lst, "list")
 
+  mat_sel <- df$mat_sel %>% select(-Yr)
+
   map(df$yrs, function(yr = .x){
     if(verbose){
       cat(green(paste0(yr, ":\n")))
@@ -32,19 +34,21 @@ run_year_loop_om <- function(df = NULL,
     # Fix SSB and recruitment in all areas
     # Extract a list of ages for the year `yr_ind` in season 1
     n_save_age <- lst$n_save_age[, yr_ind, , 1] %>% as.data.frame() %>% map(~{.x})
-    # Calculate SSB for each space
-    ssb <- map(n_save_age, function(space_at_age = .x){
-      j <- sum(space_at_age * as.numeric(wage$ssb), na.rm = TRUE) * 0.5
+browser()
+    # Calculate initial SSB for each space
+    init_ssb <- map(n_save_age, function(space_at_age = .x){
+      j <- sum(space_at_age * wage$ssb, na.rm = TRUE) * 0.5
     })
 
     # Calculate SSB with selectivity applied for the year `yr_ind` in season 1
-    ssb_all <- map(n_save_age, function(space_at_age = .x){
-      sum(space_at_age * df$mat_sel, na.rm = TRUE) * 0.5
+    init_ssb_all <- map(n_save_age, function(space_at_age = .x){
+      sum(space_at_age * mat_sel, na.rm = TRUE) * 0.5
     })
+
     rec <- map_dbl(seq_len(df$n_space), function(space = .x){
       # Recruitment only in season 1
-      j <- (4 * lst$h * lst$r0_space[space] * ssb[[space]] /
-          (lst$ssb_0[space] * (1 - lst$h) + ssb[[space]] *
+      j <- (4 * lst$h * lst$r0_space[space] * init_ssb[[space]] /
+          (lst$ssb_0[space] * (1 - lst$h) + init_ssb[[space]] *
              (5 * lst$h - 1))) * exp(-0.5 * df$b[yr_ind] *
                                        lst$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
       j
@@ -56,7 +60,15 @@ run_year_loop_om <- function(df = NULL,
     lst$r_save[yr_ind, ] <<- rec
 
     # -------------------------------------------------------------------------
-    lst <<- run_season_loop_om(df, lst, yr, yr_ind, m_season, verbose, ...)
+    lst <<- run_season_loop_om(df = df,
+                               lst = lst,
+                               yr = yr,
+                               yr_ind = yr_ind,
+                               m_season = m_season,
+                               init_ssb = init_ssb,
+                               init_ssb_all = init_ssb_all,
+                               verbose = verbose,
+                               ...)
 
     if(df$n_season > 1){
       lst$catch_age[, yr_ind] <<- apply(lst$catch_n_save_age[, yr_ind,,],
@@ -197,6 +209,7 @@ run_year_loop_om <- function(df = NULL,
       cat("\n")
     }
   })
+  browser()
   lst
   # if(!df$move){
   #   Nsave <- lst$n_save_age[,,,df$n_space]
