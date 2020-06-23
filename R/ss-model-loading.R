@@ -110,6 +110,8 @@ load_ss_files <- function(model_dir = NULL,
               forecast = FALSE)
   })
 
+  model$report <- readLines(file.path(model_dir, "Report.sso"))
+
   ## Load the data file and control file for the model
   ## Get the file whose name contains "_data.ss" and "_control.ss"
   ## If there is not exactly one of each, stop with error.
@@ -581,24 +583,12 @@ load_ss_model_data <- function(ss_model,
 
   # Bias ramp adjustment
   ctl <- ss_model$ctl
-  yb_rdev_start <- ctl[grep("#_recdev_early_start", ctl)] %>%
-    gsub("#.*$", "", .) %>%
-    as.numeric
-  yb_1 <- ctl[grep("#_last_early_yr_nobias_adj_in_MPD", ctl)] %>%
-    gsub("#.*$", "", .) %>%
-    as.numeric
-  yb_2 <- ctl[grep("#_first_yr_fullbias_adj_in_MPD", ctl)] %>%
-    gsub("#.*$", "", .) %>%
-    as.numeric
-  yb_3 <- ctl[grep("#_last_yr_fullbias_adj_in_MPD", ctl)] %>%
-    gsub("#.*$", "", .) %>%
-    as.numeric
-  yb_4 <- ctl[grep("#_first_recent_yr_nobias_adj_in_MPD", ctl)] %>%
-    gsub("#.*$", "", .) %>%
-    as.numeric
-  b_max <- ctl[grep("#_max_bias_adj_in_MPD", ctl)] %>%
-    gsub("#.*$", "", .) %>%
-    as.numeric
+  b_breakpoints <- ss_model$breakpoints_for_bias_adjustment_ramp[1,] %>% as.numeric
+  yb_1 <- b_breakpoints[1]
+  yb_2 <- b_breakpoints[2]
+  yb_3 <- b_breakpoints[3]
+  yb_4 <- b_breakpoints[4]
+  b_max <- b_breakpoints[5]
   b_yrs <- s_yr:m_yr
   lst$b <- NULL
   for(j in 1:length(b_yrs)){
@@ -618,6 +608,11 @@ load_ss_model_data <- function(ss_model,
       lst$b[j] <- 0
     }
   }
+
+  init_n <- ss_model$report[grep("Early_InitAge", ss_model$report)]
+  lst$init_n <- gsub("^.*Early_InitAge_[0-9]+ ([-]?[0-9\\.]+) .*$", "\\1", init_n) %>%
+    rev %>%
+    as.numeric
 
   lst$ctl_file <- ss_model$ctl_file
   lst$ctl <- ss_model$ctl

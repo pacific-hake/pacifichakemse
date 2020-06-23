@@ -266,7 +266,6 @@ csv_data <- function(){
   lst <- NULL
   lst$wage_ss <- load_from_csv("wage_ss.csv")
   lst$wage_unfished <- load_from_csv("unfished_waa.csv")
-  lst$init_n <- as.matrix(load_from_csv("initN.csv"))
   lst$r_dev <- as.matrix(load_from_csv("Rdev.csv"))
   lst$catch_country <- load_from_csv("catch_per_country.csv")
 

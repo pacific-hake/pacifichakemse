@@ -236,7 +236,7 @@ load_data_om <- function(ss_model = NULL,
     as.data.frame() %>%
     mutate(yr = lst$yrs) %>%
     select(yr, everything())
-  lst$init_n <- lst$init_n %>%
+  lst$init_n <- ss_model$init_n %>%
     as.data.frame() %>%
     mutate(age = ages[-which(0 %in% ages)]) %>%
     select(age, everything()) %>%
