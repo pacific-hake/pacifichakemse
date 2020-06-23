@@ -1,6 +1,6 @@
 #' Initialize values used in the age based model
 #'
-#' @param df A [list] as returned by [load_data_seasons()]
+#' @param df A [list] as returned by [load_data_om()]
 #' @param lst A [list] as returned by [setup_blank_om_objects()]
 #'
 #' @return A [list] with the same structure os `lst`, but with a new element,

@@ -266,7 +266,6 @@ csv_data <- function(){
   lst <- NULL
   lst$wage_ss <- load_from_csv("wage_ss.csv")
   lst$wage_unfished <- load_from_csv("unfished_waa.csv")
-  lst$b <- as.matrix(load_from_csv("b_input.csv"))
   lst$init_n <- as.matrix(load_from_csv("initN.csv"))
   lst$r_dev <- as.matrix(load_from_csv("Rdev.csv"))
   lst$catch_country <- load_from_csv("catch_per_country.csv")
@@ -445,7 +444,7 @@ setup_blank_om_objects <- function(yrs,
 #' Extract row(s) of age data from a [data.frame]
 #'
 #' @param d A [data.frame] in the format of the `wage_*` data frames as
-#' output by [load_data_seasons()]
+#' output by [load_data_om()]
 #' @param yr A vector of years to extract row of data for
 #'
 #' @return A data frame with the rows requested

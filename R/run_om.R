@@ -1,4 +1,5 @@
-#' Run an agebased model
+#' Run the Operating Model, which is an age based model
+#' conditioned on true catch
 #'
 #' @param df data frame of parameters and life history values
 #' @param seed seed for survey error and recruitment deviations
@@ -12,20 +13,20 @@
 #'
 #' @examples
 #' \dontrun{
-#' run_agebased_true_catch(df)
+#' run_om(df)
 #' }
-run_agebased_true_catch <- function(df = NULL,
-                                    seed = 100,
-                                    n_sim_yrs = NULL,
-                                    ...){
+run_om <- function(df = NULL,
+                   seed = 100,
+                   n_sim_yrs = NULL,
+                   ...){
   verify_argument(df, "list")
   verify_argument(seed, "numeric", 1)
   verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
 
   set.seed(seed)
 
-  # Add the sim yrs in so that we don't have to redimension the arrays later.
-  # This makes it much faster and the code cleaner in the MSE loop later
+  # Add the sim yrs in so that arrays don't have to redimension during the
+  # simulation years later. This makes the code faster and simpler overall
   yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
   lst <- setup_blank_om_objects(yrs = yrs_all,
                                 ages = df$ages,

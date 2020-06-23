@@ -16,9 +16,9 @@ run_season_loop_om(
 )
 }
 \arguments{
-\item{df}{See \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+\item{df}{See \code{\link[=run_om]{run_om()}}}
 
-\item{lst}{See \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+\item{lst}{See \code{\link[=run_om]{run_om()}}}
 
 \item{yr}{The year to run the operating model for}
 

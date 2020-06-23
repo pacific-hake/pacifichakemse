@@ -7,7 +7,7 @@
 get_wa_dfs(lst = NULL, yr = NULL)
 }
 \arguments{
-\item{lst}{A list returned from \code{\link[=load_data_seasons]{load_data_seasons()}}}
+\item{lst}{A list returned from \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{yr}{The year to fetch}
 }

@@ -26,7 +26,8 @@
 #' @param s_min Minimum age in fishery selectivity
 #' @param s_max Maximum age in fishery selectivity
 #' @param s_min_survey Minimum age in survey selectivity
-#' @param s_max_survey Maximum age in survey selectivity#' @param yr_future How many years into the future should there be stochastic values
+#' @param s_max_survey Maximum age in survey selectivity
+#' @param yr_future How many years into the future should there be stochastic values
 #' @param sel_hist Use historical selectivity?
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
@@ -42,9 +43,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' df <- load_data_seasons(n_season = 2, n_space = 2)
+#' df <- load_data_om(n_season = 2, n_space = 2)
 #' }
-load_data_seasons <- function(ss_model = NULL,
+load_data_om <- function(ss_model = NULL,
                               n_sim_yrs = NULL,
                               n_season = 4,
                               season_names = NULL,
@@ -288,22 +289,22 @@ load_data_seasons <- function(ss_model = NULL,
 #' Initialize the movement model matrix. An alternative function should be
 #' written if changes are required to the initialization assumptions
 #'
-#' @param n_space See [load_data_seasons()]
-#' @param space_names See [load_data_seasons()]
-#' @param n_season See [load_data_seasons()]
-#' @param season_names See [load_data_seasons()]
+#' @param n_space See [load_data_om()]
+#' @param space_names See [load_data_om()]
+#' @param n_season See [load_data_om()]
+#' @param season_names See [load_data_om()]
 #' @param n_yr The number of years in the array dimension
 #' @param yrs A vector of names for the years. Length must equal `n_yr`
 #' @param move_max A vector of the maximum movement rate, one for each of `n_seasons`
-#' @param move_slope  See [load_data_seasons()]
+#' @param move_slope  See [load_data_om()]
 #' @param move_fifty Age at 50 percent movement rate
-#' @param move_south  See [load_data_seasons()]
-#' @param move_out  See [load_data_seasons()]
-#' @param move_init  See [load_data_seasons()]
-#' @param ages_no_move See [load_data_seasons()]
-#' @param ages See [load_data_seasons()]
-#' @param age_names See [load_data_seasons()]
-#' @param f_space See [load_data_seasons()]
+#' @param move_south  See [load_data_om()]
+#' @param move_out  See [load_data_om()]
+#' @param move_init  See [load_data_om()]
+#' @param ages_no_move See [load_data_om()]
+#' @param ages See [load_data_om()]
+#' @param age_names See [load_data_om()]
+#' @param f_space See [load_data_om()]
 #'
 #' @return A list of 3 elements: The `move_mat` matrix for movement, the `move_init`
 #' vector of length `n_space` and the `f_space` vector of length `n_space`

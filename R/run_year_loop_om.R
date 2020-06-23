@@ -1,7 +1,7 @@
 #' Run the Operating model for all years
 #'
-#' @param df See [run_agebased_true_catch()]
-#' @param lst See [run_agebased_true_catch()]
+#' @param df See [run_om()]
+#' @param lst See [run_om()]
 #' @param verbose Print the loop information to the console
 #' @param ... Additional arguments to be passed to [run_season_loop_om()]
 #'
@@ -46,7 +46,6 @@ run_year_loop_om <- function(df = NULL,
     # c(rec[1] / sum(rec), rec[2] / sum(rec))
     lst$n_save_age[1, yr_ind, , 1] <<- init_rec
     lst$r_save[yr_ind, ] <<- init_rec
-    browser()
 
     # -------------------------------------------------------------------------
     lst <<- run_season_loop_om(df = df,

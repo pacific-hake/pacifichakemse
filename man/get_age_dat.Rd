@@ -8,7 +8,7 @@ get_age_dat(d = NULL, yr = NULL)
 }
 \arguments{
 \item{d}{A \link{data.frame} in the format of the \verb{wage_*} data frames as
-output by \code{\link[=load_data_seasons]{load_data_seasons()}}}
+output by \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{yr}{A vector of years to extract row of data for}
 }

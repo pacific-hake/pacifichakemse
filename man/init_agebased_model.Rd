@@ -7,7 +7,7 @@
 init_agebased_model(df = NULL, lst = NULL)
 }
 \arguments{
-\item{df}{A \link{list} as returned by \code{\link[=load_data_seasons]{load_data_seasons()}}}
+\item{df}{A \link{list} as returned by \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{lst}{A \link{list} as returned by \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
 }

@@ -1,7 +1,7 @@
 #' Run the Operating model for all seasons and spaces in one year
 #'
-#' @param df See [run_agebased_true_catch()]
-#' @param lst See [run_agebased_true_catch()]
+#' @param df See [run_om()]
+#' @param lst See [run_om()]
 #' @param yr The year to run the operating model for
 #' @param yr_ind The index of `yr` in the `df$yrs` vector
 #' @param m_season A vector of natural mortality-at-age

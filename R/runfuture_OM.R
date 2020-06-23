@@ -26,7 +26,7 @@ runfuture_OM <- function(df,
   #   return(ans)
   # }
   seedz <- round(runif(n = nruns, min = 1, max = 1e6))
-  #sim.data <- run_agebased_true_catch(df,seed =  56)
+  #sim.data <- run_om(df,seed =  56)
   SSB.save <- array(NA,dim = c(nruns, df$nyear,  df$nspace))
   SSB.tot <- array(NA, dim = c(nruns, df$nyear))
   SSB.weight <- array(NA, dim = c(nruns, df$nyear))
@@ -44,7 +44,7 @@ runfuture_OM <- function(df,
   start.time <- Sys.time()
   for(i in 1:nruns){
     set.seed(seedz[i])
-    sim.data <- run_agebased_true_catch(df, seed =  seedz[i])
+    sim.data <- run_om(df, seed =  seedz[i])
     if(is.list(sim.data)){
       SSB.save[i,,] <- sim.data$SSB.all[,,df$surveyseason]
       SSB.tot[i,] <- rowSums(sim.data$SSB)

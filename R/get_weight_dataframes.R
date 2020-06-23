@@ -1,6 +1,6 @@
 #' Get the weight-at-age data for a particular year
 #'
-#' @param lst A list returned from [load_data_seasons()]
+#' @param lst A list returned from [load_data_om()]
 #' @param yr The year to fetch
 #'
 #' @return A list of 4 [data.frame]s: `catch`, `surv`, `mid`, and `ssb`

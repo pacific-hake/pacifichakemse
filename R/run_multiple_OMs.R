@@ -32,7 +32,7 @@ run_multiple_OMs <- function(n_sim_yrs = 30,
   yrinit <- df$nyear
   year.future <- c(df$years,(df$years[length(df$years)]+1):(df$years[length(df$years)]+n_sim_yrs))
   N0 <- NA
-  sim.data <- run_agebased_true_catch(df,seed)
+  sim.data <- run_om(df,seed)
   simdata0 <- sim.data # The other one is gonna get overwritten.
 
   # save(sim.data,file = 'simulated_space_OM.Rdata')
@@ -172,7 +172,7 @@ run_multiple_OMs <- function(n_sim_yrs = 30,
         df$flag_sel <- c(df$flag_sel,1)
         df$parms$PSEL <- rbind(df$parms$PSEL,rep(0,nrow(df$parms$PSEL)))
       }
-      sim.data <- run_agebased_true_catch(df, seed)
+      sim.data <- run_om(df, seed)
     }
     df.new <- create_TMB_data(sim.data, df)
   }

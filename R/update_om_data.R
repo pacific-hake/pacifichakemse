@@ -1,7 +1,7 @@
 #' Update the OM data for a new year
 #'
 #' @param df Input data as created by [create_TMB_data()]
-#' @param sim_data Operating model as created by [run_agebased_true_catch()]
+#' @param sim_data Operating model as created by [run_om()]
 #' @param yr The year to add
 #' @param yr_ind Index of the year to add
 #' @param yr_survey_sims Years in which a survey takes place

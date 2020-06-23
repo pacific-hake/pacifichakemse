@@ -7,9 +7,9 @@
 run_year_loop_om(df = NULL, lst = NULL, verbose = TRUE, ...)
 }
 \arguments{
-\item{df}{See \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+\item{df}{See \code{\link[=run_om]{run_om()}}}
 
-\item{lst}{See \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+\item{lst}{See \code{\link[=run_om]{run_om()}}}
 
 \item{verbose}{Print the loop information to the console}
 

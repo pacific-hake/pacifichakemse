@@ -20,7 +20,7 @@
 #' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`,
 #' (9) A list of length = number of scenarios, containing three-column [data.frame]s with `run`, `SE.SSB`,
 #' and `year` as columns/ SE.SSB is the standard error between the OM and EM, (10) `sim_data` - output
-#' from the function [run_agebased_true_catch()] (the operating model output)
+#' from the function [run_om()] (the operating model output)
 #' @importFrom dplyr filter summarise summarize group_by select %>% mutate
 #' @importFrom PNWColors pnw_palette
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
@@ -72,9 +72,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   spaces_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$space)
 
   # Save these in future runs - calculates SSB0
-  df <- load_data_seasons(n_season = length(seasons_in_output),
-                          n_space = length(spaces_in_output))
-  sim_data <- run_agebased_true_catch(df)
+  df <- load_data_om(n_season = length(seasons_in_output),
+                     n_space = length(spaces_in_output))
+  sim_data <- run_om(df)
   names(ls_plots) <- plotnames
 
   if(all(is.na(porder))){

@@ -3,12 +3,12 @@
 #' @param n_sim_yrs Number of years to simulate
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' and loaded by [load_ss_model_from_rds()]
-#' @param sim_data Operating model as created by [run_agebased_true_catch()]
+#' @param sim_data Operating model as created by [run_om()]
 #' @param om_params_seed Seed for running the OM if it needs to be run (if `sim_data`
 #' is `NULL`)
 #' @param seed The random number seed to use for the MSE run
 #' @param tac Which harvest control rule should the model use
-#' @param df Data frame of parameters as output by [load_data_seasons()]
+#' @param df Data frame of parameters as output by [load_data_om()]
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
@@ -47,7 +47,7 @@ run_multiple_MSEs <- function(df = NULL,
       stop("To run the agebased OM, you must supply `om_params_seed`",
            call. = FALSE)
     }
-    sim_data <- run_agebased_true_catch(df, om_params_seed, ...)
+    sim_data <- run_om(df, om_params_seed, ...)
   }
 
   yr_last_non_sim <- df$yrs[df$n_yr]
@@ -86,7 +86,7 @@ run_multiple_MSEs <- function(df = NULL,
                            m_increase,
                            sel_change)
       browser()
-      sim_data <- run_agebased_true_catch(df, om_params_seed, ...)
+      sim_data <- run_om(df, om_params_seed, ...)
       browser()
     }
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)

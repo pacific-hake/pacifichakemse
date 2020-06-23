@@ -19,12 +19,12 @@ run_multiple_MSEs(
 )
 }
 \arguments{
-\item{df}{Data frame of parameters as output by \code{\link[=load_data_seasons]{load_data_seasons()}}}
+\item{df}{Data frame of parameters as output by \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}
 and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
 
-\item{sim_data}{Operating model as created by \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+\item{sim_data}{Operating model as created by \code{\link[=run_om]{run_om()}}}
 
 \item{om_params_seed}{Seed for running the OM if it needs to be run (if \code{sim_data}
 is \code{NULL})}

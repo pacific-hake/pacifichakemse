@@ -19,7 +19,7 @@ update_om_data(
 \arguments{
 \item{df}{Input data as created by \code{\link[=create_TMB_data]{create_TMB_data()}}}
 
-\item{sim_data}{Operating model as created by \code{\link[=run_agebased_true_catch]{run_agebased_true_catch()}}}
+\item{sim_data}{Operating model as created by \code{\link[=run_om]{run_om()}}}
 
 \item{yr}{The year to add}
 

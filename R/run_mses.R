@@ -22,10 +22,10 @@
 #' If `NULL`, 2 will be used for every scenario
 #' @param multiple_season_data A list of the same length as `fns`, with each element being a vector of
 #' three items, `nseason`, `nspace`, and `bfuture`. If NULL, biasadjustment will not be incorporated
-#' @param om_params_seed A seed value to use when calling the [run_agebased_true_catch()] function
+#' @param om_params_seed A seed value to use when calling the [run_om()] function
 #' @param results_root_dir The results root directory
 #' @param results_dir The results directory
-#' @param ... Arguments passed to [load_data_seasons()]
+#' @param ... Arguments passed to [load_data_om()]
 #'
 #' @return Nothing
 #' @importFrom dplyr transmute group_map mutate_at quo
@@ -95,7 +95,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
   # Prepare data for the OM. This includes initializing the movement model
-  df <- load_data_seasons(ss_model, n_sim_yrs, ...)
+  df <- load_data_om(ss_model, n_sim_yrs, ...)
 
   age_max_age <- nrow(ss_model$age_survey)
   # Parameters to initialize the OM with
@@ -135,16 +135,17 @@ run_mses <- function(ss_model_output_dir = NULL,
                             ss_model$ss_catch,
                             ss_model$flag_catch,
                             ss_model$age_catch_df,
-                            ss_model$sel_by_yrs)
+                            ss_model$sel_by_yrs,
+                            ss_model$b)
 
   # Run the operating model
-  sim_data <- run_agebased_true_catch(df, om_params_seed, n_sim_yrs, ...)
+  sim_data <- run_om(df, om_params_seed, n_sim_yrs, ...)
 
   seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
   map2(fns, 1:length(fns), function(.x, .y, ...){
     ls_save <- map(1:n_runs, function(run = .x, ...){
       if(length(sel_changes) != 1 || sel_changes != 0){
-        df <- load_data_seasons(...,
+        df <- load_data_om(...,
                                 selectivity_change = ifelse(length(sel_changes) == 1,
                                                             sel_changes,
                                                             sel_changes[.y]))
@@ -169,7 +170,7 @@ run_mses <- function(ss_model_output_dir = NULL,
           ...)
       }else{
         dfs <- map(multiple_season_data, ~{
-          do.call(load_data_seasons, as.list(.x))
+          do.call(load_data_om, as.list(.x))
         })
         tmp <- run_multiple_OMs(n_sim_yrs = n_sim_yrs,
                                 seed = seeds[run],

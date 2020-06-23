@@ -579,6 +579,46 @@ load_ss_model_data <- function(ss_model,
     filter(!grepl("^Late_", type)) %>%
     select(yr = Yr, value = Value)
 
+  # Bias ramp adjustment
+  ctl <- ss_model$ctl
+  yb_rdev_start <- ctl[grep("#_recdev_early_start", ctl)] %>%
+    gsub("#.*$", "", .) %>%
+    as.numeric
+  yb_1 <- ctl[grep("#_last_early_yr_nobias_adj_in_MPD", ctl)] %>%
+    gsub("#.*$", "", .) %>%
+    as.numeric
+  yb_2 <- ctl[grep("#_first_yr_fullbias_adj_in_MPD", ctl)] %>%
+    gsub("#.*$", "", .) %>%
+    as.numeric
+  yb_3 <- ctl[grep("#_last_yr_fullbias_adj_in_MPD", ctl)] %>%
+    gsub("#.*$", "", .) %>%
+    as.numeric
+  yb_4 <- ctl[grep("#_first_recent_yr_nobias_adj_in_MPD", ctl)] %>%
+    gsub("#.*$", "", .) %>%
+    as.numeric
+  b_max <- ctl[grep("#_max_bias_adj_in_MPD", ctl)] %>%
+    gsub("#.*$", "", .) %>%
+    as.numeric
+  b_yrs <- s_yr:m_yr
+  lst$b <- NULL
+  for(j in 1:length(b_yrs)){
+    if(b_yrs[j] <= yb_1){
+      lst$b[j] <- 0
+    }
+    if(b_yrs[j] > yb_1 && b_yrs[j]< yb_2){
+      lst$b[j] <- b_max * ((b_yrs[j] - yb_1) / (yb_2 - yb_1))
+    }
+    if(b_yrs[j] >= yb_2 && b_yrs[j] <= yb_3){
+      lst$b[j] <- b_max
+    }
+    if(b_yrs[j] > yb_3 && b_yrs[j] < yb_4){
+      lst$b[j] <- b_max * (1 - (yb_3 - b_yrs[j]) / (yb_4 - yb_3))
+    }
+    if(b_yrs[j] >= yb_4){
+      lst$b[j] <- 0
+    }
+  }
+
   lst$ctl_file <- ss_model$ctl_file
   lst$ctl <- ss_model$ctl
   lst$dat_file <- ss_model$dat_file
@@ -594,8 +634,8 @@ load_ss_model_data <- function(ss_model,
 #'
 #' @param ss_model SS model input/output as read in by [load_ss_model_from_rds()]
 #' @param age_comps_fleet 1 for fishery, 2 for survey
-#' @param s_yr See [load_data_seasons()]
-#' @param m_yr See [load_data_seasons()]
+#' @param s_yr See [load_data_om()]
+#' @param m_yr See [load_data_om()]
 #' @param age_comps_fill Value to replace NAs in the table, it can also be NA, but not NULL
 #' @param yr_col The name of the column in `ss_model$dat$agecomp` that contains
 #' the year
@@ -690,8 +730,8 @@ extract_age_comps <- function(ss_model = NULL,
 #'
 #' @param ss_model SS model input/output as read in by [load_ss_model_from_rds()]
 #' @param age_comps_fleet 1 for fishery, 2 for survey
-#' @param s_yr See [load_data_seasons()]
-#' @param m_yr See [load_data_seasons()]
+#' @param s_yr See [load_data_om()]
+#' @param m_yr See [load_data_om()]
 #' @param age_comps_fill Value to replace NAs in the table, it can also be NA, but not NULL
 #' @param yr_col The name of the column in `ss_model$dat$agecomp` that contains
 #' the year

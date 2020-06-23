@@ -21,9 +21,9 @@ extract_age_comps(
 
 \item{age_comps_fleet}{1 for fishery, 2 for survey}
 
-\item{s_yr}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
+\item{s_yr}{See \code{\link[=load_data_om]{load_data_om()}}}
 
-\item{m_yr}{See \code{\link[=load_data_seasons]{load_data_seasons()}}}
+\item{m_yr}{See \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{age_comps_fill}{Value to replace NAs in the table, it can also be NA, but not NULL}
 

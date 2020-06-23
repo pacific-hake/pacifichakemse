@@ -51,8 +51,8 @@ plotMSE_biasadjustment <- function(results,
     geom_ribbon(aes(ymin = p5.US*1e-6/2, ymax = p95.US*1e-6/2), fill = alpha('blue', alpha = 0.2), linetype = 0)
 
   p1
-  df <- load_data_seasons()
-  sim.data <- run_agebased_true_catch(df)
+  df <- load_data_om()
+  sim.data <- run_om(df)
   p2 <- ggplot(df.all[df.all$year>2005,], aes(x = year, y = med*1e-6/2, color = run, fill = run))+geom_line(size = 1.5)+
     theme_classic()+scale_y_continuous(name ='Spawning biomass \n(million tonnes)')+
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
