@@ -1,4 +1,7 @@
 context("Test the append_objs_to_list() function")
+ver <- as.character(gdtools::version_freetype())
+cat(sprintf("\nFreeType version: %s\n", ver))
+
 
 lst <- list(a = 1,
             b = c(4, 5),
