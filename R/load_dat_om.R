@@ -2,6 +2,8 @@
 #'
 #' @param ss_model A model input/output list representing the SS model as returned from
 #' [load_ss_model_from_rds()]
+#' @param n_sim_yrs Number of years to be simulated. This is used to set up arrays dimensions
+#' to include simulations so that arrays don't have to be redimensioned in the MSE loop code
 #' @param n_season Number of seasons
 #' @param season_names A vector of names for the seasons. Length must equal `n_season`
 #' @param n_space Number of spatial areas
@@ -46,37 +48,37 @@
 #' df <- load_data_om(n_season = 2, n_space = 2)
 #' }
 load_data_om <- function(ss_model = NULL,
-                              n_sim_yrs = NULL,
-                              n_season = 4,
-                              season_names = NULL,
-                              n_space = 2,
-                              space_names = NULL,
-                              n_survey = 2,
-                              s_yr = 1966,
-                              m_yr = 2018,
-                              ages = 0:20,
-                              age_names = NULL,
-                              rdev_sd = 1.4,
-                              move_init = NULL,
-                              move_max_init = 0.35,
-                              move_fifty_init = 6,
-                              move_out = 0.85,
-                              move_south = 0.05,
-                              move_slope = 0.9,
-                              ages_no_move = c(0, 1),
-                              selectivity_change = 0,
-                              s_min = 1,
-                              s_max = 6,
-                              s_min_survey = 2,
-                              s_max_survey = 6,
-                              b_future = 0.5,
-                              yr_future = 0,
-                              sel_change_yr = 1991,
-                              sel_hist = TRUE,
-                              f_space = c(0.2612, 0.7388),
-                              log_phi_survey = log(11.46),
-                              catch_props_space_season = NULL,
-                              ...){
+                         n_sim_yrs = NULL,
+                         n_season = 4,
+                         season_names = NULL,
+                         n_space = 2,
+                         space_names = NULL,
+                         n_survey = 2,
+                         s_yr = 1966,
+                         m_yr = 2018,
+                         ages = 0:20,
+                         age_names = NULL,
+                         rdev_sd = 1.4,
+                         move_init = NULL,
+                         move_max_init = 0.35,
+                         move_fifty_init = 6,
+                         move_out = 0.85,
+                         move_south = 0.05,
+                         move_slope = 0.9,
+                         ages_no_move = c(0, 1),
+                         selectivity_change = 0,
+                         s_min = 1,
+                         s_max = 6,
+                         s_min_survey = 2,
+                         s_max_survey = 6,
+                         b_future = 0.5,
+                         yr_future = 0,
+                         sel_change_yr = 1991,
+                         sel_hist = TRUE,
+                         f_space = c(0.2612, 0.7388),
+                         log_phi_survey = log(11.46),
+                         catch_props_space_season = NULL,
+                         ...){
 
   verify_argument(ss_model, "list")
   verify_argument(n_sim_yrs, "numeric", 1)
@@ -160,7 +162,7 @@ load_data_om <- function(ss_model = NULL,
   lst$move_init <- move_init
   if(is.null(lst$move_init)){
     # lst$n_space must be 2 due to error check above
-    lst$move_init <-  c(0.25, 0.75)
+    lst$move_init <- c(0.25, 0.75)
   }
   names(lst$move_init) <- lst$space_names
 

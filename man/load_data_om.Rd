@@ -43,6 +43,9 @@ load_data_om(
 \item{ss_model}{A model input/output list representing the SS model as returned from
 \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
 
+\item{n_sim_yrs}{Number of years to be simulated. This is used to set up arrays dimensions
+to include simulations so that arrays don't have to be redimensioned in the MSE loop code}
+
 \item{n_season}{Number of seasons}
 
 \item{season_names}{A vector of names for the seasons. Length must equal \code{n_season}}

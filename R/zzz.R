@@ -155,5 +155,12 @@ globalVariables(c(
 "Value",
 "Label",
 "total",
-"catch"
+"catch",
+"d2$Catchobs",
+"d2$survey",
+"d2$survey_err",
+"Year",
+"Total",
+"f_new",
+"<<-"
 ))

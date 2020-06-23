@@ -166,7 +166,7 @@ run_multiple_MSEs <- function(df = NULL,
       browser()
     }
 
-    f_new <<- get_ref_point(pars,
+    f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),
                            f_in = report$Fyear %>% tail(1),
