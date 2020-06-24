@@ -52,7 +52,6 @@ run_om <- function(df = NULL,
   })
 
   lst <- run_year_loop_om(df, lst, ...)
-  browser()
 
     #Catch.age[,idx]  <- (Fyrs/(Fyrs+m_yrs))*(1-exp(-(Fyrs+m_yrs)))*rowSums(N.save.age[,idx,,1])*wage$catch # Calculate the catch in kg
 

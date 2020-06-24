@@ -85,9 +85,7 @@ run_multiple_MSEs <- function(df = NULL,
                            c_increase,
                            m_increase,
                            sel_change)
-      browser()
       sim_data <- run_om(df, om_params_seed, ...)
-      browser()
     }
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
     if(yr == yr_start){
@@ -120,6 +118,7 @@ run_multiple_MSEs <- function(df = NULL,
       # ---------------------
     }
     # Evaluate the Objective function
+    browser()
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
@@ -129,9 +128,10 @@ run_multiple_MSEs <- function(df = NULL,
         unlist() %>%
         `[`(!is.na(names(.)))
     }
+    browser()
 
-      lower <- obj$par - Inf
-      upper <- obj$par + Inf
+    lower <- obj$par - Inf
+    upper <- obj$par + Inf
     upper[names(upper) == "log_h"] <- log(0.999)
     upper[names(upper) == "f_0"] <- 2
     lower[names(lower) == "log_sd_surv"] <- log(0.01)

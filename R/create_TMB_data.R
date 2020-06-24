@@ -90,8 +90,14 @@ create_TMB_data <- function(sim_data = NULL,
 
   # Copy simulated data into output data
   df$survey <- sim_data$survey
+  # Remove simulation years as they go beyond the dimensions required for the estimation model
+  df$survey <- df$survey[,as.numeric(colnames(df$survey)) %in% df$yrs]
   df$age_survey <- sim_data$age_comps_surv
+  # Remove simulation years as they go beyond the dimensions required for the estimation model
+  df$age_survey <- df$age_survey[,as.numeric(colnames(df$age_survey)) %in% df$yrs]
   df$age_catch <- sim_data$age_comps_catch
+  # Remove simulation years as they go beyond the dimensions required for the estimation model
+  df$age_catch <- df$age_catch[,as.numeric(colnames(df$age_catch)) %in% df$yrs]
 
   # Convert some parameter objects to base types
   df$parameters$p_sel_fish <- df$parameters$p_sel_fish %>%
@@ -103,6 +109,8 @@ create_TMB_data <- function(sim_data = NULL,
     pull(value)
   params <- df$parameters
   params$f_0 <- rowSums(sim_data$f_out_save)
+  params$f_0 <- params$f_0[as.numeric(names(params$f_0)) %in% df$yrs]
+
   last_catch <- df$catch_obs %>% tail(1)
   if(last_catch == 0){
     params$f_0[length(params$f_0)] <- 0
