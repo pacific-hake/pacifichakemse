@@ -388,10 +388,9 @@ setup_blank_om_objects <- function(yrs,
                              dimnames = list(yrs = yrs,
                                              space = seq_len(n_space),
                                              season = seq_len(n_season)))
-  # lst$survey <- array(NA,
-  #                 dim = c(n_yr),
-  #                 dimnames = list(yrs = yrs))
-  lst$survey <- NULL
+  lst$survey <- array(NA,
+                  dim = c(n_yr),
+                  dimnames = list(yrs = yrs))
   lst$survey_true <- array(NA,
                            dim = c(n_space, n_yr),
                            dimnames = list(space = seq_len(n_space),

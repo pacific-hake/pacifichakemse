@@ -131,15 +131,23 @@ run_mses <- function(ss_model_output_dir = NULL,
                             # Is there a survey in that year?
                             ss_model$flag_survey,
                             ss_model$age_survey,
+                            ss_model$age_catch,
                             age_max_age,
                             ss_model$ss_catch,
                             ss_model$flag_catch,
-                            ss_model$age_catch_df,
                             ss_model$sel_by_yrs,
                             ss_model$b)
 
+  # Add the sim yrs in so that arrays don't have to redimension during the
+  # simulation years later. This makes the code faster and simpler overall
+  yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
+  om_objs <- setup_blank_om_objects(yrs = yrs_all,
+                                    ages = df$ages,
+                                    max_surv_age = df$age_max_age,
+                                    n_space = df$n_space,
+                                    n_season = df$n_season)
   # Run the operating model
-  sim_data <- run_om(df, om_params_seed, n_sim_yrs, ...)
+  sim_data <- run_om(df, om_params_seed, om_objs, ...)
 
   seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
   map2(fns, 1:length(fns), function(.x, .y, ...){
@@ -161,6 +169,7 @@ run_mses <- function(ss_model_output_dir = NULL,
           df = df,
           ss_model = ss_model,
           sim_data = sim_data,
+          om_objs = om_objs,
           om_params_seed = om_params_seed,
           n_sim_yrs = n_sim_yrs,
           seed = seeds[run],

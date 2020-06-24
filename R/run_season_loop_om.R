@@ -69,10 +69,10 @@ run_season_loop_om <- function(df,
             filter(year == yr) %>%
             select(contains(paste0("space", space))) %>% pull()
         }else{
-          catch_space <- df$catch[yr_ind] * df$f_space[space]
+          catch_space <- df$catch_obs[yr_ind,]$value * df$f_space[space]
         }
       }else{
-        catch_space <- df$catch[yr_ind]
+        catch_space <- df$catch_obs[yr_ind,]$value
       }
       # Catch distribution in the yrs
       e_tmp <- catch_space * df$catch_props_space_season[space, season]

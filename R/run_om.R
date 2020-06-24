@@ -3,38 +3,33 @@
 #'
 #' @param df data frame of parameters and life history values
 #' @param seed seed for survey error and recruitment deviations
-#' @param n_sim_yrs The number of years to simulate into the future.
-
+#' @param om_objs A [list] of the OM objects (arrays and matrices) for holding the
+#' OM data. This list is what is returned by [setup_blank_om_objects()]
 #' @param ... Arguments passed to [run_year_loop_om()]
 #'
-#' @return A list of model outputs (TODO)
+#' @return A list of model outputs
 #' @importFrom purrr map_dbl
 #' @export
-#'
-#' @examples
-#' \dontrun{
-#' run_om(df)
-#' }
 run_om <- function(df = NULL,
                    seed = 100,
-                   n_sim_yrs = NULL,
+                   om_objs = NULL,
                    ...){
   verify_argument(df, "list")
   verify_argument(seed, "numeric", 1)
-  verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
+  verify_argument(om_objs, "list")
 
   set.seed(seed)
 
-  # Add the sim yrs in so that arrays don't have to redimension during the
-  # simulation years later. This makes the code faster and simpler overall
-  yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
-  lst <- setup_blank_om_objects(yrs = yrs_all,
-                                ages = df$ages,
-                                max_surv_age = df$age_max_age,
-                                n_space = df$n_space,
-                                n_season = df$n_season)
+  # # Add the sim yrs in so that arrays don't have to redimension during the
+  # # simulation years later. This makes the code faster and simpler overall
+  # yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
+  # lst <- setup_blank_om_objects(yrs = yrs_all,
+  #                               ages = df$ages,
+  #                               max_surv_age = df$age_max_age,
+  #                               n_space = df$n_space,
+  #                               n_season = df$n_season)
 
-  lst <- init_agebased_model(df, lst)
+  lst <- init_agebased_model(df, om_objs)
 
   # Calculate initial year-1 spawning biomass by numbers-at-age * weight-at-age (ssb) and
   # numbers-at-age * selectivity (ssb_all)

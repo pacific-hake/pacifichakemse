@@ -109,5 +109,8 @@ update_om_data <- function(df = NULL,
     names(df$sel_by_yrs)[ncol(df$sel_by_yrs)] <- yr
   }
 
+  df$yrs <- c(df$yrs, yr)
+  df$n_yr <- df$n_yr + 1
+
   df
 }

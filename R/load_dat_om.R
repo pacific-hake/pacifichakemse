@@ -158,6 +158,7 @@ load_data_om <- function(ss_model = NULL,
   lst$s_max <- s_max
   lst$s_min_survey <- s_min_survey
   lst$s_max_survey <- s_max_survey
+  lst$selectivity_change <- selectivity_change
 
   lst$move_init <- move_init
   if(is.null(lst$move_init)){

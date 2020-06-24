@@ -91,7 +91,7 @@ create_TMB_data <- function(sim_data = NULL,
   # Copy simulated data into output data
   df$survey <- sim_data$survey
   # Remove simulation years as they go beyond the dimensions required for the estimation model
-  df$survey <- df$survey[,as.numeric(colnames(df$survey)) %in% df$yrs]
+  df$survey <- df$survey[as.numeric(names(df$survey)) %in% df$yrs]
   df$age_survey <- sim_data$age_comps_surv
   # Remove simulation years as they go beyond the dimensions required for the estimation model
   df$age_survey <- df$age_survey[,as.numeric(colnames(df$age_survey)) %in% df$yrs]

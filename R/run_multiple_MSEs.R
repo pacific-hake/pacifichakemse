@@ -23,6 +23,7 @@
 run_multiple_MSEs <- function(df = NULL,
                               ss_model = NULL,
                               sim_data = NULL,
+                              om_objs = NULL,
                               om_params_seed = 12345,
                               n_sim_yrs = NULL,
                               seed = 12345,
@@ -34,6 +35,7 @@ run_multiple_MSEs <- function(df = NULL,
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
   verify_argument(sim_data, "list")
+  verify_argument(om_objs, "list")
   verify_argument(om_params_seed, "numeric", 1)
   verify_argument(n_sim_yrs, "numeric", 1)
   verify_argument(seed, "numeric", 1)
@@ -41,14 +43,6 @@ run_multiple_MSEs <- function(df = NULL,
   verify_argument(c_increase, "numeric", 1)
   verify_argument(m_increase, "numeric", 1)
   verify_argument(sel_change, "numeric", 1)
-
-  if(is.null(sim_data)){
-    if(is.null(om_params_seed)){
-      stop("To run the agebased OM, you must supply `om_params_seed`",
-           call. = FALSE)
-    }
-    sim_data <- run_om(df, om_params_seed, ...)
-  }
 
   yr_last_non_sim <- df$yrs[df$n_yr]
   yr_start <- yr_last_non_sim + 1
@@ -85,7 +79,8 @@ run_multiple_MSEs <- function(df = NULL,
                            c_increase,
                            m_increase,
                            sel_change)
-      sim_data <- run_om(df, om_params_seed, ...)
+      sim_data <- run_om(df, om_params_seed, om_objs, ...)
+      browser()
     }
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
     if(yr == yr_start){
@@ -117,8 +112,14 @@ run_multiple_MSEs <- function(df = NULL,
       lst_tmb$params$f_0 <- p1$F0
       # ---------------------
     }
+    if(yr == yr_last_non_sim){
+      # TODO: Remove these once done. Required to make output exactly the same as the original version
+      lst_tmb$df$survey <- readRDS("original_mse_data/survey.rds")
+      lst_tmb$df$survey_err <- readRDS("original_mse_data/survey_err.rds")
+      lst_tmb$df$catch_obs <- readRDS("original_mse_data/catch_obs.rds")
+    }
     # Evaluate the Objective function
-    browser()
+    #browser()
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
@@ -128,7 +129,6 @@ run_multiple_MSEs <- function(df = NULL,
         unlist() %>%
         `[`(!is.na(names(.)))
     }
-    browser()
 
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -140,6 +140,7 @@ run_multiple_MSEs <- function(df = NULL,
       lower[names(lower) == "f_0"] <- 1e-10
     }
     # Minimize the Objective function
+    browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -174,7 +175,7 @@ run_multiple_MSEs <- function(df = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
-
+browser()
   })
 
 }
