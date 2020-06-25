@@ -1,25 +1,24 @@
 #' Create the data for [TMB::MakeADFun()]
 #'
+#' @details This function mostly modified objects used in the OM which are
+#' [data.frame] and [array] types to be [matrix] and [vector] types that are required
+#' by [TMB]. It should be called on each iteration of the MSE loop before the call to
+#' [TMB::MakeADFun()].
+#'
 #' @param sim_data Operating model
 #' @param df input parameters
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' and loaded by [load_ss_model_from_rds()]
-#' @param history Logical. If TRUE use historical data. If FALSE, use simulated OM data
-#' @param sim_age_comps Logical. If TRUE, include simulated age comps (`age_survey` and `age_catch`),
-#' If FALSE, leave them as-is
 #'
-#' @return A list of the data needed by [TMB::MakeADFun()]
+#' @return A list of 2 elements: the data and parameter values needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
 #' @export
-create_TMB_data <- function(sim_data = NULL,
+create_tmb_data <- function(sim_data = NULL,
                             df = NULL,
-                            ss_model = NULL,
-                            history = FALSE,
-                            sim_age_comps = TRUE){
+                            ss_model = NULL){
   verify_argument(sim_data, "list")
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
-  verify_argument(history, "logical", 1)
 
   # Catch Observations
   catch_obs_yrs <- df$catch_obs %>% pull(yr)

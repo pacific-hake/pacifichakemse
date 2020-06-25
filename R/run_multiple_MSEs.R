@@ -73,19 +73,19 @@ run_multiple_MSEs <- function(df = NULL,
     yr_ind <- which(yr == yr_all)
 
     if(yr >= yr_start){
-      df <- update_om_data(df,
-                           sim_data,
-                           yr,
-                           yr_ind,
-                           yr_survey_sims,
-                           f_new,
-                           c_increase,
-                           m_increase,
-                           sel_change)
+      df <<- update_om_data(df,
+                            sim_data,
+                            yr,
+                            yr_ind,
+                            yr_survey_sims,
+                            f_new,
+                            c_increase,
+                            m_increase,
+                            sel_change)
       sim_data <- run_om(df, om_objs, ...)
       browser()
     }
-    lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
+    lst_tmb <- create_tmb_data(sim_data, df, ss_model, sim_age_comps = FALSE)
     if(yr == yr_last_non_sim){
       # TODO: Remove this whole `if` chunk once correct output has been verified with
       # the original output

@@ -1,6 +1,6 @@
 #' Update the OM data for a new year
 #'
-#' @param df Input data as created by [create_TMB_data()]
+#' @param df Input data as created by [create_tmb_data()]
 #' @param sim_data Operating model as created by [run_om()]
 #' @param yr The year to add
 #' @param yr_ind Index of the year to add
@@ -50,7 +50,7 @@ update_om_data <- function(df = NULL,
   df$wage_survey_df <- wage_add_yr(df$wage_survey_df)
   df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
   df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
-
+if(yr == 2020) browser()
   if(df$catch_obs[yr_ind,]$value == 0 && df$flag_survey[yr_ind] == -1){
     red(message("Stock in peril! Conducting emergency survey"))
     df$flag_survey[yr_ind] <- 1

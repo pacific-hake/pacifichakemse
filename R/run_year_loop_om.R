@@ -45,7 +45,7 @@ run_year_loop_om <- function(df = NULL,
     # Sanity check - these should equal the proportions in df$move_init:
     # c(rec[1] / sum(rec), rec[2] / sum(rec))
     lst$n_save_age[1, yr_ind, , 1] <<- init_rec
-if(yr_ind == 54) browser()
+#if(yr_ind == 54) browser()
     lst$r_save[yr_ind, ] <<- init_rec
 
     # -------------------------------------------------------------------------

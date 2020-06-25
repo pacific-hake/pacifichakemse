@@ -174,7 +174,7 @@ run_multiple_OMs <- function(n_sim_yrs = 30,
       }
       sim.data <- run_om(df, seed)
     }
-    df.new <- create_TMB_data(sim.data, df)
+    df.new <- create_tmb_data(sim.data, df)
   }
   df.ret <- list(SSB = sim.data$SSB.all[,,3],
                  ams = sim.data$age_comps_country,
