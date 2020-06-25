@@ -83,7 +83,7 @@ run_multiple_MSEs <- function(df = NULL,
       browser()
     }
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
-    if(yr == yr_start){
+    if(yr == yr_last_non_sim){
       # TODO: Remove this whole if chunk once correct output has been verified with
       # the original output
       d1 <- readRDS("original_mse_data/d.rds")
@@ -157,6 +157,7 @@ run_multiple_MSEs <- function(df = NULL,
 
     report <- obj$report()
     pars <- extract_params_tmb(opt)
+browser()
 
     if(yr == yr_end){
       rep <- sdreport(obj)
@@ -167,6 +168,7 @@ run_multiple_MSEs <- function(df = NULL,
       browser()
     }
 
+browser()
     f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),

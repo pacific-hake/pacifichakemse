@@ -86,12 +86,16 @@ create_TMB_data <- function(sim_data = NULL,
   df$b_prior <- df$tau * df$mu
   df$a_prior <- df$tau * (1 - df$mu)
 
+  df$b <- df$b %>% as.matrix()
+  # colname required to be identical to original version
+  colnames(df$b) <- "V1"
+
   df$t_end <- length(df$yrs)
 
   # Copy simulated data into output data
   df$survey <- sim_data$survey
   # Remove simulation years as they go beyond the dimensions required for the estimation model
-  df$survey <- df$survey[as.numeric(names(df$survey)) %in% df$yrs]
+  df$survey <- df$survey[as.numeric(names(df$survey)) %in% df$yrs] %>% as.numeric()
   df$age_survey <- sim_data$age_comps_surv
   # Remove simulation years as they go beyond the dimensions required for the estimation model
   df$age_survey <- df$age_survey[,as.numeric(colnames(df$age_survey)) %in% df$yrs]
