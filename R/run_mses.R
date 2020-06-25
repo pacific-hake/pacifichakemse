@@ -22,7 +22,7 @@
 #' If `NULL`, 2 will be used for every scenario
 #' @param multiple_season_data A list of the same length as `fns`, with each element being a vector of
 #' three items, `nseason`, `nspace`, and `bfuture`. If NULL, biasadjustment will not be incorporated
-#' @param om_params_seed A seed value to use when calling the [run_om()] function
+#' @param random_seed A seed value to use when calling for all random functions
 #' @param results_root_dir The results root directory
 #' @param results_dir The results directory
 #' @param ... Arguments passed to [load_data_om()]
@@ -46,7 +46,7 @@ run_mses <- function(ss_model_output_dir = NULL,
                      sel_changes = 0,
                      n_surveys = NULL,
                      multiple_season_data = NULL,
-                     om_params_seed = 12345,
+                     random_seed = 12345,
                      results_root_dir = here("results"),
                      results_dir = here("results", "default"),
                      ...){
@@ -71,6 +71,11 @@ run_mses <- function(ss_model_output_dir = NULL,
   stopifnot(length(sel_changes) == 1 | length(sel_changes) == length(fns))
   stopifnot(is.null(n_surveys) | length(n_surveys) == length(fns))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
+
+  # Seed for the random recruitment deviations: rnorm(n = 1, mean = 0, sd = exp(df$rdev_sd))
+  # found in update_om_data.R. This is also the seed used to set up the random seeds for each
+  # run (search below for "seeds")
+  set.seed(random_seed)
 
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
@@ -138,8 +143,8 @@ run_mses <- function(ss_model_output_dir = NULL,
                             ss_model$sel_by_yrs,
                             ss_model$b)
 
-  # Add the sim yrs in so that arrays don't have to redimension during the
-  # simulation years later. This makes the code faster and simpler overall
+  # Add the sim yrs in so that arrays don't have to be redimensioned during the
+  # simulations later. This makes the code faster and simpler overall
   yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
   om_objs <- setup_blank_om_objects(yrs = yrs_all,
                                     ages = df$ages,
@@ -147,16 +152,19 @@ run_mses <- function(ss_model_output_dir = NULL,
                                     n_space = df$n_space,
                                     n_season = df$n_season)
   # Run the operating model
-  sim_data <- run_om(df, om_params_seed, om_objs, ...)
+  sim_data <- run_om(df, om_objs, ...)
 
+  # Each run has its own random seed, with those seeds being chosen from
+  # the base seed which is set at the beginning of this function
   seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
+
   map2(fns, 1:length(fns), function(.x, .y, ...){
     ls_save <- map(1:n_runs, function(run = .x, ...){
       if(length(sel_changes) != 1 || sel_changes != 0){
         df <- load_data_om(...,
-                                selectivity_change = ifelse(length(sel_changes) == 1,
-                                                            sel_changes,
-                                                            sel_changes[.y]))
+                           selectivity_change = ifelse(length(sel_changes) == 1,
+                                                       sel_changes,
+                                                       sel_changes[.y]))
       }
       if(is.null(n_surveys)){
         df$n_survey <- 2
@@ -170,9 +178,8 @@ run_mses <- function(ss_model_output_dir = NULL,
           ss_model = ss_model,
           sim_data = sim_data,
           om_objs = om_objs,
-          om_params_seed = om_params_seed,
+          random_seed = seeds[run],
           n_sim_yrs = n_sim_yrs,
-          seed = seeds[run],
           tac = if(length(tacs) == 1) tacs else tacs[.y],
           c_increase = ifelse(length(c_increases) == 1, c_increases, c_increases[.y]),
           m_increase = ifelse(length(m_increases) == 1, m_increases, m_increases[.y]),
@@ -182,7 +189,6 @@ run_mses <- function(ss_model_output_dir = NULL,
           do.call(load_data_om, as.list(.x))
         })
         tmp <- run_multiple_OMs(n_sim_yrs = n_sim_yrs,
-                                seed = seeds[run],
                                 df = dfs[[.y]],
                                 catch_in = 0,
                                 ...)

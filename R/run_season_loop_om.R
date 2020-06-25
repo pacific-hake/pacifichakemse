@@ -112,7 +112,7 @@ run_season_loop_om <- function(df,
       lst$f_season_save[, yr_ind, space, season] <<- f_season
       z <- m_season + f_season
       lst$z_save[, yr_ind, space, season] <<- z
-      # This is used to deal with movement from one spce to another.
+      # This is used to deal with movement from one space to another.
       # space is the area fish are in and space_idx is the area the fish
       # are coming in from. These indexes are used in the numbers-at-age
       # calculations which include movement

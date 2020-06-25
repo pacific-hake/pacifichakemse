@@ -4,9 +4,8 @@
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' and loaded by [load_ss_model_from_rds()]
 #' @param sim_data Operating model as created by [run_om()]
-#' @param om_params_seed Seed for running the OM if it needs to be run (if `sim_data`
+#' @param random_seed Seed for running the OM if it needs to be run (if `sim_data`
 #' is `NULL`)
-#' @param seed The random number seed to use for the MSE run
 #' @param tac Which harvest control rule should the model use
 #' @param df Data frame of parameters as output by [load_data_om()]
 #' @param c_increase Increase in max movement
@@ -24,9 +23,8 @@ run_multiple_MSEs <- function(df = NULL,
                               ss_model = NULL,
                               sim_data = NULL,
                               om_objs = NULL,
-                              om_params_seed = 12345,
+                              random_seed = 12345,
                               n_sim_yrs = NULL,
-                              seed = 12345,
                               tac = 1,
                               c_increase = 0,
                               m_increase = 0,
@@ -36,13 +34,14 @@ run_multiple_MSEs <- function(df = NULL,
   verify_argument(ss_model, "list")
   verify_argument(sim_data, "list")
   verify_argument(om_objs, "list")
-  verify_argument(om_params_seed, "numeric", 1)
+  verify_argument(random_seed, "numeric", 1)
   verify_argument(n_sim_yrs, "numeric", 1)
-  verify_argument(seed, "numeric", 1)
   verify_argument(tac, "numeric", 1)
   verify_argument(c_increase, "numeric", 1)
   verify_argument(m_increase, "numeric", 1)
   verify_argument(sel_change, "numeric", 1)
+
+  set.seed(random_seed)
 
   yr_last_non_sim <- df$yrs[df$n_yr]
   yr_start <- yr_last_non_sim + 1
@@ -63,6 +62,10 @@ run_multiple_MSEs <- function(df = NULL,
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
 
+  # Store the leading parameters from each year simulation year
+  leading_params <- c("log_r_init", "log_h", "log_m_init", "log_sd_surv")
+  params_save <- array(NA, dim = c(n_sim_yrs, 4))
+
   # Modify survey objects in the simulated survey years and add catch for new year
   # Start with the last year in the time series yr_last_non_sim so that reference points can
   # be calculated for application in the first simulation year
@@ -79,19 +82,21 @@ run_multiple_MSEs <- function(df = NULL,
                            c_increase,
                            m_increase,
                            sel_change)
-      sim_data <- run_om(df, om_params_seed, om_objs, ...)
+      sim_data <- run_om(df, om_objs, ...)
       browser()
     }
     lst_tmb <- create_TMB_data(sim_data, df, ss_model, sim_age_comps = FALSE)
     if(yr == yr_last_non_sim){
-      # TODO: Remove this whole if chunk once correct output has been verified with
+      # TODO: Remove this whole `if` chunk once correct output has been verified with
       # the original output
       d1 <- readRDS("original_mse_data/d.rds")
       p1 <- readRDS("original_mse_data/p.rds")
       # Compare this package input data with the data from the original
       # If this line passes without causing as error, then the data and parameters are
       # almost identical. They are within tiny tolerances as found in the
-      # compare_tmb_data() function.
+      # compare_tmb_data() function. Stil, this is not enough to compare output to the
+      # original and to get the same likelihoods and numbers- and biomasses-at-age.
+      # That is why the list elements below are temporarily being used in this version of the code.
       compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
       # ---------------------
       # Debugging - set data and parameters to what they are in original
@@ -117,7 +122,8 @@ run_multiple_MSEs <- function(df = NULL,
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
-    # You can check likelihood components here using this function
+    # You can check likelihood components by placing a browser after the MakeADFun() call above and the
+    # nlminb() call below and calling print_likelihoods()
     print_likelihoods <- function(){
       map2(names(report), report, ~{if(length(grep("ans", .x))){ret <- .y;names(ret) <- .x;ret}}) %>%
         unlist() %>%
@@ -134,7 +140,7 @@ run_multiple_MSEs <- function(df = NULL,
       lower[names(lower) == "f_0"] <- 1e-10
     }
     # Minimize the Objective function
-    browser()
+    #browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -151,7 +157,7 @@ run_multiple_MSEs <- function(df = NULL,
 
     report <- obj$report()
     pars <- extract_params_tmb(opt)
-browser()
+#browser()
 
     if(yr == yr_end){
       rep <- sdreport(obj)
@@ -162,7 +168,7 @@ browser()
       browser()
     }
 
-browser()
+#browser()
     f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),
@@ -171,7 +177,9 @@ browser()
                            tac = tac,
                            v_real = v_real,
                            ...)
-browser()
+    # Need to use map() here to keep names
+    params_save <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
+#browser()
   })
 
 }

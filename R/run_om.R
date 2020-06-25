@@ -2,7 +2,6 @@
 #' conditioned on true catch
 #'
 #' @param df data frame of parameters and life history values
-#' @param seed seed for survey error and recruitment deviations
 #' @param om_objs A [list] of the OM objects (arrays and matrices) for holding the
 #' OM data. This list is what is returned by [setup_blank_om_objects()]
 #' @param ... Arguments passed to [run_year_loop_om()]
@@ -11,14 +10,10 @@
 #' @importFrom purrr map_dbl
 #' @export
 run_om <- function(df = NULL,
-                   seed = 100,
                    om_objs = NULL,
                    ...){
   verify_argument(df, "list")
-  verify_argument(seed, "numeric", 1)
   verify_argument(om_objs, "list")
-
-  set.seed(seed)
 
   # # Add the sim yrs in so that arrays don't have to redimension during the
   # # simulation years later. This makes the code faster and simpler overall
@@ -45,7 +40,6 @@ run_om <- function(df = NULL,
   lst$init_ssb_all <- map_dbl(n_save_age, function(space_num_at_age = .x){
     sum(space_num_at_age * mat_sel, na.rm = TRUE) * 0.5
   })
-
   lst <- run_year_loop_om(df, lst, ...)
 
     #Catch.age[,idx]  <- (Fyrs/(Fyrs+m_yrs))*(1-exp(-(Fyrs+m_yrs)))*rowSums(N.save.age[,idx,,1])*wage$catch # Calculate the catch in kg

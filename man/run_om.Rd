@@ -5,26 +5,22 @@
 \title{Run the Operating Model, which is an age based model
 conditioned on true catch}
 \usage{
-run_om(df = NULL, seed = 100, n_sim_yrs = NULL, ...)
+run_om(df = NULL, om_objs = NULL, random_seed = NULL, ...)
 }
 \arguments{
 \item{df}{data frame of parameters and life history values}
 
-\item{seed}{seed for survey error and recruitment deviations}
+\item{om_objs}{A \link{list} of the OM objects (arrays and matrices) for holding the
+OM data. This list is what is returned by \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
 
-\item{n_sim_yrs}{The number of years to simulate into the future.}
+\item{random_seed}{The seed to use for this OM}
 
 \item{...}{Arguments passed to \code{\link[=run_year_loop_om]{run_year_loop_om()}}}
 }
 \value{
-A list of model outputs (TODO)
+A list of model outputs
 }
 \description{
 Run the Operating Model, which is an age based model
 conditioned on true catch
-}
-\examples{
-\dontrun{
-run_om(df)
-}
 }

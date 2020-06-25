@@ -16,7 +16,7 @@ run_mses(
   sel_changes = 0,
   n_surveys = NULL,
   multiple_season_data = NULL,
-  om_params_seed = 12345,
+  random_seed = 12345,
   results_root_dir = here("results"),
   results_dir = here("results", "default"),
   ...
@@ -53,7 +53,7 @@ If \code{NULL}, 2 will be used for every scenario}
 \item{multiple_season_data}{A list of the same length as \code{fns}, with each element being a vector of
 three items, \code{nseason}, \code{nspace}, and \code{bfuture}. If NULL, biasadjustment will not be incorporated}
 
-\item{om_params_seed}{A seed value to use when calling the \code{\link[=run_om]{run_om()}} function}
+\item{random_seed}{A seed value to use when calling for all random functions}
 
 \item{results_root_dir}{The results root directory}
 
