@@ -112,12 +112,6 @@ run_multiple_MSEs <- function(df = NULL,
       lst_tmb$params$f_0 <- p1$F0
       # ---------------------
     }
-    if(yr == yr_last_non_sim){
-      # TODO: Remove these once done. Required to make output exactly the same as the original version
-      lst_tmb$df$survey <- readRDS("original_mse_data/survey.rds")
-      lst_tmb$df$survey_err <- readRDS("original_mse_data/survey_err.rds")
-      lst_tmb$df$catch_obs <- readRDS("original_mse_data/catch_obs.rds")
-    }
     # Evaluate the Objective function
     #browser()
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
