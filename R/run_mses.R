@@ -120,13 +120,9 @@ run_mses <- function(ss_model_output_dir = NULL,
   df <- append_objs_to_list(df,
                             parameters,
                             ss_model$wage_catch_df,
-                            ss_model$wage_catch,
                             ss_model$wage_survey_df,
-                            ss_model$wage_survey,
                             ss_model$wage_ssb_df,
-                            ss_model$wage_ssb,
                             ss_model$wage_mid_df,
-                            ss_model$wage_mid,
                             ss_model$mat_sel,
                             # Make sure the survey has the same length as the catch time series
                             ss_model$survey,
@@ -151,8 +147,6 @@ run_mses <- function(ss_model_output_dir = NULL,
                                     max_surv_age = df$age_max_age,
                                     n_space = df$n_space,
                                     n_season = df$n_season)
-  # Run the operating model
-  sim_data <- run_om(df, om_objs, ...)
 
   # Each run has its own random seed, with those seeds being chosen from
   # the base seed which is set at the beginning of this function
@@ -176,7 +170,6 @@ run_mses <- function(ss_model_output_dir = NULL,
         tmp <- run_multiple_MSEs(
           df = df,
           ss_model = ss_model,
-          sim_data = sim_data,
           om_objs = om_objs,
           random_seed = seeds[run],
           n_sim_yrs = n_sim_yrs,

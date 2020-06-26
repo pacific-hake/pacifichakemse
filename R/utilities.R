@@ -597,7 +597,7 @@ wage_add_yr <- function(wage = NULL){
 
   last_wage_yr <- wage[nrow(wage),]$Yr
   wage <- wage %>%
-    bind_rows(wage[nrow(wage),])
+    bind_rows(wage[1,])
   wage[nrow(wage),]$Yr <- last_wage_yr + 1
   wage
 }

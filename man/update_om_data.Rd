@@ -13,7 +13,8 @@ update_om_data(
   f_new = NULL,
   c_increase = NULL,
   m_increase = NULL,
-  sel_change = NULL
+  sel_change = NULL,
+  yr_sim_start = NULL
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ update_om_data(
 \item{m_increase}{Decrease of spawners returning south}
 
 \item{sel_change}{Time varying selectivity}
+
+\item{yr_sim_start}{The first year the simulations start. This is required to add an
+extra year of weight-at-age data post-historic period}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

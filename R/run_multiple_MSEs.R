@@ -3,7 +3,7 @@
 #' @param n_sim_yrs Number of years to simulate
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' and loaded by [load_ss_model_from_rds()]
-#' @param sim_data Operating model as created by [run_om()]
+#' @param om_objs Operating model objects as created by [setup_blank_om_objects()]
 #' @param random_seed Seed for running the OM if it needs to be run (if `sim_data`
 #' is `NULL`)
 #' @param tac Which harvest control rule should the model use
@@ -21,7 +21,6 @@
 #' @export
 run_multiple_MSEs <- function(df = NULL,
                               ss_model = NULL,
-                              sim_data = NULL,
                               om_objs = NULL,
                               random_seed = 12345,
                               n_sim_yrs = NULL,
@@ -32,7 +31,6 @@ run_multiple_MSEs <- function(df = NULL,
                               ...){
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
-  verify_argument(sim_data, "list")
   verify_argument(om_objs, "list")
   verify_argument(random_seed, "numeric", 1)
   verify_argument(n_sim_yrs, "numeric", 1)
@@ -67,34 +65,26 @@ run_multiple_MSEs <- function(df = NULL,
   params_save <- array(NA, dim = c(n_sim_yrs, 4))
 
   # Modify survey objects in the simulated survey years and add catch for new year
-  # Start with the last year in the time series yr_last_non_sim so that reference points can
+  # Start with the last year in the time series `yr_last_non_sim` so that reference points can
   # be calculated for application in the first simulation year
   map(c(yr_last_non_sim, yr_sims), function(yr = .x){
     yr_ind <- which(yr == yr_all)
 
-    if(yr >= yr_start){
-      df <<- update_om_data(df,
-                            sim_data,
-                            yr,
-                            yr_ind,
-                            yr_survey_sims,
-                            f_new,
-                            c_increase,
-                            m_increase,
-                            sel_change)
-      sim_data <- run_om(df, om_objs, ...)
-      browser()
-    }
-    lst_tmb <- create_tmb_data(sim_data, df, ss_model, sim_age_comps = FALSE)
+    # Run the Operating Model (OM)
+    sim_data <- run_om(df, om_objs, ...)
+
+    # Create the data for the Estimation Model (EM)
+    lst_tmb <- create_tmb_data(sim_data, df, ss_model)
+
+    # TODO: Remove this whole `if` chunk once correct output has been verified with
+    # the original output
     if(yr == yr_last_non_sim){
-      # TODO: Remove this whole `if` chunk once correct output has been verified with
-      # the original output
       d1 <- readRDS("original_mse_data/d.rds")
       p1 <- readRDS("original_mse_data/p.rds")
       # Compare this package input data with the data from the original
       # If this line passes without causing as error, then the data and parameters are
       # almost identical. They are within tiny tolerances as found in the
-      # compare_tmb_data() function. Stil, this is not enough to compare output to the
+      # compare_tmb_data() function. Still, this is not enough to compare output to the
       # original and to get the same likelihoods and numbers- and biomasses-at-age.
       # That is why the list elements below are temporarily being used in this version of the code.
       compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
@@ -117,8 +107,24 @@ run_multiple_MSEs <- function(df = NULL,
       lst_tmb$params$f_0 <- p1$F0
       # ---------------------
     }
+    # TODO: Remove this whole `if` chunk once correct output has been verified with
+    # the original output
+    if(yr == yr_start){
+      d1 <- readRDS("original_mse_data/d_yr2.rds")
+      p1 <- readRDS("original_mse_data/p_yr2.rds")
+      # Compare this package input data with the data from the original
+      # If this line passes without causing as error, then the data and parameters are
+      # almost identical. They are within tiny tolerances as found in the
+      # compare_tmb_data() function. Still, this is not enough to compare output to the
+      # original and to get the same likelihoods and numbers- and biomasses-at-age.
+      # That is why the list elements below are temporarily being used in this version of the code.
+      lst_tmb$df$b <- lst_tmb$df$b %>% as.numeric()
+      lst_tmb$df$flag_survey <- as.numeric(lst_tmb$df$flag_survey)
+      lst_tmb$df$flag_catch <- as.numeric(lst_tmb$df$flag_catch)
+      #compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
+    }
     # Evaluate the Objective function
-    #browser()
+browser()
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
@@ -129,7 +135,11 @@ run_multiple_MSEs <- function(df = NULL,
         unlist() %>%
         `[`(!is.na(names(.)))
     }
+browser()
 
+#if(yr == 2019) browser()
+
+    # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
     upper <- obj$par + Inf
     upper[names(upper) == "log_h"] <- log(0.999)
@@ -139,8 +149,8 @@ run_multiple_MSEs <- function(df = NULL,
     if(lst_tmb$df$catch_obs[length(lst_tmb$df$catch_obs)] == 1){
       lower[names(lower) == "f_0"] <- 1e-10
     }
+
     # Minimize the Objective function
-    #browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -150,25 +160,25 @@ run_multiple_MSEs <- function(df = NULL,
                                  # If error one of the random effects is unused
                                  eval.max = 1e6))
 
+    report <- obj$report()
+    pars <- extract_params_tmb(opt)
+browser()
+#if(yr == 2019) browser()
+    # if(yr == yr_end){
+    #   rep <- sdreport(obj)
+    #   sdrep <- summary(report)
+    #   rep_values <- rownames(sdrep)
+    #   # Check convergence in last year
+    #   conv <- Check_Identifiable_vs2(obj)
+    #   #browser()
+    # }
+#browser()
+
+    # Calculate the reference points to be applied to the next year
     wage_catch <- df$wage_catch[nrow(df$wage_catch) - 1,] %>% select(-Yr) %>% unlist(use.names = FALSE)
     v_real <- sum(sim_data$n_save_age[, df$n_yr,,df$n_season] *
                     matrix(rep(wage_catch, df$n_space),
                            ncol = df$n_space) * (sim_data$f_sel[, df$n_yr,]))
-
-    report <- obj$report()
-    pars <- extract_params_tmb(opt)
-#browser()
-
-    if(yr == yr_end){
-      rep <- sdreport(obj)
-      sdrep <- summary(report)
-      rep_values <- rownames(sdrep)
-      # Check convergence in last year
-      conv <- Check_Identifiable_vs2(obj)
-      browser()
-    }
-
-#browser()
     f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),
@@ -177,9 +187,29 @@ run_multiple_MSEs <- function(df = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
+
     # Need to use map() here to keep names
-    params_save <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
-#browser()
+    #params_save <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
+
+    # Update the OM data for the next simulation year in the loop. Note reference points
+    # are being passed into this function. Double <<- is used here so that `df` is
+    # in scope in the next iteration of the loop. Without that, `df` would be `NULL`
+    # in the next simulation year.
+    df <<- update_om_data(df,
+                          sim_data,
+                          yr,
+                          yr_ind,
+                          yr_survey_sims,
+                          f_new,
+                          c_increase,
+                          m_increase,
+                          sel_change)
+    #if(yr == 2019) browser()
+
+    # if(yr == yr_last_non_sim){
+    #   df <<- update_om_data(df, wage_only = TRUE)
+    # }
+
   })
 
 }

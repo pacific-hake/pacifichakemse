@@ -35,7 +35,7 @@ create_tmb_data <- function(sim_data = NULL,
     select(-Yr) %>%
     unlist(use.names = FALSE)
 
-  # Weight-at-age
+  # Create matrix versions of the WA data frames
   df$wage_catch <- format_wage_matrix(df$wage_catch_df)
   df$wage_survey <- format_wage_matrix(df$wage_survey_df)
   df$wage_mid <- format_wage_matrix(df$wage_mid_df)

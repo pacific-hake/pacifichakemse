@@ -9,6 +9,7 @@
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
+#' @param wage_only Only update the wage_ [data.frames], nothing else
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
@@ -21,9 +22,19 @@ update_om_data <- function(df = NULL,
                            f_new = NULL,
                            c_increase = NULL,
                            m_increase = NULL,
-                           sel_change = NULL){
+                           sel_change = NULL,
+                           wage_only = FALSE){
 
   verify_argument(df, "list")
+  verify_argument(wage_only, "logical", 1)
+  if(wage_only){
+    df$wage_catch_df <- wage_add_yr(df$wage_catch_df)
+    df$wage_survey_df <- wage_add_yr(df$wage_survey_df)
+    df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
+    df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
+    return(df)
+  }
+
   verify_argument(sim_data, "list")
   verify_argument(yr, c("integer", "numeric"), 1)
   verify_argument(yr_ind, c("integer", "numeric"), 1)
@@ -45,12 +56,13 @@ update_om_data <- function(df = NULL,
   df$ss_catch <- c(df$ss_catch, ceiling(mean(df$ss_catch[df$ss_catch > 0])))
   df$flag_catch <- c(df$flag_catch, 1)
 
-  # Copy last year of weight-at-age data and use that as the simulated year
+  # Copy first year of weight-at-age data and use that as the simulated year
   df$wage_catch_df <- wage_add_yr(df$wage_catch_df)
   df$wage_survey_df <- wage_add_yr(df$wage_survey_df)
   df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
   df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
-if(yr == 2020) browser()
+
+  #if(yr == 2020) browser()
   if(df$catch_obs[yr_ind,]$value == 0 && df$flag_survey[yr_ind] == -1){
     red(message("Stock in peril! Conducting emergency survey"))
     df$flag_survey[yr_ind] <- 1
