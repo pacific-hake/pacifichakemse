@@ -107,7 +107,7 @@ run_year_loop_om <- function(df = NULL,
 
     if(df$flag_survey[yr_ind] == 1){
       if(yr > df$m_yr){
-        browser()
+        set.seed(187)
         err <- rnorm(n = 1, mean = 0, sd = lst$surv_sd)
         # If the extra factor is not included the mean is > 1
         surv <- exp(log(sum(n_surv  %>% pull(sum) * lst$surv_sel *

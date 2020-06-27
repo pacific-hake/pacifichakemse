@@ -11,6 +11,7 @@
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
+#' @param f_sim Value of F to use for simulation years
 #' @param ... Absorb arguments intended for other functions
 #'
 #' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
@@ -28,6 +29,7 @@ run_multiple_MSEs <- function(df = NULL,
                               c_increase = 0,
                               m_increase = 0,
                               sel_change = 0,
+                              f_sim = NULL,
                               ...){
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
@@ -38,6 +40,7 @@ run_multiple_MSEs <- function(df = NULL,
   verify_argument(c_increase, "numeric", 1)
   verify_argument(m_increase, "numeric", 1)
   verify_argument(sel_change, "numeric", 1)
+  verify_argument(f_sim, "numeric", 1)
 
   set.seed(random_seed)
 
@@ -74,8 +77,16 @@ run_multiple_MSEs <- function(df = NULL,
     sim_data <- run_om(df, om_objs, ...)
 
     # Create the data for the Estimation Model (EM)
+    if(yr >= yr_start){
+      df$wage_catch_df <- wage_add_yr(df$wage_catch_df)
+      df$wage_survey_df <- wage_add_yr(df$wage_survey_df)
+      df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
+      df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
+    }
     lst_tmb <- create_tmb_data(sim_data, df, ss_model)
-
+    if(yr >= yr_start){
+      lst_tmb$params$f_0[length(lst_tmb$params$f_0)] <- 0.2
+    }
     # TODO: Remove this whole `if` chunk once correct output has been verified with
     # the original output
     if(yr == yr_last_non_sim){
@@ -121,10 +132,25 @@ run_multiple_MSEs <- function(df = NULL,
       lst_tmb$df$b <- lst_tmb$df$b %>% as.numeric()
       lst_tmb$df$flag_survey <- as.numeric(lst_tmb$df$flag_survey)
       lst_tmb$df$flag_catch <- as.numeric(lst_tmb$df$flag_catch)
+      lst_tmb$df$catch_obs <- d1$Catchobs
+      lst_tmb$df$wage_catch <- d1$wage_catch
+      lst_tmb$df$wage_survey <- d1$wage_survey
+      lst_tmb$df$wage_mid <- d1$wage_mid
+      lst_tmb$df$wage_ssb <- d1$wage_ssb
+      lst_tmb$df$survey <- d1$survey
+      lst_tmb$df$survey_err <- d1$survey_err
+      lst_tmb$df$age_survey <- d1$age_survey
+      lst_tmb$df$age_catch <- d1$age_catch
+      lst_tmb$params$log_m_init <- p1$logMinit
+      lst_tmb$params$log_h <- p1$logh
+      lst_tmb$params$log_sd_surv <- p1$logSDsurv
+      lst_tmb$params$init_n <- p1$initN
+      lst_tmb$params$p_sel <- p1$PSEL
+      lst_tmb$params$f_0 <- p1$F0
       #compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
     }
     # Evaluate the Objective function
-browser()
+if(yr_ind == 54) browser()
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
@@ -135,7 +161,7 @@ browser()
         unlist() %>%
         `[`(!is.na(names(.)))
     }
-browser()
+#browser()
 
 #if(yr == 2019) browser()
 
@@ -150,6 +176,8 @@ browser()
       lower[names(lower) == "f_0"] <- 1e-10
     }
 
+    # Stop "outer mgc: XXX" printing to screen
+    obj$env$tracemgc <- FALSE
     # Minimize the Objective function
     opt <- nlminb(obj$par,
                   obj$fn,
@@ -162,7 +190,7 @@ browser()
 
     report <- obj$report()
     pars <- extract_params_tmb(opt)
-browser()
+#browser()
 #if(yr == 2019) browser()
     # if(yr == yr_end){
     #   rep <- sdreport(obj)
@@ -187,9 +215,9 @@ browser()
                            tac = tac,
                            v_real = v_real,
                            ...)
-
+if(yr_ind == 54) browser()
     # Need to use map() here to keep names
-    #params_save <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
+    param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
     # Update the OM data for the next simulation year in the loop. Note reference points
     # are being passed into this function. Double <<- is used here so that `df` is
@@ -197,13 +225,14 @@ browser()
     # in the next simulation year.
     df <<- update_om_data(df,
                           sim_data,
-                          yr,
-                          yr_ind,
+                          yr + 1,
+                          yr_ind + 1,
                           yr_survey_sims,
                           f_new,
                           c_increase,
                           m_increase,
                           sel_change)
+#browser()
     #if(yr == 2019) browser()
 
     # if(yr == yr_last_non_sim){

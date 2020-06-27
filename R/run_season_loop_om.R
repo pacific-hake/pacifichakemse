@@ -163,6 +163,7 @@ run_season_loop_om <- function(df,
       }
       lst$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * lst$n_save_age[, yr_ind, space, season] * wage_catch
       lst$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * lst$n_save_age[, yr_ind, space, season]
+  #if(yr_ind == 55) browser()
       if(lst$catch_quota[yr_ind, space, season] > 0){
         if((sum(lst$catch_save_age[, yr_ind, space, season]) / lst$catch_quota[yr_ind, space, season]) > 1.1){
           stop("F estimation overshoots more than 10% in year ", yr, ", season ", season,

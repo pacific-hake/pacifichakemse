@@ -14,7 +14,7 @@ update_om_data(
   c_increase = NULL,
   m_increase = NULL,
   sel_change = NULL,
-  yr_sim_start = NULL
+  wage_only = FALSE
 )
 }
 \arguments{
@@ -36,8 +36,7 @@ update_om_data(
 
 \item{sel_change}{Time varying selectivity}
 
-\item{yr_sim_start}{The first year the simulations start. This is required to add an
-extra year of weight-at-age data post-historic period}
+\item{wage_only}{Only update the wage_ \link{data.frames}, nothing else}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

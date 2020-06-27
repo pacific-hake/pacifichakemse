@@ -103,14 +103,14 @@ create_tmb_data <- function(sim_data = NULL,
   df$age_catch <- df$age_catch[,as.numeric(colnames(df$age_catch)) %in% df$yrs]
 
   # Convert some parameter objects to base types
-  df$parameters$p_sel_fish <- df$parameters$p_sel_fish %>%
+  params <- df$parameters
+  params$p_sel_fish <- df$parameters$p_sel_fish %>%
     filter(space == 2) %>%
     filter(age != 1) %>%
     pull(value)
-  df$parameters$p_sel_surv <- df$parameters$p_sel_surv %>%
+  params$p_sel_surv <- df$parameters$p_sel_surv %>%
     filter(age != 2) %>%
     pull(value)
-  params <- df$parameters
   params$f_0 <- rowSums(sim_data$f_out_save)
   params$f_0 <- params$f_0[as.numeric(names(params$f_0)) %in% df$yrs]
 

@@ -7,7 +7,6 @@
 run_multiple_MSEs(
   df = NULL,
   ss_model = NULL,
-  sim_data = NULL,
   om_objs = NULL,
   random_seed = 12345,
   n_sim_yrs = NULL,
@@ -15,6 +14,7 @@ run_multiple_MSEs(
   c_increase = 0,
   m_increase = 0,
   sel_change = 0,
+  f_sim = NULL,
   ...
 )
 }
@@ -24,7 +24,7 @@ run_multiple_MSEs(
 \item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}
 and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
 
-\item{sim_data}{Operating model as created by \code{\link[=run_om]{run_om()}}}
+\item{om_objs}{Operating model objects as created by \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
 
 \item{random_seed}{Seed for running the OM if it needs to be run (if \code{sim_data}
 is \code{NULL})}
@@ -38,6 +38,8 @@ is \code{NULL})}
 \item{m_increase}{Decrease of spawners returning south}
 
 \item{sel_change}{Time varying selectivity}
+
+\item{f_sim}{Value of F to use for simulation years}
 
 \item{...}{Absorb arguments intended for other functions}
 }
