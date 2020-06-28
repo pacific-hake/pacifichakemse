@@ -23,6 +23,6 @@ Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}
 \details{
 This function mostly modified objects used in the OM which are
 \link{data.frame} and \link{array} types to be \link{matrix} and \link{vector} types that are required
-by \link{TMB}. It should be called on each iteration of the MSE loop before the call to
+by TMB. It should be called on each iteration of the MSE loop before the call to
 \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}.
 }

@@ -21,7 +21,7 @@ test_that("wage_add_yr() - Tests for argument errors", {
 test_that("wage_add_yr() - Tests for correct output", {
   out <- wage_add_yr(wage = df)
   expect_equal(nrow(out), 4)
-  expect_equivalent(out[3, -1], out[4, -1])
+  expect_equivalent(out[1, -1], out[4, -1])
 })
 
 

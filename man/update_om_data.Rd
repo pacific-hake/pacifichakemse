@@ -36,7 +36,7 @@ update_om_data(
 
 \item{sel_change}{Time varying selectivity}
 
-\item{wage_only}{Only update the wage_ \link{data.frames}, nothing else}
+\item{wage_only}{Only update the wage_ \link{data.frame}s, nothing else}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

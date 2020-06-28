@@ -9,7 +9,7 @@
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
-#' @param wage_only Only update the wage_ [data.frames], nothing else
+#' @param wage_only Only update the wage_ [data.frame]s, nothing else
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split

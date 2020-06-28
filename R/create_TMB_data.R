@@ -2,7 +2,7 @@
 #'
 #' @details This function mostly modified objects used in the OM which are
 #' [data.frame] and [array] types to be [matrix] and [vector] types that are required
-#' by [TMB]. It should be called on each iteration of the MSE loop before the call to
+#' by TMB. It should be called on each iteration of the MSE loop before the call to
 #' [TMB::MakeADFun()].
 #'
 #' @param sim_data Operating model
