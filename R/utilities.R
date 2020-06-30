@@ -963,3 +963,38 @@ compare_tmb_data <- function(d1, d2, p1, p2){
   }
 }
 
+#' Round all values in an arbitrarily complex [list]
+#'
+#' @details This is a recursive function and therefore can have an arbitrary
+#' nesting of lists.
+#'
+#' @param lst A [list] of arbitrary complexity
+#' @param digits The number of decimal points to round all numeric values to
+#'
+#' @return A [list] in the same format as `lst` but with all values rounded to
+#' `digits` decimal points
+#' @export
+round_list <- function(lst, digits = 2){
+  if(is.null(lst)){
+    return(NULL)
+  }
+  if(!length(lst)){
+    return(NULL)
+  }
+  if(class(lst) != "list"){
+    # At this point lst is a single non-list object (data frame, matrix, vector, etc)
+    return(round(lst, digits))
+  }
+  # At this point lst is guaranteed to be a list of one or greater
+  nms <- names(lst)
+  out_first <- round_list(lst[[1]], digits)
+  out_therest <- round_list(lst[-1], digits)
+  if(class(out_therest) == "list"){
+    out <- c(list(out_first), out_therest)
+  }else{
+    out <- list(out_first, out_therest)
+  }
+  names(out) <- nms
+  out[sapply(out, is.null)] <- NULL
+  out
+}
