@@ -983,8 +983,27 @@ round_list <- function(lst, digits = 2){
   }
   if(class(lst) != "list"){
     # At this point lst is a single non-list object (data frame, matrix, vector, etc)
-    return(round(lst, digits))
+    if(class(lst) == "data.frame"){
+      return(round_data_frame(lst, digits))
+    }else if(class(lst) == "matrix"){
+      return(as.matrix(round_data_frame(as.data.frame(lst))))
+    }else if(class(lst) == "array"){
+      n_arr_dims <- length(dim(lst))
+      if(n_arr_dims == 3){
+        return(round_3d_array(lst, digits))
+      }else if(n_arr_dims == 4){
+        return(round_4d_array(lst, digits))
+      }else if(n_arr_dims == 5){
+        return(round_5d_array(lst, digits))
+      }else{
+        stop("Arrays greater than 5 dimensions are not implemented",
+             call. = FALSE)
+      }
+    }else{
+      return(round(lst, digits))
+    }
   }
+
   # At this point lst is guaranteed to be a list of one or greater
   nms <- names(lst)
   out_first <- round_list(lst[[1]], digits)
@@ -997,4 +1016,79 @@ round_list <- function(lst, digits = 2){
   names(out) <- nms
   out[sapply(out, is.null)] <- NULL
   out
+}
+
+#' Round all numeric values found in a [data.frame] to a specified number of decimal points
+#'
+#' @details Columns which are not numeric will be returned unmodified
+#' @param df A [data.frame]
+#' @param digits The number of decimal points to round all numeric values to
+#'
+#' @return A [data.frame] identical to the input `df` but with all numerical values
+#' rounded
+#' @importFrom purrr map_df
+#' @export
+round_data_frame <- function(df, digits = 2){
+  map_df(df,~{
+    tryCatch(round(.x, digits),
+             error = function(e) .x)
+
+  })
+}
+
+#' Round all numeric values found in a multidimensional [array]
+#' to a specified number of decimal points
+#'
+#' @param arr The array
+#' @param digits  The number of decimal points to round all numeric values to
+#'
+#' @return An array identical to the input `arr` but with all numerical values rounded
+#' @export
+round_3d_array <- function(arr, digits = 2){
+  dims <- dim(arr)
+  if(length(dims) != 3){
+    stop("Not a 3D array",
+         call. = FALSE)
+  }
+  new_arr <- array(NA, dim = dims, dimnames = dimnames(arr))
+  for(i in seq_len(dims[1])){
+    new_arr[i, , ] <- as.matrix(round_data_frame(as.data.frame(arr[i, , ]), digits = digits))
+  }
+  new_arr
+}
+
+#' @rdname round_3d_array
+#' @export
+round_4d_array <- function(arr, digits = 2){
+  dims <- dim(arr)
+  if(length(dims) != 4){
+    stop("Not a 4D array",
+         call. = FALSE)
+  }
+  new_arr <- array(NA, dim = dims, dimnames = dimnames(arr))
+  for(i in seq_len(dims[1])){
+    for(j in seq_len(dims[2])){
+      new_arr[i, j, , ] <- as.matrix(round_data_frame(as.data.frame(arr[i, j, , ]), digits = digits))
+    }
+  }
+  new_arr
+}
+
+#' @rdname round_3d_array
+#' @export
+round_5d_array <- function(arr, digits = 2){
+  dims <- dim(arr)
+  if(length(dims) != 5){
+    stop("Not a 5D array",
+         call. = FALSE)
+  }
+  new_arr <- array(NA, dim = dims, dimnames = dimnames(arr))
+  for(i in seq_len(dims[1])){
+    for(j in seq_len(dims[2])){
+      for(k in seq_len(dims[3])){
+        new_arr[i, j, k, , ] <- as.matrix(round_data_frame(as.data.frame(arr[i, j, k, , ]), digits = digits))
+      }
+    }
+  }
+  new_arr
 }
