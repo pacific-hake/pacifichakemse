@@ -22,6 +22,7 @@ Imports:
     data.table,
     dplyr,
     ggplot2,
+    gfutilities,
     gridExtra,
     here,
     PNWColors,
@@ -40,6 +41,7 @@ Imports:
     utils
 Remotes:
     jakelawlor/PNWColors,
+    psb-assess/gfutilities,
     r4ss/r4ss
 BinaryFiles:
     src/runHakeassessment.dll
