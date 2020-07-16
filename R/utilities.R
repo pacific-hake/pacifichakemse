@@ -610,7 +610,7 @@ extract_params_tmb <- function(obj){
 #' @param p2 Parameter object 2
 #'
 #' @export
-compare_tmb_data <- function(d1, d2, p1, p2){
+compare_tmb_data_tol <- function(d1, d2, p1, p2){
 
   if("survey_x" %in% names(d2)){
     d2$survey_x <- NULL
@@ -839,5 +839,168 @@ compare_tmb_data <- function(d1, d2, p1, p2){
     if(any(p2$F0 - p1$f_0 > 1e-14)){
       stop("p1$f_0 not identical to p2$F0", call. = FALSE)
     }
+  }
+}
+
+#' Compare two data object inputs for input into `runHakeassessment.cpp`
+#'
+#' @description Used while developing the code to compare old and new data being input.
+#' They need to be exactly the same
+#'
+#' @param d1 Data object 1
+#' @param d2 Data object 2
+#' @param p1 Parameter object 1
+#' @param p2 Parameter object 2
+#'
+#' @export
+compare_tmb_data <- function(d1, d2, p1, p2){
+
+  if("survey_x" %in% names(d2)){
+    d2$survey_x <- NULL
+  }
+  if(!identical(d1$yrs, d2$years)){
+    stop("d1$yrs not identical to d2$years", call. = FALSE)
+  }
+  if(!identical(d1$t_end, d2$tEnd)){
+    stop("d1$t_end not identical to d2$tEnd", call. = FALSE)
+  }
+  if(!identical(d1$sel_change_yr, d2$selYear)){
+    stop("d1$sel_change_yr not identical to d2$selYear", call. = FALSE)
+  }
+  if(!identical(d1$yr_sel, d2$year_sel)){
+    stop("d1$yr_sel not identical to d2$year_sel", call. = FALSE)
+  }
+  if(!identical(d1$b, d2$b)){
+    stop("d1$b not identical to d2$b", call. = FALSE)
+  }
+  if(!identical(d1$ages, d2$age)){
+    stop("d1$ages not identical to d2$age", call. = FALSE)
+  }
+  if(!identical(d1$rdev_sd, d2$logSDR)){
+    stop("d1$rdev_sd not identical to d2$logSDR", call. = FALSE)
+  }
+  if(!identical(d1$log_q, d2$logQ)){
+    stop("d1$log_q not identical to d2$logQ", call. = FALSE)
+  }
+  if(!identical(d1$log_sd_catch, d2$logSDcatch)){
+    stop("d1$log_sd_catch not identical to d2$logSDcatch", call. = FALSE)
+  }
+  if(!identical(d1$log_phi_survey, d2$logphi_survey)){
+    stop("d1$log_phi_survey not identical to d2$logphi_survey", call. = FALSE)
+  }
+  if(!identical(d1$s_mul, d2$smul)){
+    stop("d1$s_mul not identical to d2$smul", call. = FALSE)
+  }
+  if(!identical(d1$sigma_p_sel, d2$sigma_psel)){
+    stop("d1$sigma_p_sel not identical to d2$sigma_psel", call. = FALSE)
+  }
+  if(!identical(d1$sum_zero, d2$sum_zero)){
+    stop("d1$sum_zero not identical to d2$sum_zero", call. = FALSE)
+  }
+  if(!identical(d1$s_min, d2$Smin)){
+    stop("d1$s_min not identical to d2$Smin", call. = FALSE)
+  }
+  if(!identical(d1$s_max, d2$Smax)){
+    stop("d1$s_max not identical to d2$Smax", call. = FALSE)
+  }
+  if(!identical(d1$s_min_survey, d2$Smin_survey)){
+    stop("d1$s_min_survey not identical to d2$Smin_survey", call. = FALSE)
+  }
+  if(!identical(d1$s_max_survey, d2$Smax_survey)){
+    stop("d1$s_max_survey not identical to d2$Smax_survey", call. = FALSE)
+  }
+  if(!identical(d1$n_age, d2$nage)){
+    stop("d1$n_age not identical to d2$nage", call. = FALSE)
+  }
+  if(!identical(d1$m_sel, d2$Msel)){
+    stop("d1$m_sel not identical to d2$Msel", call. = FALSE)
+  }
+  if(!identical(d1$flag_sel, d2$flag_sel)){
+    stop("d1$flag_sel not identical to d2$flag_sel", call. = FALSE)
+  }
+  if(!identical(d1$flag_survey, d2$flag_survey)){
+    stop("d1$flag_survey not identical to d2$flag_survey", call. = FALSE)
+  }
+  if(!identical(d1$flag_catch, d2$flag_catch)){
+    stop("d1$flag_catch not identical to d2$flag_catch", call. = FALSE)
+  }
+
+  if(!identical(d1$catch_obs, d2$Catchobs)){
+    stop("d1$catch_obs not identical to d2$Catchobs", call. = FALSE)
+  }
+
+  if(!identical(d1$wage_catch, d2$wage_catch)){
+    stop("d1$wage_catch not identical to d2$wage_catch", call. = FALSE)
+  }
+  if(!identical(d1$wage_survey, d2$wage_survey)){
+    stop("d1$wage_survey not identical to d2$wage_survey", call. = FALSE)
+  }
+  if(!identical(d1$wage_ssb, d2$wage_ssb)){
+    stop("d1$wage_ssb not identical to d2$wage_ssb", call. = FALSE)
+  }
+  if(!identical(d1$wage_mid, d2$wage_mid)){
+    stop("d1$wage_mid not identical to d2$wage_mid", call. = FALSE)
+  }
+  if(!identical(d1$mat_sel, d2$Matsel)){
+    stop("d1$mat_sel not identical to d2$Matsel", call. = FALSE)
+  }
+  if(!identical(d1$survey, d2$survey)){
+    stop("d1$survey not identical to d2$survey", call. = FALSE)
+  }
+  if(!identical(d1$survey_err, d2$survey_err)){
+    stop("d1$survey_err not identical to d2$survey_err", call. = FALSE)
+  }
+  if(!identical(d1$ss_survey, d2$ss_survey)){
+    stop("d1$ss_survey not identical to d2$ss_survey", call. = FALSE)
+  }
+  if(!identical(d1$ss_catch, d2$ss_catch)){
+    stop("d1$ss_catch not identical to d2$ss_catch", call. = FALSE)
+  }
+  if(!identical(d1$a_prior, d2$Aprior)){
+    stop("d1$a_prior not identical to d2$Aprior", call. = FALSE)
+  }
+  if(!identical(d1$b_prior, d2$Bprior)){
+    stop("d1$b_prior not identical to d2$Bprior", call. = FALSE)
+  }
+  if(!identical(d1$age_survey, d2$age_survey)){
+    stop("d1$age_survey not identical to d2$age_survey", call. = FALSE)
+  }
+  if(!identical(d1$age_catch, d2$age_catch)){
+    stop("d1$age_catch not identical to d2$age_catch", call. = FALSE)
+  }
+
+  # Parameters ----------------------------------------------------------------
+  if(!identical(p1$log_r_init, p2$logRinit)){
+    stop("p1$log_r_init not identical to p2$logRinit", call. = FALSE)
+  }
+  if(!identical(p1$log_m_init, p2$logMinit)){
+    stop("p1$log_m_init not identical to p2$logMinit", call. = FALSE)
+  }
+  if(!identical(p1$log_h, p2$logh)){
+    stop("p1$log_h not identical to p2$logh", call. = FALSE)
+  }
+  if(!identical(p1$log_sd_surv, p2$logSDsurv)){
+    stop("p1$log_sd_surv not identical to p2$logSDsurv", call. = FALSE)
+  }
+  if(!identical(p1$log_phi_catch, p2$logphi_catch)){
+    stop("p1$log_phi_catch not identical to p2$logphi_catch", call. = FALSE)
+  }
+  if(!identical(p1$p_sel_fish, p2$psel_fish)){
+    stop("p1$p_sel_fish not identical to p2$psel_fish", call. = FALSE)
+  }
+  if(!identical(p1$p_sel_surv, p2$psel_surv)){
+    stop("p1$p_sel_surv not identical to p2$psel_surv", call. = FALSE)
+  }
+  if(!identical(p1$init_n, p2$initN)){
+    stop("p1$init_n not identical to p2$initN", call. = FALSE)
+  }
+  if(!identical(p1$r_in, p2$Rin)){
+    stop("p1$r_in not identical to p2$Rin", call. = FALSE)
+  }
+  if(!identical(p1$p_sel, p2$PSEL)){
+    stop("p1$p_sel not identical to p2$PSEL", call. = FALSE)
+  }
+  if(!identical(p1$f_0, p2$F0)){
+    stop("p1$f_0 not identical to p2$F0", call. = FALSE)
   }
 }
