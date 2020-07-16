@@ -136,11 +136,11 @@ load_data_om <- function(ss_model = NULL,
   lst$s_yr <- s_yr
   lst$m_yr <- m_yr
   lst$n_yr <- length(lst$yrs)
-  lst$t_end <- lst$n_yr * lst$n_season
   lst$sel_change_yr <- sel_change_yr
   lst$sel_idx <- which(lst$yrs == lst$sel_change_yr)
   lst$yr_sel <- length(lst$sel_change_yr:max(lst$yrs))
   lst$n_season <- n_season
+  lst$t_end <- lst$n_yr * lst$n_season
   lst$season_names <- season_names
   lst$n_space <- n_space
   lst$space_names <- space_names
