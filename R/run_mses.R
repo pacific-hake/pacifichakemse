@@ -29,6 +29,7 @@
 #'
 #' @return Nothing
 #' @importFrom dplyr transmute group_map mutate_at quo
+#' @importFrom gfutilities verify_argument func_name
 #' @importFrom here here
 #' @importFrom purrr map2 map map_chr
 #' @importFrom r4ss SS_output
