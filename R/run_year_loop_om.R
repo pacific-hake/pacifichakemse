@@ -176,7 +176,7 @@ run_year_loop_om <- function(df = NULL,
     })
 
     catch_age_comps_tmp <- map(seq_len(df$n_space), ~{
-      c(catch_tmp[age_1_ind:(df$age_max_age), .x] / catch_tot[.x],
+      c(catch_tmp[.x, age_1_ind:(df$age_max_age)] / catch_tot[.x],
         # Plus group
         sum(catch_tmp[(df$age_max_age + 1):df$n_age]) / catch_tot[.x])
     })
