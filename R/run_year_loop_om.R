@@ -113,7 +113,9 @@ run_year_loop_om <- function(df = NULL,
         surv <- exp(log(sum(n_surv  %>% pull(sum) * lst$surv_sel *
                               lst$q * wage$survey)) + err)
       }else{
-        surv <- sum(n_surv %>% pull(sum) * lst$surv_sel *
+        # Additional sum here so that all spaces are summed together before calculation is done for total
+        # number in the coastwide survey
+        surv <- sum(sum(n_surv %>% pull(sum)) * lst$surv_sel *
                       lst$q * wage$survey)
       }
       lst$survey[yr_ind] <<- surv
@@ -121,7 +123,7 @@ run_year_loop_om <- function(df = NULL,
       lst$survey[yr_ind] <<- 1
     }
 
-    n_tot_yrs <- n_surv %>% pull(sum)
+    n_tot_yrs <- sum(n_surv %>% pull(sum))
     surv_tmp <- sum(n_tot_yrs * lst$surv_sel * lst$q)
     age_1_ind <- which(df$ages == 1)
 
