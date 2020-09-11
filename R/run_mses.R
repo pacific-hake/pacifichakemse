@@ -116,7 +116,7 @@ run_mses <- function(ss_model_output_dir = NULL,
                      init_n = df$init_n,
                      r_in = df$r_dev)
 
-  # Merge the SS \model output list with the OM outputs, and the parameters to
+  # Merge the SS model output list with the OM outputs, and the parameters to
   # initialize the OM with
   df <- append_objs_to_list(df,
                             parameters,
