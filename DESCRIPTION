@@ -41,7 +41,7 @@ Imports:
     utils
 Remotes:
     jakelawlor/PNWColors,
-    psb-assess/gfutilities,
+    pbs-assess/gfutilities,
     r4ss/r4ss
 BinaryFiles:
     src/runHakeassessment.dll
