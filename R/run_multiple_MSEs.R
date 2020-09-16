@@ -98,7 +98,6 @@ run_multiple_MSEs <- function(df = NULL,
       # compare_tmb_data() function. Still, this is not enough to compare output to the
       # original and to get the same likelihoods and numbers- and biomasses-at-age.
       # That is why the list elements below are temporarily being used in this version of the code.
-      compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
       # ---------------------
       # Debugging - set data and parameters to what they are in original
       lst_tmb$df$catch_obs <- d1$Catchobs
@@ -110,6 +109,7 @@ run_multiple_MSEs <- function(df = NULL,
       lst_tmb$df$survey_err <- d1$survey_err
       lst_tmb$df$age_survey <- d1$age_survey
       lst_tmb$df$age_catch <- d1$age_catch
+      lst_tmb$params$log_r_init <- p1$logRinit
       lst_tmb$params$log_m_init <- p1$logMinit
       lst_tmb$params$log_h <- p1$logh
       lst_tmb$params$log_sd_surv <- p1$logSDsurv
@@ -117,6 +117,8 @@ run_multiple_MSEs <- function(df = NULL,
       lst_tmb$params$p_sel <- p1$PSEL
       lst_tmb$params$f_0 <- p1$F0
       # ---------------------
+      #compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
+      #browser()
     }
     # TODO: Remove this whole `if` chunk once correct output has been verified with
     # the original output
@@ -150,7 +152,10 @@ run_multiple_MSEs <- function(df = NULL,
       #compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
     }
     # Evaluate the Objective function
-if(yr_ind == 54) browser()
+    d <- lst_tmb$df
+    p <- lst_tmb$params
+    browser()
+#if(yr_ind == 54) browser()
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
@@ -161,7 +166,8 @@ if(yr_ind == 54) browser()
         unlist() %>%
         `[`(!is.na(names(.)))
     }
-#browser()
+    browser()
+#if(yr_ind == 54) browser()
 
 #if(yr == 2019) browser()
 
