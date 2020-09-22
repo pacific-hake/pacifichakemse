@@ -10,6 +10,8 @@
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
 #' @param wage_only Only update the wage_ [data.frame]s, nothing else
+#' @param zero_rdevs Logical. If TRUE, return recruitment devs (r_in) of 0. If FALSE,
+#' return a random normal using mean = 0 and sd = exp(df$rdev_sd)
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
@@ -23,7 +25,8 @@ update_om_data <- function(df = NULL,
                            c_increase = NULL,
                            m_increase = NULL,
                            sel_change = NULL,
-                           wage_only = FALSE){
+                           wage_only = FALSE,
+                           zero_rdevs = TRUE){
 
   verify_argument(df, "list")
   verify_argument(wage_only, "logical", 1)
@@ -74,9 +77,13 @@ update_om_data <- function(df = NULL,
 
   df$b[length(df$b)] <- df$b_future
   df$b <- c(df$b, df$b_future)
-  r_devs <- rnorm(n = 1,
-                  mean = 0,
-                  sd = exp(df$rdev_sd))
+  if(zero_rdevs){
+    r_devs <- 0
+  }else{
+    r_devs <- rnorm(n = 1,
+                    mean = 0,
+                    sd = exp(df$rdev_sd))
+  }
   df$parameters$r_in <- df$parameters$r_in %>% add_row(yr = yr, value = r_devs)
 
   # Add movement to the new years
