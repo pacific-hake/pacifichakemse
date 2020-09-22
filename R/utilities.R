@@ -599,6 +599,44 @@ extract_params_tmb <- function(obj){
     set_names(nms)
 }
 
+df_identical <- function(wa1, wa2, nm_wa1, nm_wa2, diff_tol = 1e-8){
+  if(class(wa1) != "matrix" || class(wa2) != "matrix"){
+    stop("Both ", nm_wa1, " and ", nm_wa2, " must be class matrix",
+         call. = FALSE)
+  }
+  if(!identical(dim(wa1), dim(wa2))){
+    stop(nm_wa1, " not identical to ", nm_wa2, ". They have different dimensions",
+         call. = FALSE)
+  }
+  #if(identical(wa1, wa2)){
+  #  message(nm_wa1, " is identical to ", nm_wa2, "\n")
+  #}
+  wa1 <- as.data.frame(wa1)
+  wa2 <- as.data.frame(wa2)
+  wa_cols_ident <- map_lgl(seq_len(ncol(wa1)), ~{
+    if(all(is.na(wa1[,.x]))){
+      if(all(is.na(wa2[,.x]))){
+        return(TRUE)
+      }
+      return(FALSE)
+    }
+    diff <- wa1[,.x] %>%
+      as_tibble() %>%
+      add_column(wa2[, .x]) %>%
+      mutate(diff = .[[1]] - .[[2]]) %>%
+      mutate(in_tol = diff < diff_tol)
+    if(all(diff$in_tol)){
+      return(TRUE)
+    }
+    FALSE
+  })
+  if(!all(wa_cols_ident)){
+    stop(nm_wa1, " not identical to ", nm_wa2, ". These columns are not identical: ",
+         paste(which(!wa_cols_ident), collapse = " "),
+         call. = FALSE)
+  }
+}
+
 #' Compare two data object inputs for input into `runHakeassessment.cpp`
 #'
 #' @description Used while developing the code to compare old and new data being input.
@@ -611,7 +649,7 @@ extract_params_tmb <- function(obj){
 #'
 #' @export
 compare_tmb_data_tol <- function(d1, d2, p1, p2){
-
+#browser()
   if("survey_x" %in% names(d2)){
     d2$survey_x <- NULL
   }
@@ -682,7 +720,7 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
     stop("d1$flag_catch not identical to d2$flag_catch", call. = FALSE)
   }
 
-  if(class(d1$catch_obs) != "matrix" | class(d2$Catchobs) != "matrix"){
+  if(class(d1$catch_obs)[1] != "matrix" | class(d2$Catchobs)[1] != "matrix"){
     stop("Both d1$catch_obs and d2$Catchobs must be class matrix",
          call. = FALSE)
   }
@@ -695,7 +733,7 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
   catch_diff <- d1$catch_obs %>%
     as_tibble() %>%
     add_column(d2$Catchobs) %>%
-    mutate(diff = value - `d2$Catchobs`) %>%
+    mutate(diff = .[[1]] - .[[2]]) %>%
     mutate(in_tol = diff < catch_diff_tol)
   if(!all(catch_diff$in_tol)){
     stop("d1$catch_obs not identical to d2$Catchgobs, difference tolerance of ",
@@ -703,48 +741,10 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
          call. = FALSE)
   }
 
-  df_identical <- function(wa1, wa2, nm_wa1, nm_wa2){
-    if(class(wa1) != "matrix" || class(wa2) != "matrix"){
-      stop("Both ", nm_wa1, " and ", nm_wa2, " must be class matrix",
-           call. = FALSE)
-    }
-    if(!identical(dim(wa1), dim(wa2))){
-      stop(nm_wa1, " not identical to ", nm_wa2, ". They have different dimensions",
-           call. = FALSE)
-    }
-    if(identical(wa1, wa2)){
-      message(nm_wa1, " is identical to ", nm_wa2, "\n")
-    }
-    wa1 <- as.data.frame(wa1)
-    wa2 <- as.data.frame(wa2)
-    diff_tol <- 1e-14
-    wa_cols_ident <- map_lgl(seq_len(ncol(wa1)), ~{
-      if(all(is.na(wa1[,.x]))){
-        if(all(is.na(wa2[,.x]))){
-          return(TRUE)
-        }
-        return(FALSE)
-      }
-      diff <- wa1[,.x] %>%
-        as_tibble() %>%
-        add_column(wa2[, .x]) %>%
-        mutate(diff = value - `wa2[, .x]`) %>%
-        mutate(in_tol = diff < diff_tol)
-      if(all(diff$in_tol)){
-        return(TRUE)
-      }
-      FALSE
-    })
-    if(!all(wa_cols_ident)){
-      stop(nm_wa1, " not identical to ", nm_wa2, ". These columns are not identical: ",
-           paste(which(!wa_cols_ident), collapse = " "),
-           call. = FALSE)
-    }
-  }
-  df_identical(d1$wage_catch, d2$wage_catch, "d1$wage_catch", "d2$wage_catch")
-  df_identical(d1$wage_survey, d2$wage_survey, "d1$wage_survey", "d2$wage_survey")
-  df_identical(d1$wage_ssb, d2$wage_ssb, "d1$wage_ssb", "d2$wage_ssb")
-  df_identical(d1$wage_mid, d2$wage_mid, "d1$wage_mid", "d2$wage_mid")
+  df_identical(d1$wage_catch, d2$wage_catch, "d1$wage_catch", "d2$wage_catch", 1e-8)
+  df_identical(d1$wage_survey, d2$wage_survey, "d1$wage_survey", "d2$wage_survey", 1e-8)
+  df_identical(d1$wage_ssb, d2$wage_ssb, "d1$wage_ssb", "d2$wage_ssb", 1e-8)
+  df_identical(d1$wage_mid, d2$wage_mid, "d1$wage_mid", "d2$wage_mid", 1e-8)
 
   if(!identical(d1$mat_sel, d2$Matsel)){
     stop("d1$mat_sel not identical to d2$Matsel", call. = FALSE)
@@ -758,7 +758,7 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
   survey_diff <- d1$survey %>%
     as_tibble() %>%
     add_column(d2$survey) %>%
-    mutate(diff = value - `d2$survey`) %>%
+    mutate(diff = .[[1]] - .[[2]]) %>%
     mutate(in_tol = diff < survey_diff_tol)
   if(!all(survey_diff$in_tol)){
     stop("d1$survey not identical to d2$survey, difference tolerance of ",
@@ -774,7 +774,7 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
   survey_err_diff <- d1$survey_err %>%
     as_tibble() %>%
     add_column(d2$survey_err) %>%
-    mutate(diff = value - `d2$survey_err`) %>%
+    mutate(diff = .[[1]] - .[[2]]) %>%
     mutate(in_tol = diff < survey_err_diff_tol)
   if(!all(survey_err_diff$in_tol)){
     stop("d1$survey_err not identical to d2$survey_err, difference tolerance of ",
@@ -795,8 +795,8 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
     stop("d1$b_prior not identical to d2$Bprior", call. = FALSE)
   }
 
-  df_identical(d1$age_survey, d2$age_survey, "d1$age_survey", "d2$age_survey")
-  df_identical(d1$age_catch, d2$age_catch, "d1$age_catch", "d2$age_catch")
+  df_identical(d1$age_survey, d2$age_survey, "d1$age_survey", "d2$age_survey", 1e-7)
+  df_identical(d1$age_catch, d2$age_catch, "d1$age_catch", "d2$age_catch", 1e-8)
 
   # Parameters ----------------------------------------------------------------
   if(!identical(p1$log_r_init, p2$logRinit)){
@@ -808,7 +808,7 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
     }
   }
   if(!identical(p1$log_h, p2$logh)){
-    if(p2$logh - p1$log_h > 1e-14){
+    if(p2$logh - p1$log_h > 1e-6){
       stop("p1$log_h not identical to p2$logh", call. = FALSE)
     }
   }
@@ -858,7 +858,7 @@ compare_tmb_data <- function(d1, d2, p1, p2){
   if("survey_x" %in% names(d2)){
     d2$survey_x <- NULL
   }
-  if(!identical(d1$yrs, d2$years)){
+  if(!identical(d1$yrs, d2$years, )){
     stop("d1$yrs not identical to d2$years", call. = FALSE)
   }
   if(!identical(d1$t_end, d2$tEnd)){
@@ -932,12 +932,15 @@ compare_tmb_data <- function(d1, d2, p1, p2){
   if(!identical(d1$wage_catch, d2$wage_catch)){
     stop("d1$wage_catch not identical to d2$wage_catch", call. = FALSE)
   }
+
   if(!identical(d1$wage_survey, d2$wage_survey)){
     stop("d1$wage_survey not identical to d2$wage_survey", call. = FALSE)
   }
+
   if(!identical(d1$wage_ssb, d2$wage_ssb)){
     stop("d1$wage_ssb not identical to d2$wage_ssb", call. = FALSE)
   }
+
   if(!identical(d1$wage_mid, d2$wage_mid)){
     stop("d1$wage_mid not identical to d2$wage_mid", call. = FALSE)
   }
