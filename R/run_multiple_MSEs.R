@@ -70,6 +70,11 @@ run_multiple_MSEs <- function(df = NULL,
   # Modify survey objects in the simulated survey years and add catch for new year
   # Start with the last year in the time series `yr_last_non_sim` so that reference points can
   # be calculated for application in the first simulation year
+  #
+  # d_tmp and p_tmp are lists to hold data from the original code. They should be removed once the code is verified to be working
+  d_tmp <- list()
+  p_tmp <- list()
+  tmp_iter <- 1
   map(c(yr_last_non_sim, yr_sims), function(yr = .x){
     yr_ind <- which(yr == yr_all)
 
@@ -89,9 +94,10 @@ run_multiple_MSEs <- function(df = NULL,
     }
     # TODO: Remove this whole `if` chunk once correct output has been verified with
     # the original output
-    if(yr == yr_last_non_sim){
-      d1 <- readRDS("original_mse_data/d.rds")
-      p1 <- readRDS("original_mse_data/p.rds")
+    if(yr >= yr_last_non_sim && yr <= 2022){
+      d_tmp[[tmp_iter]] <-readRDS(paste0("original_mse_data/d_", yr,".rds"))
+      p_tmp[[tmp_iter]] <- readRDS(paste0("original_mse_data/p_", yr,".rds"))
+      names(d_tmp)[1] <- names(p_tmp)[1] <- yr
       # Compare this package input data with the data from the original
       # If this line passes without causing as error, then the data and parameters are
       # almost identical. They are within tiny tolerances as found in the
@@ -100,62 +106,46 @@ run_multiple_MSEs <- function(df = NULL,
       # That is why the list elements below are temporarily being used in this version of the code.
       # ---------------------
       # Debugging - set data and parameters to what they are in original
-      lst_tmb$df$catch_obs <- d1$Catchobs
-      lst_tmb$df$wage_catch <- d1$wage_catch
-      lst_tmb$df$wage_survey <- d1$wage_survey
-      lst_tmb$df$wage_mid <- d1$wage_mid
-      lst_tmb$df$wage_ssb <- d1$wage_ssb
-      lst_tmb$df$survey <- d1$survey
-      lst_tmb$df$survey_err <- d1$survey_err
-      lst_tmb$df$age_survey <- d1$age_survey
-      lst_tmb$df$age_catch <- d1$age_catch
-      lst_tmb$params$log_r_init <- p1$logRinit
-      lst_tmb$params$log_m_init <- p1$logMinit
-      lst_tmb$params$log_h <- p1$logh
-      lst_tmb$params$log_sd_surv <- p1$logSDsurv
-      lst_tmb$params$init_n <- p1$initN
-      lst_tmb$params$p_sel <- p1$PSEL
-      lst_tmb$params$f_0 <- p1$F0
+      class(lst_tmb$df$yrs) <- "integer"
+      #$lst_tmb$df$b <- lst_tmb$df$b %>% as.numeric()
+      #lst_tmb$df$flag_survey <- as.numeric(lst_tmb$df$flag_survey)
+      #lst_tmb$df$flag_catch <- as.numeric(lst_tmb$df$flag_catch)
+      if(class(lst_tmb$df$b)[1] == "matrix"){
+        lst_tmb$df$b <- lst_tmb$df$b %>% as.numeric()
+      }
+      if(class(d_tmp[[tmp_iter]]$b)[1] == "matrix"){
+        d_tmp[[tmp_iter]]$b <- d_tmp[[tmp_iter]]$b %>% as.numeric()
+      }
+      class(d_tmp[[tmp_iter]]$flag_survey) <- class(lst_tmb$df$flag_survey)
+      class(d_tmp[[tmp_iter]]$flag_catch) <- class(lst_tmb$df$flag_catch)
+      d_tmp[[tmp_iter]]$ss_survey[which(d_tmp[[tmp_iter]]$ss_survey == -1)] <- 0
+      class(d_tmp[[tmp_iter]]$ss_survey) <- class(lst_tmb$df$ss_survey)
       # ---------------------
-      #compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
-      #browser()
-    }
-    # TODO: Remove this whole `if` chunk once correct output has been verified with
-    # the original output
-    if(yr == yr_start){
-      d1 <- readRDS("original_mse_data/d_yr2.rds")
-      p1 <- readRDS("original_mse_data/p_yr2.rds")
-      # Compare this package input data with the data from the original
-      # If this line passes without causing as error, then the data and parameters are
-      # almost identical. They are within tiny tolerances as found in the
-      # compare_tmb_data() function. Still, this is not enough to compare output to the
-      # original and to get the same likelihoods and numbers- and biomasses-at-age.
-      # That is why the list elements below are temporarily being used in this version of the code.
-      lst_tmb$df$b <- lst_tmb$df$b %>% as.numeric()
-      lst_tmb$df$flag_survey <- as.numeric(lst_tmb$df$flag_survey)
-      lst_tmb$df$flag_catch <- as.numeric(lst_tmb$df$flag_catch)
-      lst_tmb$df$catch_obs <- d1$Catchobs
-      lst_tmb$df$wage_catch <- d1$wage_catch
-      lst_tmb$df$wage_survey <- d1$wage_survey
-      lst_tmb$df$wage_mid <- d1$wage_mid
-      lst_tmb$df$wage_ssb <- d1$wage_ssb
-      lst_tmb$df$survey <- d1$survey
-      lst_tmb$df$survey_err <- d1$survey_err
-      lst_tmb$df$age_survey <- d1$age_survey
-      lst_tmb$df$age_catch <- d1$age_catch
-      lst_tmb$params$log_m_init <- p1$logMinit
-      lst_tmb$params$log_h <- p1$logh
-      lst_tmb$params$log_sd_surv <- p1$logSDsurv
-      lst_tmb$params$init_n <- p1$initN
-      lst_tmb$params$p_sel <- p1$PSEL
-      lst_tmb$params$f_0 <- p1$F0
-      #compare_tmb_data(lst_tmb$df, d1, lst_tmb$params, p1)
+      # lst_tmb$df$catch_obs <- d_tmp[[tmp_iter]]$Catchobs
+      # lst_tmb$df$wage_catch <- d_tmp[[tmp_iter]]$wage_catch
+      # lst_tmb$df$wage_survey <- d_tmp[[tmp_iter]]$wage_survey
+      # lst_tmb$df$wage_mid <- d_tmp[[tmp_iter]]$wage_mid
+      # lst_tmb$df$wage_ssb <- d_tmp[[tmp_iter]]$wage_ssb
+      # lst_tmb$df$survey <- d_tmp[[tmp_iter]]$survey
+      # lst_tmb$df$survey_err <- d_tmp[[tmp_iter]]$survey_err
+      # lst_tmb$df$age_survey <- d_tmp[[tmp_iter]]$age_survey
+      # lst_tmb$df$age_catch <- d_tmp[[tmp_iter]]$age_catch
+      # lst_tmb$params$log_m_init <- p_tmp[[tmp_iter]]$logMinit
+      # lst_tmb$params$log_h <- p_tmp[[tmp_iter]]$logh
+      # lst_tmb$params$log_sd_surv <- p_tmp[[tmp_iter]]$logSDsurv
+      # lst_tmb$params$init_n <- p_tmp[[tmp_iter]]$initN
+      # lst_tmb$params$p_sel <- p_tmp[[tmp_iter]]$PSEL
+      # lst_tmb$params$f_0 <- p_tmp[[tmp_iter]]$F0
+      # ---------------------
+      tmp_iter <- tmp_iter + 1
     }
     # Evaluate the Objective function
     d <- lst_tmb$df
     p <- lst_tmb$params
-    browser()
-#if(yr_ind == 54) browser()
+    d_o <- d_tmp[as.character(yr)][[1]]
+    p_o <- p_tmp[as.character(yr)][[1]]
+
+    #compare_tmb_data_tol(d, d_o, p, p_o)
     obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
@@ -166,10 +156,7 @@ run_multiple_MSEs <- function(df = NULL,
         unlist() %>%
         `[`(!is.na(names(.)))
     }
-    browser()
-#if(yr_ind == 54) browser()
-
-#if(yr == 2019) browser()
+#browser()
 
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
@@ -196,8 +183,7 @@ run_multiple_MSEs <- function(df = NULL,
 
     report <- obj$report()
     pars <- extract_params_tmb(opt)
-#browser()
-#if(yr == 2019) browser()
+
     # if(yr == yr_end){
     #   rep <- sdreport(obj)
     #   sdrep <- summary(report)
@@ -221,7 +207,8 @@ run_multiple_MSEs <- function(df = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
-if(yr_ind == 54) browser()
+#browser()
+
     # Need to use map() here to keep names
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
@@ -229,22 +216,20 @@ if(yr_ind == 54) browser()
     # are being passed into this function. Double <<- is used here so that `df` is
     # in scope in the next iteration of the loop. Without that, `df` would be `NULL`
     # in the next simulation year.
-    df <<- update_om_data(df,
-                          sim_data,
-                          yr + 1,
-                          yr_ind + 1,
-                          yr_survey_sims,
-                          f_new,
-                          c_increase,
-                          m_increase,
-                          sel_change)
-#browser()
-    #if(yr == 2019) browser()
-
-    # if(yr == yr_last_non_sim){
-    #   df <<- update_om_data(df, wage_only = TRUE)
-    # }
-
+    message("Year before update_om_data() call is ", yr)
+    if(yr < yr_end){
+      # No need to call this in the final year as the loop is over
+      df <<- update_om_data(df,
+                            sim_data,
+                            yr + 1,
+                            yr_ind + 1,
+                            yr_survey_sims,
+                            f_new,
+                            c_increase,
+                            m_increase,
+                            sel_change,
+                            zero_rdevs = TRUE)
+    }
   })
 
 }
