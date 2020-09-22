@@ -101,8 +101,10 @@ run_year_loop_om <- function(df = NULL,
     if(df$move){
       n_surv <- n_surv %>%
         set_names(seq_len(length(n_surv))) %>%
-        bind_rows() %>%
-        mutate(sum = rowSums(.))
+        bind_rows() #%>%
+        #mutate(sum = rowSums(.))
+      # Take the sum of all the spaces (areas)
+      n_surv <- n_surv %>% apply(2, sum)
     }
 
     if(df$flag_survey[yr_ind] == 1){
@@ -110,30 +112,26 @@ run_year_loop_om <- function(df = NULL,
         set.seed(187)
         err <- rnorm(n = 1, mean = 0, sd = lst$surv_sd)
         # If the extra factor is not included the mean is > 1
-        surv <- exp(log(sum(n_surv  %>% pull(sum) * lst$surv_sel *
+        surv <- exp(log(sum(n_surv * lst$surv_sel *
                               lst$q * wage$survey)) + err)
       }else{
-        # Additional sum here so that all spaces are summed together before calculation is done for total
-        # number in the coastwide survey
-        surv <- sum(sum(n_surv %>% pull(sum)) * lst$surv_sel *
+        surv <- sum(n_surv * lst$surv_sel *
                       lst$q * wage$survey)
       }
       lst$survey[yr_ind] <<- surv
     }else{
       lst$survey[yr_ind] <<- 1
     }
-
-    n_tot_yrs <- sum(n_surv %>% pull(sum))
-    surv_tmp <- sum(n_tot_yrs * lst$surv_sel * lst$q)
+    surv_tmp <- sum(n_surv * lst$surv_sel * lst$q)
     age_1_ind <- which(df$ages == 1)
 
     if(df$flag_survey[yr_ind] == 1){
       lst$age_comps_surv[1:(df$age_max_age - 1), yr_ind] <<-
-        (n_tot_yrs[age_1_ind:(df$age_max_age)] *
+        (n_surv[age_1_ind:(df$age_max_age)] *
            lst$surv_sel[age_1_ind:(df$age_max_age)] * lst$q) / surv_tmp
 
       lst$age_comps_surv[df$age_max_age, yr_ind] <<-
-        sum(n_tot_yrs[(df$age_max_age + 1):df$n_age] *
+        sum(n_surv[(df$age_max_age + 1):df$n_age] *
               lst$surv_sel[(df$age_max_age + 1):df$n_age] * lst$q) / surv_tmp
     }else{
       lst$age_comps_surv[,yr_ind] <<- NA
@@ -141,18 +139,18 @@ run_year_loop_om <- function(df = NULL,
     #lst$age_comps_surv[is.na(lst$age_comps_surv)] <<- -1
 
     lst$surv_tot[yr_ind,] <<- map_dbl(seq_len(df$n_space), ~{
-      n_tot_yrs <- lst$n_save_age[,yr_ind, .x, df$survey_season]
-      lst$surv_tot[yr_ind, .x] <<- sum(n_tot_yrs *
+      n_surv <- lst$n_save_age[,yr_ind, .x, df$survey_season]
+      lst$surv_tot[yr_ind, .x] <<- sum(n_surv *
                                          lst$surv_sel * lst$q *
                                          exp(-m_surv_mul * lst$z_save[,yr_ind, .x, df$survey_season]))
     })
 
     # Calculate age comps for the survey by space
     surv_age_comps_tmp <- map(seq_len(df$n_space), ~{
-      c((n_tot_yrs[age_1_ind:(df$age_max_age)] *
+      c((n_surv[age_1_ind:(df$age_max_age)] *
          lst$surv_sel[age_1_ind:(df$age_max_age)] * lst$q) / lst$surv_tot[yr_ind, .x],
         # Plus group
-        sum(n_tot_yrs[(df$age_max_age + 1):df$n_age] *
+        sum(n_surv[(df$age_max_age + 1):df$n_age] *
               lst$surv_sel[(df$age_max_age + 1):df$n_age] * lst$q) / lst$surv_tot[yr_ind, .x])
     })
 
