@@ -34,9 +34,9 @@
 #' @export
 setup_mse_plot_objects <- function(results_dir = NULL,
                                    plotnames = NULL,
-                                   porder = NA,
+                                   porder = NULL,
                                    ...){
-  stopifnot(!is.null(results_dir))
+  verify_argument(results_dir, "character", 1)
 
   fls <- dir(results_dir)
   fls <- fls[grep("\\.rds", fls)]
@@ -44,19 +44,40 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     stop("There are no .rds files in the '", results_dir, "' directory",
          call. = FALSE)
   }
-  fls <- fls[grep("MSE", fls)]
   fls <- map_chr(fls, ~{
     file.path(results_dir, .x)
   })
-  ls_plots <- map(fls, ~{
+  mse_om_output <- map(fls, ~{
     readRDS(.x)
   })
+  # The output of this (mse_output) is a list of lists of MSE output, each list element is a list
+  # of the number of runs elements, and each of those sub-lists contains an entry for each simulated year
+  # check this using str(mse_output, 3)
+  mse_output <- map(mse_om_output, ~{
+    map(.x, ~{
+      .x[[1]]
+    })
+  })
 
-  # Use the plot names provided to the function. If those are `NULL`,
+  # check this using str(om_output, 2)
+  om_output <- map(mse_om_output, ~{
+    map(.x, ~{
+      .x[[2]]
+    })
+  })
+
+  # check this using str(em_output, 3)
+  em_output <- map(mse_om_output, ~{
+    map(.x, ~{
+      .x[[3]]
+    })
+  })
+
+  # Use the plot names provided to the function. If those are NULL,
   # use the plot names set up when running the MSE scenarios. If any of those
-  # are `NULL`, use the file name associated with the run
+  # are NULL, use the file name associated with the run
   if(is.null(plotnames[1])){
-    plotnames <- map_chr(ls_plots, ~{
+    plotnames <- map_chr(mse_om_output, ~{
       if(is.null(attributes(.x)$plotname)){
         plotnames <- map_chr(fls, ~{
           gsub(".rds$", "", basename(.x))
@@ -67,33 +88,39 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     })
   }
 
-  stopifnot(length(ls_plots) == length(plotnames))
-  seasons_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$season)
-  spaces_in_output <- as.numeric(attr(ls_plots[[1]][[1]]$Catch, "dimnames")$space)
+  stopifnot(length(mse_om_output) == length(plotnames))
+  seasons_in_output <- map(mse_output, ~{
+    map_dbl(.x, ~{
+      .x[[1]]$n_season
+    })
+  })
+  spaces_in_output <- map(mse_output, ~{
+    map_dbl(.x, ~{
+      .x[[1]]$n_space
+    })
+  })
 
-  # Save these in future runs - calculates SSB0
-  df <- load_data_om(n_season = length(seasons_in_output),
-                     n_space = length(spaces_in_output))
-  sim_data <- run_om(df)
-  names(ls_plots) <- plotnames
+  names(mse_output) <- plotnames
 
-  if(all(is.na(porder))){
+  if(is.null(porder[1])){
     porder <- 1:length(plotnames)
   }
-  stopifnot(length(porder) == length(ls_plots))
+  stopifnot(length(porder) == length(mse_output))
 
   #cols <- brewer.pal(6, "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
   cols <- pnw_palette("Starfish", n = length(plotnames), type = "discrete")
-  lst_indicators <- map2(ls_plots, plotnames, function(.x, .y, ...){
-    tmp <- hake_objectives(.x, sim_data$SSB0, ...)
+  # To view structure and names of lst_indicators: str(lst_indicators, 1) and str(lst_indicators[[1]], 1)
+  # To see objectives probability table for the first scenario: lst_indicators[[1]]$info
+  lst_indicators <- map2(mse_output, om_output, function(.x, .y, ...){
+    tmp <- hake_objectives(.x, .y, ...)
     tmp$info <- tmp$info %>%
-      mutate(HCR = .y)
+      mutate(HCR = names(.x))
     tmp$vtac_seas <- tmp$vtac_seas %>%
-      mutate(HCR = .y)
+      mutate(HCR = names(.x))
     tmp
   }, ...)
-
+  browser()
   df_all_indicators <- map_df(lst_indicators, ~{
     .x$info
   })
@@ -132,7 +159,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
 
   df_violin <- map_df(seq_along(ls_plots), ~{
     tmp <- hake_violin(ls_plots[[.x]],
-                       sim_data$SSB0,
+                       sim_data$ssb_0,
                        move = 1)
     tmp$HCR <- plotnames[.x]
     tmp

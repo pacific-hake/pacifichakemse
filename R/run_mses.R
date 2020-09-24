@@ -169,6 +169,8 @@ run_mses <- function(ss_model_output_dir = NULL,
 
       if(is.null(multiple_season_data)){
         tmp <- run_multiple_MSEs(
+          results_dir = results_dir, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
+          file_name = .x, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
           df = df,
           ss_model = ss_model,
           om_objs = om_objs,

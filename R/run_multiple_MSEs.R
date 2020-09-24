@@ -1,13 +1,16 @@
 #' Run/Iterate the Pacific hake MSE
 #'
-#' @param n_sim_yrs Number of years to simulate
+#' @param results_dir Directory in which the OM output will be stored
+#' @param file_name The name of the file in which the MSE output was stored. This will be prepended with 'om_'
+#' for the OM used in this MSE. The actual MSE results are stored by the function calling this one, [run_mses()]
+#' @param df Data frame of parameters as output by [load_data_om()]
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' and loaded by [load_ss_model_from_rds()]
 #' @param om_objs Operating model objects as created by [setup_blank_om_objects()]
 #' @param random_seed Seed for running the OM if it needs to be run (if `sim_data`
 #' is `NULL`)
+#' @param n_sim_yrs Number of years to simulate
 #' @param tac Which harvest control rule should the model use
-#' @param df Data frame of parameters as output by [load_data_om()]
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
@@ -20,7 +23,9 @@
 #' @importFrom stats rnorm nlminb runif predict lm median optim setNames
 #' @importFrom utils read.csv read.table
 #' @export
-run_multiple_MSEs <- function(df = NULL,
+run_multiple_MSEs <- function(results_dir = NULL,
+                              file_name = NULL,
+                              df = NULL,
                               ss_model = NULL,
                               om_objs = NULL,
                               random_seed = 12345,
@@ -31,6 +36,8 @@ run_multiple_MSEs <- function(df = NULL,
                               sel_change = 0,
                               f_sim = NULL,
                               ...){
+  verify_argument(results_dir, "character", 1)
+  verify_argument(file_name, "character", 1)
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
   verify_argument(om_objs, "list")
@@ -75,11 +82,24 @@ run_multiple_MSEs <- function(df = NULL,
   d_tmp <- list()
   p_tmp <- list()
   tmp_iter <- 1
-  map(c(yr_last_non_sim, yr_sims), function(yr = .x){
+
+  # Save Estimation Model outputs in lists. iter is used to keep track of the positions for these
+  em_output <- list(ssb_save = vector(mode = "list", length = length(yr_sims)),
+                    r_save = vector(mode = "list", length = length(yr_sims)),
+                    f40_save = vector(),
+                    catch_save = vector(mode = "list", length = length(yr_sims)))
+  em_iter <- 1
+
+  mse_run <- map(c(yr_last_non_sim, yr_sims), function(yr = .x){
     yr_ind <- which(yr == yr_all)
 
     # Run the Operating Model (OM)
-    sim_data <- run_om(df, om_objs, ...)
+    sim_data <<- run_om(df, om_objs, ...)
+    # Save the OM data the first time through for extraction later
+    #if(yr == yr_end){
+      #om_file_name <- file.path(results_dir, paste0("om_", file_name))
+      #saveRDS(sim_data, om_file_name)
+    #}
 
     # Create the data for the Estimation Model (EM)
     if(yr >= yr_start){
@@ -212,6 +232,15 @@ run_multiple_MSEs <- function(df = NULL,
     # Need to use map() here to keep names
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
+    # Save EM outputs
+    if(yr >= yr_start){
+      em_output$ssb_save[[em_iter]] <<- report$SSB
+      em_output$r_save[[em_iter]] <<- report$N_beg[1,]
+      em_output$f40_save[em_iter] <<- f_new[[2]]
+      em_output$catch_save[[em_iter]] <<- report$Catch
+      em_iter <<- em_iter + 1
+    }
+
     # Update the OM data for the next simulation year in the loop. Note reference points
     # are being passed into this function. Double <<- is used here so that `df` is
     # in scope in the next iteration of the loop. Without that, `df` would be `NULL`
@@ -229,7 +258,12 @@ run_multiple_MSEs <- function(df = NULL,
                             m_increase,
                             sel_change,
                             zero_rdevs = TRUE)
+    }else{
+      NA
     }
   })
-
+  # Removes an NA entry at the end which is caused by the loop having one more year than
+  # actual simulated years (see NA a few lines above). Making it NULL automatically removes it from the list.
+  mse_run[is.na(mse_run)] <- NULL
+  list(mse_run, sim_data, em_output)
 }

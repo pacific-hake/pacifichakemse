@@ -1,7 +1,7 @@
 #' Hake objectives (TODO: Improve docs on this function)
 #'
 #' @param lst list of MSE results
-#' @param ssb0 unfished biomass from OM
+#' @param sim_data simulated data from the OM
 #' @param short_term_yrs Years for short term plots
 #' @param long_term_yrs Years greater than this will be in long term plots
 #' @param can.prop Proportion of the coastwide TAC that Canada receives
@@ -16,73 +16,91 @@
 #' @importFrom stats quantile
 #' @export
 hake_objectives <- function(lst = NULL,
-                            ssb0 = NULL,
-                            short_term_yrs = 2018:2027,
-                            long_term_yrs = 2027,
+                            sim_data = NULL,
+                            run_num = 1,
+                            short_term_yrs = 2018:2022,
+                            long_term_yrs = 2022,
                             can.prop = 0.2488,
                             us.prop = 0.7612,
                             quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
-                            catch_multiplier = 1e-6){
-  stopifnot(!is.null(lst))
-  stopifnot(!is.null(ssb0))
+                            catch_multiplier = 1e-6,
+                            ...){
+  verify_argument(lst, "list")
+  verify_argument(sim_data, "list")
+  verify_argument(run_num, "numeric")
+  verify_argument(short_term_yrs, c("integer", "numeric"))
+  verify_argument(long_term_yrs, c("integer", "numeric"))
+  verify_argument(can.prop,  "numeric")
+  verify_argument(us.prop,  "numeric")
+  verify_argument(quants,  "numeric")
+  verify_argument(catch_multiplier,  "numeric")
 
-  yrs <- as.numeric(attributes(lst[[1]]$Catch)$dimnames$year)
+  if(run_num > length(lst)){
+    stop("run_num (", run_num, ") is greater than the number of runs completed (", length(lst), ")",
+         call. = FALSE)
+  }
+  yrs <- as.numeric(names(sim_data[[1]]$ssb[,1]))
   min_yr <- min(yrs)
   nyrs <- length(yrs)
-  if(nyrs == 1){
-    nyrs <- nrow(lst[[1]]$Catch)
-  }
   simyears <- nyrs - (length(min_yr:short_term_yrs[1])) + 1
   nruns <- length(lst)
+  lst_run <- lst[[run_num]]
 
-
-
-
-
-  ssb_plot <- map2(lst, seq_along(lst), ~{
+  # This is all OM output
+  ssb_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               ssb = rowSums(.x$SSB) / sum(ssb0),
+               ssb = rowSums(.x$ssb) / sum(.x$ssb_0),
                run = .y)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
 
   # Vulnerable biomass at mid-year start of season 3 for each country
-  v_ca_plot <- map2(lst, seq_along(lst), ~{
+  v_ca_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               v = .x$V[,1,3],
+               v = .x$v_save[,1,3],
                run = .y)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
 
-  v_us_plot <- map2(lst, seq_along(lst), ~{
+  v_us_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               v = .x$V[,2,3],
+               v = .x$v_save[,2,3],
                run = .y)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
 
-  catch_plot <- map2(lst, seq_along(lst), ~{
-    ct <- apply(.x$Catch, MARGIN = 2, FUN = sum)
+  catch_plot <- map2(sim_data, seq_along(sim_data), ~{
+    ct <- apply(.x$catch_save_age, MARGIN = 2, FUN = sum)
     if(length(ct) == 1){
       data.frame(year = yrs,
-                 catch = .x$Catch,
+                 catch = .x$catch_save_age,
                  run = .y)
     }else{
       data.frame(year = yrs,
                  catch = ct,
                  run = .y)
     }
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
 
-  quota_tot <- map2(lst, seq_along(lst), ~{
-    quot <- apply(.x$Catch.quota, MARGIN = 1, FUN = sum)
+  quota_tot <- map2(sim_data, seq_along(sim_data), ~{
+    quot <- apply(.x$catch_quota, MARGIN = 1, FUN = sum)
     if(length(quot) == 1){
       data.frame(year = yrs,
-                 catch = .x$Catch.quota,
+                 catch = .x$catch_quota,
                  run = .y)
     }else{
       data.frame(year = yrs,
                  catch = quot,
                  run = .y)
     }
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
 
   quota_plot <- map2(list(quota_tot), list(catch_plot), ~{
     .x %>%
@@ -91,27 +109,34 @@ hake_objectives <- function(lst = NULL,
       select(year, quota_frac, run)
   }) %>% map_df(~{.x})
 
-  quota_us_tot <- map2(lst, seq_along(lst), ~{
+  quota_us_tot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               quota = rowSums(.x$Catch.quota[,2,]),
+               quota = rowSums(.x$catch_quota[,2,]),
                run = .y)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
 
-  quota_ca_tot <- map2(lst, seq_along(lst), ~{
+  quota_ca_tot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               quota = rowSums(.x$Catch.quota[,1,]),
+               quota = rowSums(.x$catch_quota[,1,]),
                run = .y)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
 
-  catch_area <- map2(lst, seq_along(lst), ~{
+  catch_area <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               area = apply(.x$Catch, MARGIN = c(2, 3), FUN = sum),
+               area = apply(.x$catch_save_age, MARGIN = c(2, 3), FUN = sum),
                run = .y)
-  }) %>% map_df(~{.x}) %>%
+  }) %>%
+    map_df(~{.x}) %>%
     transmute(year,
               ca = area.1,
               us = area.2,
-              run)
+              run) %>%
+    as_tibble()
+
   catch_us_tot <- catch_area %>%
     transmute(year, catch = us, run)
   catch_ca_tot <- catch_area %>%
@@ -122,34 +147,40 @@ hake_objectives <- function(lst = NULL,
       left_join(.y, by = c("year", "run")) %>%
       mutate(v_tac = v / catch) %>%
       select(year, v_tac, run)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x})
 
   vtac_ca <- map2(list(v_us_plot), list(catch_ca_tot), ~{
     .x %>%
       left_join(.y, by = c("year", "run")) %>%
       mutate(v_tac = v / catch) %>%
       select(year, v_tac, run)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x})
 
-  vtac_us_seas <- map2(lst, seq_along(lst), ~{
-    ctmp <- colSums(.x$Catch)
+  vtac_us_seas <- map2(sim_data, seq_along(sim_data), ~{
+    ctmp <- colSums(.x$catch_save_age)
     data.frame(year = yrs,
-               v_tac_sp = ctmp[, 2, 2] / .x$V[, 2, 2],
-               v_tac_su = ctmp[, 2, 3] / .x$V[, 2, 3],
-               v_tac_fa = ctmp[, 2, 4] / .x$V[, 2, 4],
+               v_tac_sp = ctmp[, 2, 2] / .x$v_save[, 2, 2],
+               v_tac_su = ctmp[, 2, 3] / .x$v_save[, 2, 3],
+               v_tac_fa = ctmp[, 2, 4] / .x$v_save[, 2, 4],
                run = .y)
-  }) %>% map_df(~{.x}) %>%
-    mutate(country = "US")
+  }) %>%
+    map_df(~{.x}) %>%
+    mutate(country = "US") %>%
+    as_tibble()
 
-  vtac_ca_seas <- map2(lst, seq_along(lst), ~{
-    ctmp <- colSums(.x$Catch)
+  vtac_ca_seas <- map2(sim_data, seq_along(sim_data), ~{
+    ctmp <- colSums(.x$catch_save_age)
     data.frame(year = yrs,
-               v_tac_sp = ctmp[, 1, 2] / .x$V[, 1, 2],
-               v_tac_su = ctmp[, 1, 3] / .x$V[, 1, 3],
-               v_tac_fa = ctmp[, 1, 4] / .x$V[, 1, 4],
+               v_tac_sp = ctmp[, 1, 2] / .x$v_save[, 1, 2],
+               v_tac_su = ctmp[, 1, 3] / .x$v_save[, 1, 3],
+               v_tac_fa = ctmp[, 1, 4] / .x$v_save[, 1, 4],
                run = .y)
-  }) %>% map_df(~{.x}) %>%
-    mutate(country = "Canada")
+  }) %>%
+    map_df(~{.x}) %>%
+    mutate(country = "Canada") %>%
+    as_tibble()
 
   vtac_seas <- bind_rows(vtac_ca_seas, vtac_us_seas)
 
@@ -157,11 +188,12 @@ hake_objectives <- function(lst = NULL,
     .x %>%
       group_by(run) %>%
       mutate(catch_lag = lag(catch, 1)) %>%
-      mutate(aav = abs(catch - catch_lag) / n()) %>%
+      mutate(aav = abs(catch_lag - catch) / catch_lag) %>%
       ungroup() %>%
       filter(!is.na(aav)) %>%
       select(year, aav, run)
-  }) %>% map_df(~{.x})
+  }) %>%
+    map_df(~{.x})
 
   # Calculate quantiles
   ssb_yrs <- sort(unique(ssb_plot$year))
@@ -304,7 +336,7 @@ hake_objectives <- function(lst = NULL,
   # Calculate the median number of closed years
   nclosed <- map_int(unique(ssb_future$run), ~{
     tmp <- ssb_future %>% filter(run == .x)
-    length(which(tmp$SSB < 0.1))
+    length(which(tmp$ssb < 0.1))
   })
 
   # Create a table with all the indicator data
