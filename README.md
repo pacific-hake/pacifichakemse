@@ -1,11 +1,9 @@
 # PacifichakeMSE
 
 [![Travis build status](https://travis-ci.org/cgrandin/PacifichakeMSE.svg?branch=master)](https://travis-ci.org/cgrandin/PacifichakeMSE)
-
 [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-
 [![Coverage status](https://codecov.io/gh/cgrandin/PacifichakeMSE/branch/master/graph/badge.svg)](https://codecov.io/github/cgrandin/PacifichakeMSE?branch=master)
 
 Management Strategy Evaluation (MSE) for Pacific hake
