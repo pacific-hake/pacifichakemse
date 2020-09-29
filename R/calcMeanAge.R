@@ -3,32 +3,34 @@
 #' @param agemat matrix of ages
 #' @param maxage maximum age to include in the calculation
 #'
-#' @return A vector of the mean ages
+#' @return A vector of the mean ages by year, with names attribute as year names (character)
 #' @export
-calcMeanAge <- function(agemat, maxage){
+calc_mean_age <- function(agemat = NULL,
+                          maxage = NULL){
+
+  verify_argument(agemat, "matrix")
+  verify_argument(maxage, c("numeric", "integer"), 1)
+
+  n_ages_agemat <- nrow(agemat)
+  stopifnot(n_ages_agemat >= maxage)
   age <- 1:maxage
-  dims <- dim(agemat)
-  ## Adjust the agematrix to fit the maxage
-  if(dims[1] == maxage){
-    agecalc <- agemat
-  }else{
-    agecalc <- matrix(NA, maxage, dims[2])
-    agecalc[1:(maxage-1),] <- agemat[1:(maxage-1),]
-    agecalc[maxage,] <- colSums(agemat[maxage:dims[1],])
-    agecalc <- agecalc/colSums(agecalc)
+
+  if(n_ages_agemat > maxage){
+    # Calculate plus group
+    agemat[maxage, ] <- colSums(agemat[maxage:n_ages_agemat, ], na.rm = TRUE)
+  }
+  agemat <- agemat[1:maxage, ]
+  agemat <- apply(agemat, 2, function(x){x / sum(x)})
+  agemat <- agemat %>% as_tibble()
+
+  if(all(colSums(agemat) != 1)){
+    agemat <- map_df(agemat, ~{
+      .x / sum(.x)
+    })
   }
 
-  if(all(colSums(agecalc) != 1)){
-    for(i in 1:dims[2]){
-    agecalc[,i] <- agecalc[,i]/sum(agecalc[,i])
-    }
-  }
-
-  agemean <- rep(0,dims[2])
-
-  for(i in 1:dims[2]){
-    agemean[i] <- sum(age*agecalc[,i])
-  }
-
-  return(agemean)
+  # Return vector of mean ages by year
+  map_dbl(agemat, ~{
+    sum(age * .x)
+  })
 }
