@@ -65,6 +65,75 @@ calc_quantiles <- function(df = NULL,
   out
 }
 
+#' Calculate quantiles across groups for a given column
+#'
+#' @description Calculate quantiles across groups for a given column
+#'
+#' @rdname calc_quantiles
+#'
+#' @param df A [data.frame] with columns with names given by `grp_col` and `col`
+#' @param grp_col The column name to use for grouping the data
+#' @param col The column name to use as values to calculate quantiles for
+#' @param probs A vector of quantiles to pass to [stats::quantile()]
+#' @param include_mean If TRUE, include the mean in the output
+#'
+#' @return A [data.frame] containing the quantile values with one row per group represented by `grp_col`
+#' @importFrom rlang sym
+#' @export
+#'
+#' @examples
+#' library(tibble)
+#' library(dplyr)
+#' library(purrr)
+#' pq <- tribble(
+#'   ~year, ~grp, ~val,
+#'   2000,    1,  2.1,
+#'   2001,    1,  3.4,
+#'   2002,    1,  4.5,
+#'   2003,    1,  5.6,
+#'   2004,    1,  6.7,
+#'   2000,    2,  3.1,
+#'   2001,    2,  4.4,
+#'   2002,    2,  5.5,
+#'   2003,    2,  6.6,
+#'   2004,    2,  8.7,
+#'   2000,    3, 13.1,
+#'   2001,    3, 14.4,
+#'   2002,    3, 15.5,
+#'   2003,    3, 16.6,
+#'   2004,    3, 18.7)
+#'
+#' probs <- c(0.05, 0.25, 0.5, 0.75, 0.95)
+#'
+#' j <- calc_quantiles_by_group(pq,
+#'                              grp_col = "year",
+#'                              col = "val",
+#'                              probs = probs)
+calc_quantiles_by_group <- function(df = NULL,
+                                    grp_col = NULL,
+                                    col = NULL,
+                                    probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
+                                    include_mean = TRUE){
+  stopifnot(!is.null(df))
+  stopifnot(!is.null(grp_col))
+  stopifnot(!is.null(col))
+  stopifnot(grp_col %in% names(df))
+  stopifnot(col %in% names(df))
+  stopifnot(class(df[[col]]) == "numeric")
+  grp_col_sym <- sym(grp_col)
+  col_sym <- sym(col)
+  stopifnot(!is.null(probs))
+  grp_vals <- unique(df[[grp_col]])
+
+  df %>%
+    group_by(!!grp_col_sym) %>%
+    group_map(~ calc_quantiles(.x, col = col, probs = probs, include_mean = include_mean)) %>%
+    map_df(~{.x}) %>%
+    mutate(!!grp_col_sym := grp_vals) %>%
+    select(!!grp_col_sym, everything()) %>%
+    ungroup()
+}
+
 #' Calculate quantiles for the mean values (across years) of each value in
 #' the group given by `grp_col` for a term of years
 #'
@@ -163,7 +232,7 @@ calc_term_quantiles <- function(df = NULL,
 #'
 #' @param vec The aggregated vector of data. This must be the same length as `run_vec`
 #' and `yr_vec`
-#' @param col The name of the column to create in teh new data frame
+#' @param col The name of the column to create in the new data frame
 #' @param yr_vec The vector of years to place in the [data.frame]. This must be the
 #' same length as `vec`
 #' @param country The name for the country. If `NULL`, no country column will be added
