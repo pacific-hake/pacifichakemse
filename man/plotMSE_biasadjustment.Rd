@@ -12,7 +12,7 @@ plotMSE_biasadjustment(results, plotnames = NA, plotexp = FALSE)
 \item{plotnames}{Names for the plots}
 
 \item{plotexp}{Logical. If TRUE, save the two plots into files separately,
-If FALSE, plot them using \code{\link[gridExtra:grid.arrange]{gridExtra::grid.arrange()}}}
+If FALSE, plot them using \code{\link[gridExtra:arrangeGrob]{gridExtra::grid.arrange()}}}
 }
 \value{
 A list of two \link{ggplot2} plots

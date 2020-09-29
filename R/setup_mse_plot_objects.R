@@ -120,16 +120,22 @@ setup_mse_plot_objects <- function(results_dir = NULL,
       mutate(HCR = names(.x))
     tmp
   }, ...)
-  browser()
-  df_all_indicators <- map_df(lst_indicators, ~{
-    .x$info
-  })
-  df_violin_indicators <- map_df(lst_indicators, ~{
-    .x$vtac_seas
+
+  df_all_indicators <- map2(lst_indicators, 1:length(lst_indicators), ~{
+    .x$info %>%
+      mutate(hcr = names(lst_indicators)[.y])
   }) %>%
-    mutate(HCR = factor(HCR, levels = names(lst_indicators)[porder]))
+    map_df(~{.x}) %>%
+    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
+
+  df_violin_indicators <-  map2(lst_indicators, 1:length(lst_indicators), ~{
+    .x$vtac_seas %>%
+      mutate(hcr = names(lst_indicators)[.y])
+  }) %>%
+    map_df(~{.x}) %>%
+    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
   violin_names <- names(df_violin_indicators)
-  violin_last_word <- str_extract(violin_names, "\\w+$")
+  violin_last_word <- gsub("v_tac_", "", violin_names)
   season_inds <- grep("sp|su|fa", violin_last_word)
   month_strings <- ifelse(violin_last_word == "sp",
                           "Apr-Jun",
@@ -144,7 +150,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
 
   df_ssb_catch_indicators <- df_all_indicators %>%
     filter(indicator %in% indicators[1:cutoff_ind]) %>%
-    mutate(HCR = factor(HCR, levels = names(lst_indicators)[porder]))
+    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
 
   df_country_season_indicators <- df_all_indicators %>%
     filter(indicator %in% indicators[(cutoff_ind + 1):length(indicators)]) %>%
@@ -155,33 +161,38 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                            ifelse(season == "sum",
                                   "July-Sept",
                                   "Oct-Dec"))) %>%
-    mutate(HCR = factor(HCR, levels = names(lst_indicators)[porder]))
+    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
 
-  df_violin <- map_df(seq_along(ls_plots), ~{
-    tmp <- hake_violin(ls_plots[[.x]],
-                       sim_data$ssb_0,
-                       move = 1)
-    tmp$HCR <- plotnames[.x]
+  df_violin <- map2(lst_indicators, seq_along(lst_indicators), ~{
+    tmp <- list(.x$yrs_quota_met, # years between 0.1 and 0.4
+                .x$ssb_10,
+                .x$ssb_40,
+                .x$catch_short_term,
+                .x$catch_long_term,
+                .x$aav_plot)
+    tmp[[1]]$hcr <- plotnames[.y]
     tmp
-  }) %>%
-    mutate(HCR = factor(HCR, levels = plotnames[porder]))
+  })
 
-  mse_out_data <- map(ls_plots, function(.x, ...){
-    tmp <- df_lists(.x, max_yr = max(df$years), ...)
-  }, ...)
+  # mse_out_data <- map(ls_plots, function(.x, ...){
+  #   tmp <- df_lists(.x, max_yr = max(df$years), ...)
+  # }, ...)
 
   # Bind rows of all list[[3]] data frames into single data frame, and order it by scenario
   # `lst` is a list of the outputs from [df_lists()], `val` is the name of the data frame
   merge_dfs_from_scenarios <- function(lst, val){
-    map_df(lst, ~{
-      .x[[3]][[val]]
+    map2(lst, seq_along(lst), ~{
+      .x[[val]] %>%
+        mutate(scenario = plotnames[.y])
     }) %>%
-      mutate(run = factor(run, levels = plotnames[porder]))
+      map_df(~{.x}) %>%
+      mutate(scenario = factor(scenario, levels = plotnames[porder]))
   }
+  browser()
 
-  mse_values_agg <- list(ssb_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_quant"),
-                         ssb_mid_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_mid_quant"),
-                         ssb_tot_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_tot_quant"),
+  mse_values_agg <- list(ssb_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_plotquant"),
+                         ssb_mid_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_mid_plotquant"),
+                         #ssb_tot_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_tot_quant"),
                          catch_quant = merge_dfs_from_scenarios(mse_out_data, "catch_quant"),
                          amc_quant = merge_dfs_from_scenarios(mse_out_data, "amc_quant"),
                          ams_quant = merge_dfs_from_scenarios(mse_out_data, "ams_quant"),

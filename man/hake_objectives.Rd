@@ -6,19 +6,21 @@
 \usage{
 hake_objectives(
   lst = NULL,
-  ssb0 = NULL,
-  short_term_yrs = 2018:2027,
-  long_term_yrs = 2027,
+  sim_data = NULL,
+  run_num = 1,
+  short_term_yrs = 2018:2022,
+  long_term_yrs = 2022,
   can.prop = 0.2488,
   us.prop = 0.7612,
   quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
-  catch_multiplier = 1e-06
+  catch_multiplier = 1e-06,
+  ...
 )
 }
 \arguments{
 \item{lst}{list of MSE results}
 
-\item{ssb0}{unfished biomass from OM}
+\item{sim_data}{simulated data from the OM}
 
 \item{short_term_yrs}{Years for short term plots}
 

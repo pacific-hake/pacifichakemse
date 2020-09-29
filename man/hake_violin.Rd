@@ -4,14 +4,16 @@
 \alias{hake_violin}
 \title{Violin plot of the MSE results}
 \usage{
-hake_violin(ls.MSE, SSB0, move = NA)
+hake_violin(mse_output, om_output, lst_indicators, move = NA)
 }
 \arguments{
-\item{ls.MSE}{list of MSE results}
+\item{mse_output}{MSE output of a single scenario in the format enforced in \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
-\item{SSB0}{Operating Model Spawning Stock B0 value}
+\item{om_output}{OM output of a single scenario in the format enforced in \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
-\item{move}{is movement included?}
+\item{lst_indicators}{Objectives output of a single scenario in the format enforced in \code{\link[=hake_objectives]{hake_objectives()}}}
+
+\item{move}{Logical. If TRUE, stock movement is included}
 }
 \value{
 A \link{data.frame} with columns SSB, SSB.10, SSB.40, Catch.short,

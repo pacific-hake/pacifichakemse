@@ -18,7 +18,7 @@ conv_vec_to_mse_df(
 \item{vec}{The aggregated vector of data. This must be the same length as \code{run_vec}
 and \code{yr_vec}}
 
-\item{col}{The name of the column to create in teh new data frame}
+\item{col}{The name of the column to create in the new data frame}
 
 \item{yr_vec}{The vector of years to place in the \link{data.frame}. This must be the
 same length as \code{vec}}

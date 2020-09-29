@@ -46,8 +46,10 @@ hake_objectives <- function(lst = NULL,
   nruns <- length(lst)
   lst_run <- lst[[run_num]]
 
-  # This is all OM output
-  ssb_plot <- map2(sim_data, seq_along(sim_data), ~{
+  out <- list()
+
+  # ---------------------------------------------------------------------------
+  out$ssb_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
                ssb = rowSums(.x$ssb) / sum(.x$ssb_0),
                run = .y)
@@ -55,8 +57,35 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
+  out$ssb_mid_plot <- map2(sim_data, seq_along(sim_data), ~{
+    data.frame(year = yrs,
+               ssb = rowSums(.x$ssb_all[, , 3]) / sum(.x$ssb_0),
+               run = .y)
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
+
+  # Calculate SSB quantiles
+  ssb_yrs <- sort(unique(out$ssb_plot$year))
+  out$ssb_plotquant <- out$ssb_plot %>%
+    group_by(year) %>%
+    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = ssb_yrs) %>%
+    select(year, everything())
+
+  ssb_yrs <- sort(unique(out$ssb_mid_plot$year))
+  out$ssb_mid_plotquant <- out$ssb_mid_plot %>%
+    group_by(year) %>%
+    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
+    map_df(~{.x}) %>%
+    mutate(year = ssb_yrs) %>%
+    select(year, everything())
+
+  # ---------------------------------------------------------------------------
+
   # Vulnerable biomass at mid-year start of season 3 for each country
-  v_ca_plot <- map2(sim_data, seq_along(sim_data), ~{
+  out$v_ca_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
                v = .x$v_save[,1,3],
                run = .y)
@@ -64,7 +93,7 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
-  v_us_plot <- map2(sim_data, seq_along(sim_data), ~{
+  out$v_us_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
                v = .x$v_save[,2,3],
                run = .y)
@@ -72,7 +101,7 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
-  catch_plot <- map2(sim_data, seq_along(sim_data), ~{
+  out$catch_plot <- map2(sim_data, seq_along(sim_data), ~{
     ct <- apply(.x$catch_save_age, MARGIN = 2, FUN = sum)
     if(length(ct) == 1){
       data.frame(year = yrs,
@@ -87,7 +116,118 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
-  quota_tot <- map2(sim_data, seq_along(sim_data), ~{
+  #----------- Calculate quantiles by year -------------------
+  out$catch_quant <- map2(sim_data, 1:nruns,~{
+    tmp <- .x$catch %>% as_tibble() %>%
+      mutate(year = yrs) %>%
+      mutate(run = .y)
+  })
+  names(out$catch_quant) <- 1:nruns
+  out$catch_quant <- out$catch_quant %>%
+    map_dfr(~{.x}) %>%
+    select(year, run, V1) %>%
+    rename(val = V1)
+
+  out$catch_quant <- calc_quantiles_by_group(out$catch_quant,
+                                             "year",
+                                             "val",
+                                             probs = quants)
+  #-----------------------------------------------------------
+
+  # Need to check generation of age_comps_catch_space because there are no age 15's they are NA!!
+  # sim_data[[1]]$age_comps_catch_space[,,1]
+  yrs <- rownames(sim_data[[1]]$ssb)
+  conv_am <- function(space, sim_age_comp_type = "catch", mse_dat = lst){
+    if(sim_age_comp_type != "catch" && sim_age_comp_type != "surv"){
+      stop("sim_age_comp_type must be catch or surv", call. = FALSE)
+    }
+    if(space != 0 && space != 1 && space != 2){
+      stop("space must be 0, 1, or 2", call. = FALSE)
+    }
+    x <- map_df(1:nruns, ~{
+      if(sim_age_comp_type == "catch"){
+        if(space == 1){
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], mse_dat[[.x]][[1]]$age_max_age)
+        }else if(space == 2){
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,2], mse_dat[[.x]][[1]]$age_max_age)
+        }else{
+          calc_mean_age(sim_data[[.x]]$age_comps_catch, mse_dat[[.x]][[1]]$age_max_age)
+        }
+      }else{
+        if(space == 1){
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,1], mse_dat[[.x]][[1]]$age_max_age)
+        }else if(space == 2){
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,2], mse_dat[[.x]][[1]]$age_max_age)
+        }else{
+          calc_mean_age(sim_data[[.x]]$age_comps_surv, mse_dat[[.x]][[1]]$age_max_age)
+        }
+      }
+    }) %>%
+      t() %>%
+      as_tibble() %>%
+      mutate(yr = yrs)
+    names(x) <- c(1:nruns, "yr")
+    x <- x %>%
+      select(yr, everything())
+    x
+  }
+
+  #----------------------------------------------------------------------------
+  out$amc_tot <- conv_am(0)
+  out$amc_tot_quant <- melt(out$amc_tot, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$amc_tot_quant <- calc_quantiles_by_group(out$amc_tot_quant,
+                                               "year",
+                                               "val",
+                                               probs = quants)
+  #----------------------------------------------------------------------------
+  out$amc_can <- conv_am(1)
+  out$amc_can_quant <- melt(out$amc_can, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$amc_can_quant <- calc_quantiles_by_group(out$amc_can_quant,
+                                               "year",
+                                               "val",
+                                               probs = quants)
+  #----------------------------------------------------------------------------
+  out$amc_us <- conv_am(2)
+  out$amc_us_quant <- melt(out$amc_us, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$amc_us_quant <- calc_quantiles_by_group(out$amc_us_quant,
+                                              "year",
+                                              "val",
+                                              probs = quants)
+  #----------------------------------------------------------------------------
+  out$ams_tot <- conv_am(0, "surv")
+  out$ams_tot_quant <- melt(out$ams_tot, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$ams_tot_quant <- calc_quantiles_by_group(out$ams_tot_quant,
+                                               "year",
+                                               "val",
+                                               probs = quants)
+  #----------------------------------------------------------------------------
+  out$ams_can <- conv_am(1, "surv")
+  out$ams_can_quant <- melt(out$ams_can, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$ams_can_quant <- calc_quantiles_by_group(out$ams_can_quant,
+                                               "year",
+                                               "val",
+                                               probs = quants)
+  #----------------------------------------------------------------------------
+  out$ams_us <- conv_am(2, "surv")
+  out$ams_us_quant <- melt(out$ams_us, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$ams_us_quant <- calc_quantiles_by_group(out$ams_us_quant,
+                                              "year",
+                                              "val",
+                                              probs = quants)
+
+  out$quota_tot <- map2(sim_data, seq_along(sim_data), ~{
     quot <- apply(.x$catch_quota, MARGIN = 1, FUN = sum)
     if(length(quot) == 1){
       data.frame(year = yrs,
@@ -102,14 +242,16 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
-  quota_plot <- map2(list(quota_tot), list(catch_plot), ~{
+  out$quota_plot <- map2(list(out$quota_tot), list(out$catch_plot), ~{
+    class(.x$year) <- class(.y$year)
+    class(.x$run) <- class(.y$run)
     .x %>%
       left_join(.y, by = c("year", "run")) %>%
       mutate(quota_frac = catch.x / catch.y) %>%
       select(year, quota_frac, run)
   }) %>% map_df(~{.x})
 
-  quota_us_tot <- map2(sim_data, seq_along(sim_data), ~{
+  out$quota_us_tot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
                quota = rowSums(.x$catch_quota[,2,]),
                run = .y)
@@ -117,7 +259,7 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
-  quota_ca_tot <- map2(sim_data, seq_along(sim_data), ~{
+  out$quota_ca_tot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
                quota = rowSums(.x$catch_quota[,1,]),
                run = .y)
@@ -125,7 +267,11 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
-  catch_area <- map2(sim_data, seq_along(sim_data), ~{
+  out$yrs_quota_met <- out$ssb_plot %>%
+    group_by(run) %>%
+    summarize(value = length(which(ssb > 0.1 && ssb <= 0.4)) / simyears)
+
+  out$catch_area <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
                area = apply(.x$catch_save_age, MARGIN = c(2, 3), FUN = sum),
                run = .y)
@@ -137,12 +283,14 @@ hake_objectives <- function(lst = NULL,
               run) %>%
     as_tibble()
 
-  catch_us_tot <- catch_area %>%
+  out$catch_us_tot <- out$catch_area %>%
     transmute(year, catch = us, run)
-  catch_ca_tot <- catch_area %>%
+  out$catch_ca_tot <- out$catch_area %>%
     transmute(year, catch = ca, run)
 
-  vtac_us <- map2(list(v_us_plot), list(catch_us_tot), ~{
+  out$vtac_us <- map2(list(out$v_us_plot), list(out$catch_us_tot), ~{
+    class(.x$year) <- class(.y$year)
+    class(.x$run) <- class(.y$run)
     .x %>%
       left_join(.y, by = c("year", "run")) %>%
       mutate(v_tac = v / catch) %>%
@@ -150,7 +298,9 @@ hake_objectives <- function(lst = NULL,
   }) %>%
     map_df(~{.x})
 
-  vtac_ca <- map2(list(v_us_plot), list(catch_ca_tot), ~{
+  out$vtac_ca <- map2(list(out$v_us_plot), list(out$catch_ca_tot), ~{
+    class(.x$year) <- class(.y$year)
+    class(.x$run) <- class(.y$run)
     .x %>%
       left_join(.y, by = c("year", "run")) %>%
       mutate(v_tac = v / catch) %>%
@@ -158,7 +308,7 @@ hake_objectives <- function(lst = NULL,
   }) %>%
     map_df(~{.x})
 
-  vtac_us_seas <- map2(sim_data, seq_along(sim_data), ~{
+  out$vtac_us_seas <- map2(sim_data, seq_along(sim_data), ~{
     ctmp <- colSums(.x$catch_save_age)
     data.frame(year = yrs,
                v_tac_sp = ctmp[, 2, 2] / .x$v_save[, 2, 2],
@@ -170,7 +320,7 @@ hake_objectives <- function(lst = NULL,
     mutate(country = "US") %>%
     as_tibble()
 
-  vtac_ca_seas <- map2(sim_data, seq_along(sim_data), ~{
+  out$vtac_ca_seas <- map2(sim_data, seq_along(sim_data), ~{
     ctmp <- colSums(.x$catch_save_age)
     data.frame(year = yrs,
                v_tac_sp = ctmp[, 1, 2] / .x$v_save[, 1, 2],
@@ -182,9 +332,9 @@ hake_objectives <- function(lst = NULL,
     mutate(country = "Canada") %>%
     as_tibble()
 
-  vtac_seas <- bind_rows(vtac_ca_seas, vtac_us_seas)
+  out$vtac_seas <- bind_rows(out$vtac_ca_seas, out$vtac_us_seas)
 
-  aav_plot <- map2(list(catch_plot), seq_along(list(catch_plot)), ~{
+  out$aav_plot <- map2(list(out$catch_plot), seq_along(list(out$catch_plot)), ~{
     .x %>%
       group_by(run) %>%
       mutate(catch_lag = lag(catch, 1)) %>%
@@ -195,61 +345,16 @@ hake_objectives <- function(lst = NULL,
   }) %>%
     map_df(~{.x})
 
-  # Calculate quantiles
-  ssb_yrs <- sort(unique(ssb_plot$year))
-  ssb_plotquant <- ssb_plot %>%
-    group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = "ssb", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = ssb_yrs) %>%
-    select(year, everything())
+  out$v_ca_plotquant <- calc_quantiles_by_group(out$v_ca_plot, grp_col = "year", col = "v", probs = quants)
+  out$v_us_plotquant <- calc_quantiles_by_group(out$v_us_plot, grp_col = "year", col = "v", probs = quants)
+  out$catch_plotquant <- calc_quantiles_by_group(out$catch_plot, grp_col = "year", col = "catch", probs = quants)
+  out$aav_plotquant <- calc_quantiles_by_group(out$aav_plot, grp_col = "year", col = "aav", probs = quants)
+  out$quota_plotquant <- calc_quantiles_by_group(out$quota_plot, grp_col = "year", col = "quota_frac", probs = quants)
 
-  v_ca_yrs <- sort(unique(v_ca_plot$year))
-  v_ca_plotquant <- v_ca_plot %>%
-    group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = "v", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = v_ca_yrs) %>%
-    select(year, everything())
-
-  v_us_yrs <- sort(unique(v_us_plot$year))
-  v_us_plotquant <- v_us_plot %>%
-    group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = "v", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = v_us_yrs) %>%
-    select(year, everything())
-
-  catch_yrs <- sort(unique(catch_plot$year))
-  catch_plotquant <- catch_plot %>%
-    group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = "catch", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = catch_yrs) %>%
-    select(year, everything()) %>%
-    # Multiply all columns except `year` by catch_multiplier
-    mutate_at(vars(-year), ~{.x * catch_multiplier})
-
-  aav_yrs <- sort(unique(aav_plot$year))
-  aav_plotquant <- aav_plot %>%
-    group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = "aav", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = aav_yrs) %>%
-    select(year, everything())
-
-  quota_yrs <- sort(unique(quota_plot$year))
-  quota_plotquant <- quota_plot %>%
-    group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = "quota_frac", probs = quants)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = quota_yrs) %>%
-    select(year, everything())
-
-  ssb_future <- ssb_plot %>%
+  ssb_future <- out$ssb_plot %>%
     filter(year > min(short_term_yrs))
   # Probability of SSB < SSB_10%
-  ssb_10 <- ssb_future %>%
+  out$ssb_10 <- ssb_future %>%
     group_by(run) %>%
     summarize(pcnt = length(which(ssb < 0.1)) /
                 length(unique(year))) %>%
@@ -258,7 +363,7 @@ hake_objectives <- function(lst = NULL,
     ungroup()
 
   # Probability of SSB >= SSB_10% and <= SSB_40%
-  ssb_4010 <- ssb_future %>%
+  out$ssb_4010 <- ssb_future %>%
     group_by(run) %>%
     summarize(pcnt = length(which(ssb >= 0.1 & ssb <= 0.4)) /
                 length(unique(year))) %>%
@@ -266,54 +371,54 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     ungroup()
 
-  catch_short_term <- calc_term_quantiles(catch_plot,
-                                          grp_col = "run",
-                                          col = "catch",
-                                          min_yr = min(short_term_yrs),
-                                          max_yr = long_term_yrs,
-                                          probs = quants,
-                                          mean_multiplier = catch_multiplier)
+  out$catch_short_term <- calc_term_quantiles(out$catch_plot,
+                                              grp_col = "run",
+                                              col = "catch",
+                                              min_yr = min(short_term_yrs),
+                                              max_yr = long_term_yrs,
+                                              probs = quants,
+                                              mean_multiplier = catch_multiplier)
 
-  catch_long_term <- calc_term_quantiles(catch_plot,
-                                         grp_col = "run",
-                                         col = "catch",
-                                         min_yr = long_term_yrs + 1,
-                                         probs = quants,
-                                         mean_multiplier = catch_multiplier)
+  out$catch_long_term <- calc_term_quantiles(out$catch_plot,
+                                             grp_col = "run",
+                                             col = "catch",
+                                             min_yr = long_term_yrs + 1,
+                                             probs = quants,
+                                             mean_multiplier = catch_multiplier)
 
 
-  aav_short_term <- calc_term_quantiles(aav_plot,
-                                        grp_col = "run",
-                                        col = "aav",
-                                        min_yr = min(short_term_yrs),
-                                        max_yr = long_term_yrs,
-                                        probs = quants)
+  out$aav_short_term <- calc_term_quantiles(out$aav_plot,
+                                            grp_col = "run",
+                                            col = "aav",
+                                            min_yr = min(short_term_yrs),
+                                            max_yr = long_term_yrs,
+                                            probs = quants)
 
-  v_ca_stat <- calc_term_quantiles(v_ca_plot,
-                                   grp_col = "run",
-                                   col = "v",
-                                   probs = quants)
+  out$v_ca_stat <- calc_term_quantiles(out$v_ca_plot,
+                                       grp_col = "run",
+                                       col = "v",
+                                       probs = quants)
 
-  v_us_stat <- calc_term_quantiles(v_us_plot,
-                                   grp_col = "run",
-                                   col = "v",
-                                   probs = quants)
+  out$v_us_stat <- calc_term_quantiles(out$v_us_plot,
+                                       grp_col = "run",
+                                       col = "v",
+                                       probs = quants)
 
-  vtac_ca_stat <- vtac_ca %>%
+  out$vtac_ca_stat <- out$vtac_ca %>%
     group_by(run) %>%
     summarise(prop = length(which(v_tac > (1 / 0.3))) / length(v_tac)) %>%
     group_map(~ calc_quantiles(.x, col = "prop", probs = quants)) %>%
     map_df(~{.x}) %>%
     ungroup()
 
-  vtac_us_stat <- vtac_us %>%
+  out$vtac_us_stat <- out$vtac_us %>%
     group_by(run) %>%
     summarise(prop = length(which(v_tac > 1)) / length(v_tac)) %>%
     group_map(~ calc_quantiles(.x, col = "prop", probs = quants)) %>%
     map_df(~{.x}) %>%
     ungroup()
 
-  vtac_ca_seas_stat <- vtac_ca_seas %>%
+  out$vtac_ca_seas_stat <- out$vtac_ca_seas %>%
     filter(year > long_term_yrs) %>%
     group_by(run) %>%
     summarise(avg_sp = mean(1 / v_tac_sp),
@@ -323,7 +428,7 @@ hake_objectives <- function(lst = NULL,
               med_su = median(avg_su),
               med_fa = median(avg_fa))
 
-  vtac_us_seas_stat <- vtac_us_seas %>%
+  out$vtac_us_seas_stat <- out$vtac_us_seas %>%
     filter(year > long_term_yrs) %>%
     group_by(run) %>%
     summarise(avg_sp = mean(1 / v_tac_sp),
@@ -334,7 +439,7 @@ hake_objectives <- function(lst = NULL,
               med_fa = median(avg_fa))
 
   # Calculate the median number of closed years
-  nclosed <- map_int(unique(ssb_future$run), ~{
+  out$nclosed <- map_int(unique(ssb_future$run), ~{
     tmp <- ssb_future %>% filter(run == .x)
     length(which(tmp$ssb < 0.1))
   })
@@ -353,56 +458,23 @@ hake_objectives <- function(lst = NULL,
                  "US TAC/V spr",
                  "US TAC/V sum",
                  "US TAC/V fall")
-  info <- data.frame(
+  out$info <- data.frame(
     indicator = as.factor(indicator),
     value = c(
       round(length(which(ssb_future$ssb <= 0.1)) / length(ssb_future$ssb), digits = 2),
       round(length(which(ssb_future$ssb>0.1 & ssb_future$ssb<0.4)) / length(ssb_future$ssb), digits = 2),
       round(length(which(ssb_future$ssb>0.4)) / length(ssb_future$ssb), digits = 2),
-      round(median(aav_plotquant$`0.5`), digits = 2),
-      median(ssb_plotquant$`0.5`[ssb_plotquant$year > min(short_term_yrs)]),
-      median(1e6 * catch_plotquant$`0.5`[catch_plotquant$year > min(short_term_yrs) &
-                                         catch_plotquant$year <= long_term_yrs]) * catch_multiplier,
-      median(1e6 * catch_plotquant$`0.5`[catch_plotquant$year > long_term_yrs - 2]) * catch_multiplier,
-      vtac_ca_seas_stat$med_sp,
-      vtac_ca_seas_stat$med_su,
-      vtac_ca_seas_stat$med_fa,
-      vtac_us_seas_stat$med_sp,
-      vtac_us_seas_stat$med_su,
-      vtac_us_seas_stat$med_fa))
+      round(median(out$aav_plotquant$`0.5`), digits = 2),
+      median(out$ssb_plotquant$`0.5`[out$ssb_plotquant$year > min(short_term_yrs)]),
+      median(1e6 * out$catch_plotquant$`0.5`[out$catch_plotquant$year > min(short_term_yrs) &
+                                           out$catch_plotquant$year <= long_term_yrs]) * catch_multiplier,
+      median(1e6 * out$catch_plotquant$`0.5`[out$catch_plotquant$year > long_term_yrs - 2]) * catch_multiplier,
+      out$vtac_ca_seas_stat$med_sp,
+      out$vtac_ca_seas_stat$med_su,
+      out$vtac_ca_seas_stat$med_fa,
+      out$vtac_us_seas_stat$med_sp,
+      out$vtac_us_seas_stat$med_su,
+      out$vtac_us_seas_stat$med_fa))
 
-  list(ssb_plot = ssb_plot,
-       ssb_plotquant = ssb_plotquant,
-       v_ca_plot = v_ca_plot,
-       v_ca_plotquant = v_ca_plotquant,
-       v_ca_stat = v_ca_stat,
-       v_us_plot = v_us_plot,
-       v_us_plotquant = v_us_plotquant,
-       v_us_stat = v_us_stat,
-       catch_plot = catch_plot,
-       catch_plotquant = catch_plotquant,
-       catch_short_term = catch_short_term,
-       catch_long_term = catch_long_term,
-       catch_area = catch_area,
-       quota_tot = quota_tot,
-       quota_frac = quota_plot,
-       quota_fracquant = quota_plotquant,
-       quota_ca_tot = quota_ca_tot,
-       quota_us_tot = quota_us_tot,
-       vtac_ca = vtac_ca,
-       vtac_us = vtac_us,
-       vtac_ca_stat = vtac_ca_stat,
-       vtac_us_stat = vtac_us_stat,
-       vtac_ca_seas = vtac_ca_seas,
-       vtac_us_seas = vtac_us_seas,
-       vtac_seas = vtac_seas,
-       vtac_ca_seas_stat = vtac_ca_seas_stat,
-       vtac_us_seas_stat = vtac_us_seas_stat,
-       aav_plot = aav_plot,
-       aav_plotquant = aav_plotquant,
-       aav_short_term = aav_short_term,
-       ssb_10 = ssb_10,
-       ssb_4010 = ssb_4010,
-       nclosed = nclosed,
-       info = info)
+  out
 }

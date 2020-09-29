@@ -4,7 +4,12 @@
 \alias{setup_mse_plot_objects}
 \title{Setup MSE plot data frames, colors, and plot names}
 \usage{
-setup_mse_plot_objects(results_dir = NULL, plotnames = NULL, porder = NA, ...)
+setup_mse_plot_objects(
+  results_dir = NULL,
+  plotnames = NULL,
+  porder = NULL,
+  ...
+)
 }
 \arguments{
 \item{results_dir}{A directory name where results from \code{\link[=run_mses]{run_mses()}} resides. Only files

@@ -14,7 +14,8 @@ update_om_data(
   c_increase = NULL,
   m_increase = NULL,
   sel_change = NULL,
-  wage_only = FALSE
+  wage_only = FALSE,
+  zero_rdevs = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ update_om_data(
 \item{sel_change}{Time varying selectivity}
 
 \item{wage_only}{Only update the wage_ \link{data.frame}s, nothing else}
+
+\item{zero_rdevs}{Logical. If TRUE, return recruitment devs (r_in) of 0. If FALSE,
+return a random normal using mean = 0 and sd = exp(df$rdev_sd)}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

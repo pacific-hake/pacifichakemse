@@ -5,6 +5,8 @@
 \title{Run/Iterate the Pacific hake MSE}
 \usage{
 run_multiple_MSEs(
+  results_dir = NULL,
+  file_name = NULL,
   df = NULL,
   ss_model = NULL,
   om_objs = NULL,
@@ -19,6 +21,11 @@ run_multiple_MSEs(
 )
 }
 \arguments{
+\item{results_dir}{Directory in which the OM output will be stored}
+
+\item{file_name}{The name of the file in which the MSE output was stored. This will be prepended with 'om_'
+for the OM used in this MSE. The actual MSE results are stored by the function calling this one, \code{\link[=run_mses]{run_mses()}}}
+
 \item{df}{Data frame of parameters as output by \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}

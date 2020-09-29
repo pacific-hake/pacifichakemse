@@ -1,93 +1,73 @@
 #' Violin plot of the MSE results
 #'
-#' @param ls.MSE list of MSE results
-#' @param SSB0 Operating Model Spawning Stock B0 value
-#' @param move is movement included?
+#' @param mse_output MSE output of a single scenario in the format enforced in [setup_mse_plot_objects()]
+#' @param om_output OM output of a single scenario in the format enforced in [setup_mse_plot_objects()]
+#' @param lst_indicators Objectives output of a single scenario in the format enforced in [hake_objectives()]
+#' @param move Logical. If TRUE, stock movement is included
 #'
 #' @return A [data.frame] with columns SSB, SSB.10, SSB.40, Catch.short,
 #' Catch.long, and AAV
 #' @export
-hake_violin <- function(ls.MSE, SSB0, move = NA){
+hake_violin <- function(mse_output,
+                        om_output,
+                        lst_indicators,
+                        move = NA){
 
-  nruns <- length(ls.MSE)
-  nyears <- dim(ls.MSE[[1]][1]$Catch)[2]
+  mse_output_run1 <- mse_output[[1]][[1]]
+  om_output_run1 <- mse_output[[1]][[1]]
+  nruns <- length(mse_output)
+  nyears <- mse_output_run1$n_yr
+  s_yr <- mse_output_run1$s_yr
+  m_yr <- mse_output_run1$m_yr
 
-  if(dim(ls.MSE[[1]][1]$Catch)[2] == 1){
-    nyears <- dim(ls.MSE[[1]][1]$Catch)[1]
-  }
   # Get the number of years run in that MSE
-  if(all(is.na(ls.MSE[[1]]))){
-    simyears <- nyears-(length(1966:2018))+1
-  }else{
-    simyears <- nyears-(length(1966:2018))+1
-  }
-  yr <- 1966:(2018+simyears-1)
-  idx <- 1
-  if(all(is.na(ls.MSE[[idx]]))){
-    idx <- 2
-  }
-  if(all(is.na(ls.MSE[[idx]]))){
-    idx <- 3
-  }
-  if(is.na(move)){
-    SSB.plot <- data.frame(SSB = (ls.MSE[[idx]]$SSB)/(SSB0), year = yr, run = paste('run',1, sep=''))
-  }else{
-    SSB.plot <- data.frame(SSB = as.numeric(rowSums(ls.MSE[[idx]]$SSB))/sum(SSB0), year = yr, run = paste('run',1, sep=''))
-  }
+  simyears <- nyears - (length(s_yr:m_yr)) + 1
+  yrs <- mse_output_run1$yrs
+
+  # idx <- 1
+  # if(all(is.na(ls.MSE[[idx]]))){
+  #   idx <- 2
+  # }
+  # if(all(is.na(ls.MSE[[idx]]))){
+  #   idx <- 3
+  # }
 
   if(is.na(move)){
-    Catch.plot <- data.frame(Catch = ls.MSE[[idx]]$Catch, year = yr, run = paste('run',1, sep=''))
+    ssb_plot <- map2(om_output, seq_along(om_output), ~{
+      tmp <- .x$ssb / .x$ssb_0
+      tmp %>%
+        as_tibble(rownames = "year") %>%
+        mutate(run = .y) %>%
+        rename(ssb1 = `1`, ssb2 = `2`)
+    }) %>%
+      map_df(~{.x}) %>%
+      as_tibble()
   }else{
-
-    catchtmp <- as.numeric(apply(ls.MSE[[idx]]$Catch,MARGIN = 2, FUN = sum))
-
-    if(length(catchtmp) == 1){
-      catchtmp <- ls.MSE[[idx]]$Catch
-    }
-    Catch.plot <- data.frame(Catch = catchtmp, year = yr, run = paste('run',1, sep=''))
-    quota.tot <- apply(ls.MSE[[idx]]$Catch.quota, MARGIN = 1, FUN = sum)
-    quota.plot <- data.frame(Quota_frac = quota.tot/catchtmp, year = yr, run = paste('run',1, sep =''))
-    quota.us <- rowSums(ls.MSE[[idx]]$Catch.quota[,2,])
-    quota.can <- rowSums(ls.MSE[[idx]]$Catch.quota[,1,])
+    ssb_plot <- lst_indicators$ssb_plot
   }
-  AAV.plot  <- data.frame(AAV = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
-                          year = yr[2:length(yr)], run = paste('run',1, sep=''))
-  for(i in 2:nruns){
-    ls.tmp <- ls.MSE[[i]]
-    if(is.list(ls.tmp)){
-      if(is.na(move)){
-        SSB.tmp <- data.frame(SSB = (ls.tmp$SSB)/(SSB0), year = yr, run =  paste('run',i, sep=''))
-        Catch.tmp <- data.frame(Catch = ls.tmp$Catch, year = yr, run =  paste('run',i, sep=''))
-        quota.tmp <- data.frame(Catch = ls.tmp$Catch/apply(ls.tmp$Catch.quota, MARGIN = 1, FUN = sum),
-                                year = yr, run =  paste('run',i, sep=''))
-      }else{
-        catchtmp <-  as.numeric(apply(ls.tmp$Catch,MARGIN = 2, FUN = sum))
-        if(length(catchtmp) == 1){
-          catchtmp <- ls.MSE[[idx]]$Catch
-        }
-        SSB.tmp <- data.frame(SSB = rowSums(ls.tmp$SSB)/sum(SSB0), year = yr, run =  paste('run',i, sep=''))
-        Catch.tmp <- data.frame(Catch = catchtmp, year = yr, run =  paste('run',i, sep=''))
-        quota.tmp <- data.frame(Quota_frac = catchtmp/apply(ls.tmp$Catch.quota, MARGIN = 1, FUN = sum), year = yr, run =  paste('run',i, sep=''))
-        if(ncol(ls.tmp$Catch) == 1){
-          Catch.can <- ls.tmp$Catch*0.26
-          Catch.us <- ls.tmp$Catch*0.74
-        }else{
-          Catch.can <- apply(ls.tmp$Catch,MARGIN = c(2,3), FUN = sum)[,1]
-          Catch.us <- apply(ls.tmp$Catch,MARGIN = c(2,3), FUN = sum)[,2]
-        }
-        quota.tmp.can <- data.frame(Catch = Catch.can/rowSums(ls.tmp$Catch.quota[,1,]),
-                                    year = yr, run =  paste('run',i, sep=''))
-        quota.tmp.us <- data.frame(Catch = Catch.us/rowSums(ls.tmp$Catch.quota[,2,]),
-                                   year = yr, run =  paste('run',i, sep=''))
-      }
-      SSB.plot <- rbind(SSB.plot,SSB.tmp)
-      Catch.plot <- rbind(Catch.plot,Catch.tmp)
-      quota.plot <- rbind(quota.plot, quota.tmp)
-      AAV.tmp <- data.frame(AAV  = abs(catchtmp[2:length(yr)]-catchtmp[1:(length(yr)-1)])/catchtmp[1:(length(yr)-1)],
-                            year = yr[2:length(yr)], run =  paste('run',i, sep=''))
-      AAV.plot <- rbind(AAV.plot, AAV.tmp)
-    }
+
+  browser()
+  if(is.na(move)){
+    # Don't know what the output will look like here without movement model
+    # catch_plot <- map2(om_output, seq_along(om_output), ~{
+    #   tmp <- .x$ssb / .x$ssb_0
+    #   tmp %>%
+    #     as_tibble(rownames = "year") %>%
+    #     mutate(run = .y) %>%
+    #     rename(ssb1 = `1`, ssb2 = `2`)
+    # }) %>%
+    #   map_df(~{.x}) %>%
+    #   as_tibble()
+    # Catch.plot <- data.frame(Catch = ls.MSE[[idx]]$Catch, year = yr, run = paste('run',1, sep=''))
+  }else{
+    catch_plot <- lst_indicators$catch_plot
+    quota_tot <- lst_indicators$quota_tot
+    quota_frac <- lst_indicators$quota_frac
+    quota_ca_tot <- lst_indicators$quota_ca_tot
+    quota_us_tot <- lst_indicators$quota_us_tot
   }
+  aav_plot <- lst_indicators$aav_plot
+
   ## Probability of S < S10
   SSB.future <- SSB.plot[SSB.plot$year > 2018,]
   #p.export <- grid.arrange(p1,p2,p3)

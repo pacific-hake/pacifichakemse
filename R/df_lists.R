@@ -95,7 +95,7 @@ df_lists <- function(lst = NULL,
   ssb_quant <- ssb_can %>%
     bind_rows(ssb_us) %>%
     mutate(run = plotname)
-
+browser()
   ssb_tot_quant <- conv_vec_to_mse_df(lst_df$ssbtot,
                                       col = "ssb",
                                       yr_vec = allruns_yrs,
