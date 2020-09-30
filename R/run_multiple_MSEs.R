@@ -87,7 +87,10 @@ run_multiple_MSEs <- function(results_dir = NULL,
   em_output <- list(ssb_save = vector(mode = "list", length = length(yr_sims)),
                     r_save = vector(mode = "list", length = length(yr_sims)),
                     f40_save = vector(),
-                    catch_save = vector(mode = "list", length = length(yr_sims)))
+                    catch_save = vector(mode = "list", length = length(yr_sims)),
+                    ssb_se = vector(mode = "list", length = length(yr_sims)),
+                    ssb_min = vector(mode = "list", length = length(yr_sims)),
+                    ssb_max = vector(mode = "list", length = length(yr_sims)))
   em_iter <- 1
 
   mse_run <- map(c(yr_last_non_sim, yr_sims), function(yr = .x){
@@ -204,16 +207,6 @@ run_multiple_MSEs <- function(results_dir = NULL,
     report <- obj$report()
     pars <- extract_params_tmb(opt)
 
-    # if(yr == yr_end){
-    #   rep <- sdreport(obj)
-    #   sdrep <- summary(report)
-    #   rep_values <- rownames(sdrep)
-    #   # Check convergence in last year
-    #   conv <- Check_Identifiable_vs2(obj)
-    #   #browser()
-    # }
-#browser()
-
     # Calculate the reference points to be applied to the next year
     wage_catch <- df$wage_catch[nrow(df$wage_catch) - 1,] %>% select(-Yr) %>% unlist(use.names = FALSE)
     v_real <- sum(sim_data$n_save_age[, df$n_yr,,df$n_season] *
@@ -227,7 +220,6 @@ run_multiple_MSEs <- function(results_dir = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
-#browser()
 
     # Need to use map() here to keep names
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
@@ -238,6 +230,12 @@ run_multiple_MSEs <- function(results_dir = NULL,
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
+      sdrep <- sdreport(obj)
+      j <- sdrep_summary <- summary(sdrep)
+      rep_names <- rownames(sdrep_summary)
+      em_output$ssb_se[[em_iter]] <- sdrep_summary[rep_names == "SSB", 2]
+      em_output$ssb_min[[em_iter]] <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
+      em_output$ssb_max[[em_iter]] <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
       em_iter <<- em_iter + 1
     }
 
