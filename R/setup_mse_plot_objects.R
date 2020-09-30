@@ -15,7 +15,7 @@
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
-#' (6) A vector of plot names, one for each scenario, (7) mse_out_data which is a list, one for
+#' (6) A vector of plot names, one for each scenario, (7) lst_indicators which is a list, one for
 #' each scenario, and each containing a list of length 3, which is the output of [df_lists()],
 #' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`,
 #' (9) A list of length = number of scenarios, containing three-column [data.frame]s with `run`, `SE.SSB`,
@@ -188,19 +188,20 @@ setup_mse_plot_objects <- function(results_dir = NULL,
       map_df(~{.x}) %>%
       mutate(scenario = factor(scenario, levels = plotnames[porder]))
   }
-  browser()
 
-  mse_values_agg <- list(ssb_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_plotquant"),
-                         ssb_mid_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_mid_plotquant"),
-                         #ssb_tot_quant = merge_dfs_from_scenarios(mse_out_data, "ssb_tot_quant"),
-                         catch_quant = merge_dfs_from_scenarios(mse_out_data, "catch_quant"),
-                         amc_quant = merge_dfs_from_scenarios(mse_out_data, "amc_quant"),
-                         ams_quant = merge_dfs_from_scenarios(mse_out_data, "ams_quant"),
-                         amc_space_quant = merge_dfs_from_scenarios(mse_out_data, "amc_space_quant"),
-                         ams_space_quant = merge_dfs_from_scenarios(mse_out_data, "ams_space_quant"),
-                         f0_quant = merge_dfs_from_scenarios(mse_out_data, "f0_quant"),
-                         catch_q_quant = merge_dfs_from_scenarios(mse_out_data, "catch_q_quant"))
-
+  mse_values_agg <- list(ssb_quant = merge_dfs_from_scenarios(lst_indicators, "ssb_plotquant"),
+                         ssb_mid_quant = merge_dfs_from_scenarios(lst_indicators, "ssb_mid_plotquant"),
+                         catch_quant = merge_dfs_from_scenarios(lst_indicators, "catch_quant"),
+                         amc_tot_quant = merge_dfs_from_scenarios(lst_indicators, "amc_tot_quant"),
+                         amc_ca_quant = merge_dfs_from_scenarios(lst_indicators, "amc_ca_quant"),
+                         amc_us_quant = merge_dfs_from_scenarios(lst_indicators, "amc_us_quant"),
+                         ams_tot_quant = merge_dfs_from_scenarios(lst_indicators, "ams_tot_quant"),
+                         ams_ca_quant = merge_dfs_from_scenarios(lst_indicators, "ams_ca_quant"),
+                         ams_us_quant = merge_dfs_from_scenarios(lst_indicators, "ams_us_quant"),
+                         f0_ca_quant = merge_dfs_from_scenarios(lst_indicators, "f0_ca_quant"),
+                         f0_us_quant = merge_dfs_from_scenarios(lst_indicators, "f0_us_quant"),
+                         catch_q_quant = merge_dfs_from_scenarios(lst_indicators, "quota_quant"))
+browser()
   # Standard error on SSB. First make a list of scenario data frames and reorder,
   # then bind those together into a data frame using [purrr::map_df()]
   standard_error_ssb <- map2(ls_plots, names(ls_plots), function(.x, .y, ...){
@@ -219,7 +220,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        violin_data = df_violin,
        cols = cols,
        plotnames = plotnames,
-       mse_out_data = mse_out_data,
+       lst_indicators = lst_indicators,
        mse_values_agg = mse_values_agg,
        standard_error_ssb = standard_error_ssb,
        sim_data = sim_data)

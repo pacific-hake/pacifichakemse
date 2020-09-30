@@ -101,6 +101,33 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
+  out$f0_plot <- map2(sim_data, seq_along(sim_data), ~{
+    yrs <- rownames(.x$f_out_save)
+    apply(.x$f_out_save, c(1, 3), sum) %>%
+      as_tibble() %>%
+      mutate(run = .y) %>%
+      mutate(year = yrs) %>%
+      select(year, everything())
+  }) %>%
+    map_df(~{.x})
+
+  out$f0_ca_plot <- out$f0_plot %>%
+    select(-`2`) %>%
+    rename(f = `1`)
+
+  out$f0_us_plot <- out$f0_plot %>%
+    select(-`1`) %>%
+    rename(f = `2`)
+
+  out$f0_ca_quant <- calc_quantiles_by_group(out$f0_ca_plot,
+                                             "year",
+                                             "f",
+                                             probs = quants)
+  out$f0_us_quant <- calc_quantiles_by_group(out$f0_us_plot,
+                                             "year",
+                                             "f",
+                                             probs = quants)
+
   out$catch_plot <- map2(sim_data, seq_along(sim_data), ~{
     ct <- apply(.x$catch_save_age, MARGIN = 2, FUN = sum)
     if(length(ct) == 1){
@@ -182,14 +209,14 @@ hake_objectives <- function(lst = NULL,
                                                "val",
                                                probs = quants)
   #----------------------------------------------------------------------------
-  out$amc_can <- conv_am(1)
-  out$amc_can_quant <- melt(out$amc_can, id.vars = "yr") %>%
+  out$amc_ca <- conv_am(1)
+  out$amc_ca_quant <- melt(out$amc_ca, id.vars = "yr") %>%
     as_tibble() %>%
     set_names(c("year", "run", "val"))
-  out$amc_can_quant <- calc_quantiles_by_group(out$amc_can_quant,
-                                               "year",
-                                               "val",
-                                               probs = quants)
+  out$amc_ca_quant <- calc_quantiles_by_group(out$amc_ca_quant,
+                                              "year",
+                                              "val",
+                                              probs = quants)
   #----------------------------------------------------------------------------
   out$amc_us <- conv_am(2)
   out$amc_us_quant <- melt(out$amc_us, id.vars = "yr") %>%
@@ -209,14 +236,14 @@ hake_objectives <- function(lst = NULL,
                                                "val",
                                                probs = quants)
   #----------------------------------------------------------------------------
-  out$ams_can <- conv_am(1, "surv")
-  out$ams_can_quant <- melt(out$ams_can, id.vars = "yr") %>%
+  out$ams_ca <- conv_am(1, "surv")
+  out$ams_ca_quant <- melt(out$ams_ca, id.vars = "yr") %>%
     as_tibble() %>%
     set_names(c("year", "run", "val"))
-  out$ams_can_quant <- calc_quantiles_by_group(out$ams_can_quant,
-                                               "year",
-                                               "val",
-                                               probs = quants)
+  out$ams_ca_quant <- calc_quantiles_by_group(out$ams_ca_quant,
+                                              "year",
+                                              "val",
+                                              probs = quants)
   #----------------------------------------------------------------------------
   out$ams_us <- conv_am(2, "surv")
   out$ams_us_quant <- melt(out$ams_us, id.vars = "yr") %>%
@@ -241,6 +268,11 @@ hake_objectives <- function(lst = NULL,
   }) %>%
     map_df(~{.x}) %>%
     as_tibble()
+
+  out$quota_quant <- calc_quantiles_by_group(out$quota_tot,
+                                             "year",
+                                             "catch",
+                                             probs = quants)
 
   out$quota_plot <- map2(list(out$quota_tot), list(out$catch_plot), ~{
     class(.x$year) <- class(.y$year)
