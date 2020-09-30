@@ -9,30 +9,31 @@
 #' @return A [data.frame] of 3 columns: The run number, the standard error of spawning
 #' stock biomass from EM in regards to the OM, and the year
 #' @export
-calc_standard_error_ssb <- function(lst,
+calc_standard_error_ssb <- function(em_output,
+                                    om_output,
                                     col = "SE.SSB",
                                     quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
                                     inc_mean = TRUE){
-  nruns <- length(lst)
-  yrs <- lst[[1]]$SSB.hes$year
-  nyrs <- length(yrs)
-  map_df(seq_along(lst), ~{
+
+  map_df(seq_along(em_output), ~{
     if(is.na(.x)){
       NA
     }else{
-      yrs <- lst[[.x]]$SSB.hes$year
+      yrs <- as.numeric(names(em_output[[.x]]$ssb_se[[length(em_output[[.x]]$ssb_se)]]))
       nyrs <- length(yrs)
-      ssb_true <- rowSums(lst[[.x]]$SSB)
-      ssb_est <- lst[[.x]]$SSB.hes$value
+      ssb_true <- rowSums(om_output[[.x]]$ssb)
+      ssb_est <- em_output[[.x]]$ssb_se[length(em_output[[.x]]$ssb_se)][[1]]
       err <- (ssb_est - ssb_true) / ssb_true
       data.frame(run = rep(.x, nyrs),
-                 SE.SSB = err,
-                 year = yrs)
+                 ssb_se = err,
+                 year = yrs) %>%
+        as_tibble() %>%
+        select(year, ssb_se, run)
     }
-  }) %>%
-    group_by(year) %>%
-    group_map(~ calc_quantiles(.x, col = col, probs = quants, include_mean = inc_mean)) %>%
-    map_df(~{.x}) %>%
-    mutate(year = yrs) %>%
-    select(year, everything())
+  })
+  #%>%
+    # calc_quantiles_by_group(grp_col = "year",
+    #                         col = "ssb_se",
+    #                         probs = quants,
+    #                         include_mean = inc_mean)
 }

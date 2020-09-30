@@ -233,9 +233,15 @@ run_multiple_MSEs <- function(results_dir = NULL,
       sdrep <- sdreport(obj)
       j <- sdrep_summary <- summary(sdrep)
       rep_names <- rownames(sdrep_summary)
-      em_output$ssb_se[[em_iter]] <- sdrep_summary[rep_names == "SSB", 2]
-      em_output$ssb_min[[em_iter]] <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
-      em_output$ssb_max[[em_iter]] <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
+      tmp <- sdrep_summary[rep_names == "SSB", 2]
+      names(tmp) <- df$yrs
+      em_output$ssb_se[[em_iter]] <<- tmp
+      tmp <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
+      names(tmp) <- df$yrs
+      em_output$ssb_min[[em_iter]] <<- tmp
+      tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
+      names(tmp) <- df$yrs
+      em_output$ssb_max[[em_iter]] <<- tmp
       em_iter <<- em_iter + 1
     }
 

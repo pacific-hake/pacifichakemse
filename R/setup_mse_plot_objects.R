@@ -201,18 +201,13 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                          f0_ca_quant = merge_dfs_from_scenarios(lst_indicators, "f0_ca_quant"),
                          f0_us_quant = merge_dfs_from_scenarios(lst_indicators, "f0_us_quant"),
                          catch_q_quant = merge_dfs_from_scenarios(lst_indicators, "quota_quant"))
-browser()
-  # Standard error on SSB. First make a list of scenario data frames and reorder,
-  # then bind those together into a data frame using [purrr::map_df()]
-  standard_error_ssb <- map2(ls_plots, names(ls_plots), function(.x, .y, ...){
-    calc_standard_error_ssb(.x, ...) %>%
-      mutate(scenario = .y) %>%
-      select(scenario, year, everything())
-  }, ...)
-  standard_error_ssb <- map_df(standard_error_ssb, ~{
-    .x
+
+  # Standard error between the OM and EM (final year)
+  standard_error_ssb <- map(seq_along(em_output), ~{
+    calc_standard_error_ssb(em_output[[.x]], om_output[[.x]]) %>%
+      mutate(scenario = plotnames[.x])
   }) %>%
-    mutate(scenario = factor(scenario, levels = plotnames[porder]))
+    map_df(~{.x})
 
   list(ssb_catch_indicators = df_ssb_catch_indicators,
        country_season_indicators = df_country_season_indicators,
