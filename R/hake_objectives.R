@@ -490,23 +490,43 @@ hake_objectives <- function(lst = NULL,
                  "US TAC/V spr",
                  "US TAC/V sum",
                  "US TAC/V fall")
-  out$info <- data.frame(
-    indicator = as.factor(indicator),
-    value = c(
-      round(length(which(ssb_future$ssb <= 0.1)) / length(ssb_future$ssb), digits = 2),
-      round(length(which(ssb_future$ssb>0.1 & ssb_future$ssb<0.4)) / length(ssb_future$ssb), digits = 2),
-      round(length(which(ssb_future$ssb>0.4)) / length(ssb_future$ssb), digits = 2),
-      round(median(out$aav_plotquant$`0.5`), digits = 2),
-      median(out$ssb_plotquant$`0.5`[out$ssb_plotquant$year > min(short_term_yrs)]),
-      median(1e6 * out$catch_plotquant$`0.5`[out$catch_plotquant$year > min(short_term_yrs) &
-                                           out$catch_plotquant$year <= long_term_yrs]) * catch_multiplier,
-      median(1e6 * out$catch_plotquant$`0.5`[out$catch_plotquant$year > long_term_yrs - 2]) * catch_multiplier,
-      out$vtac_ca_seas_stat$med_sp,
-      out$vtac_ca_seas_stat$med_su,
-      out$vtac_ca_seas_stat$med_fa,
-      out$vtac_us_seas_stat$med_sp,
-      out$vtac_us_seas_stat$med_su,
-      out$vtac_us_seas_stat$med_fa))
+
+  out$aav_quant_by_run <- calc_quantiles_by_group(out$aav_plot, grp_col = "run",
+                                                  col = "aav", probs = quants)
+  tmp_ssb_by_run <- out$ssb_plot %>% filter(year > min(short_term_yrs))
+  out$ssb_quant_by_run <- calc_quantiles_by_group(tmp_ssb_by_run, grp_col = "run",
+                                                    col = "ssb", probs = quants)
+
+  tmp_catch_by_run <- out$catch_plot %>% filter(year > min(short_term_yrs), year <= long_term_yrs)
+  out$catch_quant_by_run <- calc_quantiles_by_group(tmp_catch_by_run, grp_col = "run",
+                                                    col = "catch", probs = quants)
+  tmp_catch_by_run <- out$catch_plot %>% filter(year > long_term_yrs - 2)
+  tmp_catch_by_run <- calc_quantiles_by_group(tmp_catch_by_run, grp_col = "run",
+                                              col = "catch", probs = quants)
+  out$info <- map(1:nruns, ~{
+    data.frame(
+      indicator = as.factor(indicator),
+      value = c(
+  round(length(which(ssb_future[ssb_future$run == .x,]$ssb <= 0.1)) /
+         length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
+  round(length(which(ssb_future[ssb_future$run == .x,]$ssb > 0.1 & ssb_future[ssb_future$run == .x,]$ssb < 0.4)) /
+          length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
+  round(length(which(ssb_future[ssb_future$run == .x,]$ssb > 0.4)) /
+          length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
+  round(out$aav_quant_by_run[out$aav_quant_by_run$run == .x,]$`0.5`, digits = 2),
+  round(out$ssb_quant_by_run[out$ssb_quant_by_run$run == .x,]$`0.5`, digits = 2),
+  round(out$catch_quant_by_run[out$catch_quant_by_run$run == .x,]$`0.5`, digits = 2),
+  round(tmp_catch_by_run[tmp_catch_by_run$run == .x,]$`0.5`, digits = 2),
+  out$vtac_ca_seas_stat$med_sp,
+  out$vtac_ca_seas_stat$med_su,
+  out$vtac_ca_seas_stat$med_fa,
+  out$vtac_us_seas_stat$med_sp,
+  out$vtac_us_seas_stat$med_su,
+  out$vtac_us_seas_stat$med_fa)) %>%
+      as_tibble() %>%
+      mutate(run = .x)
+    }) %>%
+    map_df(~{.x})
 
   out
 }

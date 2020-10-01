@@ -164,12 +164,14 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
 
   df_violin <- map2(lst_indicators, seq_along(lst_indicators), ~{
-    tmp <- list(.x$yrs_quota_met, # years between 0.1 and 0.4
-                .x$ssb_10,
-                .x$ssb_40,
-                .x$catch_short_term,
-                .x$catch_long_term,
-                .x$aav_plot)
+    tmp <- list(yrs_quota_met = .x$yrs_quota_met, # years between 0.1 and 0.4
+                ssb_10 = .x$ssb_10,
+                ssb_40 = .x$ssb_40,
+                catch_short_term = .x$catch_short_term,
+                catch_long_term = .x$catch_long_term,
+                aav_plot = .x$aav_plot,
+                catch_plot = .x$catch_plot,
+                ssb_plot = .x$ssb_plot)
     tmp[[1]]$hcr <- plotnames[.y]
     tmp
   })
@@ -218,5 +220,5 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        lst_indicators = lst_indicators,
        mse_values_agg = mse_values_agg,
        standard_error_ssb = standard_error_ssb,
-       sim_data = sim_data)
+       sim_data = om_output)
 }

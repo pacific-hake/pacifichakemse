@@ -19,20 +19,20 @@ plot_violins_country <- function(ps = NULL,
       filter(year %in% yrs)
   }
   if(is.null(pidx)){
-    pidx <- seq_along(unique(d$HCR))
+    pidx <- seq_along(unique(d$hcr))
   }
-  stopifnot(length(pidx) == length(unique(d$HCR)))
+  stopifnot(length(pidx) == length(unique(d$hcr)))
 
   melted_d <- melt(d,
-                   id.vars = c("run","HCR","country","year"),
+                   id.vars = c("run","hcr","country","year"),
                    measure.vars = 1:3,
                    variable.name = "season",
                    value.name = "exploitation") %>%
     mutate(exploitation = ifelse(exploitation > 1.0, NA, exploitation)) %>%
-    mutate(HCR = factor(HCR, levels = unique(HCR)[pidx]))
+    mutate(hcr = factor(hcr, levels = unique(hcr)[pidx]))
 
   dodge <- position_dodge(width = 0.5)
-  g <- ggplot(melted_d, aes(x = HCR, y = exploitation, factor = season, fill = HCR))+
+  g <- ggplot(melted_d, aes(x = hcr, y = exploitation, factor = season, fill = hcr))+
     geom_violin(position = dodge) +
     geom_boxplot(width = 0.15,
                  col = "black",

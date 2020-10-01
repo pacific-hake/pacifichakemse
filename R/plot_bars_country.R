@@ -9,7 +9,7 @@ plot_bars_country <- function(ps = NULL){
   stopifnot(!is.null(ps))
 
   g <- ggplot(ps$country_season_indicators,
-              aes(x = HCR,y = value, factor=season)) +
+              aes(x = hcr,y = value, factor=season)) +
     geom_bar(stat = "identity", aes(fill = season), position = "dodge2") +
     scale_x_discrete(name = "") +
     scale_y_continuous(name = "") +
