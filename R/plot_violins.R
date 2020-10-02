@@ -82,8 +82,7 @@ plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
     filter(indicator %in% inds) %>%
     mutate(indicator = forcats::fct_relevel(indicator, inds))
 
-
-  cols <- PNWColors::pnw_palette('Starfish',n = length(unique(df$hcr)), type = 'discrete')
+  cols <- PNWColors::pnw_palette("Starfish",n = length(unique(df$hcr)), type = "discrete")
   g <- ggplot(df, aes(x = hcr, y = value, fill = hcr)) +
     geom_violin() +
     geom_boxplot(width = 0.15, col = "black", outlier.shape = NA) +
