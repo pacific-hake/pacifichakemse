@@ -28,7 +28,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
                               df = NULL,
                               ss_model = NULL,
                               om_objs = NULL,
-                              random_seed = 12345,
+                              random_seed = NULL,
                               n_sim_yrs = NULL,
                               tac = 1,
                               c_increase = 0,
@@ -49,20 +49,15 @@ run_multiple_MSEs <- function(results_dir = NULL,
   verify_argument(sel_change, "numeric", 1)
   verify_argument(f_sim, "numeric", 1)
 
-  set.seed(random_seed)
+  # TODO: Investigate setting the seed here instead of in the run_om() function
+  # I think when it is set in run_om() all the r_devs end up being the same for a given scenario
+  # set.seed(random_seed)
 
   yr_last_non_sim <- df$yrs[df$n_yr]
   yr_start <- yr_last_non_sim + 1
   yr_end <- yr_last_non_sim + n_sim_yrs
   yr_sims <- yr_start:yr_end
   yr_all <- c(df$yrs, yr_sims)
-
-  # Save the estimated parameters from the EM (exclude time varying)
-  # em_parms_save <- array(NA, dim = c(n_sim_yrs, 4))
-  # f40_save <- array(NA, n_sim_yrs)
-  # ssb_save <- list()
-  # r_save <- list()
-  # catch_save <- list()
 
   # Calculate survey years, where odd years are survey years
   first_sim_surv_yr <- ifelse(yr_start %% 2 == 1, yr_start, yr_start + 1)
@@ -72,7 +67,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
 
   # Store the leading parameters from each year simulation year
   leading_params <- c("log_r_init", "log_h", "log_m_init", "log_sd_surv")
-  params_save <- array(NA, dim = c(n_sim_yrs, 4))
+  params_save <- array(NA, dim = c(n_sim_yrs, length(leading_params)))
 
   # Modify survey objects in the simulated survey years and add catch for new year
   # Start with the last year in the time series `yr_last_non_sim` so that reference points can
@@ -97,7 +92,9 @@ run_multiple_MSEs <- function(results_dir = NULL,
     yr_ind <- which(yr == yr_all)
 
     # Run the Operating Model (OM)
-    sim_data <<- run_om(df, om_objs, ...)
+    cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
+    sim_data <<- run_om(df, om_objs, random_seed = random_seed, ...)
+    #browser()
     # Save the OM data the first time through for extraction later
     #if(yr == yr_end){
       #om_file_name <- file.path(results_dir, paste0("om_", file_name))
@@ -230,18 +227,20 @@ run_multiple_MSEs <- function(results_dir = NULL,
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
-      sdrep <- sdreport(obj)
-      j <- sdrep_summary <- summary(sdrep)
-      rep_names <- rownames(sdrep_summary)
-      tmp <- sdrep_summary[rep_names == "SSB", 2]
-      names(tmp) <- df$yrs
-      em_output$ssb_se[[em_iter]] <<- tmp
-      tmp <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
-      names(tmp) <- df$yrs
-      em_output$ssb_min[[em_iter]] <<- tmp
-      tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
-      names(tmp) <- df$yrs
-      em_output$ssb_max[[em_iter]] <<- tmp
+      if(yr == yr_end){
+        sdrep <- sdreport(obj)
+        j <- sdrep_summary <- summary(sdrep)
+        rep_names <- rownames(sdrep_summary)
+        tmp <- sdrep_summary[rep_names == "SSB", 2]
+        names(tmp) <- df$yrs
+        em_output$ssb_se[[em_iter]] <<- tmp
+        tmp <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
+        names(tmp) <- df$yrs
+        em_output$ssb_min[[em_iter]] <<- tmp
+        tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
+        names(tmp) <- df$yrs
+        em_output$ssb_max[[em_iter]] <<- tmp
+      }
       em_iter <<- em_iter + 1
     }
 
@@ -249,7 +248,6 @@ run_multiple_MSEs <- function(results_dir = NULL,
     # are being passed into this function. Double <<- is used here so that `df` is
     # in scope in the next iteration of the loop. Without that, `df` would be `NULL`
     # in the next simulation year.
-    message("Year before update_om_data() call is ", yr)
     if(yr < yr_end){
       # No need to call this in the final year as the loop is over
       df <<- update_om_data(df,
@@ -261,7 +259,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
                             c_increase,
                             m_increase,
                             sel_change,
-                            zero_rdevs = TRUE)
+                            zero_rdevs = FALSE)
     }else{
       NA
     }

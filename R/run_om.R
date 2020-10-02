@@ -11,18 +11,12 @@
 #' @export
 run_om <- function(df = NULL,
                    om_objs = NULL,
+                   random_seed,
                    ...){
   verify_argument(df, "list")
   verify_argument(om_objs, "list")
 
-  # # Add the sim yrs in so that arrays don't have to redimension during the
-  # # simulation years later. This makes the code faster and simpler overall
-  # yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
-  # lst <- setup_blank_om_objects(yrs = yrs_all,
-  #                               ages = df$ages,
-  #                               max_surv_age = df$age_max_age,
-  #                               n_space = df$n_space,
-  #                               n_season = df$n_season)
+  set.seed(random_seed)
 
   lst <- init_agebased_model(df, om_objs)
 
@@ -42,6 +36,5 @@ run_om <- function(df = NULL,
   })
   lst <- run_year_loop_om(df, lst, ...)
 
-    #Catch.age[,idx]  <- (Fyrs/(Fyrs+m_yrs))*(1-exp(-(Fyrs+m_yrs)))*rowSums(N.save.age[,idx,,1])*wage$catch # Calculate the catch in kg
-
+  # Catch.age[,idx]  <- (Fyrs/(Fyrs+m_yrs))*(1-exp(-(Fyrs+m_yrs)))*rowSums(N.save.age[,idx,,1])*wage$catch # Calculate the catch in kg
 }
