@@ -81,6 +81,7 @@ plot_aa_country <- function(ps = NULL,
 
   stopifnot(all(ci %in% names(aa)))
   stopifnot("0.5" %in% names(aa))
+  aa$year <- as.numeric(aa$year)
   aa_can <- aa %>% filter(country == "Canada")
   aa_us <- aa %>% filter(country == "US")
 
