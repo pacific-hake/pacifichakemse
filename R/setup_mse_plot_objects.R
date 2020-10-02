@@ -191,12 +191,12 @@ setup_mse_plot_objects <- function(results_dir = NULL,
       mutate(scenario = factor(scenario, levels = plotnames[porder]))
   }
 
-  # AMC and AMS country combined
+  # AMC and AMS countries combined
   amc_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_ca_quant")
   amc_us_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_us_quant")
   amc_ca_tmp <- amc_ca_quant %>%
     mutate(country = "Canada")
-  amc_us_tmp <- amc_ca_quant %>%
+  amc_us_tmp <- amc_us_quant %>%
     mutate(country = "US")
   amc_space_quant <- amc_ca_tmp %>%
     bind_rows(amc_us_tmp)
@@ -204,7 +204,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   ams_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_us_quant")
   ams_ca_tmp <- ams_ca_quant %>%
     mutate(country = "Canada")
-  ams_us_tmp <- ams_ca_quant %>%
+  ams_us_tmp <- ams_us_quant %>%
     mutate(country = "US")
   ams_space_quant <- ams_ca_tmp %>%
     bind_rows(ams_us_tmp)
