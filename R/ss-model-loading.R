@@ -513,7 +513,7 @@ load_ss_model_data <- function(ss_model,
 
   # Sample sizes for fishery and survey
   ss <- ss_model$agedbase %>%
-    transmute(yr = Yr, fleet = Fleet, ss = N) %>%
+    transmute(yr = Yr, fleet = Fleet, ss = Nsamp_adj) %>%
     distinct()
   ss_catch <- ss %>%
     filter(fleet == 1) %>%
@@ -541,6 +541,10 @@ load_ss_model_data <- function(ss_model,
   # The following is shown in a table in the assessment doc and made by the
   # make.median.posterior.table() function in the hake-assessment repository
   mc <- ss_model$mcmccalcs
+  if(is.null(mc)){
+    stop("You must have a valid MCMC folder in the SS model directory to  load from",
+         call. = FALSE)
+  }
   vals_mc <- mc[c("smed", "dmed", "rmed", "pmed", "fmed")]
   vals_mc <- map(vals_mc, ~{
     .x[names(.x) %in% yrs]
