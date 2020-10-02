@@ -15,7 +15,7 @@ plot_aa <- function(ps = NULL,
   stopifnot(length(ci) == 2)
 
   if(type == "survey"){
-    aa <- ps$mse_values_agg$ams_quant
+    aa <- ps$mse_values_agg$ams_tot_quant
     stopifnot("0.5" %in% names(aa))
     are_na <- aa[-which(is.na(aa$`0.5`)), ]
     if(length(are_na)){
@@ -23,7 +23,7 @@ plot_aa <- function(ps = NULL,
     }
     ylab <- "Average age in survey"
   }else if(type == "catch"){
-    aa <- ps$mse_values_agg$amc_quant
+    aa <- ps$mse_values_agg$amc_tot_quant
     stopifnot("0.5" %in% names(aa))
     ylab <- "Average age in catch"
   }else{
@@ -33,13 +33,14 @@ plot_aa <- function(ps = NULL,
   stopifnot(all(ci %in% names(aa)))
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
-  g <- ggplot(aa, aes(x = year, y = `0.5`, color = run)) +
+  aa$year <- as.numeric(aa$year)
+  g <- ggplot(aa, aes(x = year, y = `0.5`, color = scenario)) +
     geom_line(size = 2) +
-    #geom_ribbon(aes(ymin = p5, ymax = p95, color = run), linetype = 2, fill = NA) +
+    #geom_ribbon(aes(ymin = p5, ymax = p95, color = scenario), linetype = 2, fill = NA) +
     scale_color_manual(values = ps$cols) +
     scale_y_continuous(name = ylab) +
-    geom_line(aes(y = !!ci[[1]], color = run), linetype = 2) +
-    geom_line(aes(y = !!ci[[2]], color = run), linetype = 2) +
+    geom_line(aes(y = !!ci[[1]], color = scenario), linetype = 2) +
+    geom_line(aes(y = !!ci[[2]], color = scenario), linetype = 2) +
     theme(legend.title = element_blank(),
           legend.position = c(0.1, 0.9))
   g
@@ -98,7 +99,7 @@ plot_aa_country <- function(ps = NULL,
                 fill = alpha(country_colors[2], alpha = 0.2),
                 color = country_colors[2]) +
     scale_y_continuous(name = ylab)+
-    facet_wrap(~run) +
+    facet_wrap(~scenario) +
     theme(legend.position = "n") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
   g
