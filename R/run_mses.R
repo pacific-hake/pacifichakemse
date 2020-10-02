@@ -12,9 +12,9 @@
 #' `NULL` or the same length as `fns`
 #' @param tacs A vector of TAC values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param c_increases A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param c_increases Increase in max movement. A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param m_increases A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param m_increases Decrease of spawners returning south. A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
 #' @param sel_changes A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
 #' order as the `fns` file names, or a single value
@@ -73,6 +73,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   stopifnot(is.null(n_surveys) | length(n_surveys) == length(fns))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
 
+  tictoc::tic()
   # Seed for the random recruitment deviations: rnorm(n = 1, mean = 0, sd = exp(df$rdev_sd))
   # found in update_om_data.R. This is also the seed used to set up the random seeds for each
   # run (search below for "seeds")
@@ -154,6 +155,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
 
   map2(fns, 1:length(fns), function(.x, .y, ...){
+    cat(crayon::white("Scenario:", .x, "\n"))
     ls_save <- map(1:n_runs, function(run = .x, ...){
       if(length(sel_changes) != 1 || sel_changes != 0){
         df <- load_data_om(...,
@@ -168,6 +170,7 @@ run_mses <- function(ss_model_output_dir = NULL,
       }
 
       if(is.null(multiple_season_data)){
+        cat(green("Run #", run, "\n"))
         tmp <- run_multiple_MSEs(
           results_dir = results_dir, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
           file_name = .x, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
@@ -194,4 +197,5 @@ run_mses <- function(ss_model_output_dir = NULL,
     attr(ls_save, "plotname") <- plot_names[.y]
     saveRDS(ls_save, file = file.path(results_dir, .x))
   }, ...)
+  tictoc::toc()
 }
