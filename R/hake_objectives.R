@@ -145,19 +145,22 @@ hake_objectives <- function(lst = NULL,
 
   #----------- Calculate quantiles by year -------------------
   out$catch_quant <- map2(sim_data, 1:nruns,~{
-    tmp <- .x$catch %>% as_tibble() %>%
+    tmp <- .x$catch %>%
+      as.data.frame()
+    names(tmp) <- "value"
+    tmp <- tmp %>%
+      as_tibble() %>%
       mutate(year = yrs) %>%
       mutate(run = .y)
   })
   names(out$catch_quant) <- 1:nruns
   out$catch_quant <- out$catch_quant %>%
     map_dfr(~{.x}) %>%
-    select(year, run, V1) %>%
-    rename(val = V1)
+    select(year, run, value)
 
   out$catch_quant <- calc_quantiles_by_group(out$catch_quant,
                                              "year",
-                                             "val",
+                                             "value",
                                              probs = quants)
   #-----------------------------------------------------------
 
