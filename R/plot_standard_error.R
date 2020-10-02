@@ -23,7 +23,7 @@ plot_standard_error <- function(ps = NULL,
   g <- ggplot(se, aes(x = year, y = `0.5`)) +
     theme_classic() +
     geom_line(size = 1.5) +
-    facet_wrap(~run) +
+    facet_wrap(~scenario) +
     geom_hline(yintercept = 0.0, linetype = 2) +
     geom_ribbon(aes(ymin = !!ci[[1]],
                     ymax = !!ci[[2]]),

@@ -226,6 +226,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # Standard error between the OM and EM (final year)
   standard_error_ssb <- map(seq_along(em_output), ~{
     calc_standard_error_ssb(em_output[[.x]], om_output[[.x]]) %>%
+      calc_quantiles_by_group(grp_col = "year", col = "ssb_se", include_mean = FALSE) %>%
       mutate(scenario = plotnames[.x])
   }) %>%
     map_df(~{.x})
