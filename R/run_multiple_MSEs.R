@@ -41,12 +41,12 @@ run_multiple_MSEs <- function(results_dir = NULL,
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
   verify_argument(om_objs, "list")
-  verify_argument(random_seed, "numeric", 1)
-  verify_argument(n_sim_yrs, "numeric", 1)
-  verify_argument(tac, "numeric", 1)
-  verify_argument(c_increase, "numeric", 1)
-  verify_argument(m_increase, "numeric", 1)
-  verify_argument(sel_change, "numeric", 1)
+  verify_argument(random_seed, c("integer", "numeric"), 1)
+  verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
+  verify_argument(tac, c("integer", "numeric"), 1)
+  verify_argument(c_increase, c("integer", "numeric"), 1)
+  verify_argument(m_increase, c("integer", "numeric"), 1)
+  verify_argument(sel_change, c("integer", "numeric"), 1)
   verify_argument(f_sim, "numeric", 1)
 
   # TODO: Investigate setting the seed here instead of in the run_om() function

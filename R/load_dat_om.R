@@ -103,7 +103,7 @@ load_data_om <- function(ss_model = NULL,
   verify_argument(move_south, "numeric", 1)
   verify_argument(move_slope, "numeric", 1)
   verify_argument(ages_no_move, c("numeric", "integer"))
-  verify_argument(selectivity_change, "numeric", 1)
+  verify_argument(selectivity_change, c("numeric", "integer"), 1)
   verify_argument(s_min, c("numeric", "integer"), 1)
   verify_argument(s_max, c("numeric", "integer"), 1)
   verify_argument(s_min_survey, c("numeric", "integer"), 1)
@@ -268,7 +268,7 @@ load_data_om <- function(ss_model = NULL,
   lst$b_future <- b_future
 
   # if(yr_future > 1){
-  #   # TODO: Need to debug this, make sure it works
+  #  TODO: Need to debug this, make sure it works
   #   # lst$yrs where survey occurs
   #   idx_future <- length(s_yr:m_yr) + seq(2, yr_future, by = lst$n_survey)
   #   #lst$survey_x <- c(lst$survey_x, rep(-2, yr_future))
@@ -285,6 +285,43 @@ load_data_om <- function(ss_model = NULL,
   #   # Bias adjustment
   #   lst$b <- c(lst$b, rep(lst$b_future, yr_future))
   # }
+
+  age_max_age <- nrow(ss_model$age_survey)
+  # Parameters to initialize the OM with
+  parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(lst$r_mul),
+                     log_h = ss_model$parms_scalar$log_h,
+                     log_m_init = ss_model$parms_scalar$log_m_init,
+                     log_sd_surv = ss_model$parms_scalar$log_sd_surv,
+                     log_phi_survey = ss_model$parms_scalar$log_phi_survey,
+                     log_phi_catch = ss_model$parms_scalar$log_phi_catch,
+                     p_sel_fish = ss_model$p_sel_fish,
+                     p_sel_surv = ss_model$p_sel_surv,
+                     init_n = lst$init_n,
+                     r_in = lst$r_dev)
+
+  # Merge the SS model output list with the OM outputs, and the parameters to
+  # initialize the OM with
+  lst <- append_objs_to_list(lst,
+                            parameters,
+                            ss_model$wage_catch_df,
+                            ss_model$wage_survey_df,
+                            ss_model$wage_ssb_df,
+                            ss_model$wage_mid_df,
+                            ss_model$mat_sel,
+                            # Make sure the survey has the same length as the catch time series
+                            ss_model$survey,
+                            # Make sure the survey has the same length as the catch time series
+                            ss_model$survey_err,
+                            ss_model$ss_survey,
+                            # Is there a survey in that year?
+                            ss_model$flag_survey,
+                            ss_model$age_survey,
+                            ss_model$age_catch,
+                            age_max_age,
+                            ss_model$ss_catch,
+                            ss_model$flag_catch,
+                            ss_model$sel_by_yrs,
+                            ss_model$b)
 
   lst
 }

@@ -60,11 +60,11 @@ run_mses <- function(ss_model_output_dir = NULL,
     call. = FALSE)
   }
   verify_argument(fns, chk_len = length(plot_names))
-  verify_argument(tacs, "numeric")
-  verify_argument(c_increases, "numeric")
-  verify_argument(m_increases, "numeric")
-  verify_argument(sel_changes, "numeric")
-  verify_argument(n_surveys, "numeric")
+  verify_argument(tacs, c("integer", "numeric"))
+  verify_argument(c_increases, c("integer", "numeric"))
+  verify_argument(m_increases, c("integer", "numeric"))
+  verify_argument(sel_changes, c("integer", "numeric"))
+  verify_argument(n_surveys, c("integer", "numeric"))
 
   stopifnot(length(tacs) == 1 | length(tacs) == length(fns))
   stopifnot(length(c_increases) == 1 | length(c_increases) == length(fns))
@@ -104,43 +104,6 @@ run_mses <- function(ss_model_output_dir = NULL,
   # Prepare data for the OM. This includes initializing the movement model
   df <- load_data_om(ss_model, n_sim_yrs, ...)
 
-  age_max_age <- nrow(ss_model$age_survey)
-  # Parameters to initialize the OM with
-  parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(df$r_mul),
-                     log_h = ss_model$parms_scalar$log_h,
-                     log_m_init = ss_model$parms_scalar$log_m_init,
-                     log_sd_surv = ss_model$parms_scalar$log_sd_surv,
-                     log_phi_survey = ss_model$parms_scalar$log_phi_survey,
-                     log_phi_catch = ss_model$parms_scalar$log_phi_catch,
-                     p_sel_fish = ss_model$p_sel_fish,
-                     p_sel_surv = ss_model$p_sel_surv,
-                     init_n = df$init_n,
-                     r_in = df$r_dev)
-
-  # Merge the SS model output list with the OM outputs, and the parameters to
-  # initialize the OM with
-  df <- append_objs_to_list(df,
-                            parameters,
-                            ss_model$wage_catch_df,
-                            ss_model$wage_survey_df,
-                            ss_model$wage_ssb_df,
-                            ss_model$wage_mid_df,
-                            ss_model$mat_sel,
-                            # Make sure the survey has the same length as the catch time series
-                            ss_model$survey,
-                            # Make sure the survey has the same length as the catch time series
-                            ss_model$survey_err,
-                            ss_model$ss_survey,
-                            # Is there a survey in that year?
-                            ss_model$flag_survey,
-                            ss_model$age_survey,
-                            ss_model$age_catch,
-                            age_max_age,
-                            ss_model$ss_catch,
-                            ss_model$flag_catch,
-                            ss_model$sel_by_yrs,
-                            ss_model$b)
-
   # Add the sim yrs in so that arrays don't have to be redimensioned during the
   # simulations later. This makes the code faster and simpler overall
   yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
@@ -158,10 +121,13 @@ run_mses <- function(ss_model_output_dir = NULL,
     cat(crayon::white("Scenario:", .x, "\n"))
     ls_save <- map(1:n_runs, function(run = .x, ...){
       if(length(sel_changes) != 1 || sel_changes != 0){
-        df <- load_data_om(...,
+        df <- load_data_om(ss_model,
+                           n_sim_yrs,
+                           n_survey = n_surveys,
                            selectivity_change = ifelse(length(sel_changes) == 1,
                                                        sel_changes,
-                                                       sel_changes[.y]))
+                                                       sel_changes[.y]),
+                           ...)
       }
       if(is.null(n_surveys)){
         df$n_survey <- 2
@@ -179,7 +145,8 @@ run_mses <- function(ss_model_output_dir = NULL,
           om_objs = om_objs,
           random_seed = seeds[run],
           n_sim_yrs = n_sim_yrs,
-          tac = if(length(tacs) == 1) tacs else tacs[.y],
+          tac = ifelse(length(tacs) == 1, tacs, tacs[.y]),
+          sel_change = ifelse(length(sel_changes) == 1, sel_changes, sel_changes[.y]),
           c_increase = ifelse(length(c_increases) == 1, c_increases, c_increases[.y]),
           m_increase = ifelse(length(m_increases) == 1, m_increases, m_increases[.y]),
           ...)
