@@ -14,7 +14,7 @@ plot_ssb <- function(ps = NULL,
   stopifnot(!is.null(ps))
   stopifnot(!is.null(ci))
 
-  ssb <- ps$mse_values_agg$ssb_quant
+  ssb <- ps$mse_quants$ssb_quant
   stopifnot("country" %in% names(ssb))
   stopifnot("0.5" %in% names(ssb))
   stopifnot(is.numeric(ci))
@@ -23,6 +23,7 @@ plot_ssb <- function(ps = NULL,
 
   ssb_can <- ssb %>% filter(country == "Canada")
   ssb_us <- ssb %>% filter(country == "US")
+  browser()
   ci <- as.character(ci) %>% map(~{sym(.x)})
 
   g <- ggplot(ssb_can, aes(x = year, y = `0.5` * 1e-6)) +
@@ -32,7 +33,7 @@ plot_ssb <- function(ps = NULL,
     geom_line(aes(y = ssb_us$`0.5` * 1e-6), color = "darkblue", size = 1.5) +
     theme_classic() +
     scale_y_continuous(name ="SSB (million tonnes)") +
-    facet_wrap(~run) +
+    facet_wrap(~scenario) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
     geom_ribbon(aes(ymin = ssb_us[[ci[[1]]]] * 1e-6, ymax = ssb_us[[ci[[2]]]] * 1e-6),
                 fill = alpha("blue", alpha = 0.2), linetype = 0)

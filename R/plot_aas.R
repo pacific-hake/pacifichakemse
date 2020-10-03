@@ -15,15 +15,11 @@ plot_aa <- function(ps = NULL,
   stopifnot(length(ci) == 2)
 
   if(type == "survey"){
-    aa <- ps$mse_values_agg$ams_tot_quant
+    aa <- ps$mse_quants$ams_quant
     stopifnot("0.5" %in% names(aa))
-    are_na <- aa[-which(is.na(aa$`0.5`)), ]
-    if(length(are_na)){
-      aa <- aa[-which(is.na(aa$`0.5`)), ]
-    }
     ylab <- "Average age in survey"
   }else if(type == "catch"){
-    aa <- ps$mse_values_agg$amc_tot_quant
+    aa <- ps$mse_quants$amc_quant
     stopifnot("0.5" %in% names(aa))
     ylab <- "Average age in catch"
   }else{
@@ -34,6 +30,7 @@ plot_aa <- function(ps = NULL,
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
   aa$year <- as.numeric(aa$year)
+
   g <- ggplot(aa, aes(x = year, y = `0.5`, color = scenario)) +
     geom_line(size = 2) +
     #geom_ribbon(aes(ymin = p5, ymax = p95, color = scenario), linetype = 2, fill = NA) +
@@ -69,10 +66,10 @@ plot_aa_country <- function(ps = NULL,
   stopifnot(length(ci) == 2)
 
   if(type == "survey"){
-    aa <- ps$mse_values_agg$ams_space_quant
+    aa <- ps$mse_quants$ams_quant
     ylab <- "Average age in survey"
   }else if(type == "catch"){
-    aa <- ps$mse_values_agg$amc_space_quant
+    aa <- ps$mse_quants$amc_quant
     ylab <- "Average age in catch"
   }else{
     stop("`type` must be one of 'survey' or 'catch'",

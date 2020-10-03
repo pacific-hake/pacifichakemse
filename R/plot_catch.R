@@ -12,7 +12,7 @@ plot_catch <- function(ps = NULL,
   stopifnot(!is.null(ps))
   stopifnot(!is.null(ci))
 
-  catch <- ps$mse_values_agg$catch_quant
+  catch <- ps$mse_quants$catch_quant
   stopifnot("0.5" %in% names(catch))
   stopifnot(is.numeric(ci))
   stopifnot(all(ci %in% names(catch)))

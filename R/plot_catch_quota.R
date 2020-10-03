@@ -12,24 +12,25 @@ plot_catch_quota <- function(ps = NULL,
   stopifnot(!is.null(ps))
   stopifnot(!is.null(ci))
 
-  cq <- ps$mse_values_agg$catch_q_quant
+  cq <- ps$mse_quants$quota_quant
   stopifnot("0.5" %in% names(cq))
   stopifnot(is.numeric(ci))
   stopifnot(all(ci %in% names(cq)))
   stopifnot(length(ci) == 2)
+
   cq_can <- cq %>%
     filter(country == "Canada")
   cq_us <- cq %>%
     filter(country == "US")
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
-
+  browser()
   g <- ggplot(cq_can, aes(x = year, y = `0.5`)) +
     geom_line(color = "red") +
     geom_line(aes(y = cq_us$`0.5`), color = "blue") +
     theme_classic() +
     scale_y_continuous(name = "Catch/quota") +
-    facet_wrap(~run) +
+    facet_wrap(~scenario) +
     coord_cartesian(ylim = c(0.6, 1.1)) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
     geom_ribbon(aes(ymin = !!ci[[1]], ymax = !!ci[[2]]),
