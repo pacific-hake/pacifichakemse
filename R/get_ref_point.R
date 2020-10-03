@@ -18,7 +18,7 @@ get_ref_point <- function(pars,
                           ssb_y,
                           f_in = NA,
                           n_end,
-                          tac = 1,
+                          tac = NULL,
                           v_real = NA,
                           space = 2,
                           catch_floor = NULL,
@@ -113,22 +113,13 @@ get_ref_point <- function(pars,
                             (0.4 * ssb_0 - 0.1 * ssb_0)))
   }
 
-  # Adjust tac by JMC/Utilization
-  tac_obs <- read_csv(system.file("extdata/adjusted_tac_fn.csv",
-                                  package = "PacifichakeMSE",
-                                  mustWork = TRUE),
-                      col_types = cols())
-
-  if(tac == 1){
-    c_exp <- c_new
-  }else if(tac == 2){
-    c_exp <- tac_obs$incpt[1] + tac_obs$slp[1] * c_new
-  }else if(tac == 3){
-    c_exp <- tac_obs$incpt[2] + tac_obs$slp[2] * c_new
-  }else if(tac == 4){
-    # Half the treaty specified and with a lower floor
+  # Adjust TAC by JMC/Utilization
+  if(length(tac) == 1){
+    # Floor 50%
     c_exp <- c_new * 0.5
     c_exp <- ifelse(c_exp < catch_floor, catch_floor, c_exp)
+  }else{
+    c_exp <- tac[1] + tac[2] * c_new
   }
   # Never go over the JTC recommendation
   c_exp <- ifelse(c_exp > c_new, c_new, c_exp)

@@ -30,7 +30,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
                               om_objs = NULL,
                               random_seed = NULL,
                               n_sim_yrs = NULL,
-                              tac = 1,
+                              tac = NULL,
                               c_increase = 0,
                               m_increase = 0,
                               sel_change = 0,
@@ -43,7 +43,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
   verify_argument(om_objs, "list")
   verify_argument(random_seed, c("integer", "numeric"), 1)
   verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
-  verify_argument(tac, c("integer", "numeric"), 1)
+  verify_argument(tac, c("integer", "numeric"))
   verify_argument(c_increase, c("integer", "numeric"), 1)
   verify_argument(m_increase, c("integer", "numeric"), 1)
   verify_argument(sel_change, c("integer", "numeric"), 1)

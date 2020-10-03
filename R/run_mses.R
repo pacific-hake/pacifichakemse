@@ -60,7 +60,7 @@ run_mses <- function(ss_model_output_dir = NULL,
     call. = FALSE)
   }
   verify_argument(fns, chk_len = length(plot_names))
-  verify_argument(tacs, c("integer", "numeric"))
+  verify_argument(tacs, "list")
   verify_argument(c_increases, c("integer", "numeric"))
   verify_argument(m_increases, c("integer", "numeric"))
   verify_argument(sel_changes, c("integer", "numeric"))
@@ -145,7 +145,7 @@ run_mses <- function(ss_model_output_dir = NULL,
           om_objs = om_objs,
           random_seed = seeds[run],
           n_sim_yrs = n_sim_yrs,
-          tac = ifelse(length(tacs) == 1, tacs, tacs[.y]),
+          tac = if(length(tacs) == 1) tacs else tacs[[.y]],
           sel_change = ifelse(length(sel_changes) == 1, sel_changes, sel_changes[.y]),
           c_increase = ifelse(length(c_increases) == 1, c_increases, c_increases[.y]),
           m_increase = ifelse(length(m_increases) == 1, m_increases, m_increases[.y]),
