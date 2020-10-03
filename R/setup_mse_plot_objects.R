@@ -59,14 +59,14 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     })
   })
 
-  # check this using str(om_output, 2)
+  # Operating model output - check this using str(om_output, 2)
   om_output <- map(mse_om_output, ~{
     map(.x, ~{
       .x[[2]]
     })
   })
 
-  # check this using str(em_output, 3)
+  #  Estimation model output -  check this using str(em_output, 3)
   em_output <- map(mse_om_output, ~{
     map(.x, ~{
       .x[[3]]
@@ -107,6 +107,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   }
   stopifnot(length(porder) == length(mse_output))
 
+  #----------------------------------------------------------------------------
   #cols <- brewer.pal(6, "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
   cols <- pnw_palette("Starfish", n = length(plotnames), type = "discrete")
@@ -121,6 +122,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp
   }, ...)
 
+  #----------------------------------------------------------------------------
   df_all_indicators <- map2(lst_indicators, 1:length(lst_indicators), ~{
     .x$info %>%
       mutate(hcr = names(lst_indicators)[.y])
@@ -128,6 +130,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     map_df(~{.x}) %>%
     mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
 
+  #----------------------------------------------------------------------------
   df_violin_indicators <-  map2(lst_indicators, 1:length(lst_indicators), ~{
     .x$vtac_seas %>%
       mutate(hcr = names(lst_indicators)[.y])
@@ -148,10 +151,12 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   indicators <- unique(df_all_indicators$indicator) %>% as.character
   cutoff_ind <- grep("ong term", indicators)
 
+  #----------------------------------------------------------------------------
   df_ssb_catch_indicators <- df_all_indicators %>%
     filter(indicator %in% indicators[1:cutoff_ind]) %>%
     mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
 
+  #----------------------------------------------------------------------------
   df_country_season_indicators <- df_all_indicators %>%
     filter(indicator %in% indicators[(cutoff_ind + 1):length(indicators)]) %>%
     mutate(country = str_extract(indicator, "^\\w+")) %>%
@@ -163,6 +168,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                                   "Oct-Dec"))) %>%
     mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
 
+  #----------------------------------------------------------------------------
   df_violin <- map2(lst_indicators, seq_along(lst_indicators), ~{
     tmp <- list(yrs_quota_met = .x$yrs_quota_met, # years between 0.1 and 0.4
                 ssb_10 = .x$ssb_10,
@@ -176,10 +182,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp
   })
 
-  # mse_out_data <- map(ls_plots, function(.x, ...){
-  #   tmp <- df_lists(.x, max_yr = max(df$years), ...)
-  # }, ...)
-
+  #----------------------------------------------------------------------------
   # Bind rows of all list[[3]] data frames into single data frame, and order it by scenario
   # `lst` is a list of the outputs from [df_lists()], `val` is the name of the data frame
   merge_dfs_from_scenarios <- function(lst, val){
@@ -191,48 +194,78 @@ setup_mse_plot_objects <- function(results_dir = NULL,
       mutate(scenario = factor(scenario, levels = plotnames[porder]))
   }
 
-  # AMC and AMS countries combined
-  amc_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_ca_quant")
-  amc_us_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_us_quant")
-  amc_ca_tmp <- amc_ca_quant %>%
+  #----------------------------------------------------------------------------
+  # List for holing all the quantiles
+  mse_quants <- NULL
+
+  #----------------------------------------------------------------------------
+  # AMC countries combined
+  mse_quants$amc_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_ca_quant")
+  mse_quants$amc_us_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_us_quant")
+  amc_ca_tmp <- mse_quants$amc_ca_quant %>%
     mutate(country = "Canada")
-  amc_us_tmp <- amc_us_quant %>%
+  amc_us_tmp <- mse_quants$amc_us_quant %>%
     mutate(country = "US")
-  amc_space_quant <- amc_ca_tmp %>%
+  mse_quants$amc_quant <- amc_ca_tmp %>%
     bind_rows(amc_us_tmp)
-  ams_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_ca_quant")
-  ams_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_us_quant")
-  ams_ca_tmp <- ams_ca_quant %>%
+
+  #----------------------------------------------------------------------------
+  # AMS countries combined
+  mse_quants$ams_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_ca_quant")
+  mse_quants$ams_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_us_quant")
+  ams_ca_tmp <- mse_quants$ams_ca_quant %>%
     mutate(country = "Canada")
-  ams_us_tmp <- ams_us_quant %>%
+  ams_us_tmp <- mse_quants$ams_us_quant %>%
     mutate(country = "US")
-  ams_space_quant <- ams_ca_tmp %>%
+  mse_quants$ams_quant <- ams_ca_tmp %>%
     bind_rows(ams_us_tmp)
+
+  #----------------------------------------------------------------------------
   # F0 countries combined
-  f0_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "f0_ca_quant")
-  f0_us_quant <- merge_dfs_from_scenarios(lst_indicators, "f0_us_quant")
-  f0_ca_tmp <- f0_ca_quant %>%
+  mse_quants$f0_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "f0_ca_quant")
+  mse_quants$f0_us_quant <- merge_dfs_from_scenarios(lst_indicators, "f0_us_quant")
+  f0_ca_tmp <- mse_quants$f0_ca_quant %>%
     mutate(country = "Canada")
-  f0_us_tmp <- f0_us_quant %>%
+  f0_us_tmp <- mse_quants$f0_us_quant %>%
     mutate(country = "US")
-  f0_quant <- f0_ca_tmp %>%
+  mse_quants$f0_quant <- f0_ca_tmp %>%
     bind_rows(f0_us_tmp)
 
-  mse_values_agg <- list(ssb_quant = merge_dfs_from_scenarios(lst_indicators, "ssb_plotquant"),
-                         ssb_mid_quant = merge_dfs_from_scenarios(lst_indicators, "ssb_mid_plotquant"),
-                         catch_quant = merge_dfs_from_scenarios(lst_indicators, "catch_quant"),
-                         amc_tot_quant = merge_dfs_from_scenarios(lst_indicators, "amc_tot_quant"),
-                         amc_ca_quant = amc_ca_quant,
-                         amc_us_quant = amc_us_quant,
-                         amc_space_quant = amc_space_quant,
-                         ams_tot_quant = merge_dfs_from_scenarios(lst_indicators, "ams_tot_quant"),
-                         ams_ca_quant = ams_ca_quant,
-                         ams_us_quant = ams_us_quant,
-                         ams_space_quant = ams_space_quant,
-                         f0_ca_quant = f0_ca_quant,
-                         f0_us_quant = f0_us_quant,
-                         f0_quant = f0_quant,
-                         catch_q_quant = merge_dfs_from_scenarios(lst_indicators, "quota_quant"))
+  #----------------------------------------------------------------------------
+  # Catch quota countries combined
+  mse_quants$quota_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_ca_quant")
+  mse_quants$quota_us_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_us_quant")
+  quota_ca_tmp <- mse_quants$quota_ca_quant %>%
+    mutate(country = "Canada")
+  quota_us_tmp <- mse_quants$quota_us_quant %>%
+    mutate(country = "US")
+  mse_quants$quota_quant <- quota_ca_tmp %>%
+    bind_rows(quota_us_tmp)
+
+  #----------------------------------------------------------------------------
+  # SSB countries combined
+  mse_quants$ssb_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ca_quant")
+  mse_quants$ssb_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_us_quant")
+  ssb_ca_tmp <- mse_quants$ssb_ca_quant %>%
+    mutate(country = "Canada")
+  ssb_us_tmp <- mse_quants$ssb_us_quant %>%
+    mutate(country = "US")
+  mse_quants$ssb_quant <- ssb_ca_tmp %>%
+    bind_rows(ssb_us_tmp)
+
+  #----------------------------------------------------------------------------
+  # SSB mid-year countries combined
+  mse_quants$ssb_mid_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_ca_quant")
+  mse_quants$ssb_mid_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_us_quant")
+  ssb_mid_ca_tmp <- mse_quants$ssb_mid_ca_quant %>%
+    mutate(country = "Canada")
+  ssb_mid_us_tmp <- mse_quants$ssb_mid_us_quant %>%
+    mutate(country = "US")
+  mse_quants$ssb_mid_quant <- ssb_mid_ca_tmp %>%
+    bind_rows(ssb_mid_us_tmp)
+
+  #----------------------------------------------------------------------------
+  mse_quants$catch_quant <- merge_dfs_from_scenarios(lst_indicators, "catch_quant")
 
   # Standard error between the OM and EM (final year)
   standard_error_ssb <- map(seq_along(em_output), ~{
@@ -249,7 +282,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        cols = cols,
        plotnames = plotnames,
        lst_indicators = lst_indicators,
-       mse_values_agg = mse_values_agg,
+       mse_quants = mse_quants,
        standard_error_ssb = standard_error_ssb,
        sim_data = om_output)
 }
