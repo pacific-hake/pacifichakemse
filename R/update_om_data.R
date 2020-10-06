@@ -45,7 +45,7 @@ update_om_data <- function(df = NULL,
   verify_argument(f_new, "list", 2)
   verify_argument(c_increase, "numeric", 1)
   verify_argument(m_increase, "numeric", 1)
-  verify_argument(sel_change, "numeric", 1)
+  verify_argument(sel_change, c("integer", "numeric"), 1)
 
   df$catch_obs <- df$catch_obs %>% add_row(yr = yr, value = f_new$c_new)
 
@@ -118,12 +118,10 @@ update_om_data <- function(df = NULL,
   }
 
   # Selectivity modifications
+  df$flag_sel <- c(df$flag_sel, FALSE)
   if(sel_change == 0){
-    df$flag_sel <- c(df$flag_sel, FALSE)
   }else if(sel_change == 1){
-    df$flag_sel <- c(df$flag_sel, TRUE)
   }else if(sel_change == 2){
-    df$flag_sel <- c(df$flag_sel, TRUE)
     df$sel_by_yrs <- cbind(df$sel_by_yrs, rep(0, nrow(df$sel_by_yrs)))
     names(df$sel_by_yrs)[ncol(df$sel_by_yrs)] <- yr
   }

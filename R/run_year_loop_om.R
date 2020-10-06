@@ -111,6 +111,7 @@ run_year_loop_om <- function(df = NULL,
       if(yr > df$m_yr){
         err <- exp(rnorm(n = 1, mean = 0, sd = lst$surv_sd))
         # If the extra factor is not included the mean is > 1
+        # TODO: Check this calculation. See line 538 of run_agedbased_true_catch.R in original code
         surv <- exp(log(sum(n_surv * lst$surv_sel *
                               lst$q * wage$survey)) + err)
       }else{

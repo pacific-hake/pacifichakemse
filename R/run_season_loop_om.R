@@ -35,6 +35,8 @@ run_season_loop_om <- function(df,
       p_sel <- df$parameters$p_sel_fish[df$parameters$p_sel_fish$space == space,]
       p_sel_yrs <- df$sel_by_yrs
       if(df$flag_sel[yr_ind] == 1){
+        message(yr)
+        if(yr == 2019) browser()
         age_1 <- p_sel %>%
           filter(age == 1)
         p_sel_tmp <- p_sel %>%
