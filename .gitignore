@@ -1,4 +1,4 @@
-# Only add raw code files for TMB 
+# Only add raw code files for TMB
 *.o
 *.dll
 
@@ -7,5 +7,4 @@
 *.RData
 *.Rdata
 *.Rproj.user/
-*.Rproj
 .Rproj.user

@@ -1,10 +1,10 @@
-# PacifichakeMSE
+# pacifichakemse
 
-[![Travis build status](https://travis-ci.org/cgrandin/PacifichakeMSE.svg?branch=master)](https://travis-ci.org/cgrandin/PacifichakeMSE)
+[![Travis build status](https://travis-ci.org/pacific-hake/pacifichakemse.svg?branch=master)](https://travis-ci.org/pacific-hake/pacifichakemse)
 [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![Coverage status](https://codecov.io/gh/cgrandin/PacifichakeMSE/branch/master/graph/badge.svg)](https://codecov.io/github/cgrandin/PacifichakeMSE?branch=master)
+[![Coverage status](https://codecov.io/gh/pacific-hake/pacifichakemse/branch/master/graph/badge.svg)](https://codecov.io/github/cgrandin/PacifichakeMSE?branch=master)
 
 Management Strategy Evaluation (MSE) for Pacific hake
 
@@ -12,7 +12,7 @@ To install this package, run the following code. You need to have [Rtools](https
 estimation model which is coded in C++ using the [TMB](https://github.com/kaskr/adcomp) package.
 
 ```r
-devtools::install_github("cgrandin/PacifichakeMSE")
+devtools::install_github("pacific-hake/pacifichakemse")
 ```
 
 To get started, clone or download the [companion project](https://github.com/cgrandin/runhakemse) which contains the calls to the package functions necessary for running the MSE and plotting the results.
@@ -26,6 +26,3 @@ Besides the MSE, the repository also contains the hake stock assessment rewritte
 
 # Description
 Detailed technical description is in progress.
-
-### Disclaimer
-All code by Nis Sand Jacobsen nissandjac@gmail.com . Please do not use in specific management scenarios without first consulting the author.  
