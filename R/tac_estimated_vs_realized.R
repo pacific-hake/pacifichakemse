@@ -15,7 +15,7 @@
 calc_tac_est_vs_real <- function(catch_floor = 180000){
 
   tac_fn <- system.file(file.path("extdata", "TAC.csv"),
-              package = "PacifichakeMSE",
+              package = "pacifichakemse",
               mustWork = TRUE)
   df_tac <- read_csv(tac_fn, col_types = cols())
   df <- load_data_om(n_season = 1, n_space = 1)
