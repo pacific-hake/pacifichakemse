@@ -4,7 +4,7 @@
 \alias{plot_violins}
 \title{Plot faceted violin plots for scenarios}
 \usage{
-plot_violins(ps)
+plot_violins(ps, quants = c(0.05, 0.95), min_yr = 2020)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}

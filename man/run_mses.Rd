@@ -38,10 +38,10 @@ estimates from the SS3 model}
 \item{tacs}{A vector of TAC values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{c_increases}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{c_increases}{Increase in max movement. A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{m_increases}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{m_increases}{Decrease of spawners returning south. A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
 \item{sel_changes}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same

@@ -5,7 +5,7 @@
 \title{Run the Operating Model, which is an age based model
 conditioned on true catch}
 \usage{
-run_om(df = NULL, om_objs = NULL, ...)
+run_om(df = NULL, om_objs = NULL, random_seed, ...)
 }
 \arguments{
 \item{df}{data frame of parameters and life history values}

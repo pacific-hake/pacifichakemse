@@ -10,7 +10,7 @@ get_ref_point(
   ssb_y,
   f_in = NA,
   n_end,
-  tac = 1,
+  tac = NULL,
   v_real = NA,
   space = 2,
   catch_floor = NULL,

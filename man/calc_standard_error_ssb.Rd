@@ -6,20 +6,21 @@
 for all runs in the list}
 \usage{
 calc_standard_error_ssb(
-  lst,
+  em_output,
+  om_output,
   col = "SE.SSB",
   quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
   inc_mean = TRUE
 )
 }
 \arguments{
-\item{lst}{list of MSE results}
-
 \item{col}{Column to calculate the quantiles on}
 
 \item{quants}{A vector of quantiles to pass to \code{\link[stats:quantile]{stats::quantile()}}}
 
 \item{inc_mean}{Logical. Include the mean (as column \code{avg})}
+
+\item{lst}{list of MSE results}
 }
 \value{
 A \link{data.frame} of 3 columns: The run number, the standard error of spawning
