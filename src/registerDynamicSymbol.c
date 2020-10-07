@@ -4,7 +4,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-void R_init_PacifichakeMSE(DllInfo* info) {
+void R_init_pacifichakemse(DllInfo* info) {
   R_registerRoutines(info, NULL, NULL, NULL, NULL);
   R_useDynamicSymbols(info, TRUE);
 }

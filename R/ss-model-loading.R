@@ -412,7 +412,7 @@ load_ss_model_data <- function(ss_model,
   # It is not exactly the same as what is in the SS data file and overwrites that which is
   # loaded above.
   lst$catch_obs <- read_csv(system.file("extdata/catches.csv",
-                                        package = "PacifichakeMSE",
+                                        package = "pacifichakemse",
                                         mustWork = TRUE),
                             col_types = cols("i", "i", "i", "i")) %>%
     transmute(yr = Year,

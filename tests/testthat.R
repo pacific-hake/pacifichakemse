@@ -1,4 +1,4 @@
 library(testthat)
-library(PacifichakeMSE)
+library(pacifichakemse)
 
-test_check("PacifichakeMSE")
+test_check("pacifichakemse")

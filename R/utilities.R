@@ -327,7 +327,7 @@ get_yrs_mse_list <- function(lst){
 csv_data <- function(){
   load_from_csv <- function(file){
     read_csv(system.file(file.path("extdata", file),
-                         package = "PacifichakeMSE",
+                         package = "pacifichakemse",
                          mustWork = TRUE),
              col_types = cols(),
              comment = "#")

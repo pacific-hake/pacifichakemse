@@ -1,6 +1,6 @@
 #' Pacific Hake MSE package
 #'
-#' @name PacifichakeMSE
+#' @name pacifichakemse
 #' @description Management strategy evaluation framework with a Spatial Operating Model.
 #' @docType package
 #' @author Nis S Jacobsen, Ian G. Taylor, Kristin Marshall, Aaron Berger, Chris Grandin
