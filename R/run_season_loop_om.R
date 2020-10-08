@@ -36,34 +36,28 @@ run_season_loop_om <- function(df,
       p_sel <- df$parameters$p_sel_fish[df$parameters$p_sel_fish$space == space,]
       p_sel_yrs <- df$sel_by_yrs
       if(df$flag_sel[yr_ind]){
-        p_sel_no_move <- p_sel %>%
-          filter(age %in% ages_no_move)
-        p_sel_move <- p_sel %>%
-            filter(! age %in% ages_no_move)
-        p_sel_move$value <- p_sel_move$value +
+        p_sel$value <- p_sel$value +
           p_sel_yrs[, yr_ind - df$sel_idx + 1] * df$sigma_p_sel
-        #p_sel_move <- bind_rows(ages_move, p_sel_move)
-      }else{
-        p_sel_move <- p_sel
       }
       if(df$yrs[yr_ind] > df$m_yr){
         if(df$selectivity_change == 1){
           if(space != 1){
-            p_sel_move$value <- c(rep(0.05, df$s_min_survey),
-                                 rep(0, df$s_max_survey - 2 *
-                                       df$s_min_survey + 1))
+            p_sel$value <- c(rep(0.05, df$s_min_survey),
+                             rep(0, df$s_max_survey - 2 *
+                                   df$s_min_survey + 1))
           }
         }else if(df$selectivity_change == 2){
-          p_sel_move$value <- p_sel_move$value +
+          p_sel <- df$parameters$p_sel_fish[df$parameters$p_sel_fish$space == 2,]
+          p_sel$value <- p_sel$value +
             p_sel_yrs[,ncol(p_sel_yrs)] *
             df$sigma_p_sel
         }
       }
 
       # Constant over space
-      if(yr == 1991) browser()
+      #if(yr == 2019) browser()
       f_sel <- get_select(df$ages,
-                          p_sel_move,
+                          p_sel,
                           df$s_min,
                           df$s_max)
       if(yr == 1966 && season == 1 && space == 1){

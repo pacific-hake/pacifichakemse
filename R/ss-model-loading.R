@@ -468,7 +468,7 @@ load_ss_model_data <- function(ss_model,
     filter(grepl("DEVadd", Label))
   sels_lab <- sels$Label
   sels_yrs <- as.numeric(str_extract(sels_lab, "[0-9]+$"))
-  sels_ages <- as.numeric(str_extract(sels_lab, "[0-9]+")) - 1
+  sels_ages <- as.numeric(str_extract(sels_lab, "[0-9]+")) - 2
   sels_vals <- sels$Value
   lst$sel_by_yrs <- tibble(yr = sels_yrs,
                            age = sels_ages,
@@ -490,29 +490,16 @@ load_ss_model_data <- function(ss_model,
   lst$p_sel_fish <- sel_param_ests %>% filter(source == "fish")
   lst$p_sel_surv <- sel_param_ests %>% filter(source == "survey")
 
-  # Add more selectivities by space (area). These are all set to
-  # a selectivity of `selex_fill_val`
-  if(!s_max %in% lst$p_sel_fish$age){
-    lst$p_sel_fish <- lst$p_sel_fish %>%
-      bind_rows(tibble(value = selex_fill_val,
-                        source = "fish",
-                        age = s_max))
-  }
-  if(!s_max_survey %in% lst$p_sel_surv$age){
-    lst$p_sel_surv <- lst$p_sel_surv %>%
-      bind_rows(tibble(value = selex_fill_val,
-                       source = "survey",
-                       age = s_max_survey))
-  }
+  # Add more selectivities by space (area).
   if(n_space == 1){
     lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 1)
   }else{
     lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 2)
     lst$p_sel_fish <- tibble(value = rep(selex_fill_val,
-                                         length(s_min:s_max)),
+                                         length(s_min:(s_max - 1))),
                              source = "fish",
                              space = 1,
-                             age = s_min:s_max) %>%
+                             age = s_min:(s_max - 1)) %>%
       bind_rows(lst$p_sel_fish)
   }
 

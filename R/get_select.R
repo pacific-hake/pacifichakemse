@@ -7,6 +7,7 @@
 #' @param s_max Maximum age
 #'
 #' @return A vector of selectivity values of the same length as the `ages` vector
+#' @importFrom dplyr arrange
 #' @export
 get_select <- function(ages = NULL,
                        p_sel = NULL,
@@ -24,28 +25,21 @@ get_select <- function(ages = NULL,
 
   n_age <- length(ages)
   sel <- rep(NA, n_age)
-  p_max <- max(cumsum(p_sel$value))
-  if(!1 %in% p_sel$age){
-    p_sel <- rbind(p_sel, p_sel[nrow(p_sel), ])
-    p_sel[nrow(p_sel), ]$age <- 1
-    p_sel[nrow(p_sel), ]$value <- 0
-  }
+  p_sel_val <- c(0, p_sel %>% pull(value))
+  p_max <- max(cumsum(p_sel_val))
 
   for(i in seq_along(ages)){
     if(ages[i] < s_min){
       sel[i] <- 0
       p_tmp <- 0
-    }else if(ages[i] >= s_min && ages[i] <= s_max){
-      # Using pipes here significantly slows down the code, so use base code
-      #p_tmp <- p_sel %>% filter(age == ages[i]) %>% pull(value) + p_tmp
-      p_tmp <- p_tmp + p_sel[p_sel$age == ages[i],]$value
+    }else if(ages[i] == s_min){
+      p_tmp <- p_sel_val[i - s_min]
+      sel[i] = exp(p_tmp - p_max)
+    }else if(ages[i] > s_min & ages[i] <= s_max){
+      p_tmp <- p_sel_val[i - s_min] + p_tmp
       sel[i] <- exp(p_tmp - p_max)
     }else{
-      if(is.na(sel[s_max + 1])){
-        sel[i] <- sel[s_max]
-      }else{
-        sel[i] <- sel[s_max + 1]
-      }
+      sel[i] <- sel[s_max + 1]
     }
   }
   sel

@@ -10,6 +10,8 @@ load_ss_model_data(
   m_yr = NULL,
   s_min = NULL,
   s_max = NULL,
+  s_min_survey = NULL,
+  s_max_survey = NULL,
   weight_factor = 1000,
   n_space = 1,
   selex_fill_val = 1,

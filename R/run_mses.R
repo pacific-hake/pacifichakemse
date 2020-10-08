@@ -103,9 +103,6 @@ run_mses <- function(ss_model_output_dir = NULL,
 
   # Prepare data for the OM. This includes initializing the movement model and selectivity
   df <- load_data_om(ss_model, n_sim_yrs, ...)
-  # Note: df$parameters$p_sel_fish and df$parameters$p_sel_surv are completely populated at this point,
-  # The estimated values were read in from the SS model (age 2-5 for the survey and 1-5 for the fishery)
-  # were read in from the SS model and age 6 was added to the tables at a value of 1.
 
   # Add the sim yrs into all arrays so that they don't have to be redimensioned during the
   # simulations later. This makes the code faster and simpler overall
