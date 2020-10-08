@@ -94,12 +94,6 @@ run_multiple_MSEs <- function(results_dir = NULL,
     # Run the Operating Model (OM)
     cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
     sim_data <<- run_om(df, om_objs, random_seed = random_seed, ...)
-    #browser()
-    # Save the OM data the first time through for extraction later
-    #if(yr == yr_end){
-      #om_file_name <- file.path(results_dir, paste0("om_", file_name))
-      #saveRDS(sim_data, om_file_name)
-    #}
 
     # Create the data for the Estimation Model (EM)
     if(yr >= yr_start){
