@@ -388,16 +388,22 @@ load_ss_model_data <- function(ss_model,
                                m_yr = NULL,
                                s_min = NULL,
                                s_max = NULL,
+                               s_min_survey = NULL,
+                               s_max_survey = NULL,
                                weight_factor = 1000,
                                n_space = 1,
                                selex_fill_val = 1,
                                ...){
 
+  verify_argument(s_min, c("integer", "numeric"), 1)
+  verify_argument(s_max, c("integer", "numeric"), 1)
   verify_argument(ss_model, "list")
   verify_argument(s_yr, c("integer", "numeric"), 1)
   verify_argument(m_yr, c("integer", "numeric"), 1)
   verify_argument(s_min, c("integer", "numeric"), 1)
   verify_argument(s_max, c("integer", "numeric"), 1)
+  verify_argument(s_min_survey, c("integer", "numeric"), 1)
+  verify_argument(s_max_survey, c("integer", "numeric"), 1)
   verify_argument(n_space, c("integer", "numeric"), 1)
 
   lst <- NULL
@@ -476,16 +482,32 @@ load_ss_model_data <- function(ss_model,
   sel_param_ests <- load_ss_sel_parameters(ss_model,
                                            s_min = s_min,
                                            s_max = s_max,
+                                           s_min_survey = s_min_survey,
+                                           s_max_survey = s_max_survey,
+                                           selex_fill_val = selex_fill_val,
                                            ...)
+
   lst$p_sel_fish <- sel_param_ests %>% filter(source == "fish")
   lst$p_sel_surv <- sel_param_ests %>% filter(source == "survey")
 
   # Add more selectivities by space (area). These are all set to
   # a selectivity of `selex_fill_val`
-  lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 2)
+  if(!s_max %in% lst$p_sel_fish$age){
+    lst$p_sel_fish <- lst$p_sel_fish %>%
+      bind_rows(tibble(value = selex_fill_val,
+                        source = "fish",
+                        age = s_max))
+  }
+  if(!s_max_survey %in% lst$p_sel_surv$age){
+    lst$p_sel_surv <- lst$p_sel_surv %>%
+      bind_rows(tibble(value = selex_fill_val,
+                       source = "survey",
+                       age = s_max_survey))
+  }
   if(n_space == 1){
     lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 1)
   }else{
+    lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 2)
     lst$p_sel_fish <- tibble(value = rep(selex_fill_val,
                                          length(s_min:s_max)),
                              source = "fish",
@@ -923,31 +945,41 @@ load_ss_sel_parameters <- function(ss_model = NULL,
   if(!length(grepl("^SR_LN", parm_tbl$Label))){
     stop("The `log_r_init` parameter was not found in the SS model output. ",
          "The regular expression on the parameter label is `^SR_LN`.",
+         "Debug the load_ss_sel_parameters() function.",
          call. = FALSE)
   }
-  # assume the parameters start at 0
+  # Assume the parameters start at 0, and that the "Used" field signifies unused parameters if negative
   fish <- parm_tbl %>%
-    filter(grepl("^AgeSel_.*_Fishery", Label))
+    filter(grepl("^AgeSel_.*_Fishery", Label)) %>%
+    filter(Used >= 0)
   fish <- fish[-(1:min(fish_ages)),]
-  fish <- fish[-((max(fish_ages) + 1):nrow(fish)),]
+  fish <- fish[-(max(fish_ages):nrow(fish)),]
+  if(nrow(fish) != length(fish_ages) - 1){
+    stop("The SS model does not have selectivity values matching the ages you entered (", s_min, "-", s_max, "). ",
+         "Debug the `fish` object in load_ss_sel_parameters() to see why. This could be due to parameter",
+         "names changing in SS which are matched by a regular expression.",
+         call. = FALSE)
+  }
   fish <- fish %>%
     transmute(value = Value) %>%
     mutate(source = "fish") %>%
-    mutate(age = fish_ages)
-
-  if(!1 %in% fish$age){
-    fish <- fish %>%
-      add_row(value = 0, source = "fish", age = 1, .before = 1)
-  }
+    mutate(age = fish_ages[-length(fish_ages)])
 
   survey <- parm_tbl %>%
-    filter(grepl("^AgeSel_.*_Acoustic_Survey", Label))
-  survey <- survey[-(1:min(survey_ages)),]
-  survey <- survey[-(max(survey_ages):nrow(survey)),]
+    filter(grepl("^AgeSel_.*_Acoustic_Survey", Label)) %>%
+    filter(Used >= 0)
+  survey <- survey[-(1:(min(survey_ages) - 1)),]
+  survey <- survey[-((max(survey_ages) - 1):nrow(survey)),]
+  if(nrow(survey) != length(survey_ages) - 1){
+    stop("The SS model does not have selectivity values matching the ages you entered (", s_min, "-", s_max, "). ",
+         "Debug the `survey` object in load_ss_sel_parameters() to see why. This could be due to parameter",
+         "names changing in SS which are matched by a regular expression.",
+         call. = FALSE)
+  }
   survey <- survey %>%
     transmute(value = Value) %>%
     mutate(source = "survey") %>%
-    mutate(age = survey_ages)
+    mutate(age = survey_ages[-length(survey_ages)])
 
   bind_rows(fish, survey)
 }

@@ -19,6 +19,7 @@ run_season_loop_om <- function(df,
                                yr,
                                yr_ind,
                                m_season,
+                               ages_no_move = c(0, 1),
                                pope_mul = 0.5,
                                verbose = TRUE,
                                ...){
@@ -34,35 +35,41 @@ run_season_loop_om <- function(df,
       }
       p_sel <- df$parameters$p_sel_fish[df$parameters$p_sel_fish$space == space,]
       p_sel_yrs <- df$sel_by_yrs
-      if(df$flag_sel[yr_ind] == 1){
-        message(yr)
-        if(yr == 2019) browser()
-        age_1 <- p_sel %>%
-          filter(age == 1)
-        p_sel_tmp <- p_sel %>%
-            filter(age != 1)
-        p_sel_tmp$value <- p_sel_tmp$value +
+      if(df$flag_sel[yr_ind]){
+        p_sel_no_move <- p_sel %>%
+          filter(age %in% ages_no_move)
+        p_sel_move <- p_sel %>%
+            filter(! age %in% ages_no_move)
+        p_sel_move$value <- p_sel_move$value +
           p_sel_yrs[, yr_ind - df$sel_idx + 1] * df$sigma_p_sel
-        p_sel_tmp <- bind_rows(age_1, p_sel_tmp)
+        #p_sel_move <- bind_rows(ages_move, p_sel_move)
       }else{
-        p_sel_tmp <- p_sel
+        p_sel_move <- p_sel
       }
       if(df$yrs[yr_ind] > df$m_yr){
         if(df$selectivity_change == 1){
           if(space != 1){
-            p_sel_tmp$value <- c(rep(0.05, df$s_min_survey),
-                                 rep(0, df$s_max_survey - 2 * df$s_min_survey + 1))
+            p_sel_move$value <- c(rep(0.05, df$s_min_survey),
+                                 rep(0, df$s_max_survey - 2 *
+                                       df$s_min_survey + 1))
           }
         }else if(df$selectivity_change == 2){
-          p_sel_tmp$value <- p_sel_yrs[,ncol(p_sel_yrs)] * df$sigma_p_sel
+          p_sel_move$value <- p_sel_move$value +
+            p_sel_yrs[,ncol(p_sel_yrs)] *
+            df$sigma_p_sel
         }
       }
 
       # Constant over space
+      if(yr == 1991) browser()
       f_sel <- get_select(df$ages,
-                          p_sel_tmp,
+                          p_sel_move,
                           df$s_min,
                           df$s_max)
+      if(yr == 1966 && season == 1 && space == 1){
+        write(paste("Year", "Season", "Space", "Fsel", sep = ","), "fselvals.csv")
+      }
+      write(paste(yr, season, space, paste(f_sel, sep = ",", collapse = ","), sep = ","), "fselvals.csv", append = TRUE)
 
       lst$f_sel_save[, yr_ind, space] <<- f_sel
       if(df$n_space > 1){

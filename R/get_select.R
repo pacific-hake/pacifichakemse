@@ -25,6 +25,11 @@ get_select <- function(ages = NULL,
   n_age <- length(ages)
   sel <- rep(NA, n_age)
   p_max <- max(cumsum(p_sel$value))
+  if(!1 %in% p_sel$age){
+    p_sel <- rbind(p_sel, p_sel[nrow(p_sel), ])
+    p_sel[nrow(p_sel), ]$age <- 1
+    p_sel[nrow(p_sel), ]$value <- 0
+  }
 
   for(i in seq_along(ages)){
     if(ages[i] < s_min){

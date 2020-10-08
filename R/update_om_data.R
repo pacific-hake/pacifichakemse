@@ -122,8 +122,8 @@ update_om_data <- function(df = NULL,
   if(sel_change == 0){
   }else if(sel_change == 1){
   }else if(sel_change == 2){
-    df$sel_by_yrs <- cbind(df$sel_by_yrs, rep(0, nrow(df$sel_by_yrs)))
-    names(df$sel_by_yrs)[ncol(df$sel_by_yrs)] <- yr
+    # df$sel_by_yrs <- cbind(df$sel_by_yrs, rep(0, nrow(df$sel_by_yrs)))
+    # names(df$sel_by_yrs)[ncol(df$sel_by_yrs)] <- yr
   }
 
   df$yrs <- c(df$yrs, yr)

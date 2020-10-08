@@ -10,6 +10,7 @@ run_season_loop_om(
   yr,
   yr_ind,
   m_season,
+  ages_no_move = c(0, 1),
   pope_mul = 0.5,
   verbose = TRUE,
   ...
