@@ -34,7 +34,6 @@ run_om <- function(df = NULL,
   lst$init_ssb_all <- map_dbl(n_save_age, function(space_num_at_age = .x){
     sum(space_num_at_age * mat_sel, na.rm = TRUE) * 0.5
   })
-  lst <- run_year_loop_om(df, lst, ...)
-
+  run_year_loop_om(df, lst, ...)
   # Catch.age[,idx]  <- (Fyrs/(Fyrs+m_yrs))*(1-exp(-(Fyrs+m_yrs)))*rowSums(N.save.age[,idx,,1])*wage$catch # Calculate the catch in kg
 }
