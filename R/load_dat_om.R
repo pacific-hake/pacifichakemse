@@ -225,13 +225,13 @@ load_data_om <- function(ss_model = NULL,
   }
 
   if(lst$n_season == 4 & lst$n_space == 2){
-    # Last 10 years average catch
-    lst$catch_props_space_season <- ss_model$catch_seas_country
+    lst$catch_props_space_season <- ss_model$catch_props_space_season
   }else{
-    # Equally distributed catch
     lst$catch_props_space_season <- matrix(NA, lst$n_space, lst$n_season)
+    # Equally distributed catch
     lst$catch_props_space_season[1:lst$n_space,] <- 1 / lst$n_season
   }
+
   lst$r_mul <- ifelse(lst$n_space == 2, 1.1, 1)
 
   if(zero_rdevs){

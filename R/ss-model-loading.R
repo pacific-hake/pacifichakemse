@@ -375,8 +375,6 @@ calc_mcmc <- function(mcmc,
 #' Load the SS model input and output data needed by this package in correct format
 #'
 #' @param ss_model SS3 model output as created by [create_rds_file()]
-#' @param s_yr Start year
-#' @param m_yr End year
 #' @param s_min Minimum age in fishery selectivity
 #' @param s_max Maximum age in fishery selectivity
 #' @param weight_factor A factor to multiply and divide SSB values by
@@ -392,8 +390,6 @@ calc_mcmc <- function(mcmc,
 #' @importFrom dplyr distinct
 #' @importFrom reshape2 dcast
 load_ss_model_data <- function(ss_model,
-                               s_yr = NULL,
-                               m_yr = NULL,
                                s_min = 1,
                                s_max = 6,
                                s_min_survey = 2,
@@ -403,25 +399,27 @@ load_ss_model_data <- function(ss_model,
                                selex_fill_val = 1,
                                ...){
 
-  verify_argument(s_min, c("integer", "numeric"), 1)
-  verify_argument(s_max, c("integer", "numeric"), 1)
   verify_argument(ss_model, "list")
-  verify_argument(s_yr, c("integer", "numeric"), 1)
-  verify_argument(m_yr, c("integer", "numeric"), 1)
   verify_argument(s_min, c("integer", "numeric"), 1)
   verify_argument(s_max, c("integer", "numeric"), 1)
   verify_argument(s_min_survey, c("integer", "numeric"), 1)
   verify_argument(s_max_survey, c("integer", "numeric"), 1)
+  verify_argument(weight_factor, c("integer", "numeric"), 1)
   verify_argument(n_space, c("integer", "numeric"), 1)
+  verify_argument(selex_fill_val, c("integer", "numeric"), 1)
 
   lst <- NULL
-  yrs <- s_yr:m_yr
 
   # Catch observations
   lst$catch_obs <- ss_model$dat$catch %>%
     transmute(yr = year,
               value = catch) %>%
     filter(yr != -999)
+
+  s_yr <- min(lst$catch_obs$yr)
+  m_yr <- max(lst$catch_obs$yr)
+  yrs <- s_yr:m_yr
+
   # TODO: This is to copy what is in the original MSE, from the table in the assessment.
   # It is not exactly the same as what is in the SS data file and overwrites that which is
   # loaded above.
@@ -639,7 +637,8 @@ load_ss_model_data <- function(ss_model,
   lst$ctl <- ss_model$ctl
   lst$dat_file <- ss_model$dat_file
   lst$dat <- ss_model$dat
-  lst$catch_seas_country <- ss_model$catch_seas_country
+
+  lst$catch_props_space_season <- ss_model$catch_seas_country
 
   lst
 }
@@ -679,8 +678,8 @@ extract_age_comps <- function(ss_model = NULL,
   verify_argument(ss_model, "list")
   verify_argument(age_comps_fleet, "numeric", 1)
   stopifnot(age_comps_fleet %in% c(1, 2))
-  verify_argument(s_yr, "numeric", 1)
-  verify_argument(m_yr, "numeric", 1)
+  verify_argument(s_yr, c("integer", "numeric"), 1)
+  verify_argument(m_yr, c("integer", "numeric"), 1)
   if(is.na(age_comps_fill)){
     age_comps_fill <- NA_real_
   }
