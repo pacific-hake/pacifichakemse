@@ -172,7 +172,7 @@ load_ss_files <- function(model_dir = NULL,
 #' @importFrom tidyselect starts_with
 #' @export
 calc_mcmc <- function(mcmc,
-                      ss_mcmc_quants = NULL,
+                      ss_mcmc_quants = c(0.025, 0.5, 0.975),
                       biomass_scale = 2e6,
                       recruitment_scale = 1e6,
                       ...){
@@ -386,12 +386,12 @@ calc_mcmc <- function(mcmc,
 load_ss_model_data <- function(ss_model,
                                s_yr = NULL,
                                m_yr = NULL,
-                               s_min = NULL,
-                               s_max = NULL,
-                               s_min_survey = NULL,
-                               s_max_survey = NULL,
+                               s_min = 1,
+                               s_max = 6,
+                               s_min_survey = 2,
+                               s_max_survey = 6,
                                weight_factor = 1000,
-                               n_space = 1,
+                               n_space = 2,
                                selex_fill_val = 1,
                                ...){
 
@@ -935,6 +935,7 @@ load_ss_sel_parameters <- function(ss_model = NULL,
          "Debug the load_ss_sel_parameters() function.",
          call. = FALSE)
   }
+
   # Assume the parameters start at 0, and that the "Used" field signifies unused parameters if negative
   fish <- parm_tbl %>%
     filter(grepl("^AgeSel_.*_Fishery", Label)) %>%

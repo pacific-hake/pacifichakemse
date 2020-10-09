@@ -24,7 +24,7 @@ plot_catch_quota <- function(ps = NULL,
     filter(country == "US")
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
-  browser()
+
   g <- ggplot(cq_can, aes(x = year, y = `0.5`)) +
     geom_line(color = "red") +
     geom_line(aes(y = cq_us$`0.5`), color = "blue") +

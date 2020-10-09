@@ -4,11 +4,7 @@
 #' @param file_name The name of the file in which the MSE output was stored. This will be prepended with 'om_'
 #' for the OM used in this MSE. The actual MSE results are stored by the function calling this one, [run_mses()]
 #' @param df Data frame of parameters as output by [load_data_om()]
-#' @param ss_model SS3 model output as created by [create_rds_file()]
-#' and loaded by [load_ss_model_from_rds()]
-#' @param om_objs Operating model objects as created by [setup_blank_om_objects()]
-#' @param random_seed Seed for running the OM if it needs to be run (if `sim_data`
-#' is `NULL`)
+#' @param random_seed Seed for running the OM if it needs to be run (if `om_output` is `NULL`)
 #' @param n_sim_yrs Number of years to simulate
 #' @param tac Which harvest control rule should the model use
 #' @param c_increase Increase in max movement
@@ -26,8 +22,6 @@
 run_multiple_MSEs <- function(results_dir = NULL,
                               file_name = NULL,
                               df = NULL,
-                              ss_model = NULL,
-                              om_objs = NULL,
                               random_seed = NULL,
                               n_sim_yrs = NULL,
                               tac = NULL,
@@ -39,8 +33,6 @@ run_multiple_MSEs <- function(results_dir = NULL,
   verify_argument(results_dir, "character", 1)
   verify_argument(file_name, "character", 1)
   verify_argument(df, "list")
-  verify_argument(ss_model, "list")
-  verify_argument(om_objs, "list")
   verify_argument(random_seed, c("integer", "numeric"), 1)
   verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
   verify_argument(tac, c("integer", "numeric"))
@@ -93,7 +85,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
 
     # Run the Operating Model (OM)
     cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
-    sim_data <<- run_om(df, om_objs, random_seed = random_seed, ...)
+    om_output <<- run_om(df, random_seed = random_seed, ...)
 
     # Create the data for the Estimation Model (EM)
     if(yr >= yr_start){
@@ -102,7 +94,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
       df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
       df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
     }
-    lst_tmb <- create_tmb_data(sim_data, df, ss_model)
+    lst_tmb <- create_tmb_data(om_output, df, ss_model)
     if(yr >= yr_start){
       lst_tmb$params$f_0[length(lst_tmb$params$f_0)] <- 0.2
     }
@@ -200,9 +192,9 @@ run_multiple_MSEs <- function(results_dir = NULL,
 
     # Calculate the reference points to be applied to the next year
     wage_catch <- df$wage_catch[nrow(df$wage_catch) - 1,] %>% select(-Yr) %>% unlist(use.names = FALSE)
-    v_real <- sum(sim_data$n_save_age[, df$n_yr,,df$n_season] *
+    v_real <- sum(om_output$n_save_age[, df$n_yr,,df$n_season] *
                     matrix(rep(wage_catch, df$n_space),
-                           ncol = df$n_space) * (sim_data$f_sel[, df$n_yr,]))
+                           ncol = df$n_space) * (om_output$f_sel[, df$n_yr,]))
     f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),
@@ -245,7 +237,6 @@ run_multiple_MSEs <- function(results_dir = NULL,
     if(yr < yr_end){
       # No need to call this in the final year as the loop is over
       df <<- update_om_data(df,
-                            sim_data,
                             yr + 1,
                             yr_ind + 1,
                             yr_survey_sims,
@@ -261,5 +252,5 @@ run_multiple_MSEs <- function(results_dir = NULL,
   # Removes an NA entry at the end which is caused by the loop having one more year than
   # actual simulated years (see NA a few lines above). Making it NULL automatically removes it from the list.
   mse_run[is.na(mse_run)] <- NULL
-  list(mse_run, sim_data, em_output)
+  list(mse_run, om_output, em_output)
 }

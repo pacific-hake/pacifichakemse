@@ -18,7 +18,6 @@
 #' @param n_survey Survey frequency
 #' @param rdev_sd Recruitment deviation Standard deviation
 #' @param b_future Bias adjustment in the future
-#' @param yr_future Years to go into the future
 #' @param move_out Fraction of individuals that travel south in the last season
 #' @param move_south Fraction of individuals that move south during the year
 #' @param move_init Initial distribution of fish
@@ -29,7 +28,6 @@
 #' @param s_max Maximum age in fishery selectivity
 #' @param s_min_survey Minimum age in survey selectivity
 #' @param s_max_survey Maximum age in survey selectivity
-#' @param yr_future How many years into the future should there be stochastic values
 #' @param sel_hist Use historical selectivity?
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
@@ -50,14 +48,14 @@
 load_data_om <- function(ss_model = NULL,
                          n_sim_yrs = NULL,
                          n_season = 4,
-                         season_names = NULL,
+                         season_names = c("Season1", "Season2", "Season3", "Season4"),
                          n_space = 2,
-                         space_names = NULL,
+                         space_names = c("Canada", "US"),
                          n_survey = 2,
                          s_yr = 1966,
                          m_yr = 2018,
                          ages = 0:20,
-                         age_names = NULL,
+                         age_names = paste("age", 0:20),
                          rdev_sd = 1.4,
                          move_init = NULL,
                          move_max_init = 0.35,
@@ -72,12 +70,12 @@ load_data_om <- function(ss_model = NULL,
                          s_min_survey = 2,
                          s_max_survey = 6,
                          b_future = 0.5,
-                         yr_future = 0,
                          sel_change_yr = 1991,
                          sel_hist = TRUE,
                          f_space = c(0.2612, 0.7388),
                          log_phi_survey = log(11.46),
                          catch_props_space_season = NULL,
+                         zero_rdevs = FALSE,
                          ...){
 
   verify_argument(ss_model, "list")
@@ -109,7 +107,6 @@ load_data_om <- function(ss_model = NULL,
   verify_argument(s_min_survey, c("numeric", "integer"), 1)
   verify_argument(s_max_survey, c("numeric", "integer"), 1)
   verify_argument(b_future, "numeric", 1)
-  verify_argument(yr_future, "numeric", 1)
   verify_argument(sel_change_yr, c("numeric", "integer"), 1)
   verify_argument(sel_hist, "logical", 1)
   verify_argument(f_space, "numeric", n_space)
@@ -125,14 +122,14 @@ load_data_om <- function(ss_model = NULL,
     }
   }
 
-  # Throw error if yr_future is exactly 1
-  stopifnot(yr_future == 0 | yr_future > 1)
+  # Throw error if the number of simulation years is exactly 1
+  stopifnot(n_sim_yrs == 0 | n_sim_yrs > 1)
   # Throw error if move_init is NULL and n_space is not 2
   stopifnot(!is.null(move_init) | (is.null(move_init) & n_space == 2))
 
   lst <- csv_data()
 
-  lst$yrs <- s_yr:(m_yr + yr_future)
+  lst$yrs <- s_yr:(m_yr + n_sim_yrs)
   lst$s_yr <- s_yr
   lst$m_yr <- m_yr
   lst$n_yr <- length(lst$yrs)
@@ -140,12 +137,10 @@ load_data_om <- function(ss_model = NULL,
   lst$sel_idx <- which(lst$yrs == lst$sel_change_yr)
   lst$yr_sel <- length(lst$sel_change_yr:max(lst$yrs))
   lst$n_season <- n_season
-  lst$t_end <- lst$n_yr * lst$n_season
   lst$season_names <- season_names
+  lst$t_end <- lst$n_yr * lst$n_season
   lst$n_space <- n_space
   lst$space_names <- space_names
-  lst$ages <- ages
-  lst$age_names <- age_names
   lst$rdev_sd <- log(rdev_sd)
   lst$log_q <- log(1.14135)
   lst$log_sd_catch <- log(0.01)
@@ -159,6 +154,34 @@ load_data_om <- function(ss_model = NULL,
   lst$s_min_survey <- s_min_survey
   lst$s_max_survey <- s_max_survey
   lst$selectivity_change <- selectivity_change
+  lst$ages <- ages
+  lst$age_names <- age_names
+  lst$age_max_age <- nrow(ss_model$age_survey)
+  lst$b_future <- b_future
+
+  lst$survey <- ss_model$survey
+  lst$survey_err <- ss_model$survey_err
+  lst$ss_survey <- ss_model$ss_survey
+  lst$flag_survey <- ss_model$flag_survey
+  lst$flag_catch <- ss_model$flag_catch
+
+  lst$wage_catch_df <- ss_model$wage_catch_df
+  lst$wage_survey_df <- ss_model$wage_survey_df
+  lst$wage_ssb_df <- ss_model$wage_ssb_df
+  lst$wage_mid_df <- ss_model$wage_mid_df
+  lst$mat_sel <- ss_model$mat_sel
+  lst$age_survey <- ss_model$age_survey
+  lst$age_catch <- ss_model$age_catch
+  lst$ss_catch <- ss_model$ss_catch
+  lst$sel_by_yrs <- ss_model$sel_by_yrs
+
+  future_yrs <- (m_yr + 1):(m_yr + n_sim_yrs)
+
+  lst <- append(lst, setup_blank_om_objects(yrs = lst$yrs,
+                                            ages = lst$ages,
+                                            max_surv_age = lst$age_max_age,
+                                            n_space = lst$n_space,
+                                            n_season = lst$n_season))
 
   lst$move_init <- move_init
   if(is.null(lst$move_init)){
@@ -182,16 +205,12 @@ load_data_om <- function(ss_model = NULL,
   lst$move_out <- move_out
   lst$move_slope <- move_slope
 
-  # Initialize the movement matrix
-  # Add the sim yrs in so that we don't have to redimension the array later. This makes it much faster
-  # and the code cleaner in the MSE loop later
-  yrs_all <- c(lst$yrs, (lst$yrs[length(lst$yrs)] + 1):(lst$yrs[length(lst$yrs)] + n_sim_yrs))
   move_mat_obj <- init_movement_mat(lst$n_space,
                                     lst$space_names,
                                     lst$n_season,
                                     lst$season_names,
-                                    lst$n_yr + n_sim_yrs,
-                                    yrs_all,
+                                    lst$n_yr,
+                                    lst$yrs,
                                     lst$move_max,
                                     lst$move_slope,
                                     lst$move_fifty,
@@ -232,13 +251,27 @@ load_data_om <- function(ss_model = NULL,
   }
   lst$r_mul <- ifelse(lst$n_space == 2, 1.1, 1)
 
-  # Just start all the simulations with the same initial conditions
+  if(zero_rdevs){
+    r_devs <- rep(0, n_sim_yrs)
+  }else{
+    r_devs <- rnorm(n = n_sim_yrs,
+                    mean = 0,
+                    sd = exp(df$rdev_sd))
+  }
+
+  lst$r_dev <- lst$r_dev[, 1]
+  if(n_sim_yrs > 0){
+    lst$r_dev <- c(lst$r_dev, r_devs)
+  }
   lst$r_dev <- lst$r_dev %>%
     as.data.frame() %>%
+    as_tibble() %>%
+    rename(value = 1) %>%
     mutate(yr = lst$yrs) %>%
     select(yr, everything())
   lst$init_n <- ss_model$init_n %>%
     as.data.frame() %>%
+    as_tibble() %>%
     mutate(age = ages[-which(0 %in% ages)]) %>%
     select(age, everything()) %>%
     rename(value = 2)
@@ -254,74 +287,70 @@ load_data_om <- function(ss_model = NULL,
   # lst$catch_obs <- lst$catch_country %>% pull(total)
   # If n_yr greater than the number of catch observations, append the mean catch across
   # time series to the end lst$yrs
-  lst$catch_obs <- ss_model$catch_obs
+  lst$catch_obs <- ss_model$catch_obs %>%
+    as_tibble()
   if(lst$n_yr > nrow(lst$catch_obs)){
-    lst$catch_obs <- c(lst$catch_obs, rep(mean(lst$catch_obs), lst$n_yr - length(lst$catch_obs)))
+    new_df <- rep(mean(lst$catch_obs$value), lst$n_yr - nrow(lst$catch_obs)) %>%
+      as_tibble() %>%
+      mutate(yr = future_yrs) %>%
+      select(yr, value)
+    lst$catch_obs <- lst$catch_obs %>%
+      bind_rows(new_df)
   }
 
   if(lst$n_yr > nrow(lst$catch_country)){
     means <- lst$catch_country %>%
-      summarize_all(mean)
+      summarize_all(mean) %>%
+      slice(rep(1, each = n_sim_yrs)) %>%
+      mutate(year = future_yrs)
     lst$catch_country <- lst$catch_country %>%
       bind_rows(means)
   }
-  lst$b_future <- b_future
 
-  # if(yr_future > 1){
-  #  TODO: Need to debug this, make sure it works
-  #   # lst$yrs where survey occurs
-  #   idx_future <- length(s_yr:m_yr) + seq(2, yr_future, by = lst$n_survey)
-  #   #lst$survey_x <- c(lst$survey_x, rep(-2, yr_future))
-  #   #lst$survey_x[idx_future] <- 2
-  #   lst$survey_err <- c(lst$survey_err, rep(1, yr_future))
-  #   lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
-  #   lst$ss_survey <- c(lst$ss_survey, rep(0,  yr_future))
-  #   lst$ss_survey[idx_future] <- mean(lst$ss_survey[lst$ss_survey != -1])
-  #   lst$flag_survey <- c(lst$flag_survey, rep(-1, yr_future))
-  #   lst$flag_survey[idx_future] <- 1
-  #   lst$flag_catch[lst$yrs > m_yr] <- 1
-  #   r_devs <- rnorm(n = yr_future, mean = 0, sd = exp(lst$rdev_sd))
-  #   lst$parameters$r_in <- c(lst$parameters$r_in, r_devs)
-  #   # Bias adjustment
-  #   lst$b <- c(lst$b, rep(lst$b_future, yr_future))
-  # }
+  add_wage_yrs <- function(df, row = 1){
+    if(lst$n_yr > nrow(df)){
+      yr_one_vals <- df %>%
+        slice(rep(row, each = n_sim_yrs)) %>%
+        mutate(Yr = future_yrs)
+      df <- df %>%
+        bind_rows(yr_one_vals)
+    }
+    df
+  }
+  lst$wage_catch_df <- add_wage_yrs(lst$wage_catch_df)
+  lst$wage_survey_df <- add_wage_yrs(lst$wage_survey_df)
+  lst$wage_ssb_df <- add_wage_yrs(lst$wage_ssb_df)
+  lst$wage_mid_df <- add_wage_yrs(lst$wage_mid_df)
 
-  age_max_age <- nrow(ss_model$age_survey)
   # Parameters to initialize the OM with
-  parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(lst$r_mul),
-                     log_h = ss_model$parms_scalar$log_h,
-                     log_m_init = ss_model$parms_scalar$log_m_init,
-                     log_sd_surv = ss_model$parms_scalar$log_sd_surv,
-                     log_phi_survey = ss_model$parms_scalar$log_phi_survey,
-                     log_phi_catch = ss_model$parms_scalar$log_phi_catch,
-                     p_sel_fish = ss_model$p_sel_fish,
-                     p_sel_surv = ss_model$p_sel_surv,
-                     init_n = lst$init_n,
-                     r_in = lst$r_dev)
+  lst$parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(lst$r_mul),
+                         log_h = ss_model$parms_scalar$log_h,
+                         log_m_init = ss_model$parms_scalar$log_m_init,
+                         log_sd_surv = ss_model$parms_scalar$log_sd_surv,
+                         log_phi_survey = ss_model$parms_scalar$log_phi_survey,
+                         log_phi_catch = ss_model$parms_scalar$log_phi_catch,
+                         p_sel_fish = ss_model$p_sel_fish,
+                         p_sel_surv = ss_model$p_sel_surv,
+                         init_n = lst$init_n,
+                         r_in = lst$r_dev)
 
-  # Merge the SS model output list with the OM outputs, and the parameters to
-  # initialize the OM with
-  lst <- append_objs_to_list(lst,
-                            parameters,
-                            ss_model$wage_catch_df,
-                            ss_model$wage_survey_df,
-                            ss_model$wage_ssb_df,
-                            ss_model$wage_mid_df,
-                            ss_model$mat_sel,
-                            # Make sure the survey has the same length as the catch time series
-                            ss_model$survey,
-                            # Make sure the survey has the same length as the catch time series
-                            ss_model$survey_err,
-                            ss_model$ss_survey,
-                            # Is there a survey in that year?
-                            ss_model$flag_survey,
-                            ss_model$age_survey,
-                            ss_model$age_catch,
-                            age_max_age,
-                            ss_model$ss_catch,
-                            ss_model$flag_catch,
-                            ss_model$sel_by_yrs,
-                            ss_model$b)
+  if(n_sim_yrs > 1){
+    # Assumes survey is in every odd year only into the future
+    odd_future_yrs <- as.logical(future_yrs %% 2)
+    idx_future <- (length(s_yr:m_yr) + 1):length(lst$yrs)
+    idx_future <- idx_future[odd_future_yrs]
+
+    lst$survey_err <- c(lst$survey_err, rep(1, n_sim_yrs))
+    lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
+    lst$ss_survey <- c(lst$ss_survey, rep(0, n_sim_yrs))
+    lst$ss_survey[idx_future] <- mean(lst$ss_survey[lst$ss_survey != -1])
+    lst$flag_survey <- c(lst$flag_survey, rep(-1, n_sim_yrs))
+    lst$flag_survey[idx_future] <- 1
+    lst$flag_catch <- c(lst$flag_catch, rep(-1, n_sim_yrs))
+    # Bias adjustment
+    lst$b <- c(ss_model$b, rep(lst$b_future, n_sim_yrs))
+    # Weight-at-age
+  }
 
   lst
 }
@@ -371,7 +400,7 @@ init_movement_mat <- function(n_space = NULL,
   verify_argument(n_season, c("numeric", "integer"), 1)
   verify_argument(season_names, "character", n_season)
   verify_argument(n_yr, c("numeric", "integer"), 1)
-  verify_argument(yrs, c("numeric", "integer"), n_yr)
+  verify_argument(yrs, c("numeric", "integer"))
   verify_argument(move_max, "numeric", n_season)
   verify_argument(move_slope, "numeric", 1)
   verify_argument(move_fifty, "numeric", 1)

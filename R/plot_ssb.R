@@ -23,7 +23,7 @@ plot_ssb <- function(ps = NULL,
 
   ssb_can <- ssb %>% filter(country == "Canada")
   ssb_us <- ssb %>% filter(country == "US")
-  browser()
+
   ci <- as.character(ci) %>% map(~{sym(.x)})
 
   g <- ggplot(ssb_can, aes(x = year, y = `0.5` * 1e-6)) +

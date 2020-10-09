@@ -29,7 +29,6 @@ Check_Identifiable_vs2 <- function(obj){
       row_max <- rep(0,length(lst$eigen$values))
     }
 
-    browser()
 
     lst$bad_params <- data.frame("Param" = names(obj$par),
                                  "MLE" = par_hat,

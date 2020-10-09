@@ -102,16 +102,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
   # Prepare data for the OM. This includes initializing the movement model and selectivity
-  df <- load_data_om(ss_model, n_sim_yrs, ...)
-
-  # Add the sim yrs into all arrays so that they don't have to be redimensioned during the
-  # simulations later. This makes the code faster and simpler overall
-  yrs_all <- c(df$yrs, (df$yrs[length(df$yrs)] + 1):(df$yrs[length(df$yrs)] + n_sim_yrs))
-  om_objs <- setup_blank_om_objects(yrs = yrs_all,
-                                    ages = df$ages,
-                                    max_surv_age = df$age_max_age,
-                                    n_space = df$n_space,
-                                    n_season = df$n_season)
+  df <- load_data_om(ss_model, n_sim_yrs, n_survey = n_surveys, ...)
 
   # Each run has its own random seed, with those seeds being chosen from
   # the base seed which is set at the beginning of this function
@@ -141,8 +132,6 @@ run_mses <- function(ss_model_output_dir = NULL,
           results_dir = results_dir, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
           file_name = .x, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
           df = df,
-          ss_model = ss_model,
-          om_objs = om_objs,
           random_seed = seeds[run],
           n_sim_yrs = n_sim_yrs,
           tac = if(length(tacs) == 1) tacs else tacs[[.y]],

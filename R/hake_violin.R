@@ -46,7 +46,6 @@ hake_violin <- function(mse_output,
     ssb_plot <- lst_indicators$ssb_plot
   }
 
-  browser()
   if(is.na(move)){
     # Don't know what the output will look like here without movement model
     # catch_plot <- map2(om_output, seq_along(om_output), ~{

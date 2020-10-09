@@ -718,7 +718,7 @@ df_identical <- function(wa1, wa2, nm_wa1, nm_wa2, diff_tol = 1e-8){
 #'
 #' @export
 compare_tmb_data_tol <- function(d1, d2, p1, p2){
-#browser()
+
   if("survey_x" %in% names(d2)){
     d2$survey_x <- NULL
   }

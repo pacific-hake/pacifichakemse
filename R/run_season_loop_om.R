@@ -1,21 +1,19 @@
 #' Run the Operating model for all seasons and spaces in one year
 #'
-#' @param df See [run_om()]
-#' @param lst See [run_om()]
+#' @param om See [run_om()]
 #' @param yr The year to run the operating model for
-#' @param yr_ind The index of `yr` in the `df$yrs` vector
+#' @param yr_ind The index of `yr` in the `om$yrs` vector
 #' @param m_season A vector of natural mortality-at-age
 #' @param pope_mul Multiplier used in Pope's method
 #' @param verbose Print the loop information to the console
 #' @param ... Absorbs additional arguments meant for other functions
 #'
-#' @return A modified version of `lst` with the current data for `yr` populated
+#' @return A modified version of `om` with the current data for `yr` populated
 #' in all it's arrays and other objects
 #' @importFrom crayon red yellow
 #' @importFrom tidyselect contains
 #' @export
-run_season_loop_om <- function(df,
-                               lst,
+run_season_loop_om <- function(om,
                                yr,
                                yr_ind,
                                m_season,
@@ -24,78 +22,80 @@ run_season_loop_om <- function(df,
                                verbose = TRUE,
                                ...){
 
-  mat_sel <- lst$mat_sel %>% select(-Yr)
-  map(seq_len(df$n_season), function(season = .x){
+  verify_argument(om, "list")
+
+  mat_sel <- om$mat_sel %>% select(-Yr)
+  map(seq_len(om$n_season), function(season = .x){
     if(verbose){
       cat(red("Season:", season, "\n"))
     }
-    map(seq_len(df$n_space), function(space = .x){
+    map(seq_len(om$n_space), function(space = .x){
       if(verbose){
         cat(yellow("      Space:", space, "\n"))
       }
-      p_sel <- df$parameters$p_sel_fish[df$parameters$p_sel_fish$space == space,]
-      p_sel_yrs <- df$sel_by_yrs
-      if(df$flag_sel[yr_ind]){
+      p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == space,]
+      p_sel_yrs <- om$sel_by_yrs
+      if(om$flag_sel[yr_ind]){
         p_sel$value <- p_sel$value +
-          p_sel_yrs[, yr_ind - df$sel_idx + 1] * df$sigma_p_sel
+          p_sel_yrs[, yr_ind - om$sel_idx + 1] * om$sigma_p_sel
       }
-      if(df$yrs[yr_ind] > df$m_yr){
-        if(df$selectivity_change == 1){
+      if(om$yrs[yr_ind] > om$m_yr){
+        if(om$selectivity_change == 1){
           if(space != 1){
-            p_sel$value <- c(rep(0.05, df$s_min_survey),
-                             rep(0, df$s_max_survey - 2 *
-                                   df$s_min_survey + 1))
+            p_sel$value <- c(rep(0.05, om$s_min_survey),
+                             rep(0, om$s_max_survey - 2 *
+                                   om$s_min_survey + 1))
           }
-        }else if(df$selectivity_change == 2){
-          p_sel <- df$parameters$p_sel_fish[df$parameters$p_sel_fish$space == 2,]
+        }else if(om$selectivity_change == 2){
+          p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == 2,]
           p_sel$value <- p_sel$value +
             p_sel_yrs[,ncol(p_sel_yrs)] *
-            df$sigma_p_sel
+            om$sigma_p_sel
         }
       }
 
       # Constant over space
       #if(yr == 2019) browser()
-      f_sel <- get_select(df$ages,
+      f_sel <- get_select(om$ages,
                           p_sel,
-                          df$s_min,
-                          df$s_max)
+                          om$s_min,
+                          om$s_max)
       if(yr == 1966 && season == 1 && space == 1){
         write(paste("Year", "Season", "Space", "Fsel", sep = ","), "fselvals.csv")
       }
       write(paste(yr, season, space, paste(f_sel, sep = ",", collapse = ","), sep = ","), "fselvals.csv", append = TRUE)
 
-      lst$f_sel_save[, yr_ind, space] <<- f_sel
-      if(df$n_space > 1){
-        if(df$yrs[yr_ind] <= df$m_yr){
-          catch_space <- df$catch_country %>%
+      om$f_sel_save[, yr_ind, space] <<- f_sel
+      if(om$n_space > 1){
+        if(om$yrs[yr_ind] <= om$m_yr){
+          catch_space <- om$catch_country %>%
             filter(year == yr) %>%
             select(contains(paste0("space", space))) %>% pull()
         }else{
-          catch_space <- df$catch_obs[yr_ind,]$value * df$f_space[space]
+          catch_space <- om$catch_obs[yr_ind,]$value * om$f_space[space]
         }
       }else{
-        catch_space <- df$catch_obs[yr_ind,]$value
+        catch_space <- om$catch_obs[yr_ind,]$value
       }
       # Catch distribution in the yrs
-      e_tmp <- catch_space * df$catch_props_space_season[space, season]
-      n_tmp <- lst$n_save_age[, yr_ind, space, season]
+      e_tmp <- catch_space * om$catch_props_space_season[space, season]
+      n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
-      wage_catch <- df$wage_catch_df %>% get_age_dat(yr) %>% unlist()
+      wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
       b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel)
-      lst$v_save[yr_ind, space, season] <<- b_tmp
-      lst$catch_quota[yr_ind, space, season] <<- e_tmp
+      om$v_save[yr_ind, space, season] <<- b_tmp
+      om$catch_quota[yr_ind, space, season] <<- e_tmp
 
       if(e_tmp / b_tmp >= 0.9){
-        if(df$yrs[yr_ind] < df$m_yr){
+        if(om$yrs[yr_ind] < om$m_yr){
           # Stop if in the past
           # stop("Catch exceeds available biomass in yrs: ",
-          #      df$yrs[yr_ind], " and season ",
+          #      om$yrs[yr_ind], " and season ",
           #      season, " , space ", space,
           # call. = FALSE)
         }
         e_tmp <- 0.75 * b_tmp
-        lst$catch_quota_n[yr_ind, space, season] <<- 1
+        om$catch_quota_n[yr_ind, space, season] <<- 1
       }
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,
@@ -111,10 +111,10 @@ run_season_loop_om <- function(df,
         f_season <- 0
       }
       # Terminal fishing mortality
-      lst$f_out_save[yr_ind, season, space] <<- f_out
-      lst$f_season_save[, yr_ind, space, season] <<- f_season
+      om$f_out_save[yr_ind, season, space] <<- f_out
+      om$f_season_save[, yr_ind, space, season] <<- f_season
       z <- m_season + f_season
-      lst$z_save[, yr_ind, space, season] <<- z
+      om$z_save[, yr_ind, space, season] <<- z
       # This is used to deal with movement from one space to another.
       # space is the area fish are in and space_idx is the area the fish
       # are coming in from. These indexes are used in the numbers-at-age
@@ -122,58 +122,58 @@ run_season_loop_om <- function(df,
       if(space - 1 == 0){
         space_idx <- 2
       }
-      if(space == df$n_space){
-        space_idx <- df$n_space - 1
+      if(space == om$n_space){
+        space_idx <- om$n_space - 1
       }
-      if(space > 1 & space < df$n_space){
+      if(space > 1 & space < om$n_space){
         space_idx <- c(space - 1, space + 1)
       }
-      if(!df$move){
+      if(!om$move){
         space_idx <- 1
       }
 
-      if(season < df$n_season){
-        lst$n_save_age[, yr_ind, space, season + 1] <<- lst$n_save_age[, yr_ind, space, season] * exp(-z) -
+      if(season < om$n_season){
+        om$n_save_age[, yr_ind, space, season + 1] <<- om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
-          lst$n_save_age[, yr_ind, space, season] * exp(-z) * (df$move_mat[space, , season, yr_ind]) +
+          om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
           # Add the ones come from the surrounding areas
-          lst$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (df$move_mat[space_idx, , season, yr_ind])
+          om$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (om$move_mat[space_idx, , season, yr_ind])
       }else{
-        lst$n_save_age[2:(df$n_age - 1), yr_ind + 1, space, 1] <<- lst$n_save_age[1:(df$n_age - 2), yr_ind, space, season] *
-          exp(-z[1:(df$n_age - 2)]) - lst$n_save_age[1:(df$n_age - 2), yr_ind, space, season] *
+        om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
+          exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave
-          exp(-z[1:(df$n_age - 2)]) * (df$move_mat[space, 1:(df$n_age - 2), season, yr_ind]) +
+          exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space, 1:(om$n_age - 2), season, yr_ind]) +
           # Add the ones come to the surrounding areas
-          lst$n_save_age[1:(df$n_age - 2), yr_ind, space_idx, season] *
-          exp(-z[1:(df$n_age - 2)]) * (df$move_mat[space_idx, 1:(df$n_age - 2), season, yr_ind])
+          om$n_save_age[1:(om$n_age - 2), yr_ind, space_idx, season] *
+          exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
 
         # Plus group
-        n_survive_plus <- (lst$n_save_age[df$n_age - 1, yr_ind, space, df$n_season] * exp(-z[df$n_age - 1]) +
-                             lst$n_save_age[df$n_age, yr_ind, space, df$n_season] * exp(-z[df$n_age]))
+        n_survive_plus <- (om$n_save_age[om$n_age - 1, yr_ind, space, om$n_season] * exp(-z[om$n_age - 1]) +
+                             om$n_save_age[om$n_age, yr_ind, space, om$n_season] * exp(-z[om$n_age]))
         # Leaving
-        n_out_plus <- n_survive_plus * (df$move_mat[space, df$n_age, season, yr_ind])
+        n_out_plus <- n_survive_plus * (om$move_mat[space, om$n_age, season, yr_ind])
         # Incoming
-        n_in_plus <- (lst$n_save_age[df$n_age-1, yr_ind, space_idx, df$n_season] * exp(-z[df$n_age - 1]) +
-                       lst$n_save_age[df$n_age, yr_ind, space_idx, df$n_season] * exp(-z[df$n_age])) *
-          df$move_mat[space_idx, df$n_age, season, yr_ind]
-        lst$n_save_age[df$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
+        n_in_plus <- (om$n_save_age[om$n_age-1, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age - 1]) +
+                       om$n_save_age[om$n_age, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age])) *
+          om$move_mat[space_idx, om$n_age, season, yr_ind]
+        om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
       }
-      lst$age_comps_om[, yr_ind, space, season] <<- lst$n_save_age[, yr_ind, space, season] / sum(lst$n_save_age[, yr_ind, space, season])
+      om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] / sum(om$n_save_age[, yr_ind, space, season])
       if(yr_ind == 1 && season == 1){
-        lst$ssb_all[1, space, season] <<- lst$init_ssb_all[space]
+        om$ssb_all[1, space, season] <<- om$init_ssb_all[space]
       }else{
-        lst$ssb_all[yr_ind, space, season] <<- sum(lst$n_save_age[, yr_ind, space, season] * mat_sel, na.rm = TRUE)
+        om$ssb_all[yr_ind, space, season] <<- sum(om$n_save_age[, yr_ind, space, season] * mat_sel, na.rm = TRUE)
       }
-      lst$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * lst$n_save_age[, yr_ind, space, season] * wage_catch
-      lst$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * lst$n_save_age[, yr_ind, space, season]
+      om$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season] * wage_catch
+      om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
   #if(yr_ind == 55) browser()
-      if(lst$catch_quota[yr_ind, space, season] > 0){
-        if((sum(lst$catch_save_age[, yr_ind, space, season]) / lst$catch_quota[yr_ind, space, season]) > 1.1){
+      if(om$catch_quota[yr_ind, space, season] > 0){
+        if((sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season]) > 1.1){
           stop("F estimation overshoots more than 10% in year ", yr, ", season ", season,
                call. = FALSE)
         }
       }
     })
   })
-  lst
+  om
 }
