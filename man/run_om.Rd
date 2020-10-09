@@ -5,13 +5,11 @@
 \title{Run the Operating Model, which is an age based model
 conditioned on true catch}
 \usage{
-run_om(df = NULL, om_objs = NULL, random_seed, ...)
+run_om(om = NULL, random_seed, ...)
 }
 \arguments{
-\item{df}{data frame of parameters and life history values}
-
-\item{om_objs}{A \link{list} of the OM objects (arrays and matrices) for holding the
-OM data. This list is what is returned by \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
+\item{om}{list of parameters and life history values OM data. This list is
+what is returned by \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{...}{Arguments passed to \code{\link[=run_year_loop_om]{run_year_loop_om()}}}
 }

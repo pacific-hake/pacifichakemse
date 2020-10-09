@@ -4,16 +4,14 @@
 \alias{init_agebased_model}
 \title{Initialize values used in the age based model}
 \usage{
-init_agebased_model(df = NULL, lst = NULL)
+init_agebased_model(om = NULL)
 }
 \arguments{
-\item{df}{A \link{list} as returned by \code{\link[=load_data_om]{load_data_om()}}}
-
-\item{lst}{A \link{list} as returned by \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
+\item{om}{A \link{list} as returned by \code{\link[=load_data_om]{load_data_om()}}}
 }
 \value{
-A \link{list} with the same structure os \code{lst}, but with a new element,
-\code{n_init} added, and some values chaged for the initializeation of the model
+A \link{list} with the same structure as \code{om}, but with a new element,
+\code{n_init} added, and some values changed for the initialization of the model
 }
 \description{
 Initialize values used in the age based model

@@ -6,7 +6,7 @@
 \usage{
 calc_mcmc(
   mcmc,
-  ss_mcmc_quants = NULL,
+  ss_mcmc_quants = c(0.025, 0.5, 0.975),
   biomass_scale = 2e+06,
   recruitment_scale = 1e+06,
   ...

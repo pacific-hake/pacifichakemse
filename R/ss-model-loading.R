@@ -10,11 +10,13 @@
 #' @importFrom r4ss SSgetMCMC
 #' @export
 create_rds_file <- function(model_dir = NULL,
+                            data_csv_dir = NULL,
                             overwrite_ss_rds = TRUE,
                             load_extra_mcmc = TRUE,
                             ...){
 
   verify_argument(model_dir, "character", 1)
+  verify_argument(data_csv_dir, "character", 1)
   verify_argument(overwrite_ss_rds, "logical", 1)
 
   if(!dir.exists(model_dir)){
@@ -57,6 +59,9 @@ create_rds_file <- function(model_dir = NULL,
             red(" Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
       }
     }
+    # Load the catch by country and season data
+    model$catch_seas_country <- calc_catch_seas_country(data_csv_dir)
+
     saveRDS(model, file = rds_file)
     cat(green(symbol$tick),
         green("Created RDS file successfully\n"))
@@ -68,17 +73,20 @@ create_rds_file <- function(model_dir = NULL,
 #'
 #' @details Load an SS3 model from an RDS file and return as a [list]
 #'
-#' @param model_dir A [vector] of model directory names
+#' @param model_dir A model directory name
+#' @param data_csv_dir A directory containing the csv data for the assessment
 #' @param ... Arguments to be passed to [create_rds_file()]
 #'
 #' @return A [list] of model inputs/outputs for the requested model
 #' @export
 load_ss_model_from_rds <- function(model_dir = NULL,
+                                   data_csv_dir = NULL,
                                    ...){
 
   verify_argument(model_dir, "character", 1)
+  verify_argument(data_csv_dir, "character", 1)
 
-  rds_file <- create_rds_file(model_dir, ...)
+  rds_file <- create_rds_file(model_dir, data_csv_dir, ...)
   readRDS(rds_file)
 }
 
@@ -631,6 +639,7 @@ load_ss_model_data <- function(ss_model,
   lst$ctl <- ss_model$ctl
   lst$dat_file <- ss_model$dat_file
   lst$dat <- ss_model$dat
+  lst$catch_seas_country <- ss_model$catch_seas_country
 
   lst
 }

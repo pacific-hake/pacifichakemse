@@ -8,14 +8,14 @@ load_data_om(
   ss_model = NULL,
   n_sim_yrs = NULL,
   n_season = 4,
-  season_names = NULL,
+  season_names = c("Season1", "Season2", "Season3", "Season4"),
   n_space = 2,
-  space_names = NULL,
+  space_names = c("Canada", "US"),
   n_survey = 2,
   s_yr = 1966,
   m_yr = 2018,
   ages = 0:20,
-  age_names = NULL,
+  age_names = paste("age", 0:20),
   rdev_sd = 1.4,
   move_init = NULL,
   move_max_init = 0.35,
@@ -30,12 +30,11 @@ load_data_om(
   s_min_survey = 2,
   s_max_survey = 6,
   b_future = 0.5,
-  yr_future = 0,
   sel_change_yr = 1991,
   sel_hist = TRUE,
   f_space = c(0.2612, 0.7388),
   log_phi_survey = log(11.46),
-  catch_props_space_season = NULL,
+  zero_rdevs = FALSE,
   ...
 )
 }
@@ -92,8 +91,6 @@ to include simulations so that arrays don't have to be redimensioned in the MSE 
 
 \item{b_future}{Bias adjustment in the future}
 
-\item{yr_future}{How many years into the future should there be stochastic values}
-
 \item{sel_change_yr}{A year in which a selectivity change took place}
 
 \item{sel_hist}{Use historical selectivity?}
@@ -102,8 +99,6 @@ to include simulations so that arrays don't have to be redimensioned in the MSE 
 the second is the US}
 
 \item{log_phi_survey}{Survey phi parameter value}
-
-\item{catch_props_space_season}{Proportion of catch to take by season and space}
 
 \item{...}{Absorb arguments destined for other functions}
 }

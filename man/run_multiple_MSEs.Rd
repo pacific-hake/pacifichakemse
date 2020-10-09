@@ -8,8 +8,6 @@ run_multiple_MSEs(
   results_dir = NULL,
   file_name = NULL,
   df = NULL,
-  ss_model = NULL,
-  om_objs = NULL,
   random_seed = NULL,
   n_sim_yrs = NULL,
   tac = NULL,
@@ -28,13 +26,7 @@ for the OM used in this MSE. The actual MSE results are stored by the function c
 
 \item{df}{Data frame of parameters as output by \code{\link[=load_data_om]{load_data_om()}}}
 
-\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}
-and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
-
-\item{om_objs}{Operating model objects as created by \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
-
-\item{random_seed}{Seed for running the OM if it needs to be run (if \code{sim_data}
-is \code{NULL})}
+\item{random_seed}{Seed for running the OM if it needs to be run (if \code{om_output} is \code{NULL})}
 
 \item{n_sim_yrs}{Number of years to simulate}
 

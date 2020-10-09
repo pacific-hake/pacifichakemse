@@ -4,12 +4,10 @@
 \alias{run_year_loop_om}
 \title{Run the Operating model for all years}
 \usage{
-run_year_loop_om(df = NULL, lst = NULL, verbose = TRUE, ...)
+run_year_loop_om(om = NULL, verbose = TRUE, ...)
 }
 \arguments{
-\item{df}{See \code{\link[=run_om]{run_om()}}}
-
-\item{lst}{See \code{\link[=run_om]{run_om()}}}
+\item{om}{See \code{\link[=run_om]{run_om()}}}
 
 \item{verbose}{Print the loop information to the console}
 

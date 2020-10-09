@@ -6,6 +6,7 @@
 \usage{
 create_rds_file(
   model_dir = NULL,
+  data_csv_dir = NULL,
   overwrite_ss_rds = TRUE,
   load_extra_mcmc = TRUE,
   ...

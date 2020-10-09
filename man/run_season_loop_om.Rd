@@ -5,8 +5,7 @@
 \title{Run the Operating model for all seasons and spaces in one year}
 \usage{
 run_season_loop_om(
-  df,
-  lst,
+  om,
   yr,
   yr_ind,
   m_season,
@@ -17,13 +16,11 @@ run_season_loop_om(
 )
 }
 \arguments{
-\item{df}{See \code{\link[=run_om]{run_om()}}}
-
-\item{lst}{See \code{\link[=run_om]{run_om()}}}
+\item{om}{See \code{\link[=run_om]{run_om()}}}
 
 \item{yr}{The year to run the operating model for}
 
-\item{yr_ind}{The index of \code{yr} in the \code{df$yrs} vector}
+\item{yr_ind}{The index of \code{yr} in the \code{om$yrs} vector}
 
 \item{m_season}{A vector of natural mortality-at-age}
 
@@ -34,7 +31,7 @@ run_season_loop_om(
 \item{...}{Absorbs additional arguments meant for other functions}
 }
 \value{
-A modified version of \code{lst} with the current data for \code{yr} populated
+A modified version of \code{om} with the current data for \code{yr} populated
 in all it's arrays and other objects
 }
 \description{

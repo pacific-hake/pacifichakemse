@@ -6,7 +6,6 @@
 \usage{
 update_om_data(
   df = NULL,
-  sim_data = NULL,
   yr = NULL,
   yr_ind = NULL,
   yr_survey_sims = NULL,
@@ -20,8 +19,6 @@ update_om_data(
 }
 \arguments{
 \item{df}{Input data as created by \code{\link[=create_tmb_data]{create_tmb_data()}}}
-
-\item{sim_data}{Operating model as created by \code{\link[=run_om]{run_om()}}}
 
 \item{yr}{The year to add}
 

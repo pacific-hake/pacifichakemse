@@ -8,12 +8,12 @@ load_ss_model_data(
   ss_model,
   s_yr = NULL,
   m_yr = NULL,
-  s_min = NULL,
-  s_max = NULL,
-  s_min_survey = NULL,
-  s_max_survey = NULL,
+  s_min = 1,
+  s_max = 6,
+  s_min_survey = 2,
+  s_max_survey = 6,
   weight_factor = 1000,
-  n_space = 1,
+  n_space = 2,
   selex_fill_val = 1,
   ...
 )

@@ -32,7 +32,6 @@
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
 #' @param log_phi_survey Survey phi parameter value
-#' @param catch_props_space_season Proportion of catch to take by season and space
 #' @param ... Absorb arguments destined for other functions
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
@@ -74,7 +73,6 @@ load_data_om <- function(ss_model = NULL,
                          sel_hist = TRUE,
                          f_space = c(0.2612, 0.7388),
                          log_phi_survey = log(11.46),
-                         catch_props_space_season = NULL,
                          zero_rdevs = FALSE,
                          ...){
 
@@ -111,16 +109,6 @@ load_data_om <- function(ss_model = NULL,
   verify_argument(sel_hist, "logical", 1)
   verify_argument(f_space, "numeric", n_space)
   verify_argument(log_phi_survey, "numeric", 1)
-  if(!is.null(catch_props_space_season)){
-    verify_argument(catch_props_space_season, "list", n_space)
-    map(catch_props_space_season, ~{
-      verify_argument(.x, "numeric", n_season)
-    })
-    if(!(n_space == 2 && n_season == 4)){
-      stop("`catch_props_space_season` must be NULL unless `n_season` = 4 and `n_space` = 2",
-           call. = FALSE)
-    }
-  }
 
   # Throw error if the number of simulation years is exactly 1
   stopifnot(n_sim_yrs == 0 | n_sim_yrs > 1)
@@ -237,16 +225,11 @@ load_data_om <- function(ss_model = NULL,
   }
 
   if(lst$n_season == 4 & lst$n_space == 2){
-    # Standardize row values to equal 1
-    lst$catch_props_space_season <- map(catch_props_space_season, ~{
-      .x / sum(.x)
-    }) %>%
-      set_names(seq_along(.)) %>%
-      bind_rows() %>%
-      t()
+    # Last 10 years average catch
+    lst$catch_props_space_season <- ss_model$catch_seas_country
   }else{
-    lst$catch_props_space_season <- matrix(NA, lst$n_space, lst$n_season)
     # Equally distributed catch
+    lst$catch_props_space_season <- matrix(NA, lst$n_space, lst$n_season)
     lst$catch_props_space_season[1:lst$n_space,] <- 1 / lst$n_season
   }
   lst$r_mul <- ifelse(lst$n_space == 2, 1.1, 1)
