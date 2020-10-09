@@ -416,9 +416,9 @@ load_ss_model_data <- function(ss_model,
               value = catch) %>%
     filter(yr != -999)
 
-  s_yr <- min(lst$catch_obs$yr)
-  m_yr <- max(lst$catch_obs$yr)
-  yrs <- s_yr:m_yr
+  lst$s_yr <- min(lst$catch_obs$yr)
+  lst$m_yr <- max(lst$catch_obs$yr)
+  yrs <- lst$s_yr:lst$m_yr
 
   # TODO: This is to copy what is in the original MSE, from the table in the assessment.
   # It is not exactly the same as what is in the SS data file and overwrites that which is
@@ -460,13 +460,13 @@ load_ss_model_data <- function(ss_model,
   lst$parms_scalar <- load_ss_parameters(ss_model)
   lst$age_survey <- extract_age_comps(ss_model,
                                       age_comps_fleet = 2,
-                                      s_yr = s_yr,
-                                      m_yr = m_yr,
+                                      s_yr = lst$s_yr,
+                                      m_yr = lst$m_yr,
                                       ...)
   lst$age_catch <- extract_age_comps(ss_model,
                                      age_comps_fleet = 1,
-                                     s_yr = s_yr,
-                                     m_yr = m_yr,
+                                     s_yr = lst$s_yr,
+                                     m_yr = lst$m_yr,
                                      ...)
 
   # Selectivity estimates - row names are the ages
@@ -521,7 +521,7 @@ load_ss_model_data <- function(ss_model,
   surv <- surv %>%
     filter(index == 2) %>%
     transmute(yr = year, value = obs, err = se_log) %>%
-    complete(yr = seq(s_yr, m_yr)) %>%
+    complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
     replace(is.na(.), 1)
   lst$survey <- surv %>% pull(value)
   lst$survey_err <- surv %>% pull(err)
@@ -534,7 +534,7 @@ load_ss_model_data <- function(ss_model,
     filter(fleet == 1) %>%
     select(-fleet) %>%
     mutate(flag = 1) %>%
-    complete(yr = seq(s_yr, m_yr)) %>%
+    complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
     replace(is.na(.), 0) %>%
     mutate(flag = ifelse(flag == 0, -1, flag))
   lst$ss_catch <- ss_catch %>%
@@ -545,7 +545,7 @@ load_ss_model_data <- function(ss_model,
     filter(fleet == 2) %>%
     select(-fleet) %>%
     mutate(flag = 1) %>%
-    complete(yr = seq(s_yr, m_yr)) %>%
+    complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
     replace(is.na(.), 0) %>%
     mutate(flag = ifelse(flag == 0, -1, flag))
   lst$ss_survey <- ss_survey %>%
@@ -608,7 +608,7 @@ load_ss_model_data <- function(ss_model,
   yb_3 <- b_breakpoints[3]
   yb_4 <- b_breakpoints[4]
   b_max <- b_breakpoints[5]
-  b_yrs <- s_yr:m_yr
+  b_yrs <- lst$s_yr:lst$m_yr
   lst$b <- NULL
   for(j in 1:length(b_yrs)){
     if(b_yrs[j] <= yb_1){

@@ -51,8 +51,6 @@ load_data_om <- function(ss_model = NULL,
                          n_space = 2,
                          space_names = c("Canada", "US"),
                          n_survey = 2,
-                         s_yr = 1966,
-                         m_yr = 2018,
                          ages = 0:20,
                          age_names = paste("age", 0:20),
                          rdev_sd = 1.4,
@@ -70,7 +68,6 @@ load_data_om <- function(ss_model = NULL,
                          s_max_survey = 6,
                          b_future = 0.5,
                          sel_change_yr = 1991,
-                         sel_hist = TRUE,
                          f_space = c(0.2612, 0.7388),
                          log_phi_survey = log(11.46),
                          zero_rdevs = FALSE,
@@ -82,8 +79,6 @@ load_data_om <- function(ss_model = NULL,
   verify_argument(season_names, "character", n_season)
   verify_argument(n_space, c("numeric", "integer"), 1, 1:2)
   verify_argument(space_names, "character", n_space)
-  verify_argument(s_yr, c("numeric", "integer"), 1)
-  verify_argument(m_yr, c("numeric", "integer"), 1)
   if(!is.null(ages)){
     verify_argument(ages, c("numeric", "integer"))
     verify_argument(age_names, "character", length(ages))
@@ -106,7 +101,6 @@ load_data_om <- function(ss_model = NULL,
   verify_argument(s_max_survey, c("numeric", "integer"), 1)
   verify_argument(b_future, "numeric", 1)
   verify_argument(sel_change_yr, c("numeric", "integer"), 1)
-  verify_argument(sel_hist, "logical", 1)
   verify_argument(f_space, "numeric", n_space)
   verify_argument(log_phi_survey, "numeric", 1)
 
@@ -117,9 +111,9 @@ load_data_om <- function(ss_model = NULL,
 
   lst <- csv_data()
 
-  lst$yrs <- s_yr:(m_yr + n_sim_yrs)
-  lst$s_yr <- s_yr
-  lst$m_yr <- m_yr
+  lst$s_yr <- ss_model$s_yr
+  lst$m_yr <- ss_model$m_yr
+  lst$yrs <- lst$s_yr:(lst$m_yr + n_sim_yrs)
   lst$n_yr <- length(lst$yrs)
   lst$sel_change_yr <- sel_change_yr
   lst$sel_idx <- which(lst$yrs == lst$sel_change_yr)
@@ -163,7 +157,7 @@ load_data_om <- function(ss_model = NULL,
   lst$ss_catch <- ss_model$ss_catch
   lst$sel_by_yrs <- ss_model$sel_by_yrs
 
-  future_yrs <- (m_yr + 1):(m_yr + n_sim_yrs)
+  future_yrs <- (lst$m_yr + 1):(lst$m_yr + n_sim_yrs)
 
   lst <- append(lst, setup_blank_om_objects(yrs = lst$yrs,
                                             ages = lst$ages,
@@ -261,7 +255,7 @@ load_data_om <- function(ss_model = NULL,
 
   # Selectivity change in that year
   lst$flag_sel <- rep(FALSE, lst$n_yr)
-  lst$flag_sel[which(lst$yrs == lst$sel_change_yr):which(lst$yrs == m_yr)] <- TRUE
+  lst$flag_sel[which(lst$yrs == lst$sel_change_yr):which(lst$yrs == lst$m_yr)] <- TRUE
 
   lst$catch_country <- lst$catch_country %>%
     select(year, Can, US) %>%
@@ -320,7 +314,7 @@ load_data_om <- function(ss_model = NULL,
   if(n_sim_yrs > 1){
     # Assumes survey is in every odd year only into the future
     odd_future_yrs <- as.logical(future_yrs %% 2)
-    idx_future <- (length(s_yr:m_yr) + 1):length(lst$yrs)
+    idx_future <- (length(lst$s_yr:lst$m_yr) + 1):length(lst$yrs)
     idx_future <- idx_future[odd_future_yrs]
 
     lst$survey_err <- c(lst$survey_err, rep(1, n_sim_yrs))
