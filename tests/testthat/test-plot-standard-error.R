@@ -10,10 +10,10 @@ ps$standard_error_ssb <- tibble::tibble(
   `0.75` = rep(c(-0.91, -0.840000, 0.925), 4),
   `0.95` = rep(c(-0.95, 0.87, 0.965), 4),
   avg = rep(c(-0.9, 0.92, 0.855), 4),
-  run = c(rep("Base scenario", 3),
-          rep("Historical TAC", 3),
-          rep("Realized", 3),
-          rep("Floor 50", 3)))
+  scenario = c(rep("Base scenario", 3),
+               rep("Historical TAC", 3),
+               rep("Realized", 3),
+               rep("Floor 50", 3)))
 
 test_that("plot_standard_error() - Tests for argument errors", {
   expect_error(plot_standard_error(ps = NULL, ci = c(0.05, 0.95)))

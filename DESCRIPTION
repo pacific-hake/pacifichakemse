@@ -1,20 +1,17 @@
+Type: Package
 Package: pacifichakemse
 Title: Management Strategy Evaluation of Pacific Hake
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Nis",
-           family = "Sand Jocobsen",
+    person(given = "Chris",
+           family = "Grandin",
            role = c("aut", "cre"),
-           email = "nissandjac@gmail.com")
+           email = "chris.grandin@gmail.com")
 Maintainer: Chris Grandin <chris.grandin@gmail.com>
 Description: Management strategy evaluation framework with a Spatial Operating Model.
-License: GPL-3
+License: GPL (>=3)
+BugReports: https://github.com/pacific-hake/pacifichakemse/issues
 Depends: R (>= 3.5.0)
-Encoding: UTF-8
-LinkingTo: 
-    TMB,
-    RcppEigen,
-    Rcpp
 Imports:
     clisymbols,
     cowplot,
@@ -36,18 +33,20 @@ Imports:
     tidyr,
     tidyselect,
     tibble,
-    TMB,
-    Rcpp,
+    TMB (>= 1.7.13),
     utils
+Suggests: 
+    testthat,
+    vdiffr
+LinkingTo: 
+    RcppEigen,
+    TMB
 Remotes:
     jakelawlor/PNWColors,
     pbs-assess/gfutilities,
     r4ss/r4ss
-BinaryFiles:
-    src/runHakeassessment.dll
+ByteCompile: true
+Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Suggests: 
-    testthat,
-    vdiffr

@@ -2,8 +2,8 @@ context("Test the plot_aa() function")
 
 ps <- NULL
 ps$cols <- PNWColors::pnw_palette("Starfish", n = 4, type = "discrete")
-ps$mse_values_agg$ams_quant <- tibble::tribble(
-  ~year,   ~`0.05`,   ~`0.25`,   ~`0.5`,    ~`0.75`,   ~`0.95`,     ~avg,            ~run,
+ps$mse_quants$ams_quant <- tibble::tribble(
+  ~year,   ~`0.05`,   ~`0.25`,   ~`0.5`,    ~`0.75`,   ~`0.95`,     ~avg,            ~scenario,
   2011,  3.970486,  3.970486, 3.970486,   3.970486,  3.970486, 3.970486, "Base scenario",
   2012,  3.028399,  3.028399, 3.028399,   3.028399,  3.028399, 3.028399, "Base scenario",
   2013,  3.596368,  3.596368, 3.596368,   3.596368,  3.596368, 3.596368, "Base scenario",
@@ -16,7 +16,7 @@ ps$mse_values_agg$ams_quant <- tibble::tribble(
   2011,  3.970486,  3.970486, 3.970486,   3.970486,  3.970486, 3.970486, "Floor 50",
   2012,  3.028399,  3.028399, 3.028399,   3.028399,  3.028399, 3.028399, "Floor 50",
   2013,  3.596368,  3.596368, 3.596368,   3.596368,  3.596368, 3.596368, "Floor 50")
-ps$mse_values_agg$amc_quant <- ps$mse_values_agg$ams_quant
+ps$mse_quants$amc_quant <- ps$mse_quants$ams_quant
 
 test_that("plot_aa() - Tests for argument errors", {
   expect_error(plot_aa(ps = NULL, type = "survey", ci = c(0.05, 0.95)))
@@ -27,9 +27,9 @@ test_that("plot_aa() - Tests for argument errors", {
   expect_error(plot_aa(ps = ps, type = "survey", ci = c(0.05, 0.5, 0.95)))
   expect_error(plot_aa(ps = ps, type = "nonimplemented_type", ci = c(0.05, 0.95)))
   ps_no_median <- ps
-  tmpnames <- names(ps$mse_values_agg$ams_quant)
+  tmpnames <- names(ps$mse_quants$ams_quant)
   tmpnames[4] <- "notright"
-  names(ps_no_median$mse_values_agg$ams_quant) <- tmpnames
+  names(ps_no_median$mse_quants$ams_quant) <- tmpnames
   expect_error(plot_aa(ps = ps_no_median,
                        type = "survey",
                        ci = c(0.05, 0.95)))

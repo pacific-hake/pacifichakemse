@@ -2,7 +2,7 @@ context("Test the plot_catch() function")
 
 ps <- NULL
 ps$cols <- PNWColors::pnw_palette("Starfish", n = 4, type = "discrete")
-ps$mse_values_agg$catch_quant <- tibble::tibble(
+ps$mse_quants$catch_quant <- tibble::tibble(
   year = rep(c(2011, 2012, 2013), 4),
   `0.05` = rep(c(280000, 200000, 285000), 4),
   `0.25` = rep(c(290000, 210000, 295000), 4),
@@ -10,10 +10,10 @@ ps$mse_values_agg$catch_quant <- tibble::tibble(
   `0.75` = rep(c(310000, 240000, 325000), 4),
   `0.95` = rep(c(350000, 270000, 365000), 4),
   avg = rep(c(300000, 220000, 305000), 4),
-  run = c(rep("Base scenario", 3),
-          rep("Historical TAC", 3),
-          rep("Realized", 3),
-          rep("Floor 50", 3)))
+  scenario = c(rep("Base scenario", 3),
+               rep("Historical TAC", 3),
+               rep("Realized", 3),
+               rep("Floor 50", 3)))
 
 test_that("plot_catch() - Tests for argument errors", {
   expect_error(plot_catch(ps = NULL, ci = c(0.05, 0.95)))
@@ -22,9 +22,9 @@ test_that("plot_catch() - Tests for argument errors", {
   expect_error(plot_catch(ps = ps, ci = c("a", "b")))
   expect_error(plot_catch(ps = ps, ci = c(0.05, 0.5, 0.95)))
   ps_no_median <- ps
-  tmpnames <- names(ps$mse_values_agg$catch_quant)
+  tmpnames <- names(ps$mse_quants$catch_quant)
   tmpnames[4] <- "notright"
-  names(ps_no_median$mse_values_agg$catch_quant) <- tmpnames
+  names(ps_no_median$mse_quants$catch_quant) <- tmpnames
   expect_error(plot_catch(ps = ps_no_median,
                           ci = c(0.05, 0.95)))
 

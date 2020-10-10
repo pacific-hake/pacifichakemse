@@ -6,5 +6,4 @@
 #' @author Nis S Jacobsen, Ian G. Taylor, Kristin Marshall, Aaron Berger, Chris Grandin
 #' Package maintainer: Nis Jacobsen <nissandjac@@gmail.com>
 #' @references PacifichakeMSE on GitHub: \url{https://github.com/nissandjac/PacifichakeMSE}
-#' @importFrom Rcpp sourceCpp
 NULL

@@ -3,7 +3,7 @@ context("Test the plot_bars_country_season() function")
 ps <- NULL
 ps$cols <- PNWColors::pnw_palette("Starfish", n = 4, type = "discrete")
 ps$country_season_indicators <- tibble::tribble(
-           ~indicator,       ~value,             ~HCR,  ~country,     ~season,
+           ~indicator,       ~value,             ~hcr,  ~country,     ~season,
    "Canada TAC/V spr",  2547.186233,  "Base scenario",  "Canada",   "Apr-Jun",
    "Canada TAC/V sum",  1094.430019,  "Base scenario",  "Canada", "July-Sept",
   "Canada TAC/V fall",  3629.076840,  "Base scenario",  "Canada",   "Oct-Dec",

@@ -2,7 +2,7 @@ context("Test the plot_aa_country() function")
 
 ps <- NULL
 ps$cols <- PNWColors::pnw_palette("Starfish", n = 4, type = "discrete")
-ps$mse_values_agg$ams_space_quant <- tibble::tibble(
+ps$mse_quants$ams_quant <- tibble::tibble(
   country = c(rep("Canada", 12), rep("US", 12)),
   year = rep(c(2011, 2012, 2013), 8),
   `0.05` = c(rep(c(5.9, 5.8, 6.6), 4), rep(c(4.6, 6.9, 7.9), 4)),
@@ -11,11 +11,11 @@ ps$mse_values_agg$ams_space_quant <- tibble::tibble(
   `0.75` = c(rep(c(9.9, 12.8, 13.6), 4), rep(c(11.6, 10.9, 10.9), 4)),
   `0.95` = c(rep(c(15.9, 15.8, 16.6), 4), rep(c(14.6, 16.9, 17.9), 4)),
   avg = c(rep(c(14, 15, 16), 4), rep(c(14, 16, 17), 4)),
-  run = rep(c(rep("Base scenario", 3),
-              rep("Historical TAC", 3),
-              rep("Realized", 3),
-              rep("Floor 50", 3)), 2))
-ps$mse_values_agg$amc_space_quant <- ps$mse_values_agg$ams_space_quant
+  scenario = rep(c(rep("Base scenario", 3),
+                   rep("Historical TAC", 3),
+                   rep("Realized", 3),
+                   rep("Floor 50", 3)), 2))
+ps$mse_quants$amc_quant <- ps$mse_quants$ams_quant
 
 test_that("plot_aa() - Tests for argument errors", {
   expect_error(plot_aa_country(ps = NULL,
@@ -48,9 +48,9 @@ test_that("plot_aa() - Tests for argument errors", {
                                type = "nonimplemented_type",
                                ci = c(0.05, 0.95)))
   ps_no_median <- ps
-  tmpnames <- names(ps$mse_values_agg$ams_space_quant)
+  tmpnames <- names(ps$mse_quants$ams_quant)
   tmpnames[5] <- "notright"
-  names(ps_no_median$mse_values_agg$ams_space_quant) <- tmpnames
+  names(ps_no_median$mse_quants$ams_quant) <- tmpnames
   expect_error(plot_aa_country(ps = ps_no_median,
                                type = "survey", ci = c(0.05, 0.95),
                                country_colors = c("darkred", "blue4")))
