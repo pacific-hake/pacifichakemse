@@ -42,10 +42,10 @@ create_rds_file <- function(model_dir = NULL,
                             verbose = FALSE)
       model$mcmccalcs <- calc_mcmc(mcmc_out, ...)
       cat(green(symbol$tick),
-          green(" Finished loading MCMC posteriors\n"))
+          green("Finished loading MCMC posteriors\n"))
     }else{
       cat(red(symbol$cross),
-          red(" MCMC posteriors not loaded (mcmc directory not found)\n"))
+          red("MCMC posteriors not loaded (mcmc directory not found)\n"))
     }
     if(load_extra_mcmc){
       model$extra_mcmc_dir <- file.path(model_dir, "extra-mcmc")
@@ -56,10 +56,11 @@ create_rds_file <- function(model_dir = NULL,
             green(" Finished loading extra MCMC output\n"))
       }else{
         cat(red(symbol$cross),
-            red(" Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
+            red("Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
       }
     }
     # Load the catch by country and season data
+    model$catch_country <- extract_catch_country(data_csv_dir)
     model$catch_seas_country <- calc_catch_seas_country(data_csv_dir)
 
     saveRDS(model, file = rds_file)
@@ -420,29 +421,28 @@ load_ss_model_data <- function(ss_model,
   lst$m_yr <- max(lst$catch_obs$yr)
   yrs <- lst$s_yr:lst$m_yr
 
-  # TODO: This is to copy what is in the original MSE, from the table in the assessment.
+  # TODO: This is to copy what is in the original MSE EXACTLY, from the table in the assessment.
   # It is not exactly the same as what is in the SS data file and overwrites that which is
   # loaded above.
-  lst$catch_obs <- read_csv(system.file("extdata/catches.csv",
-                                        package = "pacifichakemse",
-                                        mustWork = TRUE),
-                            col_types = cols("i", "i", "i", "i")) %>%
-    transmute(yr = Year,
-              value = Total) %>%
-    as.data.frame() %>%
-    add_row(lst$catch_obs %>% tail(1), .after = nrow(.))
-  lst$catch_obs[lst$catch_obs$yr == 1991,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1991,]$value + 1
-  lst$catch_obs[lst$catch_obs$yr == 1992,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1992,]$value + 1
-  lst$catch_obs[lst$catch_obs$yr == 1995,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1995,]$value + 1
-  lst$catch_obs[lst$catch_obs$yr == 1996,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1996,]$value - 1
-  lst$catch_obs[lst$catch_obs$yr == 2005,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 2005,]$value - 1
-  lst$catch_obs[lst$catch_obs$yr == 2008,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 2008,]$value + 1
+  # lst$catch_obs <- read_csv(system.file("extdata/catches.csv",
+  #                                       package = "pacifichakemse",
+  #                                       mustWork = TRUE),
+  #                           col_types = cols("i", "i", "i", "i")) %>%
+  #   transmute(yr = Year,
+  #             value = Total) %>%
+  #   add_row(lst$catch_obs %>% tail(1), .after = nrow(.))
+  # lst$catch_obs[lst$catch_obs$yr == 1991,]$value <-
+  #   lst$catch_obs[lst$catch_obs$yr == 1991,]$value + 1
+  # lst$catch_obs[lst$catch_obs$yr == 1992,]$value <-
+  #   lst$catch_obs[lst$catch_obs$yr == 1992,]$value + 1
+  # lst$catch_obs[lst$catch_obs$yr == 1995,]$value <-
+  #   lst$catch_obs[lst$catch_obs$yr == 1995,]$value + 1
+  # lst$catch_obs[lst$catch_obs$yr == 1996,]$value <-
+  #   lst$catch_obs[lst$catch_obs$yr == 1996,]$value - 1
+  # lst$catch_obs[lst$catch_obs$yr == 2005,]$value <-
+  #   lst$catch_obs[lst$catch_obs$yr == 2005,]$value - 1
+  # lst$catch_obs[lst$catch_obs$yr == 2008,]$value <-
+  #   lst$catch_obs[lst$catch_obs$yr == 2008,]$value + 1
 
   # Weight-at-age data
   waa <- ss_model$wtatage %>%
@@ -639,6 +639,9 @@ load_ss_model_data <- function(ss_model,
   lst$dat <- ss_model$dat
 
   lst$catch_props_space_season <- ss_model$catch_seas_country
+  lst$catch_country <- ss_model$catch_country
+  cat(green(symbol$tick),
+      green("Loaded SS data successfully\n"))
 
   lst
 }
@@ -715,9 +718,7 @@ extract_age_comps <- function(ss_model = NULL,
   age_comps <- map(age_comps$data, ~{
     tibble(.x)
   })
-  age_comps <- bind_cols(age_comps)
-  names(age_comps) <- as.character(age_comps_yrs)
-
+  age_comps <- bind_cols(age_comps, .name_repair = "minimal")
   age_comps <- age_comps %>%
     t() %>%
     as_tibble(.name_repair = "minimal") %>%

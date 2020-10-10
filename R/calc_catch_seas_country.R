@@ -41,12 +41,12 @@ calc_catch_seas_country <- function(data_csv_dir = NULL, n_yrs = 10, weight = c(
       select(-tot) %>% tail(n_yrs) %>%
       summarize_at(.vars = vars(-year), .funs = mean)
   }
-  can1 <- read_csv(file.path(data_csv_dir, "can-ft-catch-by-month.csv"))
-  can2 <- read_csv(file.path(data_csv_dir, "can-ss-catch-by-month.csv"))
-  usa1 <- read_csv(file.path(data_csv_dir, "us-cp-catch-by-month.csv"))
-  usa2 <- read_csv(file.path(data_csv_dir, "us-ms-catch-by-month.csv"))
-  usa3 <- read_csv(file.path(data_csv_dir, "us-shore-catch-by-month.csv"))
-  usa4 <- read_csv(file.path(data_csv_dir, "us-research-catch-by-month.csv"))
+  can1 <- read_csv(file.path(data_csv_dir, "can-ft-catch-by-month.csv"), col_types = cols())
+  can2 <- read_csv(file.path(data_csv_dir, "can-ss-catch-by-month.csv"), col_types = cols())
+  usa1 <- read_csv(file.path(data_csv_dir, "us-cp-catch-by-month.csv"), col_types = cols())
+  usa2 <- read_csv(file.path(data_csv_dir, "us-ms-catch-by-month.csv"), col_types = cols())
+  usa3 <- read_csv(file.path(data_csv_dir, "us-shore-catch-by-month.csv"), col_types = cols())
+  usa4 <- read_csv(file.path(data_csv_dir, "us-research-catch-by-month.csv"), col_types = cols())
   can <- can1 %>%
     bind_rows(can2) %>%
     group_by(year) %>%

@@ -109,7 +109,9 @@ load_data_om <- function(ss_model = NULL,
   # Throw error if move_init is NULL and n_space is not 2
   stopifnot(!is.null(move_init) | (is.null(move_init) & n_space == 2))
 
-  lst <- csv_data()
+  #lst <- csv_data()
+
+  lst <- NULL
 
   lst$s_yr <- ss_model$s_yr
   lst$m_yr <- ss_model$m_yr
@@ -233,19 +235,19 @@ load_data_om <- function(ss_model = NULL,
   }else{
     r_devs <- rnorm(n = n_sim_yrs,
                     mean = 0,
-                    sd = exp(df$rdev_sd))
+                    sd = exp(lst$rdev_sd))
   }
 
-  lst$r_dev <- lst$r_dev[, 1]
+  lst$r_dev <- ss_model$r_dev
   if(n_sim_yrs > 0){
-    lst$r_dev <- c(lst$r_dev, r_devs)
+    # yrs is the years after lst$m_yrs
+    yrs <- lst$m_yr:(lst$m_yr + n_sim_yrs - 1)
+    new_df <- tibble(yr = yrs, value = r_devs)
+    lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
   }
-  lst$r_dev <- lst$r_dev %>%
-    as.data.frame() %>%
-    as_tibble() %>%
-    rename(value = 1) %>%
-    mutate(yr = lst$yrs) %>%
-    select(yr, everything())
+  # add a zero r_dev to the final year
+  lst$r_dev <- rbind(lst$r_dev, c(tail(lst$yrs, 1), 0))
+
   lst$init_n <- ss_model$init_n %>%
     as.data.frame() %>%
     as_tibble() %>%
@@ -257,8 +259,7 @@ load_data_om <- function(ss_model = NULL,
   lst$flag_sel <- rep(FALSE, lst$n_yr)
   lst$flag_sel[which(lst$yrs == lst$sel_change_yr):which(lst$yrs == lst$m_yr)] <- TRUE
 
-  lst$catch_country <- lst$catch_country %>%
-    select(year, Can, US) %>%
+  lst$catch_country <- ss_model$catch_country %>%
     mutate(total = rowSums(.)) %>% set_names(c("year", "space1", "space2", "total"))
   # TODO: Check why the sum of the catch country file does not add up to the total in the SS data file
   # lst$catch_obs <- lst$catch_country %>% pull(total)

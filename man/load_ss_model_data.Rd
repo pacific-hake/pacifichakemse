@@ -6,8 +6,6 @@
 \usage{
 load_ss_model_data(
   ss_model,
-  s_yr = NULL,
-  m_yr = NULL,
   s_min = 1,
   s_max = 6,
   s_min_survey = 2,
@@ -20,10 +18,6 @@ load_ss_model_data(
 }
 \arguments{
 \item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}}
-
-\item{s_yr}{Start year}
-
-\item{m_yr}{End year}
 
 \item{s_min}{Minimum age in fishery selectivity}
 
