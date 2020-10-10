@@ -1,7 +1,8 @@
 #' Calculate the standard error on SSB between the Operating Model and the Estimation Model
 #' for all runs in the list
 #'
-#' @param lst list of MSE results
+#' @param em_output A list of Estimation model output
+#' @param om_output A list of Operating model outpu
 #' @param col Column to calculate the quantiles on
 #' @param quants A vector of quantiles to pass to [stats::quantile()]
 #' @param inc_mean Logical. Include the mean (as column `avg`)

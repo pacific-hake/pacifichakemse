@@ -15,6 +15,8 @@ create_rds_file(
 \arguments{
 \item{model_dir}{Directory name of model to be loaded}
 
+\item{data_csv_dir}{Directory name where Hake assessment CSV data are located}
+
 \item{overwrite_ss_rds}{Logical. Overwrite the RDS file if it exists}
 
 \item{load_extra_mcmc}{Logical. If TRUE, attempt to load the extra-MCMC

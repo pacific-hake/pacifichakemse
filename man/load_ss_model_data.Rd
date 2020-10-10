@@ -23,6 +23,10 @@ load_ss_model_data(
 
 \item{s_max}{Maximum age in fishery selectivity}
 
+\item{s_min_survey}{Minimum age in survey selectivity}
+
+\item{s_max_survey}{Maximum age in survey selectivity}
+
 \item{weight_factor}{A factor to multiply and divide SSB values by}
 
 \item{n_space}{The number of spaces (areas) in which fishing takes place

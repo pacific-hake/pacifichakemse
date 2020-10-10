@@ -1,9 +1,12 @@
 #' Plot faceted violin plots for scenarios
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
+#' @param quants Quantile values to calculate
+#' @param min_yr The minimum year to show on the plot
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
+#' @importFrom forcats fct_relevel
 plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
 
   # Extract Catch, SSB, and AAV and quantiles for them
@@ -80,7 +83,7 @@ plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
             "Long term catch")
   df <- ps$ssb_catch_indicators %>%
     filter(indicator %in% inds) %>%
-    mutate(indicator = forcats::fct_relevel(indicator, inds))
+    mutate(indicator = fct_relevel(indicator, inds))
 
   cols <- PNWColors::pnw_palette("Starfish",n = length(unique(df$hcr)), type = "discrete")
   g <- ggplot(df, aes(x = hcr, y = value, fill = hcr)) +

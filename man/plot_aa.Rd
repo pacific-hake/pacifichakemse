@@ -11,8 +11,7 @@ plot_aa(ps = NULL, type = NULL, ci = c(0.05, 0.95))
 
 \item{type}{Which data type to plot, "survey" or "catch"}
 
-\item{ci}{A vector of length two of the lower and upper credible interval values.
-These values must have been calculated in \code{\link[=df_lists]{df_lists()}} and exist in the data in \code{ps}}
+\item{ci}{A vector of length two of the lower and upper credible interval values.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

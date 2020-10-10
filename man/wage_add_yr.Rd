@@ -8,7 +8,7 @@ last row with the \code{Yr} value being one more than the last row's}
 wage_add_yr(wage = NULL)
 }
 \arguments{
-\item{wage}{A weight-at-age \link{data.frame} as created by \code{\link[=load_data_ss]{load_data_ss()}}}
+\item{wage}{A weight-at-age \link{data.frame} as created by \code{\link[=load_ss_model_data]{load_ss_model_data()}}}
 }
 \value{
 The same \code{wage} \link{data.frame} with a new row added to the bottom,

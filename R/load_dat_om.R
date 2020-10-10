@@ -8,8 +8,6 @@
 #' @param season_names A vector of names for the seasons. Length must equal `n_season`
 #' @param n_space Number of spatial areas
 #' @param space_names A vector of names for the spaces. Length must equal `n_space`
-#' @param s_yr First year of historical simulations
-#' @param m_yr Last year of historical simulations
 #' @param ages A vector of ages
 #' @param age_names A vector of names for the ages. Length must equal length of `ages`
 #' @param sel_change_yr A year in which a selectivity change took place
@@ -28,11 +26,12 @@
 #' @param s_max Maximum age in fishery selectivity
 #' @param s_min_survey Minimum age in survey selectivity
 #' @param s_max_survey Maximum age in survey selectivity
-#' @param sel_hist Use historical selectivity?
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
 #' @param log_phi_survey Survey phi parameter value
 #' @param ... Absorb arguments destined for other functions
+#' @param zero_rdevs Logical. If TRUE, make all recruitment deviations into the future zero.
+#' If FALSE, they will be given random normal values based on rdev_sd
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
 #' @importFrom tibble tibble as_tibble

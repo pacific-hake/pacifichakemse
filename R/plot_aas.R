@@ -3,7 +3,6 @@
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param type Which data type to plot, "survey" or "catch"
 #' @param ci A vector of length two of the lower and upper credible interval values.
-#' These values must have been calculated in [df_lists()] and exist in the data in `ps`
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_aa <- function(ps = NULL,
@@ -48,7 +47,6 @@ plot_aa <- function(ps = NULL,
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param type Which data type to plot, "survey" or "catch"
 #' @param ci A vector of length two of the lower and upper credible interval values.
-#' These values must have been calculated in [df_lists()] and exist in the data in `ps`
 #' @param country_colors A vector of two colors, the first for Canada, the second for
 #' the US
 #'

@@ -531,7 +531,7 @@ get_age_dat <- function(d = NULL,
 #' Add a new row to the bottom of the `wage` [data.frame], which is a copy of the
 #' last row with the `Yr` value being one more than the last row's
 #'
-#' @param wage A weight-at-age [data.frame] as created by [load_data_ss()]
+#' @param wage A weight-at-age [data.frame] as created by [load_ss_model_data()]
 #'
 #' @return The same `wage` [data.frame] with a new row added to the bottom,
 #' which is a copy of the last row with the `Yr` value being one more than

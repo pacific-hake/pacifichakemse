@@ -3,6 +3,7 @@
 #'
 #' @param om list of parameters and life history values OM data. This list is
 #' what is returned by [load_data_om()]
+#' @param random_seed The random seed to use for this Operating Model
 #' @param ... Arguments passed to [run_year_loop_om()]
 #'
 #' @return A list of model outputs

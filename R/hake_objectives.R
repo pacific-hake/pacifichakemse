@@ -2,14 +2,16 @@
 #'
 #' @param lst list of MSE results
 #' @param sim_data simulated data from the OM
+#' @param run_num Which run to calculate the objectives for
 #' @param short_term_yrs Years for short term plots
 #' @param long_term_yrs Years greater than this will be in long term plots
 #' @param can.prop Proportion of the coastwide TAC that Canada receives
 #' @param us.prop Proportion of the coastwide TAC that the US receives
 #' @param quants Quantiles to calculate for plotting output [data.frame]s
 #' @param catch_multiplier Value to multiply all catch calculations by
+#' @param ... Absorbs extra parameters
 #'
-#' @return List of three: p.export, t.export, ls.season (TODO: explain better)
+#' @return List of many outputs from the MSE
 #' @importFrom ggplot2 alpha
 #' @importFrom dplyr left_join lead lag n summarize_at vars everything bind_rows
 #' @importFrom purrr partial map_int

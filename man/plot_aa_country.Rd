@@ -16,8 +16,7 @@ plot_aa_country(
 
 \item{type}{Which data type to plot, "survey" or "catch"}
 
-\item{ci}{A vector of length two of the lower and upper credible interval values.
-These values must have been calculated in \code{\link[=df_lists]{df_lists()}} and exist in the data in \code{ps}}
+\item{ci}{A vector of length two of the lower and upper credible interval values.}
 
 \item{country_colors}{A vector of two colors, the first for Canada, the second for
 the US}

@@ -24,6 +24,8 @@ run_season_loop_om(
 
 \item{m_season}{A vector of natural mortality-at-age}
 
+\item{ages_no_move}{Ages that don't move in the movement model}
+
 \item{pope_mul}{Multiplier used in Pope's method}
 
 \item{verbose}{Print the loop information to the console}

@@ -14,13 +14,15 @@ calc_standard_error_ssb(
 )
 }
 \arguments{
+\item{em_output}{A list of Estimation model output}
+
+\item{om_output}{A list of Operating model outpu}
+
 \item{col}{Column to calculate the quantiles on}
 
 \item{quants}{A vector of quantiles to pass to \code{\link[stats:quantile]{stats::quantile()}}}
 
 \item{inc_mean}{Logical. Include the mean (as column \code{avg})}
-
-\item{lst}{list of MSE results}
 }
 \value{
 A \link{data.frame} of 3 columns: The run number, the standard error of spawning

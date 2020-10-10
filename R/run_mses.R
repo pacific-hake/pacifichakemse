@@ -35,6 +35,7 @@
 #' @importFrom r4ss SS_output
 #' @importFrom stringr str_ends
 #' @importFrom clisymbols symbol
+#' @importFrom tictoc tic toc
 #' @export
 run_mses <- function(ss_model_output_dir = NULL,
                      n_runs = 10,
@@ -73,7 +74,7 @@ run_mses <- function(ss_model_output_dir = NULL,
   stopifnot(is.null(n_surveys) | length(n_surveys) == length(fns))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
 
-  tictoc::tic()
+  tic()
   # Seed for the random recruitment deviations: rnorm(n = 1, mean = 0, sd = exp(df$rdev_sd))
   # found in update_om_data.R. This is also the seed used to set up the random seeds for each
   # run (search below for "seeds")
@@ -153,5 +154,5 @@ run_mses <- function(ss_model_output_dir = NULL,
     attr(ls_save, "plotname") <- plot_names[.y]
     saveRDS(ls_save, file = file.path(results_dir, .x))
   }, ...)
-  tictoc::toc()
+  toc()
 }

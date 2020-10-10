@@ -20,8 +20,7 @@ in this directory that end in '.rds' and contain 'MSE' will be loaded}
 \item{porder}{Order of the scenarios in the figures. Default is the order they appear in the
 \code{results_dir} directory. All outputs will be ordered in this way}
 
-\item{...}{Arguments to be passed to \code{\link[=hake_objectives]{hake_objectives()}}, \code{\link[=df_lists]{df_lists()}}, and
-\code{\link[=calc_standard_error_ssb]{calc_standard_error_ssb()}}}
+\item{...}{Arguments to be passed to \code{\link[=hake_objectives]{hake_objectives()}} and \code{\link[=calc_standard_error_ssb]{calc_standard_error_ssb()}}}
 }
 \value{
 A list of length 10: The items are (1) A \link{data.frame} containing the SSB/AAV/Catch
@@ -29,7 +28,7 @@ indicators, (2) A \link{data.frame} containing the country and season indicators
 containing the violin indicators (data in format for violin plots), (4) A \link{data.frame} of data
 to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
 (6) A vector of plot names, one for each scenario, (7) lst_indicators which is a list, one for
-each scenario, and each containing a list of length 3, which is the output of \code{\link[=df_lists]{df_lists()}},
+each scenario, and each containing a list of length 3, which is the output of \code{\link[=hake_objectives]{hake_objectives()}},
 (8) A list of data frames, which are the scenario-aggregated data frames from \code{mse_out_data[[N]][[3]]},
 (9) A list of length = number of scenarios, containing three-column \link{data.frame}s with \code{run}, \code{SE.SSB},
 and \code{year} as columns/ SE.SSB is the standard error between the OM and EM, (10) \code{sim_data} - output

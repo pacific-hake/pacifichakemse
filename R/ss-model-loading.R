@@ -1,6 +1,7 @@
 #' Create an rds file to hold an SS model's data and outputs.
 #'
 #' @param model_dir Directory name of model to be loaded
+#' @param data_csv_dir Directory name where Hake assessment CSV data are located
 #' @param overwrite_ss_rds Logical. Overwrite the RDS file if it exists
 #' @param load_extra_mcmc Logical. If TRUE, attempt to load the extra-MCMC
 #' runs from the model. The model_dir must contain an `extra-mcmc` directory
@@ -378,6 +379,8 @@ calc_mcmc <- function(mcmc,
 #' @param ss_model SS3 model output as created by [create_rds_file()]
 #' @param s_min Minimum age in fishery selectivity
 #' @param s_max Maximum age in fishery selectivity
+#' @param s_min_survey Minimum age in survey selectivity
+#' @param s_max_survey Maximum age in survey selectivity
 #' @param weight_factor A factor to multiply and divide SSB values by
 #' @param n_space The number of spaces (areas) in which fishing takes place
 #' and to which a selectivity-at-age is to be set. See the value of

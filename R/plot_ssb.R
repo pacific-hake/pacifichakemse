@@ -1,10 +1,7 @@
 #' Plot Spawning Stock Biomass (SSB) by scenario and country
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()].
-#' The variable `ssb_quant` in `ps$mse_values_agg$ssb_quant` is constructed
-#' in [df_lists()]
 #' @param ci A vector of length two of the lower and upper credible interval values.
-#' These values must have been calculated in [df_lists()] and exist in the data in `ps`
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export

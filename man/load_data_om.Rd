@@ -91,13 +91,10 @@ the second is the US}
 
 \item{log_phi_survey}{Survey phi parameter value}
 
+\item{zero_rdevs}{Logical. If TRUE, make all recruitment deviations into the future zero.
+If FALSE, they will be given random normal values based on rdev_sd}
+
 \item{...}{Absorb arguments destined for other functions}
-
-\item{s_yr}{First year of historical simulations}
-
-\item{m_yr}{Last year of historical simulations}
-
-\item{sel_hist}{Use historical selectivity?}
 }
 \value{
 A list of Parameters, Input parameters, Survey, Catch, and others

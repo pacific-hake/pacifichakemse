@@ -11,6 +11,8 @@ run_om(om = NULL, random_seed = 42, ...)
 \item{om}{list of parameters and life history values OM data. This list is
 what is returned by \code{\link[=load_data_om]{load_data_om()}}}
 
+\item{random_seed}{The random seed to use for this Operating Model}
+
 \item{...}{Arguments passed to \code{\link[=run_year_loop_om]{run_year_loop_om()}}}
 }
 \value{

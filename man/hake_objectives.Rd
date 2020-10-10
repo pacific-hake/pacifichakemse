@@ -22,6 +22,8 @@ hake_objectives(
 
 \item{sim_data}{simulated data from the OM}
 
+\item{run_num}{Which run to calculate the objectives for}
+
 \item{short_term_yrs}{Years for short term plots}
 
 \item{long_term_yrs}{Years greater than this will be in long term plots}
@@ -33,9 +35,11 @@ hake_objectives(
 \item{quants}{Quantiles to calculate for plotting output \link{data.frame}s}
 
 \item{catch_multiplier}{Value to multiply all catch calculations by}
+
+\item{...}{Absorbs extra parameters}
 }
 \value{
-List of three: p.export, t.export, ls.season (TODO: explain better)
+List of many outputs from the MSE
 }
 \description{
 Hake objectives (TODO: Improve docs on this function)
