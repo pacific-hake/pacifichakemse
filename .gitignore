@@ -8,3 +8,5 @@
 *.Rdata
 *.Rproj.user/
 .Rproj.user
+
+*.rds
