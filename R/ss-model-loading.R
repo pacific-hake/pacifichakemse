@@ -35,7 +35,7 @@ create_rds_file <- function(model_dir = NULL,
       return(rds_file)
     }
   }
-  cat(green("Creating a new RDS file in", model_dir, "\n"))
+  cat(green("\nCreating a new RDS file in", model_dir, "\n"))
   # If this point is reached, no RDS file exists so it has to be built from scratch
   model <- load_ss_files(model_dir)
   model$mcmc_dir <- file.path(model_dir, "mcmc")

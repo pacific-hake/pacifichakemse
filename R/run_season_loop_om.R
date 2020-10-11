@@ -62,7 +62,8 @@ run_season_loop_om <- function(om,
                           om$s_min,
                           om$s_max)
       if(yr == 1966 && season == 1 && space == 1){
-        write(paste("Year", "Season", "Space", "Fsel", sep = ","), "fselvals.csv")
+        header <- c("Year", "Season", "Space", "Fsel", paste0("fsel", 1:(length(f_sel) - 1)))
+        write(paste0(header, collapse = ","), "fselvals.csv")
       }
       write(paste(yr, season, space, paste(f_sel, sep = ",", collapse = ","), sep = ","), "fselvals.csv", append = TRUE)
 

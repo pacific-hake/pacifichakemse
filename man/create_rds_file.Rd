@@ -7,7 +7,7 @@
 create_rds_file(
   model_dir = NULL,
   data_csv_dir = NULL,
-  overwrite_ss_rds = TRUE,
+  overwrite_ss_rds = FALSE,
   load_extra_mcmc = TRUE,
   ...
 )
