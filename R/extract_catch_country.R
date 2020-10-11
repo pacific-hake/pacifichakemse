@@ -9,7 +9,13 @@ extract_catch_country <- function(data_csv_dir = NULL){
 
   verify_argument(data_csv_dir, "character", 1)
 
-  d <- read_csv(file.path(data_csv_dir, "landings-tac-history.csv"), col_types = cols())
+  fn <- file.path(data_csv_dir, "landings-tac-history.csv")
+  if(!file.exists(fn)){
+    cat(red(symbol$cross),
+        red(paste0("The data file ", fn, " does not exist. catch_country object is NULL\n")))
+    return(NULL)
+  }
+  d <- read_csv(fn, col_types = cols())
 
   can <- d %>%
     select(Year, CAN_forgn, CAN_JV, CAN_Shoreside) %>%

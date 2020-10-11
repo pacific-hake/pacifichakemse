@@ -12,13 +12,14 @@
 #' @export
 create_rds_file <- function(model_dir = NULL,
                             data_csv_dir = NULL,
-                            overwrite_ss_rds = TRUE,
+                            overwrite_ss_rds = FALSE,
                             load_extra_mcmc = TRUE,
                             ...){
 
   verify_argument(model_dir, "character", 1)
   verify_argument(data_csv_dir, "character", 1)
   verify_argument(overwrite_ss_rds, "logical", 1)
+  verify_argument(load_extra_mcmc, "logical", 1)
 
   if(!dir.exists(model_dir)){
     stop("Error - the directory ", model_dir, " does not exist.\n",
@@ -27,48 +28,50 @@ create_rds_file <- function(model_dir = NULL,
 
   rds_file <- file.path(model_dir, paste0(basename(model_dir), ".rds"))
   # The RDS file will have the same name as the directory it is in
-  if(file.exists(rds_file) && overwrite_ss_rds){
-    unlink(rds_file, force = TRUE)
+  if(file.exists(rds_file)){
+    if(overwrite_ss_rds){
+      unlink(rds_file, force = TRUE)
+    }else{
+      return(rds_file)
+    }
   }
-
-  if(!file.exists(rds_file)){
-    cat(green("Creating a new RDS file in", model_dir, "\n"))
-    # If this point is reached, no RDS file exists so it has to be built from scratch
-    model <- load_ss_files(model_dir)
-    model$mcmc_dir <- file.path(model_dir, "mcmc")
-    if(dir.exists(model$mcmc_dir)){
-      cat(green("Loading MCMC posteriors\n"))
-      mcmc_out <- SSgetMCMC(dir = model$mcmc_dir,
-                            writecsv = FALSE,
-                            verbose = FALSE)
-      model$mcmccalcs <- calc_mcmc(mcmc_out, ...)
+  cat(green("Creating a new RDS file in", model_dir, "\n"))
+  # If this point is reached, no RDS file exists so it has to be built from scratch
+  model <- load_ss_files(model_dir)
+  model$mcmc_dir <- file.path(model_dir, "mcmc")
+  if(dir.exists(model$mcmc_dir)){
+    cat(green("Loading MCMC posteriors\n"))
+    mcmc_out <- SSgetMCMC(dir = model$mcmc_dir,
+                          writecsv = FALSE,
+                          verbose = FALSE)
+    model$mcmccalcs <- calc_mcmc(mcmc_out, ...)
+    cat(green(symbol$tick),
+        green("Finished loading MCMC posteriors\n"))
+  }else{
+    cat(red(symbol$cross),
+        red("MCMC posteriors not loaded (mcmc directory not found)\n"))
+  }
+  if(load_extra_mcmc){
+    model$extra_mcmc_dir <- file.path(model_dir, "extra-mcmc")
+    if(dir.exists(model$extra_mcmc_dir)){
+      cat(green("Loading extra MCMC outputs\n"))
+      model$extra_mcmc <- fetch_extra_mcmc(model, ...)
       cat(green(symbol$tick),
-          green("Finished loading MCMC posteriors\n"))
+          green(" Finished loading extra MCMC output\n"))
     }else{
       cat(red(symbol$cross),
-          red("MCMC posteriors not loaded (mcmc directory not found)\n"))
+          red("Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
     }
-    if(load_extra_mcmc){
-      model$extra_mcmc_dir <- file.path(model_dir, "extra-mcmc")
-      if(dir.exists(model$extra_mcmc_dir)){
-        cat(green("Loading extra MCMC outputs\n"))
-        model$extra_mcmc <- fetch_extra_mcmc(model, ...)
-        cat(green(symbol$tick),
-            green(" Finished loading extra MCMC output\n"))
-      }else{
-        cat(red(symbol$cross),
-            red("Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
-      }
-    }
-    # Load the catch by country and season data
-    model$catch_country <- extract_catch_country(data_csv_dir)
-    model$catch_seas_country <- calc_catch_seas_country(data_csv_dir)
-
-    saveRDS(model, file = rds_file)
-    cat(green(symbol$tick),
-        green("Created RDS file successfully\n"))
   }
-  rds_file
+  # Load the catch by country and season data
+  model$catch_country <- extract_catch_country(data_csv_dir)
+  model$catch_seas_country <- calc_catch_seas_country(data_csv_dir)
+
+  saveRDS(model, file = rds_file)
+  cat(green(symbol$tick),
+      green("Created RDS file successfully\n"))
+
+rds_file
 }
 
 #' Load models from files created using [create_rds_file()]

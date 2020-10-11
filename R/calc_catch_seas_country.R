@@ -8,10 +8,13 @@
 #' each season. Canada will be the first row and the US the second
 #' @export
 #' @importFrom readr read_csv
-calc_catch_seas_country <- function(data_csv_dir = NULL, n_yrs = 10, weight = c(1, 1, 1, 1)){
+calc_catch_seas_country <- function(data_csv_dir = NULL,
+                                    n_yrs = 10,
+                                    weight = c(1, 1, 1, 1)){
 
   verify_argument(data_csv_dir, "character", 1)
   verify_argument(n_yrs, c("integer", "numeric"), 1)
+  verify_argument(weight, c("integer", "numeric"), 4)
 
   helper <- function(d){
     d_seas1 <- d %>%
@@ -41,29 +44,39 @@ calc_catch_seas_country <- function(data_csv_dir = NULL, n_yrs = 10, weight = c(
       select(-tot) %>% tail(n_yrs) %>%
       summarize_at(.vars = vars(-year), .funs = mean)
   }
-  can1 <- read_csv(file.path(data_csv_dir, "can-ft-catch-by-month.csv"), col_types = cols())
-  can2 <- read_csv(file.path(data_csv_dir, "can-ss-catch-by-month.csv"), col_types = cols())
-  usa1 <- read_csv(file.path(data_csv_dir, "us-cp-catch-by-month.csv"), col_types = cols())
-  usa2 <- read_csv(file.path(data_csv_dir, "us-ms-catch-by-month.csv"), col_types = cols())
-  usa3 <- read_csv(file.path(data_csv_dir, "us-shore-catch-by-month.csv"), col_types = cols())
-  usa4 <- read_csv(file.path(data_csv_dir, "us-research-catch-by-month.csv"), col_types = cols())
-  can <- can1 %>%
-    bind_rows(can2) %>%
+
+  helper_load_file <- function(fn){
+    fn <- file.path(data_csv_dir, fn)
+    if(!file.exists(fn)){
+      cat(red(symbol$cross),
+          red(paste0("The data file ", fn, " does not exist.\n")))
+      return(NULL)
+    }
+    read_csv(fn, col_types = cols())
+  }
+  fns_can <- list("can-ft-catch-by-month.csv",
+                  "can-ss-catch-by-month.csv")
+  fns_usa <- list("us-cp-catch-by-month.csv",
+                  "us-ms-catch-by-month.csv",
+                  "us-shore-catch-by-month.csv",
+                  "us-research-catch-by-month.csv")
+  df_can <- map(fns_can, helper_load_file) %>%
+    map_dfr(~{.x}) %>%
     group_by(year) %>%
     summarize_all(sum) %>%
     ungroup()
-  can <- helper(can)
+  df_can <- helper(df_can)
 
   # USA data is in long format, so use dcast() first to make it the same as the Canadian data
-  usa <- usa1 %>%
-    bind_rows(usa2, usa3, usa4) %>%
+  df_usa <- map(fns_usa, helper_load_file) %>%
+    map_dfr(~{.x}) %>%
     group_by(year, month) %>%
     summarize(catch = sum(catch)) %>%
-    ungroup()
-  usa <- dcast(usa, year ~ month, value.var = "catch") %>%
+    ungroup() %>%
+    dcast(year ~ month, value.var = "catch") %>%
     as_tibble()
-  usa[is.na(usa)] <- 0
-  usa <- helper(usa)
+  df_usa[is.na(df_usa)] <- 0
+  df_usa <- helper(df_usa)
 
-  map_df(list(can = can, usa = usa), ~{.x})
+  map_df(list(can = df_can, usa = df_usa), ~{.x})
 }
