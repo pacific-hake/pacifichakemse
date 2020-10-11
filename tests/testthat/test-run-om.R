@@ -3,7 +3,8 @@ context("Test run_om() function")
 ss_model_yr <- 2018
 ss_model_output_dir <- file.path(system.file(package = "pacifichakemse", mustWork = TRUE),
                                  "extdata", paste0("SS3_", ss_model_yr))
-ss_model_data_csv_dir <- "C:/github/pacific-hake/hake-assessment/data"
+ss_model_data_csv_dir <- file.path(system.file(package = "pacifichakemse", mustWork = TRUE),
+                                   "extdata", "csv-data")
 ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir,
                                        ss_model_data_csv_dir,
                                        load_extra_mcmc = FALSE,
