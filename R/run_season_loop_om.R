@@ -7,6 +7,7 @@
 #' @param ages_no_move Ages that don't move in the movement model
 #' @param pope_mul Multiplier used in Pope's method
 #' @param verbose Print the loop information to the console
+#' @param testing Logical. If TRUE, write out testing files
 #' @param ... Absorbs additional arguments meant for other functions
 #'
 #' @return A modified version of `om` with the current data for `yr` populated
@@ -21,6 +22,7 @@ run_season_loop_om <- function(om,
                                ages_no_move = c(0, 1),
                                pope_mul = 0.5,
                                verbose = TRUE,
+                               testing = FALSE,
                                ...){
 
   verify_argument(om, "list")
@@ -61,11 +63,13 @@ run_season_loop_om <- function(om,
                           p_sel,
                           om$s_min,
                           om$s_max)
-      if(yr == 1966 && season == 1 && space == 1){
-        header <- c("Year", "Season", "Space", "Fsel", paste0("fsel", 1:(length(f_sel) - 1)))
-        write(paste0(header, collapse = ","), "fselvals.csv")
+      if(testing){
+        if(yr == 1966 && season == 1 && space == 1){
+          header <- c("Year", "Season", "Space", "Fsel", paste0("fsel", 1:(length(f_sel) - 1)))
+          write(paste0(header, collapse = ","), "fselvals.csv")
+        }
+        write(paste(yr, season, space, paste(f_sel, sep = ",", collapse = ","), sep = ","), "fselvals.csv", append = TRUE)
       }
-      write(paste(yr, season, space, paste(f_sel, sep = ",", collapse = ","), sep = ","), "fselvals.csv", append = TRUE)
 
       om$f_sel_save[, yr_ind, space] <<- f_sel
       if(om$n_space > 1){
