@@ -59,7 +59,7 @@ load_data_om <- function(ss_model = NULL,
                          move_out = 0.85,
                          move_south = 0.05,
                          move_slope = 0.9,
-                         ages_no_move = 0,
+                         ages_no_move = 0:1,
                          selectivity_change = 0,
                          s_min = 1,
                          s_max = 6,
@@ -104,7 +104,7 @@ load_data_om <- function(ss_model = NULL,
   verify_argument(log_phi_survey, "numeric", 1)
 
   # Throw error if the number of simulation years is exactly 1
-  stopifnot(n_sim_yrs == 0 | n_sim_yrs > 1)
+  stopifnot(n_sim_yrs > 1)
   # Throw error if move_init is NULL and n_space is not 2
   stopifnot(!is.null(move_init) | (is.null(move_init) & n_space == 2))
 

@@ -96,5 +96,20 @@ init_agebased_model <- function(om = NULL){
                                        om$surv_sel * om$q * om$wage_survey)
   }
 
+  # Calculate initial year-1 spawning biomass by numbers-at-age * weight-at-age (ssb) and
+  # numbers-at-age * selectivity (ssb_all)
+  mat_sel <- om$mat_sel %>% select(-Yr)
+  yr_ind <- 1
+  wage <- get_wa_dfs(om, om$yrs[yr_ind])
+  n_save_age <- om$n_save_age[, yr_ind, , 1] %>% as.data.frame() %>% map(~{.x})
+  # Calculate initial SSB for each space
+  om$init_ssb <- map_dbl(n_save_age, function(space_num_at_age = .x){
+    sum(space_num_at_age * wage$ssb, na.rm = TRUE) * 0.5
+  })
+  # Calculate SSB with selectivity applied for the initial year in season 1
+  om$init_ssb_all <- map_dbl(n_save_age, function(space_num_at_age = .x){
+    sum(space_num_at_age * mat_sel, na.rm = TRUE) * 0.5
+  })
+
   om
 }

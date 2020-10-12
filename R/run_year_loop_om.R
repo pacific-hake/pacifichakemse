@@ -11,6 +11,7 @@ run_year_loop_om <- function(om = NULL,
                              verbose = TRUE,
                              ...){
   verify_argument(om, "list")
+  verify_argument(verbose, "logical", 1)
 
   map(om$yrs, function(yr = .x){
     if(verbose){

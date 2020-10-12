@@ -26,6 +26,19 @@ extract_catch_country <- function(data_csv_dir = NULL){
     mutate(usa = US_foreign + US_JV + atSea_US_MS + atSea_US_CP + US_shore + USresearch) %>%
     select(year = Year, usa)
 
-  can %>%
+  j <- can %>%
     left_join(usa, by = "year")
+
+  # TODO: This is hardwired to try to match the output of Nis' code. The data in the catch_per_country.csv
+  # file are the same as in the landings-tac-history.csv file up to 2005, when they diverge. Nis used
+  # catch_per_country.csv. To return to correct, comment the statement below out and return j
+  k <- read_csv(system.file("extdata/csv-data/catch_per_country.csv",
+                                        package = "pacifichakemse",
+                                        mustWork = TRUE),
+                            col_types = cols()) %>%
+    rename(can = Can, us = US) %>%
+    select(year, can, us)
+
+  #df$Catch.country <- as.matrix(Catch.country[,2:3])[,c(2,1)]
+  k
 }

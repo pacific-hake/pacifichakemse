@@ -95,10 +95,10 @@ run_season_loop_om <- function(om,
       if(e_tmp / b_tmp >= 0.9){
         if(om$yrs[yr_ind] < om$m_yr){
           # Stop if in the past
-          # stop("Catch exceeds available biomass in yrs: ",
-          #      om$yrs[yr_ind], " and season ",
-          #      season, " , space ", space,
-          # call. = FALSE)
+          stop("Catch exceeds available biomass in yrs: ",
+               om$yrs[yr_ind], " and season ",
+               season, " , space ", space,
+          call. = FALSE)
         }
         e_tmp <- 0.75 * b_tmp
         om$catch_quota_n[yr_ind, space, season] <<- 1
@@ -110,6 +110,7 @@ run_season_loop_om <- function(om,
                      n_tmp = n_tmp,
                      wage_catch = wage_catch,
                      method = "Hybrid")
+      #if(yr == 2005) browser()
       if(e_tmp > 0){
         f_new <- f_out
         f_season <- f_new * f_sel

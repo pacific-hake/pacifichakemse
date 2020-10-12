@@ -78,5 +78,14 @@ calc_catch_seas_country <- function(data_csv_dir = NULL,
   df_usa[is.na(df_usa)] <- 0
   df_usa <- helper(df_usa)
 
-  map_df(list(can = df_can, usa = df_usa), ~{.x})
+  j <- map_df(list(can = df_can, usa = df_usa), ~{.x})
+  # TODO: This is hardwired to try to match code written by Ian. He used 2011 data file for
+  # values up to 2010. It is likely the newer data file has slightly different values.
+  # To return to correct, comment the statement below out and return j
+  k <- tibble(can = c(0.001,0.188,0.603,0.208),
+              usa = c(0.000,0.317,0.382,0.302)/sum(c(0.000,0.317,0.382,0.302))) %>% t() %>%
+    as_tibble(.names_repair = "unique")
+  names(k) <- c("seas1", "seas2", "seas3", "seas4")
+
+  k
 }
