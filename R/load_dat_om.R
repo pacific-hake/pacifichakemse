@@ -15,6 +15,7 @@
 #' @param move_fifty_init Age at 50 percent maximum movement rate
 #' @param n_survey Survey frequency
 #' @param rdev_sd Recruitment deviation Standard deviation
+#' @param rdev_seed Random seed to use for all future random recruitment deviations
 #' @param b_future Bias adjustment in the future
 #' @param move_out Fraction of individuals that travel south in the last season
 #' @param move_south Fraction of individuals that move south during the year

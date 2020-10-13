@@ -168,7 +168,8 @@ run_season_loop_om <- function(om,
 
         #if(yr >= 2019) browser()
       }
-      om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] / sum(om$n_save_age[, yr_ind, space, season])
+      om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] /
+        sum(om$n_save_age[, yr_ind, space, season])
       if(yr_ind == 1 && season == 1){
         om$ssb_all[1, space, season] <<- om$init_ssb_all[space]
       }else{

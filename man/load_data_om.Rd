@@ -15,13 +15,14 @@ load_data_om(
   ages = 0:20,
   age_names = paste("age", 0:20),
   rdev_sd = 1.4,
+  rdev_seed = 42,
   move_init = NULL,
   move_max_init = 0.35,
   move_fifty_init = 6,
   move_out = 0.85,
   move_south = 0.05,
   move_slope = 0.9,
-  ages_no_move = 0,
+  ages_no_move = 0:1,
   selectivity_change = 0,
   s_min = 1,
   s_max = 6,
@@ -57,6 +58,8 @@ to include simulations so that arrays don't have to be redimensioned in the MSE 
 \item{age_names}{A vector of names for the ages. Length must equal length of \code{ages}}
 
 \item{rdev_sd}{Recruitment deviation Standard deviation}
+
+\item{rdev_seed}{Random seed to use for all future random recruitment deviations}
 
 \item{move_init}{Initial distribution of fish}
 

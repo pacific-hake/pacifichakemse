@@ -12,6 +12,7 @@ run_season_loop_om(
   ages_no_move = c(0, 1),
   pope_mul = 0.5,
   verbose = TRUE,
+  testing = FALSE,
   ...
 )
 }
@@ -29,6 +30,8 @@ run_season_loop_om(
 \item{pope_mul}{Multiplier used in Pope's method}
 
 \item{verbose}{Print the loop information to the console}
+
+\item{testing}{Logical. If TRUE, write out testing files}
 
 \item{...}{Absorbs additional arguments meant for other functions}
 }
