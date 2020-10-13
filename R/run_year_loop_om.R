@@ -45,7 +45,7 @@ run_year_loop_om <- function(om = NULL,
     om$n_save_age[1, yr_ind, , 1] <<- init_rec
 
     om$r_save[yr_ind, ] <<- init_rec
-
+#if(yr == 2018) browser()
     # -------------------------------------------------------------------------
     om <<- run_season_loop_om(om = om,
                               yr = yr,
@@ -53,6 +53,7 @@ run_year_loop_om <- function(om = NULL,
                               m_season = m_season,
                               verbose = verbose,
                               ...)
+    #if(yr >= 2019) browser()
 
     if(om$n_season > 1){
       om$catch_age[, yr_ind] <<- apply(om$catch_n_save_age[, yr_ind,,],

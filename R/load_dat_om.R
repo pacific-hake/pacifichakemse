@@ -53,6 +53,7 @@ load_data_om <- function(ss_model = NULL,
                          ages = 0:20,
                          age_names = paste("age", 0:20),
                          rdev_sd = 1.4,
+                         rdev_seed = 42,
                          move_init = NULL,
                          move_max_init = 0.35,
                          move_fifty_init = 6,
@@ -229,6 +230,7 @@ load_data_om <- function(ss_model = NULL,
 
   lst$r_mul <- ifelse(lst$n_space == 2, 1.1, 1)
 
+  set.seed(rdev_seed)
   if(zero_rdevs){
     r_devs <- rep(0, n_sim_yrs)
   }else{
@@ -236,16 +238,20 @@ load_data_om <- function(ss_model = NULL,
                     mean = 0,
                     sd = exp(lst$rdev_sd))
   }
-
+#browser()
   lst$r_dev <- ss_model$r_dev
+  # Add a zero for the final year
+  # TODO: Why is a zero assumed here? It is like this in the original code
+  last_yr_rdev <- tibble(yr = lst$m_yr, value = 0)
+  lst$r_dev <- lst$r_dev %>%
+    bind_rows(last_yr_rdev)
+
   if(n_sim_yrs > 0){
     # yrs is the years after lst$m_yrs
-    yrs <- lst$m_yr:(lst$m_yr + n_sim_yrs - 1)
+    yrs <- (lst$m_yr + 1):(lst$m_yr + n_sim_yrs)
     new_df <- tibble(yr = yrs, value = r_devs)
     lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
   }
-  # add a zero r_dev to the final year
-  lst$r_dev <- rbind(lst$r_dev, c(tail(lst$yrs, 1), 0))
 
   lst$init_n <- ss_model$init_n %>%
     as.data.frame() %>%
