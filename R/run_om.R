@@ -10,7 +10,7 @@
 #' @importFrom purrr map_dbl
 #' @export
 run_om <- function(om = NULL,
-                   random_seed = 42,
+                   random_seed = 123,
                    ...){
 
   verify_argument(om, "list")

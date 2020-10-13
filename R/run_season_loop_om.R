@@ -110,7 +110,7 @@ run_season_loop_om <- function(om,
                      n_tmp = n_tmp,
                      wage_catch = wage_catch,
                      method = "Hybrid")
-      #if(yr == 2005) browser()
+      #if(yr >= 2019) browser()
       if(e_tmp > 0){
         f_new <- f_out
         f_season <- f_new * f_sel
@@ -153,7 +153,7 @@ run_season_loop_om <- function(om,
           # Add the ones come to the surrounding areas
           om$n_save_age[1:(om$n_age - 2), yr_ind, space_idx, season] *
           exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
-
+#if(yr == 2018) browser()
         # Plus group
         n_survive_plus <- (om$n_save_age[om$n_age - 1, yr_ind, space, om$n_season] * exp(-z[om$n_age - 1]) +
                              om$n_save_age[om$n_age, yr_ind, space, om$n_season] * exp(-z[om$n_age]))
@@ -163,7 +163,10 @@ run_season_loop_om <- function(om,
         n_in_plus <- (om$n_save_age[om$n_age-1, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age - 1]) +
                        om$n_save_age[om$n_age, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age])) *
           om$move_mat[space_idx, om$n_age, season, yr_ind]
+
         om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
+
+        #if(yr >= 2019) browser()
       }
       om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] / sum(om$n_save_age[, yr_ind, space, season])
       if(yr_ind == 1 && season == 1){
