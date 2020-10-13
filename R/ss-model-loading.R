@@ -203,6 +203,7 @@ calc_mcmc <- function(mcmc,
   upper <- ss_mcmc_quants[3]
 
   lst <- NULL
+
   mcmc <- as_tibble(mcmc)
   # In 2018, SS changed from SPB to SSB in the MCMC reporting
   names(mcmc) <- gsub("SPB", "SSB", names(mcmc))

@@ -65,6 +65,13 @@ test_that("SSBs are the same", {
   expect_equivalent(d, d1, tolerance = 1e-9)
 })
 
+test_that("SSBs by space and season are the same", {
+  ssb_all <- om_0$ssb_all
+  ssb_all1 <- readRDS("ssb_all_out.rds")
+  names(dimnames(ssb_all1))[1] <- "yrs"
+  expect_equal(ssb_all, ssb_all1)
+})
+
 test_that("Age proportions in season 1 are the same", {
   nyr <- length(om_0$yrs)
   ac <- om_0$age_comps_om[,,,1]
@@ -112,4 +119,38 @@ test_that("Age proportions in season 4 are the same", {
 
   expect_equal(ac, ac1)
 })
+
+test_that("Age in catch is the same", {
+  age_catch <- om_0$catch_n_save_age
+  age_catch1 <- readRDS("catch_n_out.rds")
+  names(dimnames(age_catch1))[1] <- "ages"
+  names(dimnames(age_catch1))[2] <- "yrs"
+  expect_equal(age_catch, age_catch1)
+})
+
+test_that("Age in catch with weight-at-age applied is the same", {
+  age_catch <- om_0$catch_save_age
+  age_catch1 <- readRDS("catch_out.rds")
+  names(dimnames(age_catch1))[1] <- "ages"
+  names(dimnames(age_catch1))[2] <- "yrs"
+  expect_equal(age_catch, age_catch1)
+})
+
+test_that("Numbers at age by season and space are the same", {
+  nage <- om_0$n_save_age
+  nage1 <- readRDS("n_save_age_out.rds")
+  names(dimnames(nage1))[1] <- "ages"
+  names(dimnames(nage1))[2] <- "yrs"
+  expect_equal(nage, nage1)
+})
+
+test_that("Recruitment values are the same", {
+  r <- om_0$r_save
+  r1 <- readRDS("r_save_out.rds")
+  #names(dimnames(age_catch1))[1] <- "ages"
+  #names(dimnames(age_catch1))[2] <- "yrs"
+  expect_equal(r, r1)
+})
+
+
 

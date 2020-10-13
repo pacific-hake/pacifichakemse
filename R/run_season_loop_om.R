@@ -177,6 +177,7 @@ run_season_loop_om <- function(om,
       }
       om$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season] * wage_catch
       om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
+
   #if(yr_ind == 55) browser()
       if(om$catch_quota[yr_ind, space, season] > 0){
         if((sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season]) > 1.1){
