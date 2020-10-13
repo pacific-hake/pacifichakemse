@@ -9,5 +9,5 @@
 *.Rproj.user/
 .Rproj.user
 
-*.rds
 fselvals.csv
+SS3*.rds
