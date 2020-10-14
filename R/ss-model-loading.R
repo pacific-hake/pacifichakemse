@@ -395,6 +395,7 @@ calc_mcmc <- function(mcmc,
 #' @param ... Arguments to be passed to [load_ss_sel_parameters()]
 #'
 #' @return A [list] with objects to be used throughout the package code
+#' @export
 #' @importFrom dplyr distinct
 #' @importFrom reshape2 dcast
 load_ss_model_data <- function(ss_model,
