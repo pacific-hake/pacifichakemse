@@ -239,7 +239,7 @@ load_data_om <- function(ss_model = NULL,
                     mean = 0,
                     sd = exp(lst$rdev_sd))
   }
-#browser()
+
   lst$r_dev <- ss_model$r_dev
   # Add a zero for the final year
   # TODO: Why is a zero assumed here? It is like this in the original code
@@ -319,10 +319,21 @@ load_data_om <- function(ss_model = NULL,
                          r_in = lst$r_dev)
 
   if(n_sim_yrs > 1){
-    # Assumes survey is in every odd year only into the future
-    odd_future_yrs <- as.logical(future_yrs %% 2)
-    idx_future <- (length(lst$s_yr:lst$m_yr) + 1):length(lst$yrs)
-    idx_future <- idx_future[odd_future_yrs]
+    # Assumes survey is in every nth year only into the future
+    idx_future <- rep(FALSE, length(future_yrs))
+    ind <- 0
+    if(future_yrs[1] %% 2){
+      # If first future year is odd, set that as a survey year
+      ind <- 1
+      idx_future[1] <- TRUE
+    }
+    # Add n_survey years to the indices after the first odd year
+    while(ind <= length(future_yrs)){
+      ind <- ind + n_survey
+      if(ind <= length(future_yrs)){
+        idx_future[ind] <- TRUE
+      }
+    }
 
     lst$survey_err <- c(lst$survey_err, rep(1, n_sim_yrs))
     lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
