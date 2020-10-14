@@ -151,3 +151,46 @@ compare_move <- function(om){
   }
   p
 }
+
+#' Plot a 3-pane selectivity plot by country for three scenarios:
+#' Base, Low US, and last year selectivity
+#'
+#' @param om
+#' @param type
+#'
+#' @return A [ggplot2::ggplot()] object
+#' @export
+plot_selectivity_scenarios <- function(om, type = "new"){
+  # Check the three OMs - final year selectivity at age
+  offset <- 0 # How many years prior to the final year
+  yr_ind <- dim(om_0$f_sel_save)[2] - offset
+  yr <- om_0$m_yr - offset
+  d <- data.frame(sel = c(om_0$f_sel_save[,yr_ind,1], om_1$f_sel_save[,yr_ind,1], om_2$f_sel_save[,yr_ind,1],
+                          om_0$f_sel_save[,yr_ind,2], om_1$f_sel_save[,yr_ind,2], om_2$f_sel_save[,yr_ind,2]),
+                  country = rep(c("CAN", "USA"), each = 3 * om_0$n_age),
+                  age = rep(om_0$ages, 6),
+                  run = rep(rep(c("Base scenario",
+                                  "Low US selectivity",
+                                  paste0(yr, " selectivity")),
+                                each = om_0$n_age), 2)) %>%
+    as_tibble()
+  d$run <- factor(d$run, levels = c("Base scenario",
+                                    "Low US selectivity",
+                                    paste0(yr, " selectivity")))
+
+  p <- ggplot(data = d,
+              aes(x = age, y = sel, color = country)) +
+    theme_classic() +
+    geom_line(size = 1.2) +
+    facet_wrap(~run) +
+    scale_x_continuous(limit = c(0, om_0$age_max_age)) +
+    scale_color_manual(values = c("darkred","blue4"))
+
+  if(type == "old"){
+    p_old <- file.path(system.file(package = "pacifichakemse", mustWork = TRUE),
+                       "extdata", "selectivity_scenarios_old.rds")
+    p <- readRDS(p_old)
+  }
+
+  p
+}
