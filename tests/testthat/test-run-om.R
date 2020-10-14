@@ -152,5 +152,17 @@ test_that("Recruitment values are the same", {
   expect_equal(r, r1)
 })
 
+test_that("Vulnerability by season and space are the same", {
+  v <- om_0$v_save
+  v1 <- readRDS("v_save_out.rds")
+  names(dimnames(v1))[1] <- "yrs"
+  expect_equal(v, v1)
+})
 
+test_that("Catch quota by season and space are the same", {
+  cq <- om_0$catch_quota
+  cq1 <- readRDS("catch_quota_out.rds")
+  names(dimnames(cq1))[1] <- "yrs"
+  expect_equal(cq, cq1)
+})
 
