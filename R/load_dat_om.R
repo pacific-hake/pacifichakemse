@@ -334,7 +334,6 @@ load_data_om <- function(ss_model = NULL,
         idx_future[ind] <- TRUE
       }
     }
-
     lst$survey_err <- c(lst$survey_err, rep(1, n_sim_yrs))
     lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
     lst$ss_survey <- c(lst$ss_survey, rep(0, n_sim_yrs))
@@ -344,7 +343,6 @@ load_data_om <- function(ss_model = NULL,
     lst$flag_catch <- c(lst$flag_catch, rep(-1, n_sim_yrs))
     # Bias adjustment
     lst$b <- c(ss_model$b, rep(lst$b_future, n_sim_yrs))
-    # Weight-at-age
   }
 
   lst
