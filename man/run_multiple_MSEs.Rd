@@ -15,6 +15,7 @@ run_multiple_MSEs(
   m_increase = 0,
   sel_change = 0,
   f_sim = NULL,
+  ss_model = NULL,
   ...
 )
 }

@@ -20,15 +20,22 @@ create_tmb_data <- function(sim_data = NULL,
   verify_argument(df, "list")
   verify_argument(ss_model, "list")
 
+  # Need this length for the estimation model. Th OM goes to the full simulated range and
+  # data need to be trimmed for the EM
+  yrs_len <- length(sim_data$s_yr:sim_data$m_yr)
+
   # Catch Observations
   catch_obs_yrs <- df$catch_obs %>% pull(yr)
-  if(!identical(df$yrs, catch_obs_yrs)){
+  catch_obs_yrs <- catch_obs_yrs[1:yrs_len]
+  if(!identical(df$yrs[1:yrs_len], catch_obs_yrs)){
     stop("The years in the catch observations does not match the number of yrs in the OM")
   }
+
   df$catch_obs <- df$catch_obs %>%
+    filter(yr <= sim_data$m_yr) %>%
     select(value) %>%
     as.matrix() %>%
-    `rownames<-`(df$yrs)
+    `rownames<-`(df$yrs[1:yrs_len])
 
   # Maturity
   df$mat_sel <- df$mat_sel %>%
@@ -36,27 +43,28 @@ create_tmb_data <- function(sim_data = NULL,
     unlist(use.names = FALSE)
 
   # Create matrix versions of the WA data frames
-  df$wage_catch <- format_wage_matrix(df$wage_catch_df)
-  df$wage_survey <- format_wage_matrix(df$wage_survey_df)
-  df$wage_mid <- format_wage_matrix(df$wage_mid_df)
-  df$wage_ssb <- format_wage_matrix(df$wage_ssb_df)
+  df$wage_catch <- format_wage_matrix(df$wage_catch_df[1:yrs_len,])
+  df$wage_survey <- format_wage_matrix(df$wage_survey_df[1:yrs_len,])
+  df$wage_mid <- format_wage_matrix(df$wage_mid_df[1:yrs_len,])
+  df$wage_ssb <- format_wage_matrix(df$wage_ssb_df[1:yrs_len,])
 
   # Make tibbles into matrices or vectors for TMB input
   # Logical must be changed to integer
-  df$flag_sel <- df$flag_sel %>% as.numeric()
-  df$flag_survey <- df$flag_survey %>% as.integer()
-  df$flag_catch <- df$flag_catch %>% as.integer()
+  df$flag_sel <- df$flag_sel[1:yrs_len] %>% as.numeric()
+  df$flag_survey <- df$flag_survey[1:yrs_len] %>% as.integer()
+  df$flag_catch <- df$flag_catch[1:yrs_len] %>% as.integer()
   # This needs to be an index, not the year
-  df$sel_change_yr <- which(df$sel_change_yr == df$yrs)
+  df$sel_change_yr <- which(df$sel_change_yr == df$yrs[1:yrs_len])
   # Remove age column
   df$parameters$init_n <- df$parameters$init_n %>%
     select(value) %>%
     as.matrix()
   df$parameters$r_in <- df$parameters$r_in %>%
+    filter(yr <= sim_data$m_yr) %>%
     # Remove the final year
     slice(-n()) %>%
     pull(value)
-  df$parameters$f_0 <- rowSums(sim_data$f_out_save)
+  df$parameters$f_0 <- rowSums(sim_data$f_out_save[1:yrs_len,,])
   df$parameters$p_sel <- df$sel_by_yrs %>%
     as.matrix()
 
@@ -89,37 +97,42 @@ create_tmb_data <- function(sim_data = NULL,
   # colname required to be identical to original version
   colnames(df$b) <- "V1"
 
-  df$t_end <- length(df$yrs)
+  df$t_end <- yrs_len
 
   # Copy simulated data into output data
-  df$survey <- sim_data$survey
   # Remove simulation years as they go beyond the dimensions required for the estimation model
-  df$survey <- df$survey[as.numeric(names(df$survey)) %in% df$yrs] %>% as.numeric()
-  df$age_survey <- sim_data$age_comps_surv
+  surv <- sim_data$survey[1:yrs_len]
+  surv_ind_yrs <- which(df$survey > 1)
+  df$survey[surv_ind_yrs] <- surv[surv_ind_yrs]
+  df$age_survey <- sim_data$age_comps_surv[,1:yrs_len]
   # Remove simulation years as they go beyond the dimensions required for the estimation model
-  df$age_survey <- df$age_survey[,as.numeric(colnames(df$age_survey)) %in% df$yrs]
-  df$age_catch <- sim_data$age_comps_catch
+  df$age_survey <- df$age_survey[, 1:yrs_len]
+  df$age_catch <- sim_data$age_comps_catch[, 1:yrs_len]
   # Remove simulation years as they go beyond the dimensions required for the estimation model
-  df$age_catch <- df$age_catch[,as.numeric(colnames(df$age_catch)) %in% df$yrs]
+  df$age_catch <- df$age_catch[, 1:yrs_len]
 
+  sel_change_yr <- df$yrs[df$sel_change_yr]
+  df$yr_sel <- length(sel_change_yr:sim_data$m_yr)
   # Convert some parameter objects to base types
   params <- df$parameters
   params$p_sel_fish <- df$parameters$p_sel_fish %>%
     filter(space == 2) %>%
-    filter(age != 1) %>%
     pull(value)
   params$p_sel_surv <- df$parameters$p_sel_surv %>%
-    filter(age != 2) %>%
     pull(value)
-  params$f_0 <- rowSums(sim_data$f_out_save)
-  params$f_0 <- params$f_0[as.numeric(names(params$f_0)) %in% df$yrs]
+  params$f_0 <- rowSums(sim_data$f_out_save[1:yrs_len,,])
 
   last_catch <- df$catch_obs %>% tail(1)
   if(last_catch == 0){
     params$f_0[length(params$f_0)] <- 0
   }
 
-  # Include only what appears in the estimation model (runHakeassessment.cpp) - TODO age_catch
+  df$b <- df$b[1:yrs_len]
+  df$yrs <- df$yrs[1:yrs_len]
+  df$ss_survey <- df$ss_survey[1:yrs_len]
+  df$survey_err <- df$survey_err[1:yrs_len]
+
+  # Include only what appears in the estimation model (pacifichakemse.cpp) - TODO age_catch
   keep <- names(df) %in% c("wage_catch", "wage_survey", "wage_survey", "wage_ssb", "wage_mid", "yr_sel",
                            "m_sel", "mat_sel", "n_age", "ages", "sel_change_yr", "yrs", "t_end",
                            "log_q", "flag_sel", "s_min", "s_min_survey", "s_max", "s_max_survey",

@@ -334,12 +334,22 @@ load_data_om <- function(ss_model = NULL,
         idx_future[ind] <- TRUE
       }
     }
-    lst$survey_err <- c(lst$survey_err, rep(1, n_sim_yrs))
-    lst$survey_err[idx_future] <- mean(lst$survey_err[lst$survey_err != 1])
-    lst$ss_survey <- c(lst$ss_survey, rep(0, n_sim_yrs))
-    lst$ss_survey[idx_future] <- mean(lst$ss_survey[lst$ss_survey != -1])
-    lst$flag_survey <- c(lst$flag_survey, rep(-1, n_sim_yrs))
-    lst$flag_survey[idx_future] <- 1
+
+    future_survey_err <- map_dbl(idx_future, ~{
+      if(.x) mean(lst$survey_err[lst$survey_err != 1]) else 1
+    })
+    lst$survey_err <- c(lst$survey_err, future_survey_err)
+
+    future_ss_survey <- map_dbl(idx_future, ~{
+      if(.x) mean(lst$ss_survey[lst$ss_survey != -1]) else 0
+    })
+    lst$ss_survey <- c(lst$ss_survey, future_ss_survey)
+
+    future_flag_survey <- map_dbl(idx_future, ~{
+      if(.x) 1 else -1
+    })
+    lst$flag_survey <- c(lst$flag_survey, future_flag_survey)
+
     lst$flag_catch <- c(lst$flag_catch, rep(-1, n_sim_yrs))
     # Bias adjustment
     lst$b <- c(ss_model$b, rep(lst$b_future, n_sim_yrs))

@@ -155,12 +155,12 @@ compare_move <- function(om){
 #' Plot a 3-pane selectivity plot by country for three scenarios:
 #' Base, Low US, and last year selectivity
 #'
-#' @param om
-#' @param type
+#' @param om Output from the [run_om()] function
+#' @param type "new or "old"
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
-plot_selectivity_scenarios <- function(om, type = "new"){
+plot_selectivity_scenarios <- function(om_0, om_1, om_2, type = "new"){
   # Check the three OMs - final year selectivity at age
   offset <- 0 # How many years prior to the final year
   yr_ind <- dim(om_0$f_sel_save)[2] - offset

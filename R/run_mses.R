@@ -65,13 +65,12 @@ run_mses <- function(ss_model_output_dir = NULL,
   verify_argument(c_increases, c("integer", "numeric"))
   verify_argument(m_increases, c("integer", "numeric"))
   verify_argument(sel_changes, c("integer", "numeric"))
-  verify_argument(n_surveys, c("integer", "numeric"))
+  verify_argument(n_surveys, c("integer", "numeric"), 1)
 
   stopifnot(length(tacs) == 1 | length(tacs) == length(fns))
   stopifnot(length(c_increases) == 1 | length(c_increases) == length(fns))
   stopifnot(length(m_increases) == 1 | length(m_increases) == length(fns))
   stopifnot(length(sel_changes) == 1 | length(sel_changes) == length(fns))
-  stopifnot(is.null(n_surveys) | length(n_surveys) == length(fns))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
 
   tic()
@@ -79,6 +78,9 @@ run_mses <- function(ss_model_output_dir = NULL,
   # found in update_om_data.R. This is also the seed used to set up the random seeds for each
   # run (search below for "seeds")
   set.seed(random_seed)
+  # Each run has its own random seed, with those seeds being chosen from
+  # the base seed which is set at the beginning of this function
+  seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
 
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
@@ -105,10 +107,6 @@ run_mses <- function(ss_model_output_dir = NULL,
   # Prepare data for the OM. This includes initializing the movement model and selectivity
   df <- load_data_om(ss_model, n_sim_yrs, n_survey = n_surveys, ...)
 
-  # Each run has its own random seed, with those seeds being chosen from
-  # the base seed which is set at the beginning of this function
-  seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
-
   map2(fns, 1:length(fns), function(.x, .y, ...){
     cat(crayon::white("Scenario:", .x, "\n"))
     ls_save <- map(1:n_runs, function(run = .x, ...){
@@ -124,9 +122,8 @@ run_mses <- function(ss_model_output_dir = NULL,
       if(is.null(n_surveys)){
         df$n_survey <- 2
       }else{
-        df$n_survey <- n_surveys[.y]
+        df$n_survey <- n_surveys
       }
-
       if(is.null(multiple_season_data)){
         cat(green("Run #", run, "\n"))
         tmp <- run_multiple_MSEs(
@@ -136,9 +133,11 @@ run_mses <- function(ss_model_output_dir = NULL,
           random_seed = seeds[run],
           n_sim_yrs = n_sim_yrs,
           tac = if(length(tacs) == 1) tacs else tacs[[.y]],
+          n_survey = n_surveys,
           sel_change = ifelse(length(sel_changes) == 1, sel_changes, sel_changes[.y]),
           c_increase = ifelse(length(c_increases) == 1, c_increases, c_increases[.y]),
           m_increase = ifelse(length(m_increases) == 1, m_increases, m_increases[.y]),
+          ss_model = ss_model,
           ...)
       }else{
         dfs <- map(multiple_season_data, ~{

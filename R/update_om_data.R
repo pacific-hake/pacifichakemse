@@ -47,6 +47,7 @@ update_om_data <- function(df = NULL,
   df$catch_obs <- df$catch_obs %>% add_row(yr = yr, value = f_new$c_new)
 
   df$flag_survey <- c(df$flag_survey, ifelse(yr %in% yr_survey_sims, 1, -1))
+  browser()
   df$ss_survey <- c(df$ss_survey, ifelse(yr %in% yr_survey_sims,
                                          ceiling(mean(df$ss_survey[df$ss_survey > 0])),
                                          0))

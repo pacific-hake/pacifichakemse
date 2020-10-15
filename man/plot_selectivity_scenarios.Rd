@@ -5,10 +5,12 @@
 \title{Plot a 3-pane selectivity plot by country for three scenarios:
 Base, Low US, and last year selectivity}
 \usage{
-plot_selectivity_scenarios(om, type = "new")
+plot_selectivity_scenarios(om_0, om_1, om_2, type = "new")
 }
 \arguments{
-\item{type}{}
+\item{type}{"new or "old"}
+
+\item{om}{Output from the \code{\link[=run_om]{run_om()}} function}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

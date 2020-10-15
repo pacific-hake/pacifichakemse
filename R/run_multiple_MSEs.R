@@ -29,6 +29,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
                               m_increase = 0,
                               sel_change = 0,
                               f_sim = NULL,
+                              ss_model = NULL,
                               ...){
   verify_argument(results_dir, "character", 1)
   verify_argument(file_name, "character", 1)
@@ -152,7 +153,10 @@ run_multiple_MSEs <- function(results_dir = NULL,
     p_o <- p_tmp[as.character(yr)][[1]]
 
     #compare_tmb_data_tol(d, d_o, p, p_o)
-    obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "runHakeassessment", silent = FALSE)
+    d <- lst_tmb$df
+    p <- lst_tmb$params
+    browser()
+    obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
     pars <- extract_params_tmb(obj)
     # You can check likelihood components by placing a browser after the MakeADFun() call above and the
@@ -162,7 +166,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
         unlist() %>%
         `[`(!is.na(names(.)))
     }
-#browser()
+ browser()
 
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
