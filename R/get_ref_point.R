@@ -29,13 +29,16 @@ get_ref_point <- function(pars,
   h <- exp(pars$log_h)
   p_sel <- df$parameters$p_sel_fish %>%
     filter(!!space == space)
-  p_sel$value <- c(0, pars$p_sel_fish)
+  p_sel$value <- pars$p_sel_fish
   f_sel <- get_select(df$ages,
                       p_sel,
                       df$s_min,
                       df$s_max)
 
-  c_w <- df$wage_catch[nrow(df$wage_catch),] %>% select(-Yr) %>% unlist(use.names = FALSE)
+  c_w <- df$wage_catch %>%
+    filter(Yr == df$m_yr) %>%
+    select(-Yr) %>%
+    unlist(use.names = FALSE)
   m_age <- rep(m_est, df$n_age)
   n_0 <- NULL
   n_0[1] <- r_0
@@ -48,6 +51,7 @@ get_ref_point <- function(pars,
   mat_sel <- df$mat_sel %>% select(-Yr) %>% unlist(use.names = FALSE)
   ssb_age <- mat_sel * n_0 * 0.5
   ssb_0 <- sum(ssb_age)
+
   #ssb_pr <- ssb_0 / r_0
   #sb_eq <- 4 * h * r_0 * 0.4 * ssb_0 - ssb_0 * (1 - h) / (5 * h - 1)
 

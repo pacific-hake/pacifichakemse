@@ -153,6 +153,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
     p_o <- p_tmp[as.character(yr)][[1]]
 
     #compare_tmb_data_tol(d, d_o, p, p_o)
+    lst_tmb$df$survey <- round(lst_tmb$df$survey, 0)
     d <- lst_tmb$df
     p <- lst_tmb$params
     browser()
@@ -182,23 +183,24 @@ run_multiple_MSEs <- function(results_dir = NULL,
     # Stop "outer mgc: XXX" printing to screen
     obj$env$tracemgc <- FALSE
     # Minimize the Objective function
+    # If error one of the random effects is unused
+    browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
                   lower = lower,
                   upper = upper,
                   control = list(iter.max = 1e6,
-                                 # If error one of the random effects is unused
                                  eval.max = 1e6))
 
     report <- obj$report()
     pars <- extract_params_tmb(opt)
 
     # Calculate the reference points to be applied to the next year
-    wage_catch <- df$wage_catch[nrow(df$wage_catch) - 1,] %>% select(-Yr) %>% unlist(use.names = FALSE)
-    v_real <- sum(om_output$n_save_age[, df$n_yr,,df$n_season] *
+    wage_catch <- get_age_dat(df$wage_catch_df, df$m_yr - 1) %>% unlist(use.names = FALSE)
+    v_real <- sum(om_output$n_save_age[, which(df$yrs == df$m_yr), , df$n_season] *
                     matrix(rep(wage_catch, df$n_space),
-                           ncol = df$n_space) * (om_output$f_sel[, df$n_yr,]))
+                           ncol = df$n_space) * (om_output$f_sel[, which(df$yrs == df$m_yr),]))
     f_new <- get_ref_point(pars,
                            df,
                            ssb_y = report$SSB %>% tail(1),
@@ -207,6 +209,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
+    browser()
 
     # Need to use map() here to keep names
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
