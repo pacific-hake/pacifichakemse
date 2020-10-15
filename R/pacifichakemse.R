@@ -7,3 +7,6 @@
 #' Package maintainer: Nis Jacobsen <nissandjac@@gmail.com>
 #' @references PacifichakeMSE on GitHub: \url{https://github.com/nissandjac/PacifichakeMSE}
 NULL
+
+#' @useDynLib pacifichakemse, .registration = TRUE
+NULL
