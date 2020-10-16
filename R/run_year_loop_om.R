@@ -99,19 +99,17 @@ run_year_loop_om <- function(om = NULL,
     if(om$move){
       n_surv <- n_surv %>%
         set_names(seq_len(length(n_surv))) %>%
-        bind_rows() #%>%
-        #mutate(sum = rowSums(.))
+        bind_rows()
       # Take the sum of all the spaces (areas)
       n_surv <- n_surv %>% apply(2, sum)
     }
 
     if(om$flag_survey[yr_ind] == 1){
       if(yr > om$m_yr){
+        set.seed(99)
         err <- exp(rnorm(n = 1, mean = 0, sd = om$surv_sd))
-        # If the extra factor is not included the mean is > 1
-        # TODO: Check this calculation. See line 538 of run_agedbased_true_catch.R in original code
-        surv <- exp(log(sum(n_surv * om$surv_sel *
-                              om$q * wage$survey)) + err)
+        surv <- sum(n_surv * om$surv_sel *
+                      om$q * (wage$survey %>% unlist(use.names = FALSE)) * err)
       }else{
         surv <- sum(n_surv * om$surv_sel *
                       om$q * wage$survey)
@@ -122,7 +120,6 @@ run_year_loop_om <- function(om = NULL,
     }
     surv_tmp <- sum(n_surv * om$surv_sel * om$q)
     age_1_ind <- which(om$ages == 1)
-
     if(om$flag_survey[yr_ind] == 1){
       om$age_comps_surv[1:(om$age_max_age - 1), yr_ind] <<-
         (n_surv[age_1_ind:(om$age_max_age)] *

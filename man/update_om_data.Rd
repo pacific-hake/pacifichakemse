@@ -5,9 +5,8 @@
 \title{Update the OM data for a new year}
 \usage{
 update_om_data(
-  df = NULL,
   yr = NULL,
-  yr_ind = NULL,
+  om = NULL,
   yr_survey_sims = NULL,
   f_new = NULL,
   c_increase = NULL,
@@ -18,11 +17,9 @@ update_om_data(
 )
 }
 \arguments{
-\item{df}{Input data as created by \code{\link[=create_tmb_data]{create_tmb_data()}}}
-
 \item{yr}{The year to add}
 
-\item{yr_ind}{Index of the year to add}
+\item{om}{Operating model output as returned by \code{\link[=run_om]{run_om()}}}
 
 \item{yr_survey_sims}{Years in which a survey takes place}
 
@@ -37,7 +34,7 @@ update_om_data(
 \item{wage_only}{Only update the wage_ \link{data.frame}s, nothing else}
 
 \item{zero_rdevs}{Logical. If TRUE, return recruitment devs (r_in) of 0. If FALSE,
-return a random normal using mean = 0 and sd = exp(df$rdev_sd)}
+return a random normal using mean = 0 and sd = exp(om$rdev_sd)}
 }
 \value{
 A list of the data needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

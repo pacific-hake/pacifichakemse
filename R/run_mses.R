@@ -101,18 +101,20 @@ run_mses <- function(ss_model_output_dir = NULL,
   # only include those in this list. To add new SS model outputs,
   # modify the `load_ss_model_data()` function
   ss_model <- load_ss_model_data(ss_model_raw, ...)
-
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
   # Prepare data for the OM. This includes initializing the movement model and selectivity
-  df <- load_data_om(ss_model, n_sim_yrs, n_survey = n_surveys, ...)
+  om <- load_data_om(ss_model,
+                     n_sim_yrs = n_sim_yrs,
+                     n_survey = n_surveys,
+                     ...)
 
   map2(fns, 1:length(fns), function(.x, .y, ...){
     cat(crayon::white("Scenario:", .x, "\n"))
     ls_save <- map(1:n_runs, function(run = .x, ...){
       if(length(sel_changes) != 1 || sel_changes != 0){
-        df <- load_data_om(ss_model,
-                           n_sim_yrs,
+        om <- load_data_om(ss_model,
+                           n_sim_yrs = n_sim_yrs,
                            n_survey = n_surveys,
                            selectivity_change = ifelse(length(sel_changes) == 1,
                                                        sel_changes,
@@ -120,16 +122,16 @@ run_mses <- function(ss_model_output_dir = NULL,
                            ...)
       }
       if(is.null(n_surveys)){
-        df$n_survey <- 2
+        om$n_survey <- 2
       }else{
-        df$n_survey <- n_surveys
+        om$n_survey <- n_surveys
       }
       if(is.null(multiple_season_data)){
         cat(green("Run #", run, "\n"))
         tmp <- run_multiple_MSEs(
           results_dir = results_dir, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
           file_name = .x, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
-          df = df,
+          om = om,
           random_seed = seeds[run],
           n_sim_yrs = n_sim_yrs,
           tac = if(length(tacs) == 1) tacs else tacs[[.y]],
@@ -140,6 +142,7 @@ run_mses <- function(ss_model_output_dir = NULL,
           ss_model = ss_model,
           ...)
       }else{
+        # TODO: Make sure this works. It hasn't been tested at all
         dfs <- map(multiple_season_data, ~{
           do.call(load_data_om, as.list(.x))
         })

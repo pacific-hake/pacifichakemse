@@ -88,7 +88,7 @@ run_season_loop_om <- function(om,
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
-      b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel)
+      b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel, na.rm = TRUE)
       om$v_save[yr_ind, space, season] <<- b_tmp
       om$catch_quota[yr_ind, space, season] <<- e_tmp
 

@@ -3,7 +3,7 @@
 #' @param results_dir Directory in which the OM output will be stored
 #' @param file_name The name of the file in which the MSE output was stored. This will be prepended with 'om_'
 #' for the OM used in this MSE. The actual MSE results are stored by the function calling this one, [run_mses()]
-#' @param df Data frame of parameters as output by [load_data_om()]
+#' @param om List as output by [load_data_om()]
 #' @param random_seed Seed for running the OM if it needs to be run (if `om_output` is `NULL`)
 #' @param n_sim_yrs Number of years to simulate
 #' @param tac Which harvest control rule should the model use
@@ -21,7 +21,7 @@
 #' @export
 run_multiple_MSEs <- function(results_dir = NULL,
                               file_name = NULL,
-                              df = NULL,
+                              om = NULL,
                               random_seed = NULL,
                               n_sim_yrs = NULL,
                               tac = NULL,
@@ -33,7 +33,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
                               ...){
   verify_argument(results_dir, "character", 1)
   verify_argument(file_name, "character", 1)
-  verify_argument(df, "list")
+  verify_argument(om, "list")
   verify_argument(random_seed, c("integer", "numeric"), 1)
   verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
   verify_argument(tac, c("integer", "numeric"))
@@ -46,15 +46,15 @@ run_multiple_MSEs <- function(results_dir = NULL,
   # I think when it is set in run_om() all the r_devs end up being the same for a given scenario
   # set.seed(random_seed)
 
-  yr_last_non_sim <- df$yrs[df$n_yr]
+  yr_last_non_sim <- om$yrs[which(om$yrs == om$m_yr)]
   yr_start <- yr_last_non_sim + 1
   yr_end <- yr_last_non_sim + n_sim_yrs
   yr_sims <- yr_start:yr_end
-  yr_all <- c(df$yrs, yr_sims)
+  yr_all <- c(om$yrs, yr_sims)
 
   # Calculate survey years, where odd years are survey years
   first_sim_surv_yr <- ifelse(yr_start %% 2 == 1, yr_start, yr_start + 1)
-  yr_survey_sims <- seq(first_sim_surv_yr, yr_start + n_sim_yrs, by = df$n_survey)
+  yr_survey_sims <- seq(first_sim_surv_yr, yr_start + n_sim_yrs, by = om$n_survey)
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
 
@@ -86,89 +86,70 @@ run_multiple_MSEs <- function(results_dir = NULL,
 
     # Run the Operating Model (OM)
     cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
-    om_output <<- run_om(df, random_seed = random_seed, ...)
-
+    om_output <<- run_om(om, random_seed = random_seed, ...)
+#browser()
     # Create the data for the Estimation Model (EM)
-    if(yr >= yr_start){
-      df$wage_catch_df <- wage_add_yr(df$wage_catch_df)
-      df$wage_survey_df <- wage_add_yr(df$wage_survey_df)
-      df$wage_mid_df <- wage_add_yr(df$wage_mid_df)
-      df$wage_ssb_df <- wage_add_yr(df$wage_ssb_df)
-    }
-    lst_tmb <- create_tmb_data(om_output, df, ss_model)
+    # if(yr >= yr_start){
+    #   om$wage_catch_df <- modify_wage_df(om$wage_catch_df, yr)
+    #   om$wage_survey_df <- modify_wage_df(om$wage_survey_df, yr)
+    #   om$wage_mid_df <- modify_wage_df(om$wage_mid_df, yr)
+    #   om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
+    # }
+    lst_tmb <- create_tmb_data(om_output, ss_model, yr)
+    #browser()
     if(yr >= yr_start){
       lst_tmb$params$f_0[length(lst_tmb$params$f_0)] <- 0.2
     }
-    # TODO: Remove this whole `if` chunk once correct output has been verified with
-    # the original output
-    if(yr >= yr_last_non_sim && yr <= 2022){
-      d_tmp[[tmp_iter]] <-readRDS(paste0("original_mse_data/d_", yr,".rds"))
-      p_tmp[[tmp_iter]] <- readRDS(paste0("original_mse_data/p_", yr,".rds"))
-      names(d_tmp)[1] <- names(p_tmp)[1] <- yr
-      # Compare this package input data with the data from the original
-      # If this line passes without causing as error, then the data and parameters are
-      # almost identical. They are within tiny tolerances as found in the
-      # compare_tmb_data() function. Still, this is not enough to compare output to the
-      # original and to get the same likelihoods and numbers- and biomasses-at-age.
-      # That is why the list elements below are temporarily being used in this version of the code.
-      # ---------------------
-      # Debugging - set data and parameters to what they are in original
-      class(lst_tmb$df$yrs) <- "integer"
-      #$lst_tmb$df$b <- lst_tmb$df$b %>% as.numeric()
-      #lst_tmb$df$flag_survey <- as.numeric(lst_tmb$df$flag_survey)
-      #lst_tmb$df$flag_catch <- as.numeric(lst_tmb$df$flag_catch)
-      if(class(lst_tmb$df$b)[1] == "matrix"){
-        lst_tmb$df$b <- lst_tmb$df$b %>% as.numeric()
-      }
-      if(class(d_tmp[[tmp_iter]]$b)[1] == "matrix"){
-        d_tmp[[tmp_iter]]$b <- d_tmp[[tmp_iter]]$b %>% as.numeric()
-      }
-      class(d_tmp[[tmp_iter]]$flag_survey) <- class(lst_tmb$df$flag_survey)
-      class(d_tmp[[tmp_iter]]$flag_catch) <- class(lst_tmb$df$flag_catch)
-      d_tmp[[tmp_iter]]$ss_survey[which(d_tmp[[tmp_iter]]$ss_survey == -1)] <- 0
-      class(d_tmp[[tmp_iter]]$ss_survey) <- class(lst_tmb$df$ss_survey)
-      # ---------------------
-      # lst_tmb$df$catch_obs <- d_tmp[[tmp_iter]]$Catchobs
-      # lst_tmb$df$wage_catch <- d_tmp[[tmp_iter]]$wage_catch
-      # lst_tmb$df$wage_survey <- d_tmp[[tmp_iter]]$wage_survey
-      # lst_tmb$df$wage_mid <- d_tmp[[tmp_iter]]$wage_mid
-      # lst_tmb$df$wage_ssb <- d_tmp[[tmp_iter]]$wage_ssb
-      # lst_tmb$df$survey <- d_tmp[[tmp_iter]]$survey
-      # lst_tmb$df$survey_err <- d_tmp[[tmp_iter]]$survey_err
-      # lst_tmb$df$age_survey <- d_tmp[[tmp_iter]]$age_survey
-      # lst_tmb$df$age_catch <- d_tmp[[tmp_iter]]$age_catch
-      # lst_tmb$params$log_m_init <- p_tmp[[tmp_iter]]$logMinit
-      # lst_tmb$params$log_h <- p_tmp[[tmp_iter]]$logh
-      # lst_tmb$params$log_sd_surv <- p_tmp[[tmp_iter]]$logSDsurv
-      # lst_tmb$params$init_n <- p_tmp[[tmp_iter]]$initN
-      # lst_tmb$params$p_sel <- p_tmp[[tmp_iter]]$PSEL
-      # lst_tmb$params$f_0 <- p_tmp[[tmp_iter]]$F0
-      # ---------------------
-      tmp_iter <- tmp_iter + 1
-    }
     # Evaluate the Objective function
-    d <- lst_tmb$df
+    d <- lst_tmb$om
     p <- lst_tmb$params
-    d_o <- d_tmp[as.character(yr)][[1]]
-    p_o <- p_tmp[as.character(yr)][[1]]
 
-    #compare_tmb_data_tol(d, d_o, p, p_o)
-    lst_tmb$df$survey <- round(lst_tmb$df$survey, 0)
-    d <- lst_tmb$df
-    p <- lst_tmb$params
-    browser()
-    obj <- MakeADFun(lst_tmb$df, lst_tmb$params, DLL = "pacifichakemse", silent = FALSE)
+    d1 <- conv_d(yr)
+    p1 <- conv_p(yr)
+    d$survey <- round(d$survey, 0)
+    class(d$yr_sel) <- "integer"
+    class(d$ss_survey) <- "integer"
+    d$flag_survey <- as.numeric(d$flag_survey)
+    d$flag_catch <- as.numeric(d$flag_catch)
+    d1$flag_survey <- as.numeric(d1$flag_survey)
+    d1$flag_catch <- as.numeric(d1$flag_catch)
+    dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
+    if("matrix" %in% class(d$b)){
+      d$b <- d$b[,1]
+    }
+    if("matrix" %in% class(d1$b)){
+      d1$b <- d1$b[,1]
+    }
+    dimnames(d$wage_catch) <- dimnames(d1$wage_catch)
+    dimnames(d$wage_survey) <- dimnames(d1$wage_survey)
+    dimnames(d$wage_ssb) <- dimnames(d1$wage_ssb)
+    dimnames(d$wage_mid) <- dimnames(d1$wage_mid)
+    dimnames(d$age_survey) <- dimnames(d1$age_survey)
+    dimnames(p$init_n) <- dimnames(p1$init_n)
+    dimnames(p$p_sel) <- dimnames(p1$p_sel)
+    d$age_survey <- d1$age_survey
+    d$age_catch <- d1$age_catch
+    d$age_max_age <- as.numeric(d$age_max_age)
+    d1$survey_x <- NULL
+    # p$log_h <- p1$log_h
+    # p$log_m_init <- p1$log_m_init
+    # p$log_sd_surv <- p1$log_sd_surv
+    p$f_0 <- p1$f_0
+    cmp <- compare_tmb_data(d, d1, p, p1)
+
+browser()
+    #compare_tmb_data(d, d1, p, p1)
+    #obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
+    obj <- MakeADFun(d1, p1, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
+    rsmall <- map(report, ~{format(.x, nsmall = 20)})
+    objfn <- obj$fn() %>% format(nsmall=20)
+    plike <- get_likelihoods(report) %>% format(nsmall = 20)
     pars <- extract_params_tmb(obj)
+    psmall <- map(pars, ~{format(.x, nsmall = 20)})
     # You can check likelihood components by placing a browser after the MakeADFun() call above and the
     # nlminb() call below and calling print_likelihoods()
-    print_likelihoods <- function(){
-      map2(names(report), report, ~{if(length(grep("ans", .x))){ret <- .y;names(ret) <- .x;ret}}) %>%
-        unlist() %>%
-        `[`(!is.na(names(.)))
-    }
- browser()
-
+browser()
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -176,7 +157,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
     upper[names(upper) == "f_0"] <- 2
     lower[names(lower) == "log_sd_surv"] <- log(0.01)
     lower[names(lower) == "f_0"] <- 0.01
-    if(lst_tmb$df$catch_obs[length(lst_tmb$df$catch_obs)] == 1){
+    if(lst_tmb$om$catch_obs[length(lst_tmb$om$catch_obs)] == 1){
       lower[names(lower) == "f_0"] <- 1e-10
     }
 
@@ -184,7 +165,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
     obj$env$tracemgc <- FALSE
     # Minimize the Objective function
     # If error one of the random effects is unused
-    browser()
+    #browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -195,21 +176,22 @@ run_multiple_MSEs <- function(results_dir = NULL,
 
     report <- obj$report()
     pars <- extract_params_tmb(opt)
+    browser()
 
     # Calculate the reference points to be applied to the next year
-    wage_catch <- get_age_dat(df$wage_catch_df, df$m_yr - 1) %>% unlist(use.names = FALSE)
-    v_real <- sum(om_output$n_save_age[, which(df$yrs == df$m_yr), , df$n_season] *
-                    matrix(rep(wage_catch, df$n_space),
-                           ncol = df$n_space) * (om_output$f_sel[, which(df$yrs == df$m_yr),]))
+    wage_catch <- get_age_dat(om$wage_catch_df, om$m_yr - 1) %>% unlist(use.names = FALSE)
+    v_real <- sum(om_output$n_save_age[, which(om$yrs == om$m_yr), , om$n_season] *
+                    matrix(rep(wage_catch, om$n_space),
+                           ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == om$m_yr),]))
+    if(yr == 2021) browser()
     f_new <- get_ref_point(pars,
-                           df,
+                           om,
                            ssb_y = report$SSB %>% tail(1),
                            f_in = report$Fyear %>% tail(1),
                            n_end = report$N_beg[, ncol(report$N_beg)],
                            tac = tac,
                            v_real = v_real,
                            ...)
-    browser()
 
     # Need to use map() here to keep names
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
@@ -225,27 +207,26 @@ run_multiple_MSEs <- function(results_dir = NULL,
         j <- sdrep_summary <- summary(sdrep)
         rep_names <- rownames(sdrep_summary)
         tmp <- sdrep_summary[rep_names == "SSB", 2]
-        names(tmp) <- df$yrs
+        names(tmp) <- om$yrs
         em_output$ssb_se[[em_iter]] <<- tmp
         tmp <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
-        names(tmp) <- df$yrs
+        names(tmp) <- om$yrs
         em_output$ssb_min[[em_iter]] <<- tmp
         tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
-        names(tmp) <- df$yrs
+        names(tmp) <- om$yrs
         em_output$ssb_max[[em_iter]] <<- tmp
       }
       em_iter <<- em_iter + 1
     }
 
     # Update the OM data for the next simulation year in the loop. Note reference points
-    # are being passed into this function. Double <<- is used here so that `df` is
-    # in scope in the next iteration of the loop. Without that, `df` would be `NULL`
+    # are being passed into this function. Double <<- is used here so that `om` is
+    # in scope in the next iteration of the loop. Without that, `om` would be `NULL`
     # in the next simulation year.
     if(yr < yr_end){
       # No need to call this in the final year as the loop is over
-      df <<- update_om_data(df,
-                            yr + 1,
-                            yr_ind + 1,
+      om <<- update_om_data(yr + 1,
+                            om,
                             yr_survey_sims,
                             f_new,
                             c_increase,

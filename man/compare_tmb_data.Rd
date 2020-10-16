@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{compare_tmb_data}
 \alias{compare_tmb_data}
-\title{Compare two data object inputs for input into \code{runHakeassessment.cpp}}
+\title{Compare two data object inputs for input into \code{pacifichakemse.cpp}}
 \usage{
 compare_tmb_data(d1, d2, p1, p2)
 }

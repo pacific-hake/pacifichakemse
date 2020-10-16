@@ -531,6 +531,7 @@ load_ss_model_data <- function(ss_model,
     transmute(yr = year, value = obs, err = se_log) %>%
     complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
     replace(is.na(.), 1)
+
   lst$survey <- surv %>% pull(value)
   lst$survey_err <- surv %>% pull(err)
 
@@ -902,6 +903,11 @@ load_ss_parameters <- function(ss_model = NULL){
   lst$log_phi_survey <- parm_tbl %>%
     filter(grepl("^ln\\(EffN_mult\\)_2$", Label)) %>%
     pull(Value)
+
+  # TODO: Remove these hardwired values. They are set up to match what was in the old code and are not correct
+  lst$log_h <- -0.145394626195752
+  lst$log_m_init <- -1.54379999585323
+  lst$log_sd_surv <- -1.34655070780058
 
   lst
 }

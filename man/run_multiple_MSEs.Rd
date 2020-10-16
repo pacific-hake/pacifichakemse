@@ -7,7 +7,7 @@
 run_multiple_MSEs(
   results_dir = NULL,
   file_name = NULL,
-  df = NULL,
+  om = NULL,
   random_seed = NULL,
   n_sim_yrs = NULL,
   tac = NULL,
@@ -25,7 +25,7 @@ run_multiple_MSEs(
 \item{file_name}{The name of the file in which the MSE output was stored. This will be prepended with 'om_'
 for the OM used in this MSE. The actual MSE results are stored by the function calling this one, \code{\link[=run_mses]{run_mses()}}}
 
-\item{df}{Data frame of parameters as output by \code{\link[=load_data_om]{load_data_om()}}}
+\item{om}{List as output by \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{random_seed}{Seed for running the OM if it needs to be run (if \code{om_output} is \code{NULL})}
 

@@ -2,8 +2,8 @@
 #'
 #' @param ss_model A model input/output list representing the SS model as returned from
 #' [load_ss_model_from_rds()]
-#' @param n_sim_yrs Number of years to be simulated. This is used to set up arrays dimensions
-#' to include simulations so that arrays don't have to be redimensioned in the MSE loop code
+#' @param yr_future Number of years to run the OM into the future
+#' @param n_sim_yrs Number of years to allocate for the movement matrix.
 #' @param n_season Number of seasons
 #' @param season_names A vector of names for the seasons. Length must equal `n_season`
 #' @param n_space Number of spatial areas
@@ -45,7 +45,8 @@
 #' df <- load_data_om(n_season = 2, n_space = 2)
 #' }
 load_data_om <- function(ss_model = NULL,
-                         n_sim_yrs = NULL,
+                         yr_future = 0,
+                         n_sim_yrs = 0,
                          n_season = 4,
                          season_names = c("Season1", "Season2", "Season3", "Season4"),
                          n_space = 2,
@@ -75,7 +76,7 @@ load_data_om <- function(ss_model = NULL,
                          ...){
 
   verify_argument(ss_model, "list")
-  verify_argument(n_sim_yrs, "numeric", 1)
+  verify_argument(yr_future, "numeric", 1)
   verify_argument(n_season, c("numeric", "integer"), 1, 1:4)
   verify_argument(season_names, "character", n_season)
   verify_argument(n_space, c("numeric", "integer"), 1, 1:2)
@@ -106,21 +107,28 @@ load_data_om <- function(ss_model = NULL,
   verify_argument(log_phi_survey, "numeric", 1)
 
   # Throw error if the number of simulation years is exactly 1
-  stopifnot(n_sim_yrs > 1)
+  stopifnot(yr_future >= 0 & yr_future != 1)
   # Throw error if move_init is NULL and n_space is not 2
   stopifnot(!is.null(move_init) | (is.null(move_init) & n_space == 2))
 
-  #lst <- csv_data()
+  # Only one of n_sim_yrs or yr_future can be used
+  if(n_sim_yrs > 0 & yr_future > 0){
+    stop("Only one of n_sim_yrs or yr_future can be used.", call. = FALSE)
+  }
+  populate_future <- TRUE
+  if(n_sim_yrs > 0){
+    populate_future <- FALSE
+    yr_future <- n_sim_yrs
+  }
 
   lst <- NULL
-
   lst$s_yr <- ss_model$s_yr
   lst$m_yr <- ss_model$m_yr
-  lst$yrs <- lst$s_yr:(lst$m_yr + n_sim_yrs)
+  lst$yrs <- lst$s_yr:(lst$m_yr + yr_future)
   lst$n_yr <- length(lst$yrs)
   lst$sel_change_yr <- sel_change_yr
   lst$sel_idx <- which(lst$yrs == lst$sel_change_yr)
-  lst$yr_sel <- length(lst$sel_change_yr:max(lst$yrs))
+  lst$yr_sel <- length(lst$sel_change_yr:lst$m_yr)
   lst$n_season <- n_season
   lst$season_names <- season_names
   lst$t_end <- lst$n_yr * lst$n_season
@@ -160,7 +168,7 @@ load_data_om <- function(ss_model = NULL,
   lst$ss_catch <- ss_model$ss_catch
   lst$sel_by_yrs <- ss_model$sel_by_yrs
 
-  future_yrs <- (lst$m_yr + 1):(lst$m_yr + n_sim_yrs)
+  future_yrs <- (lst$m_yr + 1):(lst$m_yr + yr_future)
 
   lst <- append(lst, setup_blank_om_objects(yrs = lst$yrs,
                                             ages = lst$ages,
@@ -190,22 +198,23 @@ load_data_om <- function(ss_model = NULL,
   lst$move_out <- move_out
   lst$move_slope <- move_slope
 
-  move_mat_obj <- init_movement_mat(lst$n_space,
-                                    lst$space_names,
-                                    lst$n_season,
-                                    lst$season_names,
-                                    lst$n_yr,
-                                    lst$yrs,
-                                    lst$move_max,
-                                    lst$move_slope,
-                                    lst$move_fifty,
-                                    lst$move_south,
-                                    lst$move_out,
-                                    lst$move_init,
-                                    ages_no_move,
-                                    lst$ages,
-                                    lst$age_names,
-                                    f_space)
+  move_mat_obj <- init_movement_mat(n_space = lst$n_space,
+                                    space_names = lst$space_names,
+                                    n_season = lst$n_season,
+                                    season_names = lst$season_names,
+                                    m_yr = lst$m_yr,
+                                    n_yr = lst$n_yr,
+                                    yrs = lst$yrs,
+                                    move_max = lst$move_max,
+                                    move_slope = lst$move_slope,
+                                    move_fifty = lst$move_fifty,
+                                    move_south = lst$move_south,
+                                    move_out = lst$move_out,
+                                    move_init = lst$move_init,
+                                    ages_no_move = ages_no_move,
+                                    ages = lst$ages,
+                                    age_names = lst$age_names,
+                                    f_space = f_space)
 
   lst$move_mat <- move_mat_obj$move_mat
   lst$move_init <- move_mat_obj$move_init
@@ -233,9 +242,9 @@ load_data_om <- function(ss_model = NULL,
 
   set.seed(rdev_seed)
   if(zero_rdevs){
-    r_devs <- rep(0, n_sim_yrs)
+    r_devs <- rep(0, yr_future)
   }else{
-    r_devs <- rnorm(n = n_sim_yrs,
+    r_devs <- rnorm(n = yr_future,
                     mean = 0,
                     sd = exp(lst$rdev_sd))
   }
@@ -247,9 +256,9 @@ load_data_om <- function(ss_model = NULL,
   lst$r_dev <- lst$r_dev %>%
     bind_rows(last_yr_rdev)
 
-  if(n_sim_yrs > 0){
+  if(yr_future > 0){
     # yrs is the years after lst$m_yrs
-    yrs <- (lst$m_yr + 1):(lst$m_yr + n_sim_yrs)
+    yrs <- (lst$m_yr + 1):(lst$m_yr + yr_future)
     new_df <- tibble(yr = yrs, value = r_devs)
     lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
   }
@@ -285,7 +294,7 @@ load_data_om <- function(ss_model = NULL,
   if(lst$n_yr > nrow(lst$catch_country)){
     means <- lst$catch_country %>%
       summarize_all(mean) %>%
-      slice(rep(1, each = n_sim_yrs)) %>%
+      slice(rep(1, each = yr_future)) %>%
       mutate(year = future_yrs)
     lst$catch_country <- lst$catch_country %>%
       bind_rows(means)
@@ -293,18 +302,28 @@ load_data_om <- function(ss_model = NULL,
 
   add_wage_yrs <- function(df, row = 1){
     if(lst$n_yr > nrow(df)){
-      yr_one_vals <- df %>%
-        slice(rep(row, each = n_sim_yrs)) %>%
-        mutate(Yr = future_yrs)
+      #if(populate_future){
+        yr_one_vals <- df %>%
+          slice(rep(row, each = yr_future)) %>%
+          mutate(Yr = future_yrs)
+      #}else{
+      #   yr_one_vals <- df %>%
+      #     slice(rep(row, each = yr_future)) %>%
+      #     mutate_at(.vars = vars(-Yr), ~{NA}) %>%
+      #     mutate(Yr = future_yrs)
+      # }
       df <- df %>%
         bind_rows(yr_one_vals)
     }
     df
   }
+
   lst$wage_catch_df <- add_wage_yrs(lst$wage_catch_df)
   lst$wage_survey_df <- add_wage_yrs(lst$wage_survey_df)
   lst$wage_ssb_df <- add_wage_yrs(lst$wage_ssb_df)
   lst$wage_mid_df <- add_wage_yrs(lst$wage_mid_df)
+
+  lst$b <- ss_model$b
 
   # Parameters to initialize the OM with
   lst$parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(lst$r_mul),
@@ -318,7 +337,7 @@ load_data_om <- function(ss_model = NULL,
                          init_n = lst$init_n,
                          r_in = lst$r_dev)
 
-  if(n_sim_yrs > 1){
+  if(yr_future > 1){
     # Assumes survey is in every nth year only into the future
     idx_future <- rep(FALSE, length(future_yrs))
     ind <- 0
@@ -334,13 +353,24 @@ load_data_om <- function(ss_model = NULL,
         idx_future[ind] <- TRUE
       }
     }
+    # TODO: Remove these two idx_future lines, it is set up to match the old mse code
+    # and overwrites idx_future above. Used to compare to the old code output
+    idx_future <- rep(FALSE, length(future_yrs))
+    idx_future[seq(2,n_sim_yrs, by = n_survey)] <- TRUE
+    # TODO: Remove this, it is set up to match the old mse code
 
     future_survey_err <- map_dbl(idx_future, ~{
+      # if(!populate_future){
+      #   return(NA)
+      # }
       if(.x) mean(lst$survey_err[lst$survey_err != 1]) else 1
     })
     lst$survey_err <- c(lst$survey_err, future_survey_err)
 
     future_ss_survey <- map_dbl(idx_future, ~{
+      # if(!populate_future){
+      #   return(NA)
+      # }
       if(.x) mean(lst$ss_survey[lst$ss_survey != -1]) else 0
     })
     lst$ss_survey <- c(lst$ss_survey, future_ss_survey)
@@ -350,9 +380,9 @@ load_data_om <- function(ss_model = NULL,
     })
     lst$flag_survey <- c(lst$flag_survey, future_flag_survey)
 
-    lst$flag_catch <- c(lst$flag_catch, rep(-1, n_sim_yrs))
+    lst$flag_catch <- c(lst$flag_catch, rep(-1, yr_future))
     # Bias adjustment
-    lst$b <- c(ss_model$b, rep(lst$b_future, n_sim_yrs))
+    lst$b <- c(ss_model$b, rep(lst$b_future, yr_future))
   }
 
   lst
@@ -365,6 +395,7 @@ load_data_om <- function(ss_model = NULL,
 #' @param space_names See [load_data_om()]
 #' @param n_season See [load_data_om()]
 #' @param season_names See [load_data_om()]
+#' @param m_yr The last non-future year. Used to de-populate future values if `populate_future` is FALSE
 #' @param n_yr The number of years in the array dimension
 #' @param yrs A vector of names for the years. Length must equal `n_yr`
 #' @param move_max A vector of the maximum movement rate, one for each of `n_seasons`
@@ -377,6 +408,7 @@ load_data_om <- function(ss_model = NULL,
 #' @param ages See [load_data_om()]
 #' @param age_names See [load_data_om()]
 #' @param f_space See [load_data_om()]
+#' @param populate_future If TRUE, future years will be populated with values. If FALSE they will be NA
 #'
 #' @return A list of 3 elements: The `move_mat` matrix for movement, the `move_init`
 #' vector of length `n_space` and the `f_space` vector of length `n_space`
@@ -385,6 +417,7 @@ init_movement_mat <- function(n_space = NULL,
                               space_names = NULL,
                               n_season = NULL,
                               season_names = NULL,
+                              m_yr = NULL,
                               n_yr = NULL,
                               yrs = NULL,
                               move_max = NULL,
@@ -445,6 +478,10 @@ init_movement_mat <- function(n_space = NULL,
     # All F occurs in US
     f_space <- c(0, 1)
   }
+  # if(!populate_future){
+  #   m_ind <- which(yrs == m_yr)
+  #   move_mat[, , , (m_ind + 1):n_yr] <- NA
+  # }
   list(move_mat = move_mat,
        move_init = move_init,
        f_space = f_space)

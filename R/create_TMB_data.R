@@ -5,67 +5,68 @@
 #' by TMB. It should be called on each iteration of the MSE loop before the call to
 #' [TMB::MakeADFun()].
 #'
-#' @param sim_data Operating model
-#' @param df input parameters
-#' @param ss_model SS3 model output as created by [create_rds_file()]
+#' @param om Operating model output returned by the [run_om()] function
 #' and loaded by [load_ss_model_from_rds()]
+#' @param ss_model A model input/output list representing the SS model as returned from
+#' [load_ss_model_from_rds()]
+#' @param yr The year to trim the data to on the end of the time series. Various objects
+#' are populated into the future and must be trimmed
 #'
 #' @return A list of 2 elements: the data and parameter values needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
 #' @export
-create_tmb_data <- function(sim_data = NULL,
-                            df = NULL,
-                            ss_model = NULL){
-  verify_argument(sim_data, "list")
-  verify_argument(df, "list")
+create_tmb_data <- function(om = NULL,
+                            ss_model = NULL,
+                            yr = NULL){
+  verify_argument(om, "list")
   verify_argument(ss_model, "list")
+  verify_argument(yr, c("integer", "numeric"), 1)
 
-  # Need this length for the estimation model. Th OM goes to the full simulated range and
-  # data need to be trimmed for the EM
-  yrs_len <- length(sim_data$s_yr:sim_data$m_yr)
+  inc_yrs <- om$yrs[om$yrs <= yr]
+  inc_yr_ind <- which(om$yrs == yr)
 
   # Catch Observations
-  catch_obs_yrs <- df$catch_obs %>% pull(yr)
-  catch_obs_yrs <- catch_obs_yrs[1:yrs_len]
-  if(!identical(df$yrs[1:yrs_len], catch_obs_yrs)){
+  catch_obs_yrs <- om$catch_obs %>% filter(yr <= !!yr) %>% pull(yr)
+  if(!identical(inc_yrs, catch_obs_yrs)){
     stop("The years in the catch observations does not match the number of yrs in the OM")
   }
 
-  df$catch_obs <- df$catch_obs %>%
-    filter(yr <= sim_data$m_yr) %>%
+  om$catch_obs <- om$catch_obs %>%
+    filter(yr <= !!yr) %>%
     select(value) %>%
     as.matrix() %>%
-    `rownames<-`(df$yrs[1:yrs_len])
+    `rownames<-`(inc_yrs)
 
   # Maturity
-  df$mat_sel <- df$mat_sel %>%
+  om$mat_sel <- om$mat_sel %>%
     select(-Yr) %>%
     unlist(use.names = FALSE)
 
   # Create matrix versions of the WA data frames
-  df$wage_catch <- format_wage_matrix(df$wage_catch_df[1:yrs_len,])
-  df$wage_survey <- format_wage_matrix(df$wage_survey_df[1:yrs_len,])
-  df$wage_mid <- format_wage_matrix(df$wage_mid_df[1:yrs_len,])
-  df$wage_ssb <- format_wage_matrix(df$wage_ssb_df[1:yrs_len,])
+  om$wage_catch <- format_wage_matrix(om$wage_catch_df[1:inc_yr_ind,])
+  om$wage_survey <- format_wage_matrix(om$wage_survey_df[1:inc_yr_ind,])
+  om$wage_mid <- format_wage_matrix(om$wage_mid_df[1:inc_yr_ind,])
+  om$wage_ssb <- format_wage_matrix(om$wage_ssb_df[1:inc_yr_ind,])
 
   # Make tibbles into matrices or vectors for TMB input
   # Logical must be changed to integer
-  df$flag_sel <- df$flag_sel[1:yrs_len] %>% as.numeric()
-  df$flag_survey <- df$flag_survey[1:yrs_len] %>% as.integer()
-  df$flag_catch <- df$flag_catch[1:yrs_len] %>% as.integer()
+  om$flag_sel <- om$flag_sel[1:inc_yr_ind] %>% as.numeric()
+  om$flag_survey <- om$flag_survey[1:inc_yr_ind] %>% as.integer()
+  om$flag_catch <- om$flag_catch[1:inc_yr_ind] %>% as.integer()
   # This needs to be an index, not the year
-  df$sel_change_yr <- which(df$sel_change_yr == df$yrs[1:yrs_len])
+  om$sel_change_yr <- which(om$sel_change_yr == inc_yrs)
   # Remove age column
-  df$parameters$init_n <- df$parameters$init_n %>%
+  om$parameters$init_n <- om$parameters$init_n %>%
     select(value) %>%
     as.matrix()
-  df$parameters$r_in <- df$parameters$r_in %>%
-    filter(yr <= sim_data$m_yr) %>%
+  om$parameters$r_in <- om$parameters$r_in %>%
+    filter(yr <= om$m_yr) %>%
     # Remove the final year
     slice(-n()) %>%
     pull(value)
-  df$parameters$f_0 <- rowSums(sim_data$f_out_save[1:yrs_len,,])
-  df$parameters$p_sel <- df$sel_by_yrs %>%
+
+  om$parameters$f_0 <- rowSums(om$f_out_save[1:inc_yr_ind, , ])
+  om$parameters$p_sel <- om$sel_by_yrs %>%
     as.matrix()
 
   # Load parameters from the assessment
@@ -88,64 +89,64 @@ create_tmb_data <- function(sim_data = NULL,
   # For testing. This value was used in the original but not what was in the assessment output
   h_sd <- 0.117
 
-  df$mu <- (h_prior - h_min) / (h_max - h_min)
-  df$tau <- ((h_prior - h_min) * (h_max - h_prior)) / h_sd ^ 2 - 1
-  df$b_prior <- df$tau * df$mu
-  df$a_prior <- df$tau * (1 - df$mu)
+  om$mu <- (h_prior - h_min) / (h_max - h_min)
+  om$tau <- ((h_prior - h_min) * (h_max - h_prior)) / h_sd ^ 2 - 1
+  om$b_prior <- om$tau * om$mu
+  om$a_prior <- om$tau * (1 - om$mu)
 
-  df$b <- df$b %>% as.matrix()
+  om$b <- om$b %>% as.matrix()
   # colname required to be identical to original version
-  colnames(df$b) <- "V1"
+  colnames(om$b) <- "V1"
 
-  df$t_end <- yrs_len
+  om$t_end <- inc_yr_ind
 
   # Copy simulated data into output data
   # Remove simulation years as they go beyond the dimensions required for the estimation model
-  surv <- sim_data$survey[1:yrs_len]
-  surv_ind_yrs <- which(df$survey > 1)
-  df$survey[surv_ind_yrs] <- surv[surv_ind_yrs]
-  df$age_survey <- sim_data$age_comps_surv[,1:yrs_len]
-  # Remove simulation years as they go beyond the dimensions required for the estimation model
-  df$age_survey <- df$age_survey[, 1:yrs_len]
-  df$age_catch <- sim_data$age_comps_catch[, 1:yrs_len]
-  # Remove simulation years as they go beyond the dimensions required for the estimation model
-  df$age_catch <- df$age_catch[, 1:yrs_len]
+  om$survey <- om$survey[1:inc_yr_ind]
+  surv_ind_yrs <- which(om$survey > 1)
+  om$survey[surv_ind_yrs] <- om$survey[surv_ind_yrs]
 
-  sel_change_yr <- df$yrs[df$sel_change_yr]
-  df$yr_sel <- length(sel_change_yr:sim_data$m_yr)
+  om$survey_err <- om$survey_err[1:inc_yr_ind]
+  om$ss_survey <- om$ss_survey[1:inc_yr_ind]
+
+  om$age_survey <- om$age_comps_surv[,1:inc_yr_ind]
+  om$age_catch <- om$age_comps_catch[,1:inc_yr_ind]
+
+  sel_change_yr <- om$yrs[om$sel_change_yr]
+
   # Convert some parameter objects to base types
-  params <- df$parameters
-  params$p_sel_fish <- df$parameters$p_sel_fish %>%
+  params <- om$parameters
+  params$p_sel_fish <- om$parameters$p_sel_fish %>%
     filter(space == 2) %>%
     pull(value)
-  params$p_sel_surv <- df$parameters$p_sel_surv %>%
+  params$p_sel_surv <- om$parameters$p_sel_surv %>%
     pull(value)
-  params$f_0 <- rowSums(sim_data$f_out_save[1:yrs_len,,])
+  params$f_0 <- rowSums(om$f_out_save[1:inc_yr_ind, , ])
 
-  last_catch <- df$catch_obs %>% tail(1)
+  last_catch <- om$catch_obs %>% tail(1)
   if(last_catch == 0){
     params$f_0[length(params$f_0)] <- 0
   }
 
-  df$b <- df$b[1:yrs_len]
-  df$yrs <- df$yrs[1:yrs_len]
-  df$ss_survey <- df$ss_survey[1:yrs_len]
-  df$survey_err <- df$survey_err[1:yrs_len]
+  om$yrs <- inc_yrs
+  #om$yr_sel <- inc_yr_ind - om$sel_change_yr + 1
+  om$b <- om$b[1:inc_yr_ind]
+  om$rdev_sd <- log(om$rdev_sd)
 
   # Include only what appears in the estimation model (pacifichakemse.cpp) - TODO age_catch
-  keep <- names(df) %in% c("wage_catch", "wage_survey", "wage_survey", "wage_ssb", "wage_mid", "yr_sel",
+  keep <- names(om) %in% c("wage_catch", "wage_survey", "wage_survey", "wage_ssb", "wage_mid", "yr_sel",
                            "m_sel", "mat_sel", "n_age", "ages", "sel_change_yr", "yrs", "t_end",
                            "log_q", "flag_sel", "s_min", "s_min_survey", "s_max", "s_max_survey",
                            "b", "survey", "ss_survey", "flag_survey", "age_survey", "age_max_age",
                            "catch_obs", "ss_catch", "flag_catch", "age_catch", "log_sd_catch",
                            "rdev_sd", "sigma_p_sel", "sum_zero", "s_mul", "b_prior",
                            "a_prior", "survey_err", "log_phi_survey")
-  df <- df[keep]
+  om <- om[keep]
 
   # Make parameter order correct
   ord <- c("log_r_init", "log_h", "log_m_init", "log_sd_surv", "log_phi_catch",
            "p_sel_fish", "p_sel_surv", "init_n", "r_in", "p_sel", "f_0")
   params <- params[ord]
 
-  list(df = df, params = params)
+  list(om = om, params = params)
 }

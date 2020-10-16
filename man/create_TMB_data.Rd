@@ -4,15 +4,17 @@
 \alias{create_tmb_data}
 \title{Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 \usage{
-create_tmb_data(sim_data = NULL, df = NULL, ss_model = NULL)
+create_tmb_data(om = NULL, ss_model = NULL, yr = NULL)
 }
 \arguments{
-\item{sim_data}{Operating model}
-
-\item{df}{input parameters}
-
-\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}
+\item{om}{Operating model output returned by the \code{\link[=run_om]{run_om()}} function
 and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+
+\item{ss_model}{A model input/output list representing the SS model as returned from
+\code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+
+\item{yr}{The year to trim the data to on the end of the time series. Various objects
+are populated into the future and must be trimmed}
 }
 \value{
 A list of 2 elements: the data and parameter values needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

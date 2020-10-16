@@ -319,28 +319,6 @@ get_yrs_mse_list <- function(lst){
   ls_all[[1]]
 }
 
-#' Load data from CSV files
-#'
-#' @return A list of the loaded [data.frame]s
-#' @importFrom readr read_csv cols
-#' @export
-csv_data <- function(){
-  load_from_csv <- function(file){
-    read_csv(system.file(file.path("extdata", file),
-                         package = "pacifichakemse",
-                         mustWork = TRUE),
-             col_types = cols(),
-             comment = "#")
-  }
-  lst <- NULL
-  lst$wage_ss <- load_from_csv("wage_ss.csv")
-  lst$wage_unfished <- load_from_csv("unfished_waa.csv")
-  lst$r_dev <- as.matrix(load_from_csv("Rdev.csv"))
-  lst$catch_country <- load_from_csv("catch_per_country.csv")
-
-  lst
-}
-
 #' Construct blank objects for Operating model outputs
 #'
 #' @param yrs A vector of years
@@ -457,9 +435,9 @@ setup_blank_om_objects <- function(yrs,
                              dimnames = list(yrs = yrs,
                                              space = seq_len(n_space),
                                              season = seq_len(n_season)))
-  lst$survey <- array(NA,
-                  dim = c(n_yr),
-                  dimnames = list(yrs = yrs))
+  # lst$survey <- array(NA,
+  #                 dim = c(n_yr),
+  #                 dimnames = list(yrs = yrs))
   lst$survey_true <- array(NA,
                            dim = c(n_space, n_yr),
                            dimnames = list(space = seq_len(n_space),
@@ -528,25 +506,54 @@ get_age_dat <- function(d = NULL,
   d[d$Yr %in% yr, -1]
 }
 
-#' Add a new row to the bottom of the `wage` [data.frame], which is a copy of the
-#' last row with the `Yr` value being one more than the last row's
+#' Modify the `yr` row in the `wage` [data.frame], copying data from the `yr_copy` row
 #'
 #' @param wage A weight-at-age [data.frame] as created by [load_ss_model_data()]
+#' @param yr The year to modify the row data for in the [data.frame]
+#' @param yr_copy The year to use as source data row for the copy. If `NULL`, the first row will be used
 #'
-#' @return The same `wage` [data.frame] with a new row added to the bottom,
-#' which is a copy of the last row with the `Yr` value being one more than
-#' the last row's
+#' @return The same `wage` [data.frame] with the year row modified
 #' @export
-wage_add_yr <- function(wage = NULL){
+modify_wage_df <- function(wage = NULL, yr = NULL, yr_copy = NULL){
 
   verify_argument(wage, "data.frame")
-  stopifnot(nrow(wage) >= 1)
+  verify_argument(yr, c("integer", "numeric"), 1)
   stopifnot("Yr" %in% names(wage))
 
-  last_wage_yr <- wage[nrow(wage),]$Yr
-  wage <- wage %>%
-    bind_rows(wage[1,])
-  wage[nrow(wage),]$Yr <- last_wage_yr + 1
+  line <- which(wage$Yr == yr)
+  if(is.null(yr_copy)){
+    line_copy <- 1
+  }else{
+    line_copy <- which(wage$Yr == yr_copy)
+  }
+
+  if(!nrow(wage)){
+    warning("The wage data frame provided is empty")
+    return(wage)
+  }
+  if(!length(line)){
+    warning("The year ", yr, " was not found in the wage data frame provided")
+    return(wage)
+  }
+  if(!length(line_copy)){
+    warning("The yr_copy year ", yr, " was not found in the wage data frame provided")
+    return(wage)
+  }
+  if(length(line) > 1){
+    warning("The year ", yr, " occurs multiple times in the wage data frame provided")
+    return(wage)
+  }
+  if(length(line_copy) > 1){
+    warning("The yr_copy year ", yr, " occurs multiple times in the wage data frame provided")
+    return(wage)
+  }
+  if(line == line_copy){
+    warning("The year to copy from is the same as the year to copy to")
+    return(wage)
+  }
+
+  wage[line, -1] <- wage[line_copy, -1]
+
   wage
 }
 
@@ -668,7 +675,7 @@ extract_params_tmb <- function(obj){
     set_names(nms)
 }
 
-df_identical <- function(wa1, wa2, nm_wa1, nm_wa2, diff_tol = 1e-8){
+df_identical <- function(wa1, wa2, nm_wa1, nm_wa2, diff_tol = 1e-20){
   if(class(wa1) != "matrix" || class(wa2) != "matrix"){
     stop("Both ", nm_wa1, " and ", nm_wa2, " must be class matrix",
          call. = FALSE)
@@ -706,212 +713,26 @@ df_identical <- function(wa1, wa2, nm_wa1, nm_wa2, diff_tol = 1e-8){
   }
 }
 
-#' Compare two data object inputs for input into `runHakeassessment.cpp`
+
+#' Get likelihood values for a model object the begin with 'ans'
 #'
-#' @description Used while developing the code to compare old and new data being input.
-#' They need to be exactly the same
+#' @param report The object returned by the `report()` function of the returned object of the minimizer.
 #'
-#' @param d1 Data object 1
-#' @param d2 Data object 2
-#' @param p1 Parameter object 1
-#' @param p2 Parameter object 2
-#'
+#' @return A list of the likelihoods whose names begin with 'ans'. Add these in pacifichakemse.cpp at the end as a REPORT
 #' @export
-compare_tmb_data_tol <- function(d1, d2, p1, p2){
-
-  if("survey_x" %in% names(d2)){
-    d2$survey_x <- NULL
-  }
-  if(!identical(d1$yrs, d2$years)){
-    stop("d1$yrs not identical to d2$years", call. = FALSE)
-  }
-  if(!identical(d1$t_end, d2$tEnd)){
-    stop("d1$t_end not identical to d2$tEnd", call. = FALSE)
-  }
-  if(!identical(d1$sel_change_yr, d2$selYear)){
-    stop("d1$sel_change_yr not identical to d2$selYear", call. = FALSE)
-  }
-  if(!identical(d1$yr_sel, d2$year_sel)){
-    stop("d1$yr_sel not identical to d2$year_sel", call. = FALSE)
-  }
-  if(!identical(d1$b, d2$b)){
-    stop("d1$b not identical to d2$b", call. = FALSE)
-  }
-  if(!identical(d1$ages, d2$age)){
-    stop("d1$ages not identical to d2$age", call. = FALSE)
-  }
-  if(!identical(d1$rdev_sd, d2$logSDR)){
-    stop("d1$rdev_sd not identical to d2$logSDR", call. = FALSE)
-  }
-  if(!identical(d1$log_q, d2$logQ)){
-    stop("d1$log_q not identical to d2$logQ", call. = FALSE)
-  }
-  if(!identical(d1$log_sd_catch, d2$logSDcatch)){
-    stop("d1$log_sd_catch not identical to d2$logSDcatch", call. = FALSE)
-  }
-  if(!identical(d1$log_phi_survey, d2$logphi_survey)){
-    stop("d1$log_phi_survey not identical to d2$logphi_survey", call. = FALSE)
-  }
-  if(!identical(d1$s_mul, d2$smul)){
-    stop("d1$s_mul not identical to d2$smul", call. = FALSE)
-  }
-  if(!identical(d1$sigma_p_sel, d2$sigma_psel)){
-    stop("d1$sigma_p_sel not identical to d2$sigma_psel", call. = FALSE)
-  }
-  if(!identical(d1$sum_zero, d2$sum_zero)){
-    stop("d1$sum_zero not identical to d2$sum_zero", call. = FALSE)
-  }
-  if(!identical(d1$s_min, d2$Smin)){
-    stop("d1$s_min not identical to d2$Smin", call. = FALSE)
-  }
-  if(!identical(d1$s_max, d2$Smax)){
-    stop("d1$s_max not identical to d2$Smax", call. = FALSE)
-  }
-  if(!identical(d1$s_min_survey, d2$Smin_survey)){
-    stop("d1$s_min_survey not identical to d2$Smin_survey", call. = FALSE)
-  }
-  if(!identical(d1$s_max_survey, d2$Smax_survey)){
-    stop("d1$s_max_survey not identical to d2$Smax_survey", call. = FALSE)
-  }
-  if(!identical(d1$n_age, d2$nage)){
-    stop("d1$n_age not identical to d2$nage", call. = FALSE)
-  }
-  if(!identical(d1$m_sel, d2$Msel)){
-    stop("d1$m_sel not identical to d2$Msel", call. = FALSE)
-  }
-  if(!identical(d1$flag_sel, d2$flag_sel)){
-    stop("d1$flag_sel not identical to d2$flag_sel", call. = FALSE)
-  }
-  if(!identical(d1$flag_survey, d2$flag_survey)){
-    stop("d1$flag_survey not identical to d2$flag_survey", call. = FALSE)
-  }
-  if(!identical(d1$flag_catch, d2$flag_catch)){
-    stop("d1$flag_catch not identical to d2$flag_catch", call. = FALSE)
-  }
-
-  if(class(d1$catch_obs)[1] != "matrix" | class(d2$Catchobs)[1] != "matrix"){
-    stop("Both d1$catch_obs and d2$Catchobs must be class matrix",
-         call. = FALSE)
-  }
-  if(!identical(dim(d1$catch_obs), dim(d2$Catchobs))){
-    stop("d1$catch_obs not identical to d2$Catchobs. They have different dimensions",
-         call. = FALSE)
-  }
-
-  catch_diff_tol <- 1e-4
-  catch_diff <- d1$catch_obs %>%
-    as_tibble() %>%
-    add_column(d2$Catchobs) %>%
-    mutate(diff = .[[1]] - .[[2]]) %>%
-    mutate(in_tol = diff < catch_diff_tol)
-  if(!all(catch_diff$in_tol)){
-    stop("d1$catch_obs not identical to d2$Catchgobs, difference tolerance of ",
-         catch_diff_tol, " not upheld",
-         call. = FALSE)
-  }
-
-  df_identical(d1$wage_catch, d2$wage_catch, "d1$wage_catch", "d2$wage_catch", 1e-8)
-  df_identical(d1$wage_survey, d2$wage_survey, "d1$wage_survey", "d2$wage_survey", 1e-8)
-  df_identical(d1$wage_ssb, d2$wage_ssb, "d1$wage_ssb", "d2$wage_ssb", 1e-8)
-  df_identical(d1$wage_mid, d2$wage_mid, "d1$wage_mid", "d2$wage_mid", 1e-8)
-
-  if(!identical(d1$mat_sel, d2$Matsel)){
-    stop("d1$mat_sel not identical to d2$Matsel", call. = FALSE)
-  }
-
-  if(class(d1$survey) != "numeric" | class(d2$survey) != "numeric"){
-    stop("Both d1$survey and d2$survey must be class numeric",
-         call. = FALSE)
-  }
-  survey_diff_tol <- 1e-7
-  survey_diff <- d1$survey %>%
-    as_tibble() %>%
-    add_column(d2$survey) %>%
-    mutate(diff = .[[1]] - .[[2]]) %>%
-    mutate(in_tol = diff < survey_diff_tol)
-  if(!all(survey_diff$in_tol)){
-    stop("d1$survey not identical to d2$survey, difference tolerance of ",
-         survey_diff_tol, " not upheld",
-         call. = FALSE)
-  }
-
-  if(class(d1$survey_err) != "numeric" | class(d2$survey_err) != "numeric"){
-    stop("Both d1$survey_err and d2$survey_err must be class numeric",
-         call. = FALSE)
-  }
-  survey_err_diff_tol <- 1e-5
-  survey_err_diff <- d1$survey_err %>%
-    as_tibble() %>%
-    add_column(d2$survey_err) %>%
-    mutate(diff = .[[1]] - .[[2]]) %>%
-    mutate(in_tol = diff < survey_err_diff_tol)
-  if(!all(survey_err_diff$in_tol)){
-    stop("d1$survey_err not identical to d2$survey_err, difference tolerance of ",
-         survey_err_diff_tol, " not upheld",
-         call. = FALSE)
-  }
-
-  if(!identical(d1$ss_survey, d2$ss_survey)){
-    stop("d1$ss_survey not identical to d2$ss_survey", call. = FALSE)
-  }
-  if(!identical(d1$ss_catch, d2$ss_catch)){
-    stop("d1$ss_catch not identical to d2$ss_catch", call. = FALSE)
-  }
-  if(!identical(d1$a_prior, d2$Aprior)){
-    stop("d1$a_prior not identical to d2$Aprior", call. = FALSE)
-  }
-  if(!identical(d1$b_prior, d2$Bprior)){
-    stop("d1$b_prior not identical to d2$Bprior", call. = FALSE)
-  }
-
-  df_identical(d1$age_survey, d2$age_survey, "d1$age_survey", "d2$age_survey", 1e-7)
-  df_identical(d1$age_catch, d2$age_catch, "d1$age_catch", "d2$age_catch", 1e-8)
-
-  # Parameters ----------------------------------------------------------------
-  if(!identical(p1$log_r_init, p2$logRinit)){
-    stop("p1$log_r_init not identical to p2$logRinit", call. = FALSE)
-  }
-  if(!identical(p1$log_m_init, p2$logMinit)){
-    if(p2$logMinit - p1$log_m_init > 1e-14){
-      stop("p1$log_m_init not identical to p2$logMinit", call. = FALSE)
-    }
-  }
-  if(!identical(p1$log_h, p2$logh)){
-    if(p2$logh - p1$log_h > 1e-6){
-      stop("p1$log_h not identical to p2$logh", call. = FALSE)
-    }
-  }
-  if(!identical(p1$log_sd_surv, p2$logSDsurv)){
-    if(p2$logSDsurv - p1$log_sd_surv > 1e-14){
-      stop("p1$log_sd_surv not identical to p2$logSDsurv", call. = FALSE)
-    }
-  }
-  if(!identical(p1$log_phi_catch, p2$logphi_catch)){
-    stop("p1$log_phi_catch not identical to p2$logphi_catch", call. = FALSE)
-  }
-  if(!identical(p1$p_sel_fish, p2$psel_fish)){
-    stop("p1$p_sel_fish not identical to p2$psel_fish", call. = FALSE)
-  }
-  if(!identical(p1$p_sel_surv, p2$psel_surv)){
-    stop("p1$p_sel_surv not identical to p2$psel_surv", call. = FALSE)
-  }
-
-  df_identical(p1$init_n, p2$initN, "p1$init_n", "p2$initN")
-
-  if(!identical(p1$r_in, p2$Rin)){
-    stop("p1$r_in not identical to p2$Rin", call. = FALSE)
-  }
-
-  df_identical(p1$p_sel, p2$PSEL, "p1$p_sel", "p2$PSEL")
-
-  if(!identical(p1$f_0, p2$F0)){
-    if(any(p2$F0 - p1$f_0 > 1e-14)){
-      stop("p1$f_0 not identical to p2$F0", call. = FALSE)
-    }
-  }
+#'
+#' @examples
+#' \dontrun
+#' obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
+#' report <- obj$report()
+#' print_likelihoods(report)
+get_likelihoods <- function(report){
+  map2(names(report), report, ~{if(length(grep("ans", .x))){ret <- .y;names(ret) <- .x;ret}}) %>%
+    unlist() %>%
+    `[`(!is.na(names(.)))
 }
 
-#' Compare two data object inputs for input into `runHakeassessment.cpp`
+#' Compare two data object inputs for input into `pacifichakemse.cpp`
 #'
 #' @description Used while developing the code to compare old and new data being input.
 #' They need to be exactly the same
@@ -923,156 +744,28 @@ compare_tmb_data_tol <- function(d1, d2, p1, p2){
 #'
 #' @export
 compare_tmb_data <- function(d1, d2, p1, p2){
+  d1 <- d1[order(names(d1))]
+  d2 <- d2[order(names(d2))]
 
-  if("survey_x" %in% names(d2)){
-    d2$survey_x <- NULL
-  }
-  if(!identical(d1$yrs, d2$years, )){
-    stop("d1$yrs not identical to d2$years", call. = FALSE)
-  }
-  if(!identical(d1$t_end, d2$tEnd)){
-    stop("d1$t_end not identical to d2$tEnd", call. = FALSE)
-  }
-  if(!identical(d1$sel_change_yr, d2$selYear)){
-    stop("d1$sel_change_yr not identical to d2$selYear", call. = FALSE)
-  }
-  if(!identical(d1$yr_sel, d2$year_sel)){
-    stop("d1$yr_sel not identical to d2$year_sel", call. = FALSE)
-  }
-  if(!identical(d1$b, d2$b)){
-    stop("d1$b not identical to d2$b", call. = FALSE)
-  }
-  if(!identical(d1$ages, d2$age)){
-    stop("d1$ages not identical to d2$age", call. = FALSE)
-  }
-  if(!identical(d1$rdev_sd, d2$logSDR)){
-    stop("d1$rdev_sd not identical to d2$logSDR", call. = FALSE)
-  }
-  if(!identical(d1$log_q, d2$logQ)){
-    stop("d1$log_q not identical to d2$logQ", call. = FALSE)
-  }
-  if(!identical(d1$log_sd_catch, d2$logSDcatch)){
-    stop("d1$log_sd_catch not identical to d2$logSDcatch", call. = FALSE)
-  }
-  if(!identical(d1$log_phi_survey, d2$logphi_survey)){
-    stop("d1$log_phi_survey not identical to d2$logphi_survey", call. = FALSE)
-  }
-  if(!identical(d1$s_mul, d2$smul)){
-    stop("d1$s_mul not identical to d2$smul", call. = FALSE)
-  }
-  if(!identical(d1$sigma_p_sel, d2$sigma_psel)){
-    stop("d1$sigma_p_sel not identical to d2$sigma_psel", call. = FALSE)
-  }
-  if(!identical(d1$sum_zero, d2$sum_zero)){
-    stop("d1$sum_zero not identical to d2$sum_zero", call. = FALSE)
-  }
-  if(!identical(d1$s_min, d2$Smin)){
-    stop("d1$s_min not identical to d2$Smin", call. = FALSE)
-  }
-  if(!identical(d1$s_max, d2$Smax)){
-    stop("d1$s_max not identical to d2$Smax", call. = FALSE)
-  }
-  if(!identical(d1$s_min_survey, d2$Smin_survey)){
-    stop("d1$s_min_survey not identical to d2$Smin_survey", call. = FALSE)
-  }
-  if(!identical(d1$s_max_survey, d2$Smax_survey)){
-    stop("d1$s_max_survey not identical to d2$Smax_survey", call. = FALSE)
-  }
-  if(!identical(d1$n_age, d2$nage)){
-    stop("d1$n_age not identical to d2$nage", call. = FALSE)
-  }
-  if(!identical(d1$m_sel, d2$Msel)){
-    stop("d1$m_sel not identical to d2$Msel", call. = FALSE)
-  }
-  if(!identical(d1$flag_sel, d2$flag_sel)){
-    stop("d1$flag_sel not identical to d2$flag_sel", call. = FALSE)
-  }
-  if(!identical(d1$flag_survey, d2$flag_survey)){
-    stop("d1$flag_survey not identical to d2$flag_survey", call. = FALSE)
-  }
-  if(!identical(d1$flag_catch, d2$flag_catch)){
-    stop("d1$flag_catch not identical to d2$flag_catch", call. = FALSE)
-  }
+  d <- map2(d1, d2, ~{
+    identical(.x, .y)
+  }) %>%
+    map_df(~{.x}) %>%
+    t() %>%
+    as_tibble(rownames = "name", .name_repair = "minimal") %>%
+    rename(is_identical = 2) %>%
+    mutate(type = "data")
 
-  if(!identical(d1$catch_obs, d2$Catchobs)){
-    stop("d1$catch_obs not identical to d2$Catchobs", call. = FALSE)
-  }
+  p1 <- p1[order(names(p1))]
+  p2 <- p2[order(names(p2))]
+  p <- map2(p1, p2, ~{
+    identical(.x, .y)
+  }) %>%
+    map_df(~{.x}) %>%
+    t() %>%
+    as_tibble(rownames = "name", .name_repair = "minimal") %>%
+    rename(is_identical = 2) %>%
+    mutate(type = "parameter")
 
-  if(!identical(d1$wage_catch, d2$wage_catch)){
-    stop("d1$wage_catch not identical to d2$wage_catch", call. = FALSE)
-  }
-
-  if(!identical(d1$wage_survey, d2$wage_survey)){
-    stop("d1$wage_survey not identical to d2$wage_survey", call. = FALSE)
-  }
-
-  if(!identical(d1$wage_ssb, d2$wage_ssb)){
-    stop("d1$wage_ssb not identical to d2$wage_ssb", call. = FALSE)
-  }
-
-  if(!identical(d1$wage_mid, d2$wage_mid)){
-    stop("d1$wage_mid not identical to d2$wage_mid", call. = FALSE)
-  }
-  if(!identical(d1$mat_sel, d2$Matsel)){
-    stop("d1$mat_sel not identical to d2$Matsel", call. = FALSE)
-  }
-  if(!identical(d1$survey, d2$survey)){
-    stop("d1$survey not identical to d2$survey", call. = FALSE)
-  }
-  if(!identical(d1$survey_err, d2$survey_err)){
-    stop("d1$survey_err not identical to d2$survey_err", call. = FALSE)
-  }
-  if(!identical(d1$ss_survey, d2$ss_survey)){
-    stop("d1$ss_survey not identical to d2$ss_survey", call. = FALSE)
-  }
-  if(!identical(d1$ss_catch, d2$ss_catch)){
-    stop("d1$ss_catch not identical to d2$ss_catch", call. = FALSE)
-  }
-  if(!identical(d1$a_prior, d2$Aprior)){
-    stop("d1$a_prior not identical to d2$Aprior", call. = FALSE)
-  }
-  if(!identical(d1$b_prior, d2$Bprior)){
-    stop("d1$b_prior not identical to d2$Bprior", call. = FALSE)
-  }
-  if(!identical(d1$age_survey, d2$age_survey)){
-    stop("d1$age_survey not identical to d2$age_survey", call. = FALSE)
-  }
-  if(!identical(d1$age_catch, d2$age_catch)){
-    stop("d1$age_catch not identical to d2$age_catch", call. = FALSE)
-  }
-
-  # Parameters ----------------------------------------------------------------
-  if(!identical(p1$log_r_init, p2$logRinit)){
-    stop("p1$log_r_init not identical to p2$logRinit", call. = FALSE)
-  }
-  if(!identical(p1$log_m_init, p2$logMinit)){
-    stop("p1$log_m_init not identical to p2$logMinit", call. = FALSE)
-  }
-  if(!identical(p1$log_h, p2$logh)){
-    stop("p1$log_h not identical to p2$logh", call. = FALSE)
-  }
-  if(!identical(p1$log_sd_surv, p2$logSDsurv)){
-    stop("p1$log_sd_surv not identical to p2$logSDsurv", call. = FALSE)
-  }
-  if(!identical(p1$log_phi_catch, p2$logphi_catch)){
-    stop("p1$log_phi_catch not identical to p2$logphi_catch", call. = FALSE)
-  }
-  if(!identical(p1$p_sel_fish, p2$psel_fish)){
-    stop("p1$p_sel_fish not identical to p2$psel_fish", call. = FALSE)
-  }
-  if(!identical(p1$p_sel_surv, p2$psel_surv)){
-    stop("p1$p_sel_surv not identical to p2$psel_surv", call. = FALSE)
-  }
-  if(!identical(p1$init_n, p2$initN)){
-    stop("p1$init_n not identical to p2$initN", call. = FALSE)
-  }
-  if(!identical(p1$r_in, p2$Rin)){
-    stop("p1$r_in not identical to p2$Rin", call. = FALSE)
-  }
-  if(!identical(p1$p_sel, p2$PSEL)){
-    stop("p1$p_sel not identical to p2$PSEL", call. = FALSE)
-  }
-  if(!identical(p1$f_0, p2$F0)){
-    stop("p1$f_0 not identical to p2$F0", call. = FALSE)
-  }
+  bind_rows(d, p)
 }

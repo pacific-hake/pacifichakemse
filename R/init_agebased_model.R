@@ -65,8 +65,6 @@ init_agebased_model <- function(om = NULL){
   om$catch[1] <- 0
   om$catch_n[1] <- 0
   om$catch_n_age[, 1] <- 0
-  # Set first survey year to 1, surveys start later
-  om$survey[1] <- 1
   # Distribute over space
   om$n_init <- rep(NA, om$n_age)
   om$n_init_dev <- om$parameters$init_n

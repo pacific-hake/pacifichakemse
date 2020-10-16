@@ -10,6 +10,7 @@ init_movement_mat(
   space_names = NULL,
   n_season = NULL,
   season_names = NULL,
+  m_yr = NULL,
   n_yr = NULL,
   yrs = NULL,
   move_max = NULL,
@@ -32,6 +33,8 @@ init_movement_mat(
 \item{n_season}{See \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{season_names}{See \code{\link[=load_data_om]{load_data_om()}}}
+
+\item{m_yr}{The last non-future year. Used to de-populate future values if \code{populate_future} is FALSE}
 
 \item{n_yr}{The number of years in the array dimension}
 
@@ -56,6 +59,8 @@ init_movement_mat(
 \item{age_names}{See \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{f_space}{See \code{\link[=load_data_om]{load_data_om()}}}
+
+\item{populate_future}{If TRUE, future years will be populated with values. If FALSE they will be NA}
 }
 \value{
 A list of 3 elements: The \code{move_mat} matrix for movement, the \code{move_init}
