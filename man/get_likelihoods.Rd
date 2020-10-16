@@ -16,8 +16,9 @@ A list of the likelihoods whose names begin with 'ans'. Add these in pacifichake
 Get likelihood values for a model object the begin with 'ans'
 }
 \examples{
-\dontrun
+\dontrun{
 obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
 report <- obj$report()
-print_likelihoods(report)
+get_likelihoods(report)
+}
 }

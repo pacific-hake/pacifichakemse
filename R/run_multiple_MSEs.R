@@ -103,44 +103,42 @@ run_multiple_MSEs <- function(results_dir = NULL,
     # Evaluate the Objective function
     d <- lst_tmb$om
     p <- lst_tmb$params
-
     d1 <- conv_d(yr)
     p1 <- conv_p(yr)
     d$survey <- round(d$survey, 0)
-    class(d$yr_sel) <- "integer"
-    class(d$ss_survey) <- "integer"
-    d$flag_survey <- as.numeric(d$flag_survey)
-    d$flag_catch <- as.numeric(d$flag_catch)
-    d1$flag_survey <- as.numeric(d1$flag_survey)
-    d1$flag_catch <- as.numeric(d1$flag_catch)
-    dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
-    if("matrix" %in% class(d$b)){
-      d$b <- d$b[,1]
-    }
-    if("matrix" %in% class(d1$b)){
-      d1$b <- d1$b[,1]
-    }
-    dimnames(d$wage_catch) <- dimnames(d1$wage_catch)
-    dimnames(d$wage_survey) <- dimnames(d1$wage_survey)
-    dimnames(d$wage_ssb) <- dimnames(d1$wage_ssb)
-    dimnames(d$wage_mid) <- dimnames(d1$wage_mid)
-    dimnames(d$age_survey) <- dimnames(d1$age_survey)
-    dimnames(p$init_n) <- dimnames(p1$init_n)
-    dimnames(p$p_sel) <- dimnames(p1$p_sel)
-    d$age_survey <- d1$age_survey
-    d$age_catch <- d1$age_catch
-    d$age_max_age <- as.numeric(d$age_max_age)
-    d1$survey_x <- NULL
-    # p$log_h <- p1$log_h
-    # p$log_m_init <- p1$log_m_init
-    # p$log_sd_surv <- p1$log_sd_surv
-    p$f_0 <- p1$f_0
-    cmp <- compare_tmb_data(d, d1, p, p1)
+    # -------------------------------------------------------------------------
+    # All of this stuff is done to make sure the inputs are exactly the same as the inputs for the old code
+    # It can be deleted once everything is proved to be working right.
+    # Also go into the load_ss_parameters() function and delete the hardwired parameter values there as well
+    # class(d$yr_sel) <- "integer"
+    # class(d$ss_survey) <- "integer"
+    # d$flag_survey <- as.numeric(d$flag_survey)
+    # d$flag_catch <- as.numeric(d$flag_catch)
+    # d1$flag_survey <- as.numeric(d1$flag_survey)
+    # d1$flag_catch <- as.numeric(d1$flag_catch)
+    # dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
+    # if("matrix" %in% class(d$b)){
+    #   d$b <- d$b[,1]
+    # }
+    # if("matrix" %in% class(d1$b)){
+    #   d1$b <- d1$b[,1]
+    # }
+    #dimnames(d$wage_catch) <- dimnames(d1$wage_catch)
+    #dimnames(d$wage_survey) <- dimnames(d1$wage_survey)
+    #dimnames(d$wage_ssb) <- dimnames(d1$wage_ssb)
+    #dimnames(d$wage_mid) <- dimnames(d1$wage_mid)
+    #dimnames(d$age_survey) <- dimnames(d1$age_survey)
+    #dimnames(d$age_catch) <- dimnames(d1$age_catch)
+    #dimnames(p$init_n) <- dimnames(p1$init_n)
+    #dimnames(p$p_sel) <- dimnames(p1$p_sel)
+    #d$age_max_age <- as.numeric(d$age_max_age)
+    #d1$survey_x <- NULL
+    #cmp <- compare_tmb_data(d, d1, p, p1)
+    # -------------------------------------------------------------------------
 
 browser()
-    #compare_tmb_data(d, d1, p, p1)
-    #obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
-    obj <- MakeADFun(d1, p1, DLL = "pacifichakemse", silent = FALSE)
+    obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
+    #obj <- MakeADFun(d1, p1, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
     rsmall <- map(report, ~{format(.x, nsmall = 20)})
     objfn <- obj$fn() %>% format(nsmall=20)
@@ -176,6 +174,7 @@ browser()
 
     report <- obj$report()
     pars <- extract_params_tmb(opt)
+    plike <- get_likelihoods(report) %>% format(nsmall = 20)
     browser()
 
     # Calculate the reference points to be applied to the next year

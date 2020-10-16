@@ -722,10 +722,11 @@ df_identical <- function(wa1, wa2, nm_wa1, nm_wa2, diff_tol = 1e-20){
 #' @export
 #'
 #' @examples
-#' \dontrun
+#' \dontrun{
 #' obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
 #' report <- obj$report()
-#' print_likelihoods(report)
+#' get_likelihoods(report)
+#' }
 get_likelihoods <- function(report){
   map2(names(report), report, ~{if(length(grep("ans", .x))){ret <- .y;names(ret) <- .x;ret}}) %>%
     unlist() %>%
