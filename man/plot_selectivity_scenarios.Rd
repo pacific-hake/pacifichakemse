@@ -8,9 +8,13 @@ Base, Low US, and last year selectivity}
 plot_selectivity_scenarios(om_0, om_1, om_2, type = "new")
 }
 \arguments{
-\item{type}{"new or "old"}
+\item{om_0}{Operating model output from \code{\link[=run_om]{run_om()}}}
 
-\item{om}{Output from the \code{\link[=run_om]{run_om()}} function}
+\item{om_1}{Operating model output from \code{\link[=run_om]{run_om()}}}
+
+\item{om_2}{Operating model output from \code{\link[=run_om]{run_om()}}}
+
+\item{type}{"new or "old"}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

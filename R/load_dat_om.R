@@ -408,7 +408,6 @@ load_data_om <- function(ss_model = NULL,
 #' @param ages See [load_data_om()]
 #' @param age_names See [load_data_om()]
 #' @param f_space See [load_data_om()]
-#' @param populate_future If TRUE, future years will be populated with values. If FALSE they will be NA
 #'
 #' @return A list of 3 elements: The `move_mat` matrix for movement, the `move_init`
 #' vector of length `n_space` and the `f_space` vector of length `n_space`

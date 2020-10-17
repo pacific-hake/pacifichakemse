@@ -59,8 +59,6 @@ init_movement_mat(
 \item{age_names}{See \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{f_space}{See \code{\link[=load_data_om]{load_data_om()}}}
-
-\item{populate_future}{If TRUE, future years will be populated with values. If FALSE they will be NA}
 }
 \value{
 A list of 3 elements: The \code{move_mat} matrix for movement, the \code{move_init}

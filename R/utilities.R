@@ -226,6 +226,66 @@ calc_term_quantiles <- function(df = NULL,
     ungroup()
 }
 
+#' Read in and convert data objects from the
+#' old code to make sure new code produced the same likelihoods
+#'
+#' @param yr The year for file read (file will be d2018.rds for example)
+#'
+#' @return The data with converted names
+#' @export
+conv_d <- function(yr){
+  d <- readRDS(paste0("d", yr, ".rds"))
+  nm <- names(d)
+  nm[nm == "year_sel"] <- "yr_sel"
+  nm[nm == "Msel"] <- "m_sel"
+  nm[nm == "Matsel"] <- "mat_sel"
+  nm[nm == "nage"] <- "n_age"
+  nm[nm == "selYear"] <- "sel_change_yr"
+  nm[nm == "years"] <- "yrs"
+  nm[nm == "tEnd"] <- "t_end"
+  nm[nm == "logQ"] <- "log_q"
+  nm[nm == "Smin"] <- "s_min"
+  nm[nm == "Smax"] <- "s_max"
+  nm[nm == "Smin_survey"] <- "s_min_survey"
+  nm[nm == "Smax_survey"] <- "s_max_survey"
+  nm[nm == "age_maxage"] <- "age_max_age"
+  nm[nm == "Catchobs"] <- "catch_obs"
+  nm[nm == "logSDcatch"] <- "log_sd_catch"
+  nm[nm == "logSDR"] <- "rdev_sd"
+  nm[nm == "logphi_survey"] <- "log_phi_survey"
+  nm[nm == "sigma_psel"] <- "sigma_p_sel"
+  nm[nm == "smul"] <- "s_mul"
+  nm[nm == "Bprior"] <- "b_prior"
+  nm[nm == "Aprior"] <- "a_prior"
+  nm[nm == "age"] <- "ages"
+  names(d) <- nm
+  d
+}
+
+#' Read in and convert parameter objects from the
+#' old code to make sure new code produced the same likelihoods
+#'
+#' @param yr The year for file read (file will be p2018.rds for example)
+#'
+#' @return The parameters with converted names
+#' @export
+conv_p <- function(yr){
+  p <- readRDS(paste0("p", yr, ".rds"))
+  nm <- names(p)
+  nm[nm == "logRinit"] <- "log_r_init"
+  nm[nm == "logh"] <- "log_h"
+  nm[nm == "logMinit"] <- "log_m_init"
+  nm[nm == "logSDsurv"] <- "log_sd_surv"
+  nm[nm == "logphi_catch"] <- "log_phi_catch"
+  nm[nm == "psel_fish"] <- "p_sel_fish"
+  nm[nm == "psel_surv"] <- "p_sel_surv"
+  nm[nm == "initN"] <- "init_n"
+  nm[nm == "Rin"] <- "r_in"
+  nm[nm == "PSEL"] <- "p_sel"
+  nm[nm == "F0"] <- "f_0"
+  names(p) <- nm
+  p
+}
 
 #' Convert a vector of aggregated values into a [data.frame] containing
 #' the year, run, value, and possibly country as columns

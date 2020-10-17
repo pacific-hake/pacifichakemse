@@ -197,5 +197,10 @@ globalVariables(c(
 "Used",
 "atSea_US_CP",
 "atSea_US_MS",
-"US_shore"
+"US_shore",
+"variable",
+"om",
+"am",
+"Country",
+"movement"
 ))

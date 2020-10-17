@@ -41,6 +41,8 @@ for the OM used in this MSE. The actual MSE results are stored by the function c
 
 \item{f_sim}{Value of F to use for simulation years}
 
+\item{ss_model}{Output from \code{\link[=load_ss_model_data]{load_ss_model_data()}}}
+
 \item{...}{Absorb arguments intended for other functions}
 }
 \value{

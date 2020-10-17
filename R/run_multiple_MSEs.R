@@ -11,6 +11,7 @@
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
 #' @param f_sim Value of F to use for simulation years
+#' @param ss_model Output from [load_ss_model_data()]
 #' @param ... Absorb arguments intended for other functions
 #'
 #' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om

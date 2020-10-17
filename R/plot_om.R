@@ -115,7 +115,7 @@ compare_age_in_catch <- function(obj){
 
   p <- ggplot(df_am_catch, aes(x = year, y = am, color = Country)) +
     geom_line(size = 1) +
-    scale_y_continuous(name = "Average age in catch", limit = c(2,10)) +
+    scale_y_continuous(name = "Average age in catch", limits = c(2,10)) +
     scale_x_continuous()
 
   p
@@ -145,7 +145,7 @@ compare_move <- function(om){
   for(i in 1:4){
     p[[i]] <- ggplot(d[d$season == i,], aes(x = age, y = movement, color = country)) +
       geom_line() +
-      scale_y_continuous(limit = c(0, 1)) +
+      scale_y_continuous(limits = c(0, 1)) +
       geom_point() +
       ggtitle(paste("season", i))
   }
@@ -155,7 +155,9 @@ compare_move <- function(om){
 #' Plot a 3-pane selectivity plot by country for three scenarios:
 #' Base, Low US, and last year selectivity
 #'
-#' @param om Output from the [run_om()] function
+#' @param om_0 Operating model output from [run_om()]
+#' @param om_1 Operating model output from [run_om()]
+#' @param om_2 Operating model output from [run_om()]
 #' @param type "new or "old"
 #'
 #' @return A [ggplot2::ggplot()] object
@@ -183,7 +185,7 @@ plot_selectivity_scenarios <- function(om_0, om_1, om_2, type = "new"){
     theme_classic() +
     geom_line(size = 1.2) +
     facet_wrap(~run) +
-    scale_x_continuous(limit = c(0, om_0$age_max_age)) +
+    scale_x_continuous(limits = c(0, om_0$age_max_age)) +
     scale_color_manual(values = c("darkred","blue4"))
 
   if(type == "old"){
