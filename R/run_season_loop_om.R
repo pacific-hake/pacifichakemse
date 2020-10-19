@@ -93,18 +93,24 @@ run_season_loop_om <- function(om,
       om$v_save[yr_ind, space, season] <<- b_tmp
       om$catch_quota[yr_ind, space, season] <<- e_tmp
 
-      if(e_tmp / b_tmp >= 0.9){
-        if(om$yrs[yr_ind] < om$m_yr){
-          # Stop if in the past
-          stop("Catch exceeds available biomass in yrs: ",
-               om$yrs[yr_ind], " and season ",
-               season, " , space ", space,
-               call. = FALSE)
+      tryCatch({
+        if(e_tmp / b_tmp >= 0.9){
+          if(om$yrs[yr_ind] < om$m_yr){
+            # Stop if in the past
+            stop("Catch exceeds available biomass in yrs: ",
+                 om$yrs[yr_ind], " and season ",
+                 season, " , space ", space,
+                 call. = FALSE)
+          }
+          e_tmp <- 0.75 * b_tmp
+          om$catch_quota_n[yr_ind, space, season] <<- 1
         }
+      }, error = function(e){
+        stop("Error in the Operating model. If running a standalone OM outside the MSE, ",
+             "did you set `n_sim_yrs` instead of `yr_future`?",
+             call. = FALSE)
+      })
 
-        e_tmp <- 0.75 * b_tmp
-        om$catch_quota_n[yr_ind, space, season] <<- 1
-      }
 #if(yr_ind == 54 & season == 4 & space == 2) browser()
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,

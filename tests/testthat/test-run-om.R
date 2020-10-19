@@ -10,7 +10,7 @@ ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir,
                                        load_extra_mcmc = FALSE,
                                        overwrite_ss_rds = TRUE)
 ss_model <- load_ss_model_data(ss_model_raw)
-om <- load_data_om(ss_model, yr_future = 5, rdev_seed =)
+om <- load_data_om(ss_model, yr_future = 5, rdev_seed = 42)
 
 if(file.exists("fselvals.csv")){
   unlink("fselvals.csv", force = TRUE)
@@ -170,3 +170,7 @@ test_that("Catch quota by season and space are the same", {
   expect_true(identical(cq, cq1))
 })
 
+test_that("Standalone OM run catches n_sim_yrs set", {
+  om <- load_data_om(ss_model, n_sim_yrs = 5, rdev_seed = 42)
+  expect_error(run_om(om, verbose = FALSE))
+})
