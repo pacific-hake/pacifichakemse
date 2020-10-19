@@ -5,13 +5,15 @@
 \title{Run the Operating Model, which is an age based model
 conditioned on true catch}
 \usage{
-run_om(om = NULL, random_seed = 123, ...)
+run_om(om = NULL, random_seed = 123, n_sim_yrs = 0, ...)
 }
 \arguments{
 \item{om}{list of parameters and life history values OM data. This list is
 what is returned by \code{\link[=load_data_om]{load_data_om()}}}
 
 \item{random_seed}{The random seed to use for this Operating Model}
+
+\item{n_sim_yrs}{The number of future years to run}
 
 \item{...}{Arguments passed to \code{\link[=run_year_loop_om]{run_year_loop_om()}}}
 }

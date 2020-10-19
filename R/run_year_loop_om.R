@@ -38,6 +38,7 @@ run_year_loop_om <- function(om = NULL,
           (om$ssb_0[space] * (1 - om$h) + om$ssb[yr_ind, space] *
              (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                        om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
+      #if(yr == 2019) browser()
       j
     }) %>% set_names(om$space_names)
     # Sanity check - these should equal the proportions in om$move_init:
@@ -45,7 +46,7 @@ run_year_loop_om <- function(om = NULL,
     om$n_save_age[1, yr_ind, , 1] <<- init_rec
 
     om$r_save[yr_ind, ] <<- init_rec
-#if(yr == 2018) browser()
+#if(yr >= 2019) browser()
     # -------------------------------------------------------------------------
     om <<- run_season_loop_om(om = om,
                               yr = yr,
@@ -59,21 +60,20 @@ run_year_loop_om <- function(om = NULL,
       om$catch_age[, yr_ind] <<- apply(om$catch_n_save_age[, yr_ind,,],
                                        MARGIN = 1,
                                        FUN = sum)
-      om$catch[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
 
       om$catch_n_age[, yr_ind] <<- apply(om$catch_n_save_age[,yr_ind,,],
                                          MARGIN = 1,
                                          FUN = sum)
       om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
+#if(yr >= 2019) browser()
+
     }else{
       if(om$n_space == 1){
         om$catch_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
-        om$catch[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
         om$catch_n_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
       }else{
         om$catch_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
-        om$catch[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
         om$catch_n_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
       }
@@ -185,9 +185,9 @@ run_year_loop_om <- function(om = NULL,
         om$catch_n_age[age_1_ind:(om$age_max_age), yr_ind] / om$catch_n[yr_ind]
       om$age_comps_catch[om$age_max_age, yr_ind] <<-
         sum(om$catch_n_age[(om$age_max_age + 1):om$n_age, yr_ind]) / om$catch_n[yr_ind]
+#if(yr >= 2019) browser()
     }
     #om$age_comps_catch[is.na(om$age_comps_catch)] <<- -1
-
     if(verbose){
       cat("\n")
     }

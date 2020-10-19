@@ -78,7 +78,8 @@ run_season_loop_om <- function(om,
             filter(year == yr) %>%
             select(contains(paste0("space", space))) %>% pull()
         }else{
-          catch_space <- om$catch_obs[yr_ind,]$value * om$f_space[space]
+          #browser()
+          catch_space <- om$catch_obs$value[yr_ind] * om$f_space[space]
         }
       }else{
         catch_space <- om$catch_obs[yr_ind,]$value
@@ -98,11 +99,13 @@ run_season_loop_om <- function(om,
           stop("Catch exceeds available biomass in yrs: ",
                om$yrs[yr_ind], " and season ",
                season, " , space ", space,
-          call. = FALSE)
+               call. = FALSE)
         }
+
         e_tmp <- 0.75 * b_tmp
         om$catch_quota_n[yr_ind, space, season] <<- 1
       }
+#if(yr_ind == 54 & season == 4 & space == 2) browser()
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,
                      m_season = m_season,
@@ -177,7 +180,7 @@ run_season_loop_om <- function(om,
       }
       om$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season] * wage_catch
       om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
-
+#if(yr_ind == 54 & season == 4 & space == 2) browser()
   #if(yr_ind == 55) browser()
       if(om$catch_quota[yr_ind, space, season] > 0){
         if((sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season]) > 1.1){

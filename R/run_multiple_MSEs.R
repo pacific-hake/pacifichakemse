@@ -87,8 +87,8 @@ run_multiple_MSEs <- function(results_dir = NULL,
 
     # Run the Operating Model (OM)
     cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
-    om_output <<- run_om(om, random_seed = random_seed, ...)
-#browser()
+    om_output <<- run_om(om, random_seed = random_seed, n_sim_yrs = n_sim_yrs, ...)
+
     # Create the data for the Estimation Model (EM)
     # if(yr >= yr_start){
     #   om$wage_catch_df <- modify_wage_df(om$wage_catch_df, yr)
@@ -106,49 +106,49 @@ run_multiple_MSEs <- function(results_dir = NULL,
     p <- lst_tmb$params
     d1 <- conv_d(yr)
     p1 <- conv_p(yr)
+    d1$survey_x <- NULL
     d$survey <- round(d$survey, 0)
     # -------------------------------------------------------------------------
     # All of this stuff is done to make sure the inputs are exactly the same as the inputs for the old code
     # It can be deleted once everything is proved to be working right.
     # Also go into the load_ss_parameters() function and delete the hardwired parameter values there as well
-    # class(d$yr_sel) <- "integer"
-    # class(d$ss_survey) <- "integer"
-    # d$flag_survey <- as.numeric(d$flag_survey)
-    # d$flag_catch <- as.numeric(d$flag_catch)
-    # d1$flag_survey <- as.numeric(d1$flag_survey)
-    # d1$flag_catch <- as.numeric(d1$flag_catch)
-    # dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
-    # if("matrix" %in% class(d$b)){
-    #   d$b <- d$b[,1]
-    # }
-    # if("matrix" %in% class(d1$b)){
-    #   d1$b <- d1$b[,1]
-    # }
-    #dimnames(d$wage_catch) <- dimnames(d1$wage_catch)
-    #dimnames(d$wage_survey) <- dimnames(d1$wage_survey)
-    #dimnames(d$wage_ssb) <- dimnames(d1$wage_ssb)
-    #dimnames(d$wage_mid) <- dimnames(d1$wage_mid)
-    #dimnames(d$age_survey) <- dimnames(d1$age_survey)
-    #dimnames(d$age_catch) <- dimnames(d1$age_catch)
-    #dimnames(p$init_n) <- dimnames(p1$init_n)
-    #dimnames(p$p_sel) <- dimnames(p1$p_sel)
-    #d$age_max_age <- as.numeric(d$age_max_age)
-    #d1$survey_x <- NULL
-    #cmp <- compare_tmb_data(d, d1, p, p1)
+    class(d$yr_sel) <- "integer"
+    class(d$ss_survey) <- "integer"
+    d$flag_survey <- as.numeric(d$flag_survey)
+    d$flag_catch <- as.numeric(d$flag_catch)
+    d1$flag_survey <- as.numeric(d1$flag_survey)
+    d1$flag_catch <- as.numeric(d1$flag_catch)
+    dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
+    if("matrix" %in% class(d$b)){
+      d$b <- d$b[,1]
+    }
+    if("matrix" %in% class(d1$b)){
+      d1$b <- d1$b[,1]
+    }
+    # dimnames(d$wage_catch) <- dimnames(d1$wage_catch)
+    # dimnames(d$wage_survey) <- dimnames(d1$wage_survey)
+    # dimnames(d$wage_ssb) <- dimnames(d1$wage_ssb)
+    # dimnames(d$wage_mid) <- dimnames(d1$wage_mid)
+    dimnames(d$age_survey) <- dimnames(d1$age_survey)
+    dimnames(d$age_catch) <- dimnames(d1$age_catch)
+    dimnames(p$init_n) <- dimnames(p1$init_n)
+    dimnames(p$p_sel) <- dimnames(p1$p_sel)
+    d$age_max_age <- as.numeric(d$age_max_age)
+    cmp <- compare_tmb_data(d, d1, p, p1)
     # -------------------------------------------------------------------------
 
 browser()
     obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
     #obj <- MakeADFun(d1, p1, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
-    rsmall <- map(report, ~{format(.x, nsmall = 20)})
-    objfn <- obj$fn() %>% format(nsmall=20)
-    plike <- get_likelihoods(report) %>% format(nsmall = 20)
-    pars <- extract_params_tmb(obj)
-    psmall <- map(pars, ~{format(.x, nsmall = 20)})
+    rsmall <- report %>% map(~{format(.x, nsmall = 20)})
+    plike <- report %>% get_likelihoods %>% format(nsmall = 20)
+    objfn <- obj$fn() %>% format(nsmall = 20)
+    psmall <- obj %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
+#browser()
+
     # You can check likelihood components by placing a browser after the MakeADFun() call above and the
     # nlminb() call below and calling print_likelihoods()
-browser()
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -164,7 +164,6 @@ browser()
     obj$env$tracemgc <- FALSE
     # Minimize the Objective function
     # If error one of the random effects is unused
-    #browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -176,14 +175,14 @@ browser()
     report <- obj$report()
     pars <- extract_params_tmb(opt)
     plike <- get_likelihoods(report) %>% format(nsmall = 20)
-    browser()
+    #browser()
 
     # Calculate the reference points to be applied to the next year
     wage_catch <- get_age_dat(om$wage_catch_df, om$m_yr - 1) %>% unlist(use.names = FALSE)
     v_real <- sum(om_output$n_save_age[, which(om$yrs == om$m_yr), , om$n_season] *
                     matrix(rep(wage_catch, om$n_space),
                            ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == om$m_yr),]))
-    if(yr == 2021) browser()
+
     f_new <- get_ref_point(pars,
                            om,
                            ssb_y = report$SSB %>% tail(1),
@@ -192,7 +191,7 @@ browser()
                            tac = tac,
                            v_real = v_real,
                            ...)
-
+#browser()
     # Need to use map() here to keep names
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
@@ -225,6 +224,7 @@ browser()
     # in the next simulation year.
     if(yr < yr_end){
       # No need to call this in the final year as the loop is over
+      om0 <- om
       om <<- update_om_data(yr + 1,
                             om,
                             yr_survey_sims,
@@ -233,6 +233,7 @@ browser()
                             m_increase,
                             sel_change,
                             zero_rdevs = FALSE)
+      #browser()
     }else{
       NA
     }

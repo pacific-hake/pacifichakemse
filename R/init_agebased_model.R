@@ -60,9 +60,8 @@ init_agebased_model <- function(om = NULL){
   # om$catch_age <- om$catch_age %>%
   #   as.data.frame() %>%
   #   mutate(!!sym(as.character(om$s_yr)) := m)
-  # Set catch and catch-at-age for first year to 0
+  # Set catch-at-age for first year to 0
   om$catch_age[, 1] <- 0
-  om$catch[1] <- 0
   om$catch_n[1] <- 0
   om$catch_n_age[, 1] <- 0
   # Distribute over space

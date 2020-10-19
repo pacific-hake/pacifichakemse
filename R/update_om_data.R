@@ -33,7 +33,6 @@ update_om_data <- function(yr = NULL,
     om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
     return(om)
   }
-
   verify_argument(yr_survey_sims, c("integer", "numeric"))
   verify_argument(f_new, "list", 2)
   verify_argument(c_increase, "numeric", 1)
@@ -42,34 +41,28 @@ update_om_data <- function(yr = NULL,
 
   yr_ind <- which(om$yrs == yr)
 
-  # These are row replacement because the row already exists in the data frames
-  om$catch_obs[om$catch_obs$yr == yr,] <- list(yr = yr, value = f_new$c_new)
+  # Catch updates -------------------------------------------------------------
+  om$catch_obs[om$catch_obs$yr == yr,] <- list(yr = yr, value = round(f_new$c_new, 0))
 
-  om$flag_survey[yr_ind] <- ifelse(yr %in% yr_survey_sims, 1, -1)
-
-  curr_ss_survey <- om$ss_survey[1:(yr_ind - 1)]
-  om$ss_survey[yr_ind] <- ifelse(yr %in% yr_survey_sims,
-                                 ceiling(mean(curr_ss_survey[curr_ss_survey > 0])),
-                                 0)
-
-  curr_survey_err <- om$survey_err[1:(yr_ind - 1)]
-  om$survey_err[yr_ind] <- ifelse(yr %in% yr_survey_sims,
-                                  mean(curr_survey_err[curr_survey_err < 1]),
-                                  1)
-
-  curr_ss_catch <- om$ss_catch[1:(yr_ind - 1)]
+    curr_ss_catch <- om$ss_catch[1:(yr_ind - 1)]
   om$ss_catch[yr_ind] <- ceiling(mean(curr_ss_catch[curr_ss_catch > 0]))
 
   om$flag_catch[yr_ind] <- 1
 
-  # Copy first year of weight-at-age data and use that as the simulated year
-  om$wage_catch_df <- modify_wage_df(om$wage_catch_df, yr)
-  om$wage_survey_df <- modify_wage_df(om$wage_survey_df, yr)
-  om$wage_mid_df <- modify_wage_df(om$wage_mid_df, yr)
-  om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
+  # Survey updates ------------------------------------------------------------
+  curr_ss_survey <- om$ss_survey[1:(yr_ind - 1)]
+  om$ss_survey[yr_ind] <- ifelse(om$flag_survey[yr_ind] == 1,
+                                 ceiling(mean(curr_ss_survey[curr_ss_survey > 0])),
+                                 0)
+
+
+  curr_survey_err <- om$survey_err[1:(yr_ind - 1)]
+  om$survey_err[yr_ind] <- ifelse(om$flag_survey[yr_ind] == 1,
+                                  mean(curr_survey_err[curr_survey_err < 1]),
+                                  1)
 
   if(om$catch_obs[yr_ind,]$value == 0 && om$flag_survey[yr_ind] == -1){
-    red(message("Stock in p'eril! Conducting emergency survey"))
+    red(message("Stock in peril! Conducting emergency survey"))
     om$flag_survey[yr_ind] <- 1
     # Emergency survey adds 200 more age samples onto the mean value for all surveys,
     # because it is an emergency survey the hypothesis is that they will sample more
@@ -77,8 +70,14 @@ update_om_data <- function(yr = NULL,
     om$survey_err[yr_ind] <- mean(curr_survey_err[curr_survey_err < 1])
   }
 
-  om$b[yr_ind - 1] <- om$b_future
-  om$b[yr_ind] <- om$b_future
+  # Weight-at-age updates -----------------------------------------------------
+  # Copy first year of weight-at-age data and use that as the simulated year
+  om$wage_catch_df <- modify_wage_df(om$wage_catch_df, yr)
+  om$wage_survey_df <- modify_wage_df(om$wage_survey_df, yr)
+  om$wage_mid_df <- modify_wage_df(om$wage_mid_df, yr)
+  om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
+
+  # Recruitment updates -------------------------------------------------------
   if(zero_rdevs){
     r_dev <- 0
   }else{
@@ -88,8 +87,17 @@ update_om_data <- function(yr = NULL,
   }
   om$parameters$r_in[yr_ind, ] <- list(yr = yr, value = r_dev)
 
-  # Add movement to the new years
-  # If the first simulation year..
+  # Selectivity updates -------------------------------------------------------
+  om$flag_sel[yr_ind] <- FALSE
+  if(sel_change == 1){
+    om$flag_sel[yr_ind] <- TRUE
+  }else if(sel_change == 2){
+    om$flag_sel[yr_ind] <- TRUE
+    om$sel_by_yrs <- cbind(om$sel_by_yrs, rep(0, nrow(om$sel_by_yrs)))
+    names(om$sel_by_yrs)[ncol(om$sel_by_yrs)] <- yr
+  }
+
+  # Movement model updates ----------------------------------------------------
   if(yr > om$m_yr){
     move_max_tmp <- om$move_max[1] + c_increase
     om$move_out <- om$move_out - m_increase
@@ -107,7 +115,6 @@ update_om_data <- function(yr = NULL,
         (1 + exp(-om$move_slope * (om$ages - om$move_fifty)))
     }
   }
-  # For the standard model
   if(om$n_season == 4){
     # Recruits and 1 year olds don't move
     om$move_mat[, 1:2, , yr_ind] <- 0
@@ -119,15 +126,10 @@ update_om_data <- function(yr = NULL,
     om$move_mat[2, 3:om$n_age, 4, yr_ind] <- om$move_south
   }
 
-  # Selectivity modifications
-  om$flag_sel[yr_ind] <- FALSE
-  if(sel_change == 1){
-    om$flag_sel[yr_ind] <- TRUE
-  }else if(sel_change == 2){
-    om$flag_sel[yr_ind] <- TRUE
-    om$sel_by_yrs <- cbind(om$sel_by_yrs, rep(0, nrow(om$sel_by_yrs)))
-    names(om$sel_by_yrs)[ncol(om$sel_by_yrs)] <- yr
-  }
+  # Bias adjustment updates ---------------------------------------------------
+  om$b[yr_ind - 1] <- om$b_future
+  om$b[yr_ind] <- om$b_future
+
 
   om
 }

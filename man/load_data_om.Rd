@@ -41,9 +41,12 @@ load_data_om(
 \item{ss_model}{A model input/output list representing the SS model as returned from
 \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
 
-\item{yr_future}{Number of years to run the OM into the future}
+\item{yr_future}{Number of years to run the OM into the future in an OM-only run.
+If this is > 0, \code{n_sim_yrs} cannot be. This must be 0 when running from an MSE context.
+Use \code{n_sim_yrs} for that instead.}
 
-\item{n_sim_yrs}{Number of years to allocate for the movement matrix.}
+\item{n_sim_yrs}{Number of years to allocate OM objects for the future. If this is > 0,
+\code{yr_future} cannot be. All future values will be \code{NA} except for the movement matrix values.}
 
 \item{n_season}{Number of seasons}
 

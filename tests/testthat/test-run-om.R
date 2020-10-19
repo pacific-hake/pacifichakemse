@@ -10,7 +10,7 @@ ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir,
                                        load_extra_mcmc = FALSE,
                                        overwrite_ss_rds = TRUE)
 ss_model <- load_ss_model_data(ss_model_raw)
-om <- load_data_om(ss_model, n_sim_yrs = 5)
+om <- load_data_om(ss_model, yr_future = 5, rdev_seed =)
 
 if(file.exists("fselvals.csv")){
   unlink("fselvals.csv", force = TRUE)
@@ -62,14 +62,14 @@ test_that("SSBs are the same", {
   d <- data.frame(yr = om_0$yrs,
                   ssb = rowSums(om_0$ssb))
   d1 <- readRDS("ssb_out.rds")
-  expect_equivalent(d, d1, tolerance = 1e-9)
+  expect_true(identical(d, d1))
 })
 
 test_that("SSBs by space and season are the same", {
   ssb_all <- om_0$ssb_all
   ssb_all1 <- readRDS("ssb_all_out.rds")
   names(dimnames(ssb_all1))[1] <- "yrs"
-  expect_equal(ssb_all, ssb_all1)
+  expect_true(identical(ssb_all, ssb_all1))
 })
 
 test_that("Age proportions in season 1 are the same", {
@@ -81,7 +81,7 @@ test_that("Age proportions in season 1 are the same", {
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as_tibble(ac1)
 
-  expect_equivalent(ac, ac1)
+  expect_true(identical(ac, ac1))
 })
 
 test_that("Age proportions in season 2 are the same", {
@@ -93,7 +93,7 @@ test_that("Age proportions in season 2 are the same", {
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as_tibble(ac1)
 
-  expect_equivalent(ac, ac1, tolerance = 1e-1)
+  expect_true(identical(ac, ac1))
 })
 
 test_that("Age proportions in season 3 are the same", {
@@ -105,7 +105,7 @@ test_that("Age proportions in season 3 are the same", {
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as_tibble(ac1)
 
-  expect_equivalent(ac, ac1)
+  expect_true(identical(ac, ac1))
 })
 
 test_that("Age proportions in season 4 are the same", {
@@ -117,7 +117,7 @@ test_that("Age proportions in season 4 are the same", {
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as.data.frame(ac1)
 
-  expect_equal(ac, ac1)
+  expect_true(identical(ac, ac1))
 })
 
 test_that("Age in catch is the same", {
@@ -125,7 +125,8 @@ test_that("Age in catch is the same", {
   age_catch1 <- readRDS("catch_n_out.rds")
   names(dimnames(age_catch1))[1] <- "ages"
   names(dimnames(age_catch1))[2] <- "yrs"
-  expect_equal(age_catch, age_catch1)
+
+  expect_true(identical(age_catch, age_catch1))
 })
 
 test_that("Age in catch with weight-at-age applied is the same", {
@@ -133,7 +134,8 @@ test_that("Age in catch with weight-at-age applied is the same", {
   age_catch1 <- readRDS("catch_out.rds")
   names(dimnames(age_catch1))[1] <- "ages"
   names(dimnames(age_catch1))[2] <- "yrs"
-  expect_equal(age_catch, age_catch1)
+
+  expect_true(identical(age_catch, age_catch1))
 })
 
 test_that("Numbers at age by season and space are the same", {
@@ -141,28 +143,30 @@ test_that("Numbers at age by season and space are the same", {
   nage1 <- readRDS("n_save_age_out.rds")
   names(dimnames(nage1))[1] <- "ages"
   names(dimnames(nage1))[2] <- "yrs"
-  expect_equal(nage, nage1)
+
+  expect_true(identical(nage, nage1))
 })
 
 test_that("Recruitment values are the same", {
   r <- om_0$r_save
   r1 <- readRDS("r_save_out.rds")
-  #names(dimnames(age_catch1))[1] <- "ages"
-  #names(dimnames(age_catch1))[2] <- "yrs"
-  expect_equal(r, r1)
+
+  expect_true(identical(r, r1))
 })
 
 test_that("Vulnerability by season and space are the same", {
   v <- om_0$v_save
   v1 <- readRDS("v_save_out.rds")
   names(dimnames(v1))[1] <- "yrs"
-  expect_equal(v, v1)
+
+  expect_true(identical(v, v1))
 })
 
 test_that("Catch quota by season and space are the same", {
   cq <- om_0$catch_quota
   cq1 <- readRDS("catch_quota_out.rds")
   names(dimnames(cq1))[1] <- "yrs"
-  expect_equal(cq, cq1)
+
+  expect_true(identical(cq, cq1))
 })
 

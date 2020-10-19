@@ -4,6 +4,7 @@
 #' @param om list of parameters and life history values OM data. This list is
 #' what is returned by [load_data_om()]
 #' @param random_seed The random seed to use for this Operating Model
+#' @param n_sim_yrs The number of future years to run
 #' @param ... Arguments passed to [run_year_loop_om()]
 #'
 #' @return A list of model outputs
@@ -11,6 +12,7 @@
 #' @export
 run_om <- function(om = NULL,
                    random_seed = 123,
+                   n_sim_yrs = 0,
                    ...){
 
   verify_argument(om, "list")
@@ -20,6 +22,6 @@ run_om <- function(om = NULL,
 
   om <- init_agebased_model(om)
 
-  run_year_loop_om(om, ...)
+  run_year_loop_om(om, n_sim_yrs = n_sim_yrs, ...)
   # Catch.age[,idx]  <- (Fyrs/(Fyrs+m_yrs))*(1-exp(-(Fyrs+m_yrs)))*rowSums(N.save.age[,idx,,1])*wage$catch # Calculate the catch in kg
 }
