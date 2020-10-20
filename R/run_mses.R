@@ -36,6 +36,7 @@
 #' @importFrom stringr str_ends
 #' @importFrom clisymbols symbol
 #' @importFrom tictoc tic toc
+#' @importFrom crayon white
 #' @export
 run_mses <- function(n_runs = 10,
                      n_sim_yrs = NULL,
@@ -102,7 +103,7 @@ run_mses <- function(n_runs = 10,
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
   map2(fns, 1:length(fns), function(fn = .x, fn_ind = .y, ...){
-    cat(crayon::white("Scenario:", fn, "\n"))
+    cat(white("Scenario:", fn, "\n"))
     ls_save <- map(1:n_runs, function(run = .x, ...){
       # Prepare data for the OM. This includes initializing the movement model and selectivity
       om <- load_data_om(ss_model,
