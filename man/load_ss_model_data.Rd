@@ -5,7 +5,6 @@
 \title{Load the SS model input and output data needed by this package in correct format}
 \usage{
 load_ss_model_data(
-  ss_model,
   s_min = 1,
   s_max = 6,
   s_min_survey = 2,
@@ -17,8 +16,6 @@ load_ss_model_data(
 )
 }
 \arguments{
-\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}}
-
 \item{s_min}{Minimum age in fishery selectivity}
 
 \item{s_max}{Maximum age in fishery selectivity}
@@ -38,6 +35,8 @@ selectivity estimates, e.g. Used to fill in Canadian selectivity because the
 estimation model only estimates one selectivity which is used for the USA}
 
 \item{...}{Arguments to be passed to \code{\link[=load_ss_sel_parameters]{load_ss_sel_parameters()}}}
+
+\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}}
 }
 \value{
 A \link{list} with objects to be used throughout the package code

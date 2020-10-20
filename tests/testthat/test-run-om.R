@@ -5,11 +5,12 @@ ss_model_output_dir <- file.path(system.file(package = "pacifichakemse", mustWor
                                  "extdata", paste0("SS3_", ss_model_yr))
 ss_model_data_csv_dir <- file.path(system.file(package = "pacifichakemse", mustWork = TRUE),
                                    "extdata", "csv-data")
-ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir,
-                                       ss_model_data_csv_dir,
-                                       load_extra_mcmc = FALSE,
-                                       overwrite_ss_rds = TRUE)
-ss_model <- load_ss_model_data(ss_model_raw)
+
+ss_model <- load_ss_model_data(ss_model_output_dir = ss_model_output_dir,
+                               ss_model_data_csv_dir = ss_model_data_csv_dir,
+                               load_extra_mcmc = FALSE,
+                               overwrite_ss_rds = TRUE)
+
 om <- load_data_om(ss_model, yr_future = 5, rdev_seed = 42)
 
 if(file.exists("fselvals.csv")){

@@ -5,22 +5,22 @@
 \title{Create an rds file to hold an SS model's data and outputs.}
 \usage{
 create_rds_file(
-  model_dir = NULL,
-  data_csv_dir = NULL,
+  ss_model_output_dir = NULL,
+  ss_model_data_csv_dir = NULL,
   overwrite_ss_rds = FALSE,
   load_extra_mcmc = TRUE,
   ...
 )
 }
 \arguments{
-\item{model_dir}{Directory name of model to be loaded}
+\item{ss_model_output_dir}{Directory name of model to be loaded}
 
-\item{data_csv_dir}{Directory name where Hake assessment CSV data are located}
+\item{ss_model_data_csv_dir}{Directory name where Hake assessment CSV data are located}
 
 \item{overwrite_ss_rds}{Logical. Overwrite the RDS file if it exists}
 
 \item{load_extra_mcmc}{Logical. If TRUE, attempt to load the extra-MCMC
-runs from the model. The model_dir must contain an \code{extra-mcmc} directory}
+runs from the model. The ss_model_output_dir must contain an \code{extra-mcmc} directory}
 
 \item{...}{Absorb arguments destined for other functions}
 }

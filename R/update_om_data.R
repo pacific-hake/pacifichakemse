@@ -130,6 +130,5 @@ update_om_data <- function(yr = NULL,
   om$b[yr_ind - 1] <- om$b_future
   om$b[yr_ind] <- om$b_future
 
-
   om
 }

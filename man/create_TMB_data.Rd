@@ -7,11 +7,10 @@
 create_tmb_data(om = NULL, ss_model = NULL, yr = NULL)
 }
 \arguments{
-\item{om}{Operating model output returned by the \code{\link[=run_om]{run_om()}} function
-and loaded by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+\item{om}{Operating model output returned by the \code{\link[=run_om]{run_om()}} function}
 
-\item{ss_model}{A model input/output list representing the SS model as returned from
-\code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+\item{ss_model}{A model input/output list representing the SS model as found in
+the RDS file created by  \code{\link[=create_rds_file]{create_rds_file()}}}
 
 \item{yr}{The year to trim the data to on the end of the time series. Various objects
 are populated into the future and must be trimmed}

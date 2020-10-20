@@ -1,32 +1,34 @@
 #' Create an rds file to hold an SS model's data and outputs.
 #'
-#' @param model_dir Directory name of model to be loaded
-#' @param data_csv_dir Directory name where Hake assessment CSV data are located
+#' @param ss_model_output_dir Directory name of model to be loaded
+#' @param ss_model_data_csv_dir Directory name where Hake assessment CSV data are located
 #' @param overwrite_ss_rds Logical. Overwrite the RDS file if it exists
 #' @param load_extra_mcmc Logical. If TRUE, attempt to load the extra-MCMC
-#' runs from the model. The model_dir must contain an `extra-mcmc` directory
+#' runs from the model. The ss_model_output_dir must contain an `extra-mcmc` directory
 #' @param ... Absorb arguments destined for other functions
 #'
 #' @return [base::invisible()]
 #' @importFrom r4ss SSgetMCMC
 #' @export
-create_rds_file <- function(model_dir = NULL,
-                            data_csv_dir = NULL,
+create_rds_file <- function(ss_model_output_dir = NULL,
+                            ss_model_data_csv_dir = NULL,
                             overwrite_ss_rds = FALSE,
                             load_extra_mcmc = TRUE,
                             ...){
 
-  verify_argument(model_dir, "character", 1)
-  verify_argument(data_csv_dir, "character", 1)
+  verify_argument(ss_model_output_dir, "character", 1)
+  if(!dir.exists(ss_model_output_dir)){
+    stop("The directory name you set for the SS3 model output ",
+         "(ss_model_output_dir) does not exist:\n",
+         ss_model_output_dir,
+         call. = FALSE)
+  }
+  verify_argument(ss_model_data_csv_dir, "character", 1)
   verify_argument(overwrite_ss_rds, "logical", 1)
   verify_argument(load_extra_mcmc, "logical", 1)
 
-  if(!dir.exists(model_dir)){
-    stop("Error - the directory ", model_dir, " does not exist.\n",
-         "Fix the problem and try again.", call. = FALSE)
-  }
 
-  rds_file <- file.path(model_dir, paste0(basename(model_dir), ".rds"))
+  rds_file <- file.path(ss_model_output_dir, paste0(basename(ss_model_output_dir), ".rds"))
   # The RDS file will have the same name as the directory it is in
   if(file.exists(rds_file)){
     if(overwrite_ss_rds){
@@ -35,10 +37,10 @@ create_rds_file <- function(model_dir = NULL,
       return(rds_file)
     }
   }
-  cat(green("\nCreating a new RDS file in", model_dir, "\n"))
+  cat(green("\nCreating a new RDS file in", ss_model_output_dir, "\n"))
   # If this point is reached, no RDS file exists so it has to be built from scratch
-  model <- load_ss_files(model_dir)
-  model$mcmc_dir <- file.path(model_dir, "mcmc")
+  model <- load_ss_files(ss_model_output_dir)
+  model$mcmc_dir <- file.path(ss_model_output_dir, "mcmc")
   if(dir.exists(model$mcmc_dir)){
     cat(green("Loading MCMC posteriors\n"))
     mcmc_out <- SSgetMCMC(dir = model$mcmc_dir,
@@ -52,7 +54,7 @@ create_rds_file <- function(model_dir = NULL,
         red("MCMC posteriors not loaded (mcmc directory not found)\n"))
   }
   if(load_extra_mcmc){
-    model$extra_mcmc_dir <- file.path(model_dir, "extra-mcmc")
+    model$extra_mcmc_dir <- file.path(ss_model_output_dir, "extra-mcmc")
     if(dir.exists(model$extra_mcmc_dir)){
       cat(green("Loading extra MCMC outputs\n"))
       model$extra_mcmc <- fetch_extra_mcmc(model, ...)
@@ -64,98 +66,77 @@ create_rds_file <- function(model_dir = NULL,
     }
   }
   # Load the catch by country and season data
-  model$catch_country <- extract_catch_country(data_csv_dir)
-  model$catch_seas_country <- calc_catch_seas_country(data_csv_dir)
+  model$catch_country <- extract_catch_country(ss_model_data_csv_dir)
+  model$catch_seas_country <- calc_catch_seas_country(ss_model_data_csv_dir)
 
   saveRDS(model, file = rds_file)
   cat(green(symbol$tick),
       green("Created RDS file successfully\n"))
 
-rds_file
-}
-
-#' Load models from files created using [create_rds_file()]
-#'
-#' @details Load an SS3 model from an RDS file and return as a [list]
-#'
-#' @param model_dir A model directory name
-#' @param data_csv_dir A directory containing the csv data for the assessment
-#' @param ... Arguments to be passed to [create_rds_file()]
-#'
-#' @return A [list] of model inputs/outputs for the requested model
-#' @export
-load_ss_model_from_rds <- function(model_dir = NULL,
-                                   data_csv_dir = NULL,
-                                   ...){
-
-  verify_argument(model_dir, "character", 1)
-  verify_argument(data_csv_dir, "character", 1)
-
-  rds_file <- create_rds_file(model_dir, data_csv_dir, ...)
-  readRDS(rds_file)
+  rds_file
 }
 
 #' Load all the SS files for output and input, and return the model object
 #'
-#' @param model_dir Directory the model resides in
+#' @param ss_model_output_dir Directory the model resides in
 #' @param printstats Print info on each model loaded via [r4ss::SS_output()]
 #'
 #' @return A model object representing the output from the SS model
 #' @importFrom r4ss SS_output SS_readdat
 #' @export
-load_ss_files <- function(model_dir = NULL,
+load_ss_files <- function(ss_model_output_dir = NULL,
                           printstats = FALSE){
 
-  verify_argument(model_dir, "character", 1)
+  verify_argument(ss_model_output_dir, "character", 1)
   verify_argument(printstats, "logical", 1)
 
   # Load MPD results
   model <- tryCatch({
-    SS_output(dir = model_dir,
+    SS_output(dir = ss_model_output_dir,
               verbose = FALSE,
               printstats = printstats,
               covar = FALSE)
   }, error = function(e){
-    SS_output(dir = model_dir,
+    SS_output(dir = ss_model_output_dir,
               verbose = FALSE,
               printstats = printstats,
               covar = FALSE,
               forecast = FALSE)
   })
 
-  model$report <- readLines(file.path(model_dir, "Report.sso"))
+  model$report <- readLines(file.path(ss_model_output_dir, "Report.sso"))
 
   ## Load the data file and control file for the model
   ## Get the file whose name contains "_data.ss" and "_control.ss"
   ## If there is not exactly one of each, stop with error.
-  model_dir_listing <- dir(model_dir)
+  model_dir_listing <- dir(ss_model_output_dir)
   dat_fn_ind <- grep("_data.ss", model_dir_listing)
   ctl_fn_ind <- grep("_control.ss", model_dir_listing)
   par_fn_ind <- grep("ss.par", model_dir_listing)
   if(!length(dat_fn_ind)){
-    stop("Error in model ", model_dir,
+    stop("Error in model ", ss_model_output_dir,
          ", there is no data file. A data file is any file whose name contains the text _data.ss.\n\n",
          call. = FALSE)
   }
   if(length(dat_fn_ind) > 1){
-    stop("Error in model ", model_dir,
+    stop("Error in model ", ss_model_output_dir,
          ", there is more than one data file. A data file is any file whose name contains the text _data.ss.\n\n",
          call. = FALSE)
   }
   if(!length(ctl_fn_ind)){
-    stop("Error in model ", model_dir,
+    stop("Error in model ", ss_model_output_dir,
          ", there is no control file. A control file is any file whose name contains the text _control.ss.\n\n",
          call. = FALSE)
   }
   if(length(ctl_fn_ind) > 1){
-    stop("Error in model ", model_dir,
+    stop("Error in model ", ss_model_output_dir,
          ", there is more than one control file. A control file is any file whose name contains the text _control.ss.\n\n",
          call. = FALSE)
   }
-  dat_fn <- file.path(model_dir, model_dir_listing[dat_fn_ind])
-  ctl_fn <- file.path(model_dir, model_dir_listing[ctl_fn_ind])
-  par_fn <- file.path(model_dir, model_dir_listing[par_fn_ind])
-  model$path <- model_dir
+  dat_fn <- file.path(ss_model_output_dir, model_dir_listing[dat_fn_ind])
+  ctl_fn <- file.path(ss_model_output_dir, model_dir_listing[ctl_fn_ind])
+  par_fn <- file.path(ss_model_output_dir, model_dir_listing[par_fn_ind])
+  model$path <- ss_model_output_dir
   model$dat_file <- dat_fn
   model$dat <- SS_readdat(dat_fn, verbose = FALSE)
   model$ctl_file <- ctl_fn
@@ -398,8 +379,7 @@ calc_mcmc <- function(mcmc,
 #' @export
 #' @importFrom dplyr distinct
 #' @importFrom reshape2 dcast
-load_ss_model_data <- function(ss_model,
-                               s_min = 1,
+load_ss_model_data <- function(s_min = 1,
                                s_max = 6,
                                s_min_survey = 2,
                                s_max_survey = 6,
@@ -408,7 +388,6 @@ load_ss_model_data <- function(ss_model,
                                selex_fill_val = 1,
                                ...){
 
-  verify_argument(ss_model, "list")
   verify_argument(s_min, c("integer", "numeric"), 1)
   verify_argument(s_max, c("integer", "numeric"), 1)
   verify_argument(s_min_survey, c("integer", "numeric"), 1)
@@ -417,9 +396,12 @@ load_ss_model_data <- function(ss_model,
   verify_argument(n_space, c("integer", "numeric"), 1)
   verify_argument(selex_fill_val, c("integer", "numeric"), 1)
 
+  rds_file <- create_rds_file(...)
+  ss_model <- readRDS(rds_file)
+
   lst <- NULL
 
-  # Catch observations
+  # Catch observations --------------------------------------------------------
   lst$catch_obs <- ss_model$dat$catch %>%
     transmute(yr = year,
               value = catch) %>%
@@ -428,6 +410,8 @@ load_ss_model_data <- function(ss_model,
   lst$s_yr <- min(lst$catch_obs$yr)
   lst$m_yr <- max(lst$catch_obs$yr)
   yrs <- lst$s_yr:lst$m_yr
+  lst$catch_props_space_season <- ss_model$catch_seas_country
+  lst$catch_country <- ss_model$catch_country
 
   # TODO: This is to copy what is in the original MSE EXACTLY, from the table in the assessment.
   # It is not exactly the same as what is in the SS data file and overwrites that which is
@@ -452,7 +436,7 @@ load_ss_model_data <- function(ss_model,
   lst$catch_obs[lst$catch_obs$yr == 2008,]$value <-
     lst$catch_obs[lst$catch_obs$yr == 2008,]$value + 1
 
-  # Weight-at-age data
+  # Weight-at-age data --------------------------------------------------------
   waa <- ss_model$wtatage %>%
     as_tibble() %>%
     select(-c(Seas, Sex, Bio_Pattern, BirthSeas)) %>%
@@ -462,7 +446,7 @@ load_ss_model_data <- function(ss_model,
   lst$wage_mid_df <- format_wage_df(waa, -1)
   lst$wage_ssb_df <- format_wage_df(waa, -2)
 
-  # Maturity from first year only
+  # Maturity from first year only ---------------------------------------------
   lst$mat_sel <- lst$wage_ssb[1,]
 
   lst$parms_scalar <- load_ss_parameters(ss_model)
@@ -477,7 +461,8 @@ load_ss_model_data <- function(ss_model,
                                      m_yr = lst$m_yr,
                                      ...)
 
-  # Selectivity estimates - row names are the ages
+  # Selectivity estimates -----------------------------------------------------
+  # row names are the ages
   sels <- ss_model$parameters %>%
     filter(grepl("DEVadd", Label))
   sels_lab <- sels$Label
@@ -492,7 +477,7 @@ load_ss_model_data <- function(ss_model,
   lst$sel_by_yrs <- lst$sel_by_yrs %>%
     select(-age)
 
-  # Selectivity parameter estimates
+  # Selectivity parameter estimates -------------------------------------------
   sel_param_ests <- load_ss_sel_parameters(ss_model,
                                            s_min = s_min,
                                            s_max = s_max,
@@ -524,7 +509,7 @@ load_ss_model_data <- function(ss_model,
          nrow(lst$age_catch), " ages in the catch output.",
          call. = FALSE)
   }
-  # Survey index and error (log SD)
+  # Survey index and error (log SD) -------------------------------------------
   surv <- ss_model$dat$CPUE
   surv <- surv %>%
     filter(index == 2) %>%
@@ -535,7 +520,7 @@ load_ss_model_data <- function(ss_model,
   lst$survey <- surv %>% pull(value)
   lst$survey_err <- surv %>% pull(err)
 
-  # Sample sizes for fishery and survey
+  # Sample sizes for fishery and survey ---------------------------------------
   ss <- ss_model$agedbase %>%
     transmute(yr = Yr, fleet = Fleet, ss = Nsamp_adj) %>%
     distinct()
@@ -562,6 +547,7 @@ load_ss_model_data <- function(ss_model,
   lst$flag_survey <- ss_survey %>%
     pull(flag)
 
+  # Median population estimates -----------------------------------------------
   # The following is shown in a table in the assessment doc and made by the
   # make.median.posterior.table() function in the hake-assessment repository
   mc <- ss_model$mcmccalcs
@@ -602,14 +588,14 @@ load_ss_model_data <- function(ss_model,
   lst$med_popests[nrow_p, ncol_p - 1] <- NA
   lst$med_popests[nrow_p, ncol_p] <- NA
 
-  # Recruitment deviations
+  # Recruitment deviations ----------------------------------------------------
   lst$r_dev <- ss_model$recruitpars %>%
     as_tibble() %>%
     filter(grepl("RecrDev", type)) %>%
     filter(!grepl("^Late_", type)) %>%
     select(yr = Yr, value = Value)
 
-  # Bias ramp adjustment
+  # Bias ramp adjustment ------------------------------------------------------
   ctl <- ss_model$ctl
   b_breakpoints <- ss_model$breakpoints_for_bias_adjustment_ramp[1,] %>% as.numeric
   yb_1 <- b_breakpoints[1]
@@ -637,6 +623,7 @@ load_ss_model_data <- function(ss_model,
     }
   }
 
+  # Initial numbers-at-age ---------------------------------------------------
   init_n <- ss_model$report[grep("Early_InitAge", ss_model$report)]
   lst$init_n <- gsub("^.*Early_InitAge_[0-9]+ ([-]?[0-9\\.]+) .*$", "\\1", init_n) %>%
     rev %>%
@@ -647,8 +634,6 @@ load_ss_model_data <- function(ss_model,
   lst$dat_file <- ss_model$dat_file
   lst$dat <- ss_model$dat
 
-  lst$catch_props_space_season <- ss_model$catch_seas_country
-  lst$catch_country <- ss_model$catch_country
   cat(green(symbol$tick),
       green("Loaded SS data successfully\n"))
 
@@ -904,7 +889,8 @@ load_ss_parameters <- function(ss_model = NULL){
     filter(grepl("^ln\\(EffN_mult\\)_2$", Label)) %>%
     pull(Value)
 
-  # TODO: Remove these hardwired values. They are set up to match what was in the old code and are not correct
+  # TODO: Remove these hardwired values. They are set up to match what was in the
+  # old code for the 2018 SS model and are not correct
   lst$log_h <- -0.145394626195752
   lst$log_m_init <- -1.54379999585323
   lst$log_sd_surv <- -1.34655070780058
@@ -1114,68 +1100,74 @@ fetch_extra_mcmc <- function(model = NULL,
       green("Finished loading extra MCMC report files\n"))
   cat(green("Extracting outputs from extra MCMC report data frames\n"))
 
-  ## Make custom reps_ objects for each output. Only relevant portions of the report file will be passed to
-  ## the table-making map2() calls later (speeds up the map2() calls)
+  # Make custom reps_ objects for each output. Only relevant portions of the report file will be passed to
+  # the table-making map2() calls later (speeds up the map2() calls)
   rep_example <- reps[[which(!is.na(reps))[1]]]
   comprep_example <- compreps[[which(!is.na(compreps))[1]]]
-  ## Biomass
+
+  # Biomass -------------------------------------------------------------------
   bio_header_ind <- grep("^TIME_SERIES", rep_example) + 1
   bio_header_line <- rep_example[bio_header_ind]
   bio_header <- str_split(bio_header_line, " +")[[1]]
   bio_start_ind <- bio_header_ind + 1
   bio_end_ind <- grep("^SPR_series", rep_example) - 2
   reps_bio <- map(reps, ~{.x[bio_start_ind:bio_end_ind]})
-  # Likelihood
+
+  # Likelihood ----------------------------------------------------------------
   like_start_ind <- grep("^LIKELIHOOD", rep_example) + 1
   like_end_ind <- like_start_ind + 17
   reps_like <- map(reps, ~{.x[like_start_ind:like_end_ind]})
-  ## Selectivity
+
+  # Selectivity ---------------------------------------------------------------
   next_yr <- model$endyr + 1
   sel_header_ind <- grep("Factor Fleet Yr Seas", rep_example)
   sel_header_line <- rep_example[sel_header_ind]
   sel_header <- str_split(sel_header_line, " +")[[1]]
   sel_ind <- grep(paste0(next_yr, "_1Asel"), rep_example)
   reps_sel <- map(reps, ~{.x[sel_ind]})
-  ## Selectivity * Weight
-  selwt_ind <- grep(paste0(next_yr, "_1_sel\\*wt"), rep_example)
-  reps_selwt <- map(reps, ~{.x[selwt_ind]})
-  ## Natage
-  natage_header_ind <- grep("NUMBERS_AT_AGE_Annual_2 With_fishery", rep_example) + 1
-  natage_header <- str_split(rep_example[natage_header_ind], " +")[[1]]
-  natage_start_ind <- natage_header_ind + 1
-  natage_end_ind <- grep("Z_AT_AGE_Annual_2 With_fishery", rep_example) - 2
-  reps_natage <- map(reps, ~{.x[natage_start_ind:natage_end_ind]})
-  ## Q
-  q_header_ind <- grep("^INDEX_2", rep_example) + 1
-  q_header <- str_split(rep_example[q_header_ind], " +")[[1]]
-  q_start_ind <- q_header_ind + 1
-  ncpue <- nrow(model$dat$CPUE)
-  q_end_ind <- q_start_ind + ncpue - 1
-  reps_q <- map(reps, ~{.x[q_start_ind:q_end_ind]})
-  ## Comp tables
-  comp_header_ind <- grep("Composition_Database", comprep_example) + 1
-  comp_header <- str_split(comprep_example[comp_header_ind], " +")[[1]]
-  comp_start_ind <- comp_header_ind + 1
-  comp_end_ind <- grep("End_comp_data", comprep_example) - 1
-  reps_comp <- map(compreps, ~{.x[comp_start_ind:comp_end_ind]})
-
   sel <- extract_rep_table(reps_sel, sel_header) %>%
     select(-c(2, 3, 5, 6, 7, 8)) %>%
     map_df(as.numeric) %>%
     filter(Yr == next_yr) %>%
     select(-c(Iter, Yr))
+
+  # Selectivity * Weight ------------------------------------------------------
+  selwt_ind <- grep(paste0(next_yr, "_1_sel\\*wt"), rep_example)
+  reps_selwt <- map(reps, ~{.x[selwt_ind]})
   selwt <- extract_rep_table(reps_selwt, sel_header) %>%
     select(-c(2, 3, 5, 6, 7, 8)) %>%
     map_df(as.numeric) %>%
     filter(Yr == next_yr) %>%
     select(-c(Iter, Yr))
+
+  # Numbers-at-age ------------------------------------------------------------
+  natage_header_ind <- grep("NUMBERS_AT_AGE_Annual_2 With_fishery", rep_example) + 1
+  natage_header <- str_split(rep_example[natage_header_ind], " +")[[1]]
+  natage_start_ind <- natage_header_ind + 1
+  natage_end_ind <- grep("Z_AT_AGE_Annual_2 With_fishery", rep_example) - 2
+  reps_natage <- map(reps, ~{.x[natage_start_ind:natage_end_ind]})
   natage <- extract_rep_table(reps_natage, natage_header) %>%
     select(-c(2, 3)) %>%
     map_df(as.numeric) %>%
     filter(Yr == next_yr) %>%
     select(-c(Iter, Yr))
 
-  ## Apply selectivity to numbers-at-age
+  # Q -------------------------------------------------------------------------
+  q_header_ind <- grep("^INDEX_2", rep_example) + 1
+  q_header <- str_split(rep_example[q_header_ind], " +")[[1]]
+  q_start_ind <- q_header_ind + 1
+  ncpue <- nrow(model$dat$CPUE)
+  q_end_ind <- q_start_ind + ncpue - 1
+  reps_q <- map(reps, ~{.x[q_start_ind:q_end_ind]})
+
+  # Comp tables ---------------------------------------------------------------
+  comp_header_ind <- grep("Composition_Database", comprep_example) + 1
+  comp_header <- str_split(comprep_example[comp_header_ind], " +")[[1]]
+  comp_start_ind <- comp_header_ind + 1
+  comp_end_ind <- grep("End_comp_data", comprep_example) - 1
+  reps_comp <- map(compreps, ~{.x[comp_start_ind:comp_end_ind]})
+
+  # Apply selectivity to numbers-at-age ---------------------------------------
   natsel <- natage * sel
   natselwt <- natage * selwt
   extra_mcmc$natsel.prop <- natsel %>%
@@ -1187,7 +1179,7 @@ fetch_extra_mcmc <- function(model = NULL,
     mutate_at(.vars = vars(-rsum), .funs = ~{.x / rsum}) %>%
     select(-rsum)
 
-  # CPUE table and values (Q)
+  # Extra-mcmc CPUE table and values (Q) --------------------------------------
   q <- extract_rep_table(reps_q, q_header) %>%
     select(Iter, Exp, Calc_Q)
   iter <- unique(q$Iter)
@@ -1216,7 +1208,8 @@ fetch_extra_mcmc <- function(model = NULL,
   extra_mcmc$cpue.median <- as.numeric(cpue[2,])
   extra_mcmc$cpue.0.975 <- as.numeric(cpue[3,])
 
-  ## Add info on distribution of total biomass to existing time series data frame
+  # Extra-mcmc timeseries data ------------------------------------------------
+  # Add info on distribution of total biomass to existing time series data frame
   timeseries <- extract_rep_table(reps_bio, bio_header) %>%
     select(Iter, Bio_all, Bio_smry)
   iter <- unique(timeseries$Iter)
@@ -1251,6 +1244,7 @@ fetch_extra_mcmc <- function(model = NULL,
   extra_mcmc$timeseries$Bio_smry.median <- as.numeric(Bio_smry[2,])
   extra_mcmc$timeseries$Bio_smry.0.975 <- as.numeric(Bio_smry[3,])
 
+  # Extra-mcmc Pearson residuals ----------------------------------------------
   comp <- extract_rep_table(reps_comp, comp_header)
   ## median and quantiles of expected values and Pearsons
   iter <- unique(comp$Iter)

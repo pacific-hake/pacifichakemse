@@ -1,8 +1,5 @@
-#' Run/Iterate the Pacific hake MSE
+#' Run a single MSE scenario
 #'
-#' @param results_dir Directory in which the OM output will be stored
-#' @param file_name The name of the file in which the MSE output was stored. This will be prepended with 'om_'
-#' for the OM used in this MSE. The actual MSE results are stored by the function calling this one, [run_mses()]
 #' @param om List as output by [load_data_om()]
 #' @param random_seed Seed for running the OM if it needs to be run (if `om_output` is `NULL`)
 #' @param n_sim_yrs Number of years to simulate
@@ -14,26 +11,22 @@
 #' @param ss_model Output from [load_ss_model_data()]
 #' @param ... Absorb arguments intended for other functions
 #'
-#' @return A list of Catch, Catch.quota, SSB, SSB.mid, SSB.hes, Survey.om
-#' F0, parms, N, converge, ams, amc, V
+#' @return A list of length 3: The MSE output, the OM output, and the EM output
+
 #' @importFrom TMB sdreport MakeADFun
 #' @importFrom stats rnorm nlminb runif predict lm median optim setNames
 #' @importFrom utils read.csv read.table
 #' @export
-run_multiple_MSEs <- function(results_dir = NULL,
-                              file_name = NULL,
-                              om = NULL,
-                              random_seed = NULL,
-                              n_sim_yrs = NULL,
-                              tac = NULL,
-                              c_increase = 0,
-                              m_increase = 0,
-                              sel_change = 0,
-                              f_sim = NULL,
-                              ss_model = NULL,
-                              ...){
-  verify_argument(results_dir, "character", 1)
-  verify_argument(file_name, "character", 1)
+run_mse_scenario <- function(om = NULL,
+                             random_seed = NULL,
+                             n_sim_yrs = NULL,
+                             tac = NULL,
+                             c_increase = 0,
+                             m_increase = 0,
+                             sel_change = 0,
+                             f_sim = NULL,
+                             ...){
+
   verify_argument(om, "list")
   verify_argument(random_seed, c("integer", "numeric"), 1)
   verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
@@ -96,7 +89,7 @@ run_multiple_MSEs <- function(results_dir = NULL,
     #   om$wage_mid_df <- modify_wage_df(om$wage_mid_df, yr)
     #   om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
     # }
-    lst_tmb <- create_tmb_data(om_output, ss_model, yr)
+    lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
     #browser()
     if(yr >= yr_start){
       lst_tmb$params$f_0[length(lst_tmb$params$f_0)] <- 0.2

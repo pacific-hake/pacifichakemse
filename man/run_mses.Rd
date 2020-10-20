@@ -5,7 +5,6 @@
 \title{Run the MSE for a number of runs for any scenarios}
 \usage{
 run_mses(
-  ss_model_output_dir = NULL,
   n_runs = 10,
   n_sim_yrs = NULL,
   fns = NULL,
@@ -23,9 +22,6 @@ run_mses(
 )
 }
 \arguments{
-\item{ss_model_output_dir}{A directory which contains SS3 model run output. Used to import
-estimates from the SS3 model}
-
 \item{n_runs}{Then number of runs to do for each simulation}
 
 \item{n_sim_yrs}{The number of years to simulate into the future}
@@ -35,16 +31,16 @@ estimates from the SS3 model}
 \item{plot_names}{A vector of strings to use for the scenarios later when plotting. Must either be
 \code{NULL} or the same length as \code{fns}}
 
-\item{tacs}{A vector of TAC values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{tacs}{A vector of TAC values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{c_increases}{Increase in max movement. A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{c_increases}{Increase in max movement. A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{m_increases}{Decrease of spawners returning south. A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{m_increases}{Decrease of spawners returning south. A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{sel_changes}{A vector of values to be passed to the \code{\link[=run_multiple_MSEs]{run_multiple_MSEs()}} function, in the same
+\item{sel_changes}{A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
 \item{n_surveys}{The number of surveys for each run. This must be a vector of the same length as \code{fns} or \code{NULL}.
@@ -60,6 +56,9 @@ three items, \code{nseason}, \code{nspace}, and \code{bfuture}. If NULL, biasadj
 \item{results_dir}{The results directory}
 
 \item{...}{Arguments passed to \code{\link[=load_data_om]{load_data_om()}}}
+
+\item{ss_model_output_dir}{A directory which contains SS3 model run output. Used to import
+estimates from the SS3 model}
 }
 \value{
 Nothing

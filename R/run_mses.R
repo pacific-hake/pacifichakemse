@@ -10,13 +10,13 @@
 #' @param fns A vector of file names for the scenarios (.rds files). .rds extension is optional
 #' @param plot_names A vector of strings to use for the scenarios later when plotting. Must either be
 #' `NULL` or the same length as `fns`
-#' @param tacs A vector of TAC values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param tacs A vector of TAC values to be passed to the [run_mse_scenario()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param c_increases Increase in max movement. A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param c_increases Increase in max movement. A vector of values to be passed to the [run_mse_scenario()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param m_increases Decrease of spawners returning south. A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param m_increases Decrease of spawners returning south. A vector of values to be passed to the [run_mse_scenario()] function, in the same
 #' order as the `fns` file names, or a single value
-#' @param sel_changes A vector of values to be passed to the [run_multiple_MSEs()] function, in the same
+#' @param sel_changes A vector of values to be passed to the [run_mse_scenario()] function, in the same
 #' order as the `fns` file names, or a single value
 #' @param n_surveys The number of surveys for each run. This must be a vector of the same length as `fns` or `NULL`.
 #' If `NULL`, 2 will be used for every scenario
@@ -37,8 +37,7 @@
 #' @importFrom clisymbols symbol
 #' @importFrom tictoc tic toc
 #' @export
-run_mses <- function(ss_model_output_dir = NULL,
-                     n_runs = 10,
+run_mses <- function(n_runs = 10,
                      n_sim_yrs = NULL,
                      fns = NULL,
                      plot_names = NULL,
@@ -53,34 +52,13 @@ run_mses <- function(ss_model_output_dir = NULL,
                      results_dir = here("results", "default"),
                      ...){
 
-  verify_argument(ss_model_output_dir, "character", 1)
-  if(!dir.exists(ss_model_output_dir)){
-    stop("The directory name you set for the SS3 model output ",
-         "(ss_model_output_dir) does not exist:\n",
-    ss_model_output_dir,
-    call. = FALSE)
-  }
   verify_argument(fns, chk_len = length(plot_names))
   verify_argument(tacs, "list")
   verify_argument(c_increases, c("integer", "numeric"))
   verify_argument(m_increases, c("integer", "numeric"))
   verify_argument(sel_changes, c("integer", "numeric"))
-  verify_argument(n_surveys, c("integer", "numeric"), 1)
-
-  stopifnot(length(tacs) == 1 | length(tacs) == length(fns))
-  stopifnot(length(c_increases) == 1 | length(c_increases) == length(fns))
-  stopifnot(length(m_increases) == 1 | length(m_increases) == length(fns))
-  stopifnot(length(sel_changes) == 1 | length(sel_changes) == length(fns))
+  verify_argument(n_surveys, c("integer", "numeric"))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
-
-  tic()
-  # Seed for the random recruitment deviations: rnorm(n = 1, mean = 0, sd = exp(df$rdev_sd))
-  # found in update_om_data.R. This is also the seed used to set up the random seeds for each
-  # run (search below for "seeds")
-  set.seed(random_seed)
-  # Each run has its own random seed, with those seeds being chosen from
-  # the base seed which is set at the beginning of this function
-  seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
 
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
@@ -94,67 +72,71 @@ run_mses <- function(ss_model_output_dir = NULL,
     dir.create(results_dir)
   }
 
+  fill_vec <- function(d){
+    stopifnot(length(d) == 1 | length(d) == length(fns))
+    if(length(d) == 1 && length(fns) > 1){
+      d <- rep(d, length(fns))
+    }
+    d
+  }
+  c_increases <- fill_vec(c_increases)
+  m_increases <- fill_vec(m_increases)
+  sel_changes <- fill_vec(sel_changes)
+  n_surveys <- fill_vec(n_surveys)
+  tacs <- fill_vec(tacs)
+
+  tic()
+  # Seed for the random recruitment deviations (search rnorm in update_om_data.R) and
+  # survey error (search rnorm in run_year_loop.R).
+  # This is also the seed used to set up the random seeds for each run:
+  set.seed(random_seed)
+  seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
+
   # Load the raw SS model inputs and outputs using the r4ss package and the same
   # methods used in the `hake-assessment` package
-  ss_model_raw <- load_ss_model_from_rds(ss_model_output_dir, ...)
-  # create objects from the raw SS model inputs and outputs and
+  # Create objects from the raw SS model inputs and outputs and
   # only include those in this list. To add new SS model outputs,
   # modify the `load_ss_model_data()` function
-  ss_model <- load_ss_model_data(ss_model_raw, ...)
+  ss_model <- load_ss_model_data(...)
+
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
-  # Prepare data for the OM. This includes initializing the movement model and selectivity
-  om <- load_data_om(ss_model,
-                     n_sim_yrs = n_sim_yrs,
-                     n_survey = n_surveys,
-                     ...)
-
-  map2(fns, 1:length(fns), function(.x, .y, ...){
-    cat(crayon::white("Scenario:", .x, "\n"))
+  map2(fns, 1:length(fns), function(fn = .x, fn_ind = .y, ...){
+    cat(crayon::white("Scenario:", fn, "\n"))
     ls_save <- map(1:n_runs, function(run = .x, ...){
-      if(length(sel_changes) != 1 || sel_changes != 0){
-        om <- load_data_om(ss_model,
-                           n_sim_yrs = n_sim_yrs,
-                           n_survey = n_surveys,
-                           selectivity_change = ifelse(length(sel_changes) == 1,
-                                                       sel_changes,
-                                                       sel_changes[.y]),
-                           ...)
-      }
-      if(is.null(n_surveys)){
-        om$n_survey <- 2
-      }else{
-        om$n_survey <- n_surveys
-      }
+      # Prepare data for the OM. This includes initializing the movement model and selectivity
+      om <- load_data_om(ss_model,
+                         n_sim_yrs = n_sim_yrs,
+                         n_survey = n_surveys[fn_ind],
+                         selectivity_change = sel_changes[fn_ind],
+                         ...)
+      browser()
       if(is.null(multiple_season_data)){
         cat(green("Run #", run, "\n"))
-        tmp <- run_multiple_MSEs(
-          results_dir = results_dir, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
-          file_name = .x, # For storing OM data only, MSE output stored using saveRDS() call at end of this map()
-          om = om,
-          random_seed = seeds[run],
-          n_sim_yrs = n_sim_yrs,
-          tac = if(length(tacs) == 1) tacs else tacs[[.y]],
-          n_survey = n_surveys,
-          sel_change = ifelse(length(sel_changes) == 1, sel_changes, sel_changes[.y]),
-          c_increase = ifelse(length(c_increases) == 1, c_increases, c_increases[.y]),
-          m_increase = ifelse(length(m_increases) == 1, m_increases, m_increases[.y]),
-          ss_model = ss_model,
-          ...)
+        tmp <- run_mse_scenario(om = om,
+                                random_seed = seeds[run],
+                                n_sim_yrs = n_sim_yrs,
+                                tac = if(length(tacs) == 1) tacs else tacs[[fn_ind]],
+                                n_survey = n_surveys,
+                                sel_change = sel_changes[fn_ind],
+                                c_increase = c_increases[fn_ind],
+                                m_increase = m_increases[fn_ind],
+                                ss_model = ss_model,
+                                ...)
       }else{
         # TODO: Make sure this works. It hasn't been tested at all
         dfs <- map(multiple_season_data, ~{
-          do.call(load_data_om, as.list(.x))
+          do.call(load_data_om, as.list(fn))
         })
         tmp <- run_multiple_OMs(n_sim_yrs = n_sim_yrs,
-                                df = dfs[[.y]],
+                                df = dfs[[fn_ind]],
                                 catch_in = 0,
                                 ...)
       }
       if(is.list(tmp)) tmp else NA
     }, ...)
-    attr(ls_save, "plotname") <- plot_names[.y]
-    saveRDS(ls_save, file = file.path(results_dir, .x))
+    attr(ls_save, "plotname") <- plot_names[fn_ind]
+    saveRDS(ls_save, file = file.path(results_dir, fn))
   }, ...)
   toc()
 }

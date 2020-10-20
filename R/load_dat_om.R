@@ -1,7 +1,7 @@
 #' Prepare the data for the operating model
 #'
-#' @param ss_model A model input/output list representing the SS model as returned from
-#' [load_ss_model_from_rds()]
+#' @param ss_model A model input/output list representing the SS model as as found in
+#' the RDS file created by  [create_rds_file()]
 #' @param yr_future Number of years to run the OM into the future in an OM-only run.
 #' If this is > 0, `n_sim_yrs` cannot be. This must be 0 when running from an MSE context.
 #' Use `n_sim_yrs` for that instead.
@@ -125,8 +125,7 @@ load_data_om <- function(ss_model = NULL,
   # is going to be run in OM-only mode
   populate_future <- ifelse(yr_future > 0, TRUE, FALSE)
 
-  # ---------------------------------------------------------------------------
-  # Year in OM
+  # Years in OM ---------------------------------------------------------------
   lst$s_yr <- ss_model$s_yr
   lst$m_yr <- ss_model$m_yr
   lst$n_future_yrs <- ifelse(yr_future == 0, n_sim_yrs, yr_future)
@@ -136,16 +135,14 @@ load_data_om <- function(ss_model = NULL,
   lst$yr_future <- yr_future
   lst$n_yr <- length(lst$yrs)
 
-  # ---------------------------------------------------------------------------
-  # Seasons and Space in OM
+  # Seasons and Space in OM ---------------------------------------------------
   lst$n_season <- n_season
   lst$season_names <- season_names
   lst$n_space <- n_space
   lst$space_names <- space_names
   lst$t_end <- lst$n_yr * lst$n_season
 
-  # ---------------------------------------------------------------------------
-  # Ages in OM
+  # Ages in OM ----------------------------------------------------------------
   lst$ages <- ages
   lst$age_names <- age_names
   lst$age_max_age <- nrow(ss_model$age_survey)
@@ -156,8 +153,7 @@ load_data_om <- function(ss_model = NULL,
   lst$n_age <- length(ages)
   lst$m_sel <- rep(1, lst$n_age)
 
-  # ---------------------------------------------------------------------------
-  # Selectivity in OM
+  # Selectivity in OM ---------------------------------------------------------
   lst$sel_change_yr <- sel_change_yr
   lst$sel_idx <- which(lst$yrs == lst$sel_change_yr)
   lst$yr_sel <- length(lst$sel_change_yr:lst$m_yr)
@@ -167,14 +163,12 @@ load_data_om <- function(ss_model = NULL,
   lst$flag_sel <- rep(FALSE, lst$n_yr)
   lst$flag_sel[which(lst$yrs == lst$sel_change_yr):which(lst$yrs == lst$m_yr)] <- TRUE
 
-  # ---------------------------------------------------------------------------
-  # Maturity in OM
+  # Maturity in OM ------------------------------------------------------------
   lst$mat_sel <- ss_model$mat_sel
   lst$recruit_mat <- rep(1, lst$n_space)
   names(lst$recruit_mat) <- lst$space_names
 
-  # ---------------------------------------------------------------------------
-  # Parameters in OM
+  # Parameters in OM ----------------------------------------------------------
   lst$rdev_sd <- log(rdev_sd)
   lst$log_q <- log(1.14135)
   lst$log_sd_catch <- log(0.01)
@@ -185,13 +179,11 @@ load_data_om <- function(ss_model = NULL,
   lst$log_phi_survey <- log_phi_survey
   lst$r_mul <- ifelse(lst$n_space == 2, 1.1, 1)
 
-  # ---------------------------------------------------------------------------
-  # Bias adjustments in OM
+  # Bias adjustments in OM ----------------------------------------------------
   lst$b <- ss_model$b
   lst$b_future <- b_future
 
-  # ---------------------------------------------------------------------------
-  # Survey in OM
+  # Survey in OM --------------------------------------------------------------
   lst$survey <- ss_model$survey
   lst$survey_err <- ss_model$survey_err
   # TODO: Remove these hardwired values. They are here to match the former MSE
@@ -239,8 +231,7 @@ load_data_om <- function(ss_model = NULL,
     lst$catch_props_space_season[1:lst$n_space,] <- 1 / lst$n_season
   }
 
-  # ---------------------------------------------------------------------------
-  # Catch in OM
+  # Catch in OM ---------------------------------------------------------------
   lst$flag_catch <- ss_model$flag_catch
   lst$age_catch <- ss_model$age_catch
   lst$ss_catch <- ss_model$ss_catch
@@ -281,8 +272,7 @@ load_data_om <- function(ss_model = NULL,
       bind_rows(new_df)
   }
 
-  # ---------------------------------------------------------------------------
-  # Weight-at-age in OM
+  # Weight-at-age in OM -------------------------------------------------------
   lst$wage_catch_df <- ss_model$wage_catch_df
   lst$wage_survey_df <- ss_model$wage_survey_df
   lst$wage_ssb_df <- ss_model$wage_ssb_df
@@ -309,16 +299,14 @@ load_data_om <- function(ss_model = NULL,
   lst$wage_mid_df <- add_yrs(lst$wage_mid_df)
 
 
-  # ---------------------------------------------------------------------------
-  # Create all empty arrays and objects to hold the OM output
+  # Create empty objects for OM------------------------------------------------
   lst <- append(lst, setup_blank_om_objects(yrs = lst$yrs,
                                             ages = lst$ages,
                                             max_surv_age = lst$age_max_age,
                                             n_space = lst$n_space,
                                             n_season = lst$n_season))
 
-  # ---------------------------------------------------------------------------
-  # Movement in OM
+  # Movement in OM ------------------------------------------------------------
   lst$move_init <- move_init
   if(is.null(lst$move_init)){
     # Note: lst$n_space must be 2 due to error check above. This assumes
@@ -361,8 +349,7 @@ load_data_om <- function(ss_model = NULL,
   lst$f_space <- move_mat_obj$f_space
   names(lst$f_space) <- lst$space_names
 
-  # ---------------------------------------------------------------------------
-  # Recruitment deviations in future years of OM
+  # Recdevs in future years of OM ---------------------------------------------
   r_devs <- rep(NA, lst$n_future_yrs)
   if(populate_future){
     if(zero_rdevs){
@@ -389,8 +376,7 @@ load_data_om <- function(ss_model = NULL,
   }
   lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
 
-  # ---------------------------------------------------------------------------
-  # Initial Numbers-at-age in OM
+  # Initial Numbers-at-age in OM ----------------------------------------------
   lst$init_n <- ss_model$init_n %>%
     as.data.frame() %>%
     as_tibble() %>%
@@ -398,8 +384,7 @@ load_data_om <- function(ss_model = NULL,
     select(age, everything()) %>%
     rename(value = 2)
 
-  # ---------------------------------------------------------------------------
-  # Parameters to initialize the OM with
+  # Parameters to initialize the OM -------------------------------------------
   lst$parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(lst$r_mul),
                          log_h = ss_model$parms_scalar$log_h,
                          log_m_init = ss_model$parms_scalar$log_m_init,
@@ -411,6 +396,7 @@ load_data_om <- function(ss_model = NULL,
                          init_n = lst$init_n,
                          r_in = lst$r_dev)
 
+  # Future year modifications -------------------------------------------------
   if(lst$n_future_yrs > 1){
     # Assumes survey is in every nth year only into the future
     idx_future <- rep(FALSE, length(lst$future_yrs))

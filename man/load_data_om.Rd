@@ -38,8 +38,8 @@ load_data_om(
 )
 }
 \arguments{
-\item{ss_model}{A model input/output list representing the SS model as returned from
-\code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+\item{ss_model}{A model input/output list representing the SS model as as found in
+the RDS file created by  \code{\link[=create_rds_file]{create_rds_file()}}}
 
 \item{yr_future}{Number of years to run the OM into the future in an OM-only run.
 If this is > 0, \code{n_sim_yrs} cannot be. This must be 0 when running from an MSE context.

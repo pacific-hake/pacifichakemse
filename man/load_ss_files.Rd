@@ -4,10 +4,10 @@
 \alias{load_ss_files}
 \title{Load all the SS files for output and input, and return the model object}
 \usage{
-load_ss_files(model_dir = NULL, printstats = FALSE)
+load_ss_files(ss_model_output_dir = NULL, printstats = FALSE)
 }
 \arguments{
-\item{model_dir}{Directory the model resides in}
+\item{ss_model_output_dir}{Directory the model resides in}
 
 \item{printstats}{Print info on each model loaded via \code{\link[r4ss:SS_output]{r4ss::SS_output()}}}
 }
