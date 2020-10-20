@@ -28,14 +28,17 @@ run_season_loop_om <- function(om,
   verify_argument(om, "list")
 
   mat_sel <- om$mat_sel %>% select(-Yr)
+  # Begin season loop ---------------------------------------------------------
   map(seq_len(om$n_season), function(season = .x){
     if(verbose){
       cat(red("Season:", season, "\n"))
     }
+    # Begin space loop --------------------------------------------------------
     map(seq_len(om$n_space), function(space = .x){
       if(verbose){
         cat(yellow("      Space:", space, "\n"))
       }
+      # Calculate selectivity -------------------------------------------------
       p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == space,]
       p_sel_yrs <- om$sel_by_yrs
       if(om$flag_sel[yr_ind]){
@@ -63,6 +66,8 @@ run_season_loop_om <- function(om,
                           p_sel,
                           om$s_min,
                           om$s_max)
+
+      # Write selectivity testing file ----------------------------------------
       if(testing){
         if(yr == 1966 && season == 1 && space == 1){
           header <- c("Year", "Season", "Space", "Fsel", paste0("fsel", 1:(length(f_sel) - 1)))
@@ -84,7 +89,8 @@ run_season_loop_om <- function(om,
       }else{
         catch_space <- om$catch_obs[yr_ind,]$value
       }
-      # Catch distribution in the yrs
+
+      # Calculate catch distribution ------------------------------------------
       e_tmp <- catch_space * om$catch_props_space_season[space, season] %>% pull
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
@@ -112,6 +118,7 @@ run_season_loop_om <- function(om,
       })
 
 #if(yr_ind == 54 & season == 4 & space == 2) browser()
+      # Calculate F based on catch distribution -------------------------------
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,
                      m_season = m_season,
@@ -131,6 +138,8 @@ run_season_loop_om <- function(om,
       om$f_season_save[, yr_ind, space, season] <<- f_season
       z <- m_season + f_season
       om$z_save[, yr_ind, space, season] <<- z
+
+      # Calculate numbers-at-age with movement --------------------------------
       # This is used to deal with movement from one space to another.
       # space is the area fish are in and space_idx is the area the fish
       # are coming in from. These indexes are used in the numbers-at-age
@@ -177,6 +186,8 @@ run_season_loop_om <- function(om,
 
         #if(yr >= 2019) browser()
       }
+
+      # Calculate age-comps ---------------------------------------------------
       om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] /
         sum(om$n_save_age[, yr_ind, space, season])
       if(yr_ind == 1 && season == 1){
@@ -188,13 +199,17 @@ run_season_loop_om <- function(om,
       om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
 #if(yr_ind == 54 & season == 4 & space == 2) browser()
   #if(yr_ind == 55) browser()
+      # Calculate catch quota -------------------------------------------------
       if(om$catch_quota[yr_ind, space, season] > 0){
         if((sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season]) > 1.1){
-          stop("F estimation overshoots more than 10% in year ", yr, ", season ", season,
+          stop("F estimation overshoots more than 10% in year ", yr, ", season ", season, "space ", space,
                call. = FALSE)
         }
       }
     })
+    # End space loop ----------------------------------------------------------
   })
+  # End season loop -----------------------------------------------------------
+
   om
 }

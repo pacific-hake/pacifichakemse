@@ -13,6 +13,7 @@ run_year_loop_om <- function(om = NULL,
   verify_argument(om, "list")
   verify_argument(verbose, "logical", 1)
 
+  # Begin year loop -----------------------------------------------------------
   map(om$yrs, function(yr = .x){
     if(verbose){
       cat(green(paste0(yr, ":\n")))
@@ -26,6 +27,7 @@ run_year_loop_om <- function(om = NULL,
     # M is distributed throughout the yrs
     m_season <- m_yrs / om$n_season
 
+    # Setup initial recruitment -----------------------------------------------
     init_rec <- map_dbl(seq_len(om$n_space), function(space = .x){
       # Recruitment only in season 1
       if(yr_ind == 1){
@@ -47,15 +49,18 @@ run_year_loop_om <- function(om = NULL,
 
     om$r_save[yr_ind, ] <<- init_rec
 #if(yr >= 2019) browser()
-    # -------------------------------------------------------------------------
+    # Run season loop code ----------------------------------------------------
     om <<- run_season_loop_om(om = om,
                               yr = yr,
                               yr_ind = yr_ind,
                               m_season = m_season,
                               verbose = verbose,
                               ...)
+    # Return from season loop -------------------------------------------------
+
     #if(yr >= 2019) browser()
 
+    # Calculate catch-age -----------------------------------------------------
     if(om$n_season > 1){
       om$catch_age[, yr_ind] <<- apply(om$catch_n_save_age[, yr_ind,,],
                                        MARGIN = 1,
@@ -66,7 +71,6 @@ run_year_loop_om <- function(om = NULL,
                                          FUN = sum)
       om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
 #if(yr >= 2019) browser()
-
     }else{
       if(om$n_space == 1){
         om$catch_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
@@ -79,19 +83,18 @@ run_year_loop_om <- function(om = NULL,
       }
     }
 
+    # Calculate survey true biomass -------------------------------------------
     m_surv_mul <- 0
     if(om$n_season == 1){
       m_surv_mul <- 0.5
     }
-
-    # Calculate survey biomass for all spaces
     om$survey_true[,yr_ind] <<- map_dbl(seq_len(om$n_space), ~{
       sum(om$n_save_age[, yr_ind, .x, om$survey_season] *
           exp(-m_surv_mul * om$z_save[, yr_ind, .x, om$survey_season]) *
             om$surv_sel * om$q * wage$survey)
     })
 
-    # Calculate numbers in the survey
+    # Calculate numbers in survey biomass -------------------------------------
     n_surv <- map(seq_len(om$n_space), ~{
       om$n_save_age[, yr_ind, .x, om$survey_season] *
         exp(-m_surv_mul * om$z_save[, yr_ind, .x, om$survey_season])
@@ -104,9 +107,10 @@ run_year_loop_om <- function(om = NULL,
       n_surv <- n_surv %>% apply(2, sum)
     }
 
+    # Calculate survey abundance -------------------------------------------------
     if(om$flag_survey[yr_ind] == 1){
       if(yr > om$m_yr){
-        set.seed(99)
+        #set.seed(99)
         err <- exp(rnorm(n = 1, mean = 0, sd = om$surv_sd))
         surv <- sum(n_surv * om$surv_sel *
                       om$q * (wage$survey %>% unlist(use.names = FALSE)) * err)
@@ -118,6 +122,7 @@ run_year_loop_om <- function(om = NULL,
     }else{
       om$survey[yr_ind] <<- 1
     }
+    # Calculate survey age-comps ----------------------------------------------
     surv_tmp <- sum(n_surv * om$surv_sel * om$q)
     age_1_ind <- which(om$ages == 1)
     if(om$flag_survey[yr_ind] == 1){
@@ -133,6 +138,7 @@ run_year_loop_om <- function(om = NULL,
     }
     #om$age_comps_surv[is.na(om$age_comps_surv)] <<- -1
 
+    # Calculate survey biomass by space -------------------------------------
     om$surv_tot[yr_ind,] <<- map_dbl(seq_len(om$n_space), ~{
       n_surv <- om$n_save_age[,yr_ind, .x, om$survey_season]
       om$surv_tot[yr_ind, .x] <<- sum(n_surv *
@@ -140,7 +146,7 @@ run_year_loop_om <- function(om = NULL,
                                          exp(-m_surv_mul * om$z_save[,yr_ind, .x, om$survey_season]))
     })
 
-    # Calculate age comps for the survey by space
+    # Calculate survey age-comps by space -------------------------------------
     surv_age_comps_tmp <- map(seq_len(om$n_space), ~{
       c((n_surv[age_1_ind:(om$age_max_age)] *
          om$surv_sel[age_1_ind:(om$age_max_age)] * om$q) / om$surv_tot[yr_ind, .x],
@@ -148,28 +154,26 @@ run_year_loop_om <- function(om = NULL,
         sum(n_surv[(om$age_max_age + 1):om$n_age] *
               om$surv_sel[(om$age_max_age + 1):om$n_age] * om$q) / om$surv_tot[yr_ind, .x])
     })
-
     om$age_comps_surv_space[1:om$age_max_age, yr_ind, ] <<- surv_age_comps_tmp %>%
       set_names(seq_len(length(surv_age_comps_tmp))) %>%
       bind_rows() %>%
       as.matrix()
 
-    # Calculate catch-at-age by space. rowSums sums all seasons within a space
+    # Calculate catch value by space -----------------------------------------
+    # rowSums sums all seasons within a space
     catch_tmp <- map(seq_len(om$n_space), ~{
       tmp <- om$catch_n_save_age[, yr_ind, .x,]
       rowSums(tmp)
     })
-    # Aggregate catch-at-age by space into a matrix
+    # Aggregate catch-at-age by space
     catch_tmp <- catch_tmp %>%
       set_names(seq_len(length(catch_tmp))) %>%
       bind_rows() %>%
       as.matrix()
-
     # Calculate catch totals by space by summing the catch-at-age for each space
     catch_tot <- map_dbl(seq_len(om$n_space), ~{
       sum(om$catch_n_save_age[, yr_ind, .x,])
     })
-
     catch_age_comps_tmp <- map(seq_len(om$n_space), ~{
       c(catch_tmp[.x, age_1_ind:(om$age_max_age)] / catch_tot[.x],
         # Plus group
@@ -192,5 +196,6 @@ run_year_loop_om <- function(om = NULL,
       cat("\n")
     }
   })
+  # End year loop
   om
 }

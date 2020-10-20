@@ -40,18 +40,21 @@ run_mse_scenario <- function(om = NULL,
   # I think when it is set in run_om() all the r_devs end up being the same for a given scenario
   # set.seed(random_seed)
 
+  # Years setup ---------------------------------------------------------------
   yr_last_non_sim <- om$yrs[which(om$yrs == om$m_yr)]
   yr_start <- yr_last_non_sim + 1
   yr_end <- yr_last_non_sim + n_sim_yrs
   yr_sims <- yr_start:yr_end
   yr_all <- c(om$yrs, yr_sims)
 
+  # Survey years setup ---------------------------------------------------------
   # Calculate survey years, where odd years are survey years
   first_sim_surv_yr <- ifelse(yr_start %% 2 == 1, yr_start, yr_start + 1)
   yr_survey_sims <- seq(first_sim_surv_yr, yr_start + n_sim_yrs, by = om$n_survey)
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
 
+  # Leading parameter setup ---------------------------------------------------
   # Store the leading parameters from each year simulation year
   leading_params <- c("log_r_init", "log_h", "log_m_init", "log_sd_surv")
   params_save <- array(NA, dim = c(n_sim_yrs, length(leading_params)))
@@ -65,6 +68,7 @@ run_mse_scenario <- function(om = NULL,
   p_tmp <- list()
   tmp_iter <- 1
 
+  # Create EM objects for saving -----------------------------------------------------
   # Save Estimation Model outputs in lists. iter is used to keep track of the positions for these
   em_output <- list(ssb_save = vector(mode = "list", length = length(yr_sims)),
                     r_save = vector(mode = "list", length = length(yr_sims)),
@@ -75,6 +79,7 @@ run_mse_scenario <- function(om = NULL,
                     ssb_max = vector(mode = "list", length = length(yr_sims)))
   em_iter <- 1
 
+  # Begin MSE loop ------------------------------------------------------------
   mse_run <- map(c(yr_last_non_sim, yr_sims), function(yr = .x){
     yr_ind <- which(yr == yr_all)
 
@@ -89,6 +94,7 @@ run_mse_scenario <- function(om = NULL,
     #   om$wage_mid_df <- modify_wage_df(om$wage_mid_df, yr)
     #   om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
     # }
+    # Create TMB data for EM --------------------------------------------------
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
     #browser()
     if(yr >= yr_start){
@@ -101,7 +107,7 @@ run_mse_scenario <- function(om = NULL,
     p1 <- conv_p(yr)
     d1$survey_x <- NULL
     d$survey <- round(d$survey, 0)
-    # -------------------------------------------------------------------------
+    #  Make OM equal old OM ---------------------------------------------------
     # All of this stuff is done to make sure the inputs are exactly the same as the inputs for the old code
     # It can be deleted once everything is proved to be working right.
     # Also go into the load_ss_parameters() function and delete the hardwired parameter values there as well
@@ -128,9 +134,9 @@ run_mse_scenario <- function(om = NULL,
     dimnames(p$p_sel) <- dimnames(p1$p_sel)
     d$age_max_age <- as.numeric(d$age_max_age)
     cmp <- compare_tmb_data(d, d1, p, p1)
-    # -------------------------------------------------------------------------
 
 browser()
+    # Run TMB model -----------------------------------------------------------
     obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
     #obj <- MakeADFun(d1, p1, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
@@ -153,6 +159,7 @@ browser()
       lower[names(lower) == "f_0"] <- 1e-10
     }
 
+    # Minimize model (nlminb) -------------------------------------------------
     # Stop "outer mgc: XXX" printing to screen
     obj$env$tracemgc <- FALSE
     # Minimize the Objective function
@@ -170,6 +177,7 @@ browser()
     plike <- get_likelihoods(report) %>% format(nsmall = 20)
     #browser()
 
+    # Calc ref points for next year vals --------------------------------------
     # Calculate the reference points to be applied to the next year
     wage_catch <- get_age_dat(om$wage_catch_df, om$m_yr - 1) %>% unlist(use.names = FALSE)
     v_real <- sum(om_output$n_save_age[, which(om$yrs == om$m_yr), , om$n_season] *
@@ -188,7 +196,7 @@ browser()
     # Need to use map() here to keep names
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
-    # Save EM outputs
+    # Save EM outputs ---------------------------------------------------------
     if(yr >= yr_start){
       em_output$ssb_save[[em_iter]] <<- report$SSB
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
@@ -211,6 +219,7 @@ browser()
       em_iter <<- em_iter + 1
     }
 
+    # Update the OM data for next year ----------------------------------------
     # Update the OM data for the next simulation year in the loop. Note reference points
     # are being passed into this function. Double <<- is used here so that `om` is
     # in scope in the next iteration of the loop. Without that, `om` would be `NULL`
@@ -231,6 +240,7 @@ browser()
       NA
     }
   })
+  # End MSE loop --------------------------------------------------------------
   # Removes an NA entry at the end which is caused by the loop having one more year than
   # actual simulated years (see NA a few lines above). Making it NULL automatically removes it from the list.
   mse_run[is.na(mse_run)] <- NULL
