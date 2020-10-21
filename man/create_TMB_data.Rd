@@ -4,7 +4,7 @@
 \alias{create_tmb_data}
 \title{Create the data for \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}}
 \usage{
-create_tmb_data(om = NULL, ss_model = NULL, yr = NULL)
+create_tmb_data(om = NULL, ss_model = NULL, yr = NULL, ...)
 }
 \arguments{
 \item{om}{Operating model output returned by the \code{\link[=run_om]{run_om()}} function}
@@ -14,6 +14,8 @@ the RDS file created by  \code{\link[=create_rds_file]{create_rds_file()}}}
 
 \item{yr}{The year to trim the data to on the end of the time series. Various objects
 are populated into the future and must be trimmed}
+
+\item{..}{Absorbs parameters not needed}
 }
 \value{
 A list of 2 elements: the data and parameter values needed by \code{\link[TMB:MakeADFun]{TMB::MakeADFun()}}

@@ -78,14 +78,16 @@ update_om_data <- function(yr = NULL,
   om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
 
   # Recruitment updates -------------------------------------------------------
-  if(zero_rdevs){
-    r_dev <- 0
-  }else{
-    r_dev <- rnorm(n = 1,
-                   mean = 0,
-                   sd = exp(om$rdev_sd))
-  }
-  om$parameters$r_in[yr_ind, ] <- list(yr = yr, value = r_dev)
+  # TODO: This is done one year at a time in run_year_loop() in order to get the exact
+  # same values for the rdev random draws as in the old code
+  # if(zero_rdevs){
+  #   r_dev <- 0
+  # }else{
+  #   r_dev <- rnorm(n = 1,
+  #                  mean = 0,
+  #                  sd = exp(om$rdev_sd))
+  # }
+  # om$parameters$r_in[yr_ind, ] <- list(yr = yr, value = r_dev)
 
   # Selectivity updates -------------------------------------------------------
   om$flag_sel[yr_ind] <- FALSE

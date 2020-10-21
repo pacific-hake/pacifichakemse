@@ -4,10 +4,12 @@
 \alias{run_year_loop_om}
 \title{Run the Operating model for all years}
 \usage{
-run_year_loop_om(om = NULL, verbose = TRUE, ...)
+run_year_loop_om(om = NULL, yrs = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{om}{See \code{\link[=run_om]{run_om()}}}
+
+\item{yrs}{A vector of years for which to run the operating model}
 
 \item{verbose}{Print the loop information to the console}
 

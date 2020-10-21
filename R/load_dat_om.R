@@ -18,7 +18,6 @@
 #' @param move_fifty_init Age at 50 percent maximum movement rate
 #' @param n_survey Survey frequency
 #' @param rdev_sd Recruitment deviation Standard deviation
-#' @param rdev_seed Random seed to use for all future random recruitment deviations
 #' @param b_future Bias adjustment in the future
 #' @param move_out Fraction of individuals that travel south in the last season
 #' @param move_south Fraction of individuals that move south during the year
@@ -58,7 +57,6 @@ load_data_om <- function(ss_model = NULL,
                          ages = 0:20,
                          age_names = paste("age", 0:20),
                          rdev_sd = 1.4,
-                         rdev_seed = 42,
                          move_init = NULL,
                          move_max_init = 0.35,
                          move_fifty_init = 6,
@@ -184,6 +182,7 @@ load_data_om <- function(ss_model = NULL,
   lst$b_future <- b_future
 
   # Survey in OM --------------------------------------------------------------
+  lst$n_survey <- n_survey
   lst$survey <- ss_model$survey
   lst$survey_err <- ss_model$survey_err
   # TODO: Remove these hardwired values. They are here to match the former MSE
@@ -352,15 +351,11 @@ load_data_om <- function(ss_model = NULL,
   # Recdevs in future years of OM ---------------------------------------------
   r_devs <- rep(NA, lst$n_future_yrs)
   if(populate_future){
-    if(zero_rdevs){
-      r_devs <- rep(0, lst$n_future_yrs)
-    }else{
-      set.seed(rdev_seed)
-      r_devs <- rnorm(n = lst$n_future_yrs,
-                      mean = 0,
-                      sd = exp(lst$rdev_sd))
-    }
+    r_devs <- rnorm(n = lst$n_future_yrs,
+                    mean = 0,
+                    sd = exp(lst$rdev_sd))
   }
+
   lst$r_dev <- ss_model$r_dev
   # Add a zero for the final year
   # TODO: Why is a zero assumed here? It is like this in the original code so
@@ -372,7 +367,7 @@ load_data_om <- function(ss_model = NULL,
   if(populate_future){
     new_df <- tibble(yr = lst$future_yrs, value = r_devs)
   }else{
-    new_df <- tibble(yr = lst$future_yrs, value = NA)
+   new_df <- tibble(yr = lst$future_yrs, value = NA)
   }
   lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
 

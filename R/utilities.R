@@ -516,11 +516,6 @@ setup_blank_om_objects <- function(yrs,
                                     dim = c(max(ages), n_yr, n_space),
                                     dimnames = list(ages = seq_len(max(ages)),
                                                     yrs = yrs))
-  lst$n_survey <- matrix(NA,
-                         max(ages),
-                         n_yr,
-                         dimnames = list(ages = seq_len(max(ages)),
-                                         yrs= yrs))
   lst$age_comps_catch <- array(NA,
                                dim = c(max_surv_age, n_yr),
                                dimnames = list(ages = seq_len(max_surv_age),

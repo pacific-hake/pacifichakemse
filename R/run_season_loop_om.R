@@ -99,6 +99,7 @@ run_season_loop_om <- function(om,
       om$v_save[yr_ind, space, season] <<- b_tmp
       om$catch_quota[yr_ind, space, season] <<- e_tmp
 
+
       tryCatch({
         if(e_tmp / b_tmp >= 0.9){
           if(om$yrs[yr_ind] < om$m_yr){
@@ -112,6 +113,7 @@ run_season_loop_om <- function(om,
           om$catch_quota_n[yr_ind, space, season] <<- 1
         }
       }, error = function(e){
+        #browser()
         stop("Error in the Operating model. If running a standalone OM outside the MSE, ",
              "did you set `n_sim_yrs` instead of `yr_future`?",
              call. = FALSE)
@@ -163,6 +165,7 @@ run_season_loop_om <- function(om,
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
           # Add the ones come from the surrounding areas
           om$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (om$move_mat[space_idx, , season, yr_ind])
+        #if(yr == 2017) browser()
       }else{
         om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
@@ -171,7 +174,7 @@ run_season_loop_om <- function(om,
           # Add the ones come to the surrounding areas
           om$n_save_age[1:(om$n_age - 2), yr_ind, space_idx, season] *
           exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
-#if(yr == 2018) browser()
+
         # Plus group
         n_survive_plus <- (om$n_save_age[om$n_age - 1, yr_ind, space, om$n_season] * exp(-z[om$n_age - 1]) +
                              om$n_save_age[om$n_age, yr_ind, space, om$n_season] * exp(-z[om$n_age]))
@@ -184,7 +187,7 @@ run_season_loop_om <- function(om,
 
         om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
 
-        #if(yr >= 2019) browser()
+        #if(yr == 2017) browser()
       }
 
       # Calculate age-comps ---------------------------------------------------

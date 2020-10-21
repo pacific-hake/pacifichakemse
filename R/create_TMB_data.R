@@ -10,13 +10,15 @@
 #' the RDS file created by  [create_rds_file()]
 #' @param yr The year to trim the data to on the end of the time series. Various objects
 #' are populated into the future and must be trimmed
+#' @param .. Absorbs parameters not needed
 #'
 #' @return A list of 2 elements: the data and parameter values needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
 #' @export
 create_tmb_data <- function(om = NULL,
                             ss_model = NULL,
-                            yr = NULL){
+                            yr = NULL,
+                            ...){
 
   verify_argument(om, "list")
   verify_argument(ss_model, "list")

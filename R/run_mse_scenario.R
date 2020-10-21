@@ -40,19 +40,12 @@ run_mse_scenario <- function(om = NULL,
   # I think when it is set in run_om() all the r_devs end up being the same for a given scenario
   # set.seed(random_seed)
 
-  # Years setup ---------------------------------------------------------------
-  yr_last_non_sim <- om$yrs[which(om$yrs == om$m_yr)]
-  yr_start <- yr_last_non_sim + 1
-  yr_end <- yr_last_non_sim + n_sim_yrs
-  yr_sims <- yr_start:yr_end
-  yr_all <- c(om$yrs, yr_sims)
-
   # Survey years setup ---------------------------------------------------------
   # Calculate survey years, where odd years are survey years
-  first_sim_surv_yr <- ifelse(yr_start %% 2 == 1, yr_start, yr_start + 1)
-  yr_survey_sims <- seq(first_sim_surv_yr, yr_start + n_sim_yrs, by = om$n_survey)
+  first_sim_surv_yr <- ifelse((om$m_yr + 1) %% 2 == 1, om$m_yr + 1, om$m_yr + 2)
+  yr_survey_sims <- seq(first_sim_surv_yr, om$m_yr + 1 + n_sim_yrs, by = om$n_survey)
   # Remove any survey years not included in the simulated years
-  yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% yr_sims]
+  yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% om$yrs]
 
   # Leading parameter setup ---------------------------------------------------
   # Store the leading parameters from each year simulation year
@@ -70,22 +63,32 @@ run_mse_scenario <- function(om = NULL,
 
   # Create EM objects for saving -----------------------------------------------------
   # Save Estimation Model outputs in lists. iter is used to keep track of the positions for these
-  em_output <- list(ssb_save = vector(mode = "list", length = length(yr_sims)),
-                    r_save = vector(mode = "list", length = length(yr_sims)),
+  em_output <- list(ssb_save = vector(mode = "list", length = om$n_future_yrs),
+                    r_save = vector(mode = "list", length = om$n_future_yrs),
                     f40_save = vector(),
-                    catch_save = vector(mode = "list", length = length(yr_sims)),
-                    ssb_se = vector(mode = "list", length = length(yr_sims)),
-                    ssb_min = vector(mode = "list", length = length(yr_sims)),
-                    ssb_max = vector(mode = "list", length = length(yr_sims)))
+                    catch_save = vector(mode = "list", length = om$n_future_yrs),
+                    ssb_se = vector(mode = "list", length = om$n_future_yrs),
+                    ssb_min = vector(mode = "list", length = om$n_future_yrs),
+                    ssb_max = vector(mode = "list", length = om$n_future_yrs))
   em_iter <- 1
 
   # Begin MSE loop ------------------------------------------------------------
-  mse_run <- map(c(yr_last_non_sim, yr_sims), function(yr = .x){
-    yr_ind <- which(yr == yr_all)
+  mse_run <- map(c(om$m_yr, om$future_yrs), function(yr = .x){
+    yr_ind <- which(yr == om$yrs)
 
     # Run the Operating Model (OM)
     cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
-    om_output <<- run_om(om, random_seed = random_seed, n_sim_yrs = n_sim_yrs, ...)
+    if(yr >= om$m_yr + 1){
+      r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
+      om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value <<- r_dev
+    }
+    #if(yr >= 2019) browser()
+
+    om_output <<- run_om(om,
+                         n_sim_yrs = n_sim_yrs,
+                         yrs = om$yrs[1:yr_ind],
+                         random_seed = random_seed,
+                         ...)
 
     # Create the data for the Estimation Model (EM)
     # if(yr >= yr_start){
@@ -97,7 +100,7 @@ run_mse_scenario <- function(om = NULL,
     # Create TMB data for EM --------------------------------------------------
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
     #browser()
-    if(yr >= yr_start){
+    if(yr >= om$m_yr + 1){
       lst_tmb$params$f_0[length(lst_tmb$params$f_0)] <- 0.2
     }
     # Evaluate the Objective function
@@ -111,31 +114,31 @@ run_mse_scenario <- function(om = NULL,
     # All of this stuff is done to make sure the inputs are exactly the same as the inputs for the old code
     # It can be deleted once everything is proved to be working right.
     # Also go into the load_ss_parameters() function and delete the hardwired parameter values there as well
-    class(d$yr_sel) <- "integer"
-    class(d$ss_survey) <- "integer"
-    d$flag_survey <- as.numeric(d$flag_survey)
-    d$flag_catch <- as.numeric(d$flag_catch)
-    d1$flag_survey <- as.numeric(d1$flag_survey)
-    d1$flag_catch <- as.numeric(d1$flag_catch)
-    dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
-    if("matrix" %in% class(d$b)){
-      d$b <- d$b[,1]
-    }
-    if("matrix" %in% class(d1$b)){
-      d1$b <- d1$b[,1]
-    }
+    #class(d$yr_sel) <- "integer"
+    #class(d$ss_survey) <- "integer"
+    #d$flag_survey <- as.numeric(d$flag_survey)
+    #d$flag_catch <- as.numeric(d$flag_catch)
+    #d1$flag_survey <- as.numeric(d1$flag_survey)
+    #d1$flag_catch <- as.numeric(d1$flag_catch)
+    #dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
+    # if("matrix" %in% class(d$b)){
+    #   d$b <- d$b[,1]
+    # }
+    # if("matrix" %in% class(d1$b)){
+    #   d1$b <- d1$b[,1]
+    # }
     # dimnames(d$wage_catch) <- dimnames(d1$wage_catch)
     # dimnames(d$wage_survey) <- dimnames(d1$wage_survey)
     # dimnames(d$wage_ssb) <- dimnames(d1$wage_ssb)
     # dimnames(d$wage_mid) <- dimnames(d1$wage_mid)
-    dimnames(d$age_survey) <- dimnames(d1$age_survey)
-    dimnames(d$age_catch) <- dimnames(d1$age_catch)
-    dimnames(p$init_n) <- dimnames(p1$init_n)
-    dimnames(p$p_sel) <- dimnames(p1$p_sel)
-    d$age_max_age <- as.numeric(d$age_max_age)
-    cmp <- compare_tmb_data(d, d1, p, p1)
+    # dimnames(d$age_survey) <- dimnames(d1$age_survey)
+    # dimnames(d$age_catch) <- dimnames(d1$age_catch)
+    # dimnames(p$init_n) <- dimnames(p1$init_n)
+    # dimnames(p$p_sel) <- dimnames(p1$p_sel)
+    # d$age_max_age <- as.numeric(d$age_max_age)
+    # cmp <- compare_tmb_data(d, d1, p, p1)
 
-browser()
+#browser()
     # Run TMB model -----------------------------------------------------------
     obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
     #obj <- MakeADFun(d1, p1, DLL = "pacifichakemse", silent = FALSE)
@@ -164,6 +167,7 @@ browser()
     obj$env$tracemgc <- FALSE
     # Minimize the Objective function
     # If error one of the random effects is unused
+    #if(yr == 2022) browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -184,6 +188,7 @@ browser()
                     matrix(rep(wage_catch, om$n_space),
                            ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == om$m_yr),]))
 
+
     f_new <- get_ref_point(pars,
                            om,
                            ssb_y = report$SSB %>% tail(1),
@@ -197,12 +202,12 @@ browser()
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
     # Save EM outputs ---------------------------------------------------------
-    if(yr >= yr_start){
+    if(yr >= om$m_yr + 1){
       em_output$ssb_save[[em_iter]] <<- report$SSB
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
-      if(yr == yr_end){
+      if(yr == tail(om$yrs, 1)){
         sdrep <- sdreport(obj)
         j <- sdrep_summary <- summary(sdrep)
         rep_names <- rownames(sdrep_summary)
@@ -224,7 +229,7 @@ browser()
     # are being passed into this function. Double <<- is used here so that `om` is
     # in scope in the next iteration of the loop. Without that, `om` would be `NULL`
     # in the next simulation year.
-    if(yr < yr_end){
+    if(yr < tail(om$yrs, 1)){
       # No need to call this in the final year as the loop is over
       om0 <- om
       om <<- update_om_data(yr + 1,
@@ -235,6 +240,7 @@ browser()
                             m_increase,
                             sel_change,
                             zero_rdevs = FALSE)
+
       #browser()
     }else{
       NA

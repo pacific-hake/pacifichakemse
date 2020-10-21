@@ -111,7 +111,7 @@ run_mses <- function(n_runs = 10,
                          n_survey = n_surveys[fn_ind],
                          selectivity_change = sel_changes[fn_ind],
                          ...)
-      browser()
+
       if(is.null(multiple_season_data)){
         cat(green("Run #", run, "\n"))
         tmp <- run_mse_scenario(om = om,

@@ -1,6 +1,7 @@
 #' Run the Operating model for all years
 #'
 #' @param om See [run_om()]
+#' @param yrs A vector of years for which to run the operating model
 #' @param verbose Print the loop information to the console
 #' @param ... Additional arguments to be passed to [run_season_loop_om()]
 #'
@@ -8,13 +9,16 @@
 #' @importFrom crayon green
 #' @export
 run_year_loop_om <- function(om = NULL,
+                             yrs = NULL,
                              verbose = TRUE,
                              ...){
+
   verify_argument(om, "list")
+  verify_argument(yrs, c("integer", "numerical"))
   verify_argument(verbose, "logical", 1)
 
   # Begin year loop -----------------------------------------------------------
-  map(om$yrs, function(yr = .x){
+  map(yrs, function(yr = .x){
     if(verbose){
       cat(green(paste0(yr, ":\n")))
     }
@@ -40,11 +44,13 @@ run_year_loop_om <- function(om = NULL,
           (om$ssb_0[space] * (1 - om$h) + om$ssb[yr_ind, space] *
              (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                        om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
-      #if(yr == 2019) browser()
+      #if(yr == 2018) browser()
       j
     }) %>% set_names(om$space_names)
     # Sanity check - these should equal the proportions in om$move_init:
     # c(rec[1] / sum(rec), rec[2] / sum(rec))
+    #if(yr == 2019) browser()
+    #if(yr == 2018) browser()
     om$n_save_age[1, yr_ind, , 1] <<- init_rec
 
     om$r_save[yr_ind, ] <<- init_rec
@@ -56,6 +62,9 @@ run_year_loop_om <- function(om = NULL,
                               m_season = m_season,
                               verbose = verbose,
                               ...)
+    #if(yr == 2018) browser()
+
+
     # Return from season loop -------------------------------------------------
 
     #if(yr >= 2019) browser()
@@ -96,9 +105,11 @@ run_year_loop_om <- function(om = NULL,
 
     # Calculate numbers in survey biomass -------------------------------------
     n_surv <- map(seq_len(om$n_space), ~{
+      #if(yr == 2019) browser()
       om$n_save_age[, yr_ind, .x, om$survey_season] *
         exp(-m_surv_mul * om$z_save[, yr_ind, .x, om$survey_season])
     })
+
     if(om$move){
       n_surv <- n_surv %>%
         set_names(seq_len(length(n_surv))) %>%
@@ -112,6 +123,7 @@ run_year_loop_om <- function(om = NULL,
       if(yr > om$m_yr){
         #set.seed(99)
         err <- exp(rnorm(n = 1, mean = 0, sd = om$surv_sd))
+        #browser()
         surv <- sum(n_surv * om$surv_sel *
                       om$q * (wage$survey %>% unlist(use.names = FALSE)) * err)
       }else{
@@ -129,7 +141,7 @@ run_year_loop_om <- function(om = NULL,
       om$age_comps_surv[1:(om$age_max_age - 1), yr_ind] <<-
         (n_surv[age_1_ind:(om$age_max_age)] *
            om$surv_sel[age_1_ind:(om$age_max_age)] * om$q) / surv_tmp
-
+#if(yr == 2019) browser()
       om$age_comps_surv[om$age_max_age, yr_ind] <<-
         sum(n_surv[(om$age_max_age + 1):om$n_age] *
               om$surv_sel[(om$age_max_age + 1):om$n_age] * om$q) / surv_tmp
