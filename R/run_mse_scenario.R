@@ -178,8 +178,13 @@ run_mse_scenario <- function(om = NULL,
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
       if(yr == tail(om$yrs, 1)){
-        sdrep <- sdreport(obj)
-        j <- sdrep_summary <- summary(sdrep)
+        # Suppress these warnings:
+        # In sqrt(diag(object$cov.fixed)) : NaNs produced
+        # In sqrt(diag(cov)) : NaNs produced
+        # which are caused by using optimHess() for inverting the hessian.
+        # See: https://groups.google.com/g/tmb-users/c/5dFwWqcuQQA
+        suppressWarnings(sdrep <- sdreport(obj))
+        suppressWarnings(sdrep_summary <- summary(sdrep))
         rep_names <- rownames(sdrep_summary)
         tmp <- sdrep_summary[rep_names == "SSB", 2]
         names(tmp) <- om$yrs
