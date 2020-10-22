@@ -123,9 +123,7 @@ run_year_loop_om <- function(om = NULL,
     # Calculate survey abundance -------------------------------------------------
     if(om$flag_survey[yr_ind] == 1){
       if(yr > om$m_yr){
-        #set.seed(99)
         err <- exp(rnorm(n = 1, mean = 0, sd = om$surv_sd))
-        #browser()
         surv <- sum(n_surv * om$surv_sel *
                       om$q * (wage$survey %>% unlist(use.names = FALSE)) * err)
       }else{

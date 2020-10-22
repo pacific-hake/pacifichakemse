@@ -32,7 +32,6 @@ load_data_om(
   sel_change_yr = 1991,
   f_space = c(0.2612, 0.7388),
   log_phi_survey = log(11.46),
-  zero_rdevs = FALSE,
   ...
 )
 }
@@ -94,9 +93,7 @@ Use \code{n_sim_yrs} for that instead.}
 \item{f_space}{The proportion of TAC given to each country. First value is Canada,
 the second is the US}
 
-\item{log_phi_survey}{Survey phi parameter value}
-
-\item{zero_rdevs}{Logical. If TRUE, make all recruitment deviations into the future zero.
+\item{log_phi_survey}{Survey phi parameter value
 If FALSE, they will be given random normal values based on rdev_sd}
 
 \item{...}{Absorb arguments destined for other functions}

@@ -12,7 +12,6 @@ run_mse_scenario(
   c_increase = 0,
   m_increase = 0,
   sel_change = 0,
-  f_sim = NULL,
   ...
 )
 }
@@ -30,8 +29,6 @@ run_mse_scenario(
 \item{m_increase}{Decrease of spawners returning south}
 
 \item{sel_change}{Time varying selectivity}
-
-\item{f_sim}{Value of F to use for simulation years}
 
 \item{...}{Absorb arguments intended for other functions}
 

@@ -32,7 +32,6 @@
 #' @param f_space The proportion of TAC given to each country. First value is Canada,
 #' the second is the US
 #' @param log_phi_survey Survey phi parameter value
-#' @param zero_rdevs Logical. If TRUE, make all recruitment deviations into the future zero.
 #' If FALSE, they will be given random normal values based on rdev_sd
 #' @param ... Absorb arguments destined for other functions
 #'
@@ -73,7 +72,6 @@ load_data_om <- function(ss_model = NULL,
                          sel_change_yr = 1991,
                          f_space = c(0.2612, 0.7388),
                          log_phi_survey = log(11.46),
-                         zero_rdevs = FALSE,
                          ...){
 
   verify_argument(ss_model, "list")

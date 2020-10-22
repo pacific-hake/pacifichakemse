@@ -13,11 +13,12 @@ run_mses(
   c_increases = 0,
   m_increases = 0,
   sel_changes = 0,
-  n_surveys = NULL,
+  n_surveys = 2,
   multiple_season_data = NULL,
   random_seed = 12345,
   results_root_dir = here("results"),
   results_dir = here("results", "default"),
+  catch_floor = NULL,
   ...
 )
 }

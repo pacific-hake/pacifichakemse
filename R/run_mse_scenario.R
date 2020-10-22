@@ -7,7 +7,6 @@
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
-#' @param f_sim Value of F to use for simulation years
 #' @param ss_model Output from [load_ss_model_data()]
 #' @param ... Absorb arguments intended for other functions
 #'
@@ -24,7 +23,6 @@ run_mse_scenario <- function(om = NULL,
                              c_increase = 0,
                              m_increase = 0,
                              sel_change = 0,
-                             f_sim = NULL,
                              ...){
 
   verify_argument(om, "list")
@@ -34,7 +32,6 @@ run_mse_scenario <- function(om = NULL,
   verify_argument(c_increase, c("integer", "numeric"), 1)
   verify_argument(m_increase, c("integer", "numeric"), 1)
   verify_argument(sel_change, c("integer", "numeric"), 1)
-  verify_argument(f_sim, "numeric", 1)
 
   # TODO: Investigate setting the seed here instead of in the run_om() function
   # I think when it is set in run_om() all the r_devs end up being the same for a given scenario
@@ -233,8 +230,7 @@ run_mse_scenario <- function(om = NULL,
                             f_new,
                             c_increase,
                             m_increase,
-                            sel_change,
-                            zero_rdevs = FALSE)
+                            sel_change)
 
       #browser()
     }else{

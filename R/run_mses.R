@@ -31,7 +31,7 @@
 #' @importFrom dplyr transmute group_map mutate_at quo
 #' @importFrom gfutilities verify_argument func_name
 #' @importFrom here here
-#' @importFrom purrr map2 map map_chr
+#' @importFrom purrr map2 map map_chr map_lgl
 #' @importFrom r4ss SS_output
 #' @importFrom stringr str_ends
 #' @importFrom clisymbols symbol
@@ -46,20 +46,27 @@ run_mses <- function(n_runs = 10,
                      c_increases = 0,
                      m_increases = 0,
                      sel_changes = 0,
-                     n_surveys = NULL,
+                     n_surveys = 2,
                      multiple_season_data = NULL,
                      random_seed = 12345,
                      results_root_dir = here("results"),
                      results_dir = here("results", "default"),
+                     catch_floor = NULL,
                      ...){
 
   verify_argument(fns, chk_len = length(plot_names))
-  verify_argument(tacs, "list")
+  verify_argument(tacs, c("numeric", "list"))
   verify_argument(c_increases, c("integer", "numeric"))
   verify_argument(m_increases, c("integer", "numeric"))
   verify_argument(sel_changes, c("integer", "numeric"))
   verify_argument(n_surveys, c("integer", "numeric"))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
+
+  if(any(map_lgl(j, ~{length(.x) == 1})) && is.null(catch_floor)){
+    stop("`catch_floor` argument is NULL with at least one of the `tac` argument list ",
+         "values having length 1. Provide a catch_floor value to apply.",
+         call. = FALSE)
+  }
 
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
@@ -123,6 +130,7 @@ run_mses <- function(n_runs = 10,
                                 c_increase = c_increases[fn_ind],
                                 m_increase = m_increases[fn_ind],
                                 ss_model = ss_model,
+                                catch_floor = catch_floor,
                                 ...)
       }else{
         # TODO: Make sure this works. It hasn't been tested at all
