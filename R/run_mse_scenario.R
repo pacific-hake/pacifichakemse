@@ -1,9 +1,8 @@
 #' Run a single MSE scenario
 #'
 #' @param om List as output by [load_data_om()]
-#' @param random_seed Seed for running the OM if it needs to be run (if `om_output` is `NULL`)
+#' @param random_seed Seed for running the OM
 #' @param n_sim_yrs Number of years to simulate
-#' @param tac Which harvest control rule should the model use
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
@@ -33,10 +32,6 @@ run_mse_scenario <- function(om = NULL,
   verify_argument(m_increase, c("integer", "numeric"), 1)
   verify_argument(sel_change, c("integer", "numeric"), 1)
 
-  # TODO: Investigate setting the seed here instead of in the run_om() function
-  # I think when it is set in run_om() all the r_devs end up being the same for a given scenario
-  # set.seed(random_seed)
-
   # Survey years setup ---------------------------------------------------------
   # Calculate survey years, where odd years are survey years
   first_sim_surv_yr <- ifelse((om$m_yr + 1) %% 2 == 1, om$m_yr + 1, om$m_yr + 2)
@@ -49,17 +44,9 @@ run_mse_scenario <- function(om = NULL,
   leading_params <- c("log_r_init", "log_h", "log_m_init", "log_sd_surv")
   params_save <- array(NA, dim = c(n_sim_yrs, length(leading_params)))
 
-  # Modify survey objects in the simulated survey years and add catch for new year
-  # Start with the last year in the time series `yr_last_non_sim` so that reference points can
-  # be calculated for application in the first simulation year
-  #
-  # d_tmp and p_tmp are lists to hold data from the original code. They should be removed once the code is verified to be working
-  d_tmp <- list()
-  p_tmp <- list()
-  tmp_iter <- 1
-
-  # Create EM objects for saving -----------------------------------------------------
-  # Save Estimation Model outputs in lists. iter is used to keep track of the positions for these
+  # Create EM objects for saving ----------------------------------------------
+  # Save Estimation Model outputs in lists. iter is used to keep track of the
+  # positions for these
   em_output <- list(ssb_save = vector(mode = "list", length = om$n_future_yrs),
                     r_save = vector(mode = "list", length = om$n_future_yrs),
                     f40_save = vector(),
@@ -78,7 +65,6 @@ run_mse_scenario <- function(om = NULL,
       r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
       om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value <<- r_dev
     }
-    #if(yr >= 2019) browser()
 
     # Run the Operating Model -------------------------------------------------
     cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
@@ -89,9 +75,7 @@ run_mse_scenario <- function(om = NULL,
     om$catch_obs <- om_output$catch_obs <- om_output$catch
 
     # Create TMB data for EM --------------------------------------------------
-    #browser()
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
-    #browser()
     if(yr >= om$m_yr + 1){
       lst_tmb$params$f_0[length(lst_tmb$params$f_0)] <- 0.2
     }
@@ -131,19 +115,18 @@ run_mse_scenario <- function(om = NULL,
     # cmp <- compare_tmb_data(d, d1, p, p1)
     # --
 
-#browser()
     # Run TMB model -----------------------------------------------------------
     obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
-    #obj <- MakeADFun(d1, p1, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
     rsmall <- report %>% map(~{format(.x, nsmall = 20)})
     plike <- report %>% get_likelihoods %>% format(nsmall = 20)
     objfn <- obj$fn() %>% format(nsmall = 20)
     psmall <- obj %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
-#browser()
 
-    # You can check likelihood components by placing a browser after the MakeADFun() call above and the
-    # nlminb() call below and calling print_likelihoods()
+    # You can check likelihood components and parameter estimates by placing
+    # a browser after the MakeADFun() call above and the nlminb() call below and
+    # looking at the `plike` vector and the `psmall` list.
+
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -156,11 +139,9 @@ run_mse_scenario <- function(om = NULL,
     }
 
     # Minimize model (nlminb) -------------------------------------------------
-    # Stop "outer mgc: XXX" printing to screen
+    # Stop "outer mgc: XXX" from printing to screen
     obj$env$tracemgc <- FALSE
     # Minimize the Objective function
-    # If error one of the random effects is unused
-    #if(yr == 2022) browser()
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -174,13 +155,10 @@ run_mse_scenario <- function(om = NULL,
     plike <- get_likelihoods(report) %>% format(nsmall = 20)
 
     # Calc ref points for next year vals --------------------------------------
-    # Calculate the reference points to be applied to the next year
     wage_catch <- get_age_dat(om$wage_catch_df, om$m_yr - 1) %>% unlist(use.names = FALSE)
     v_real <- sum(om_output$n_save_age[, which(om$yrs == om$m_yr), , om$n_season] *
                     matrix(rep(wage_catch, om$n_space),
                            ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == om$m_yr),]))
-
-#browser()
 
     f_new <- get_ref_point(pars,
                            om,
@@ -190,8 +168,7 @@ run_mse_scenario <- function(om = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
-#browser()
-    # Need to use map() here to keep names
+
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
     # Save EM outputs ---------------------------------------------------------
@@ -223,7 +200,7 @@ run_mse_scenario <- function(om = NULL,
     # in scope in the next iteration of the loop. Without that, `om` would be `NULL`
     # in the next simulation year.
     if(yr < tail(om$yrs, 1)){
-      # No need to call this in the final year as the loop is over
+      # No need to call this in the final year as the loop is finished
       om <<- update_om_data(yr + 1,
                             om,
                             yr_survey_sims,
@@ -231,8 +208,6 @@ run_mse_scenario <- function(om = NULL,
                             c_increase,
                             m_increase,
                             sel_change)
-
-      #browser()
     }else{
       NA
     }

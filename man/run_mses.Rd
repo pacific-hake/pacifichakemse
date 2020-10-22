@@ -14,7 +14,7 @@ run_mses(
   m_increases = 0,
   sel_changes = 0,
   n_surveys = 2,
-  multiple_season_data = NULL,
+  b_futures = 0.5,
   random_seed = 12345,
   results_root_dir = here("results"),
   results_dir = here("results", "default"),
@@ -35,20 +35,22 @@ run_mses(
 \item{tacs}{A vector of TAC values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
 order as the \code{fns} file names, or a single value}
 
-\item{c_increases}{Increase in max movement. A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
-order as the \code{fns} file names, or a single value}
+\item{c_increases}{Increase in max movement. A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}}
+function, in the same order as the \code{fns} file names, or a single value which will be used for all scenarios}
 
-\item{m_increases}{Decrease of spawners returning south. A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
-order as the \code{fns} file names, or a single value}
+\item{m_increases}{Decrease of spawners returning south. A vector of values to be passed to the
+\code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same order as the \code{fns} file names, or a single value which
+will be used for all scenarios}
 
-\item{sel_changes}{A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
-order as the \code{fns} file names, or a single value}
+\item{sel_changes}{Selectivity scenario change type. A vector of values to be passed to the
+\code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same order as the \code{fns} file names, or a single value which will
+be used for all scenarios}
 
 \item{n_surveys}{The number of surveys for each run. This must be a vector of the same length as \code{fns} or \code{NULL}.
 If \code{NULL}, 2 will be used for every scenario}
 
-\item{multiple_season_data}{A list of the same length as \code{fns}, with each element being a vector of
-three items, \code{nseason}, \code{nspace}, and \code{bfuture}. If NULL, biasadjustment will not be incorporated}
+\item{b_futures}{A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function for bias adjustment into
+the future, in the same order as the \code{fns} file names, or a single value which will be used for all scenarios}
 
 \item{random_seed}{A seed value to use when calling for all random functions}
 

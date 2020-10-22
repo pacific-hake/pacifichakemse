@@ -22,8 +22,6 @@ run_mse_scenario(
 
 \item{n_sim_yrs}{Number of years to simulate}
 
-\item{tac}{Which harvest control rule should the model use}
-
 \item{c_increase}{Increase in max movement}
 
 \item{m_increase}{Decrease of spawners returning south}

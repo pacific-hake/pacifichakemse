@@ -27,7 +27,6 @@ create_rds_file <- function(ss_model_output_dir = NULL,
   verify_argument(overwrite_ss_rds, "logical", 1)
   verify_argument(load_extra_mcmc, "logical", 1)
 
-
   rds_file <- file.path(ss_model_output_dir, paste0(basename(ss_model_output_dir), ".rds"))
   # The RDS file will have the same name as the directory it is in
   if(file.exists(rds_file)){

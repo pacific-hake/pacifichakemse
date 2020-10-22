@@ -58,11 +58,9 @@ run_season_loop_om <- function(om,
             p_sel_yrs[,ncol(p_sel_yrs)] *
             om$sigma_p_sel
         }
-        #if(yr >= 2019) browser()
       }
 
       # Constant over space
-      #if(yr == 2019) browser()
       f_sel <- get_select(om$ages,
                           p_sel,
                           om$s_min,
@@ -84,7 +82,6 @@ run_season_loop_om <- function(om,
             filter(year == yr) %>%
             select(contains(paste0("space", space))) %>% pull()
         }else{
-          #if(yr >= 2019) browser()
           catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space]
         }
       }else{
@@ -99,7 +96,6 @@ run_season_loop_om <- function(om,
       b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel, na.rm = TRUE)
       om$v_save[yr_ind, space, season] <<- b_tmp
       om$catch_quota[yr_ind, space, season] <<- e_tmp
-
 
       tryCatch({
         if(e_tmp / b_tmp >= 0.9){
@@ -120,7 +116,6 @@ run_season_loop_om <- function(om,
              call. = FALSE)
       })
 
-#if(yr_ind == 54 & season == 4 & space == 2) browser()
       # Calculate F based on catch distribution -------------------------------
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,
@@ -129,7 +124,7 @@ run_season_loop_om <- function(om,
                      n_tmp = n_tmp,
                      wage_catch = wage_catch,
                      method = "Hybrid")
-      #if(yr >= 2019) browser()
+
       if(e_tmp > 0){
         f_new <- f_out
         f_season <- f_new * f_sel
@@ -166,7 +161,6 @@ run_season_loop_om <- function(om,
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
           # Add the ones come from the surrounding areas
           om$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (om$move_mat[space_idx, , season, yr_ind])
-        #if(yr == 2017) browser()
       }else{
         om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
@@ -187,8 +181,6 @@ run_season_loop_om <- function(om,
           om$move_mat[space_idx, om$n_age, season, yr_ind]
 
         om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
-
-        #if(yr == 2017) browser()
       }
 
       # Calculate age-comps ---------------------------------------------------
@@ -201,8 +193,7 @@ run_season_loop_om <- function(om,
       }
       om$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season] * wage_catch
       om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
-#if(yr_ind == 54 & season == 4 & space == 2) browser()
-  #if(yr_ind == 55) browser()
+
       # Calculate catch quota -------------------------------------------------
       if(om$catch_quota[yr_ind, space, season] > 0){
         if((sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season]) > 1.1){
