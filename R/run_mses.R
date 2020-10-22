@@ -62,12 +62,6 @@ run_mses <- function(n_runs = 10,
   verify_argument(n_surveys, c("integer", "numeric"))
   stopifnot(is.null(multiple_season_data) | length(multiple_season_data) == length(fns))
 
-  if(any(map_lgl(j, ~{length(.x) == 1})) && is.null(catch_floor)){
-    stop("`catch_floor` argument is NULL with at least one of the `tac` argument list ",
-         "values having length 1. Provide a catch_floor value to apply.",
-         call. = FALSE)
-  }
-
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
     ifelse(str_ends(.x, pattern = "\\.rds"), .x, paste0(.x, ".rds"))
@@ -92,6 +86,17 @@ run_mses <- function(n_runs = 10,
   sel_changes <- fill_vec(sel_changes)
   n_surveys <- fill_vec(n_surveys)
   tacs <- fill_vec(tacs)
+
+  if(any(map_lgl(tacs, ~{length(.x) == 1 && .x != 0})) && is.null(catch_floor)){
+    stop("`catch_floor` argument is NULL with at least one of the `tac` argument list ",
+         "values having length 1, and being not equal to zero (which signifies no tac application). ",
+         "Provide a catch_floor value to use when applying tac value of 1.",
+         call. = FALSE)
+  }
+  if(!all(map_lgl(tacs, ~{if(length(.x) %in% 1:2) TRUE else FALSE}))){
+    stop("List elements of `tacs` must be either length 1 or length 2.",
+         call. = FALSE)
+  }
 
   tic()
   # Seed for the random recruitment deviations (search rnorm in update_om_data.R) and
@@ -125,7 +130,7 @@ run_mses <- function(n_runs = 10,
                                 random_seed = seeds[run],
                                 n_sim_yrs = n_sim_yrs,
                                 tac = if(length(tacs) == 1) tacs else tacs[[fn_ind]],
-                                n_survey = n_surveys,
+                                #n_survey = n_surveys[fn_ind],
                                 sel_change = sel_changes[fn_ind],
                                 c_increase = c_increases[fn_ind],
                                 m_increase = m_increases[fn_ind],
