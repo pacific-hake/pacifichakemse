@@ -87,9 +87,9 @@ run_mse_scenario <- function(om = NULL,
     # It can be deleted once everything is proved to be working right.
     # Also go into the load_ss_parameters() function and delete the hardwired parameter values there as well
     # --
-    d1 <- conv_d(yr)
-    p1 <- conv_p(yr)
-    d1$survey_x <- NULL
+    # d1 <- conv_d(yr)
+    # p1 <- conv_p(yr)
+    # d1$survey_x <- NULL
     # class(d$yr_sel) <- "integer"
     # class(d$ss_survey) <- "integer"
     # d$flag_survey <- as.numeric(d$flag_survey)
