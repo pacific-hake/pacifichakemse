@@ -34,7 +34,7 @@ create_tmb_data <- function(om = NULL,
   }
 
   om$catch_obs <- om$catch %>%
-    as_tibble(.name_repair = "unique") %>%
+    as_tibble(.name_repair = "minimal") %>%
     rename(value = 1) %>%
     mutate(yr = om$yrs) %>%
     select(yr, everything()) %>%

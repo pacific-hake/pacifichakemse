@@ -72,6 +72,7 @@ run_mse_scenario <- function(om = NULL,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          ...)
+
     om$catch_obs <- om_output$catch_obs <- om_output$catch
 
     # Create TMB data for EM --------------------------------------------------
