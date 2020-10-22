@@ -78,26 +78,13 @@ update_om_data <- function(yr = NULL,
   om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
 
   # Recruitment updates -------------------------------------------------------
-  # TODO: This is done one year at a time in run_year_loop() in order to get the exact
-  # same values for the rdev random draws as in the old code
-  # if(zero_rdevs){
-  #   r_dev <- 0
-  # }else{
-  #   r_dev <- rnorm(n = 1,
-  #                  mean = 0,
-  #                  sd = exp(om$rdev_sd))
-  # }
-  # om$parameters$r_in[yr_ind, ] <- list(yr = yr, value = r_dev)
+  # Recruitment updates are done one year at a time in the 'Random recruitment deviations'
+  # section in run_mse_scenario.R
 
   # Selectivity updates -------------------------------------------------------
-  om$flag_sel[yr_ind] <- FALSE
-  if(sel_change == 1){
-    om$flag_sel[yr_ind] <- TRUE
-  }else if(sel_change == 2){
-    om$flag_sel[yr_ind] <- TRUE
-    om$sel_by_yrs <- cbind(om$sel_by_yrs, rep(0, nrow(om$sel_by_yrs)))
-    names(om$sel_by_yrs)[ncol(om$sel_by_yrs)] <- yr
-  }
+  # Selectivity updates are handled in the season loop of the MSE, see the
+  # 'Calculate selectivity' section in run_season_loop.R
+  # This includes the updates for the different selectivity scenarios
 
   # Movement model updates ----------------------------------------------------
   if(yr > om$m_yr){

@@ -76,27 +76,21 @@ run_mse_scenario <- function(om = NULL,
   mse_run <- map(c(om$m_yr, om$future_yrs), function(yr = .x){
     yr_ind <- which(yr == om$yrs)
 
-    # Run the Operating Model (OM)
-    cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
+    # Random recruitment deviation --------------------------------------------
     if(yr >= om$m_yr + 1){
       r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
       om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value <<- r_dev
     }
     #if(yr >= 2019) browser()
 
+    # Run the Operating Model -------------------------------------------------
+    cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
     om_output <<- run_om(om,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          ...)
     om$catch_obs <- om_output$catch_obs <- om_output$catch
 
-    # Create the data for the Estimation Model (EM)
-    # if(yr >= yr_start){
-    #   om$wage_catch_df <- modify_wage_df(om$wage_catch_df, yr)
-    #   om$wage_survey_df <- modify_wage_df(om$wage_survey_df, yr)
-    #   om$wage_mid_df <- modify_wage_df(om$wage_mid_df, yr)
-    #   om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
-    # }
     # Create TMB data for EM --------------------------------------------------
     #browser()
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)

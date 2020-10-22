@@ -58,6 +58,7 @@ run_season_loop_om <- function(om,
             p_sel_yrs[,ncol(p_sel_yrs)] *
             om$sigma_p_sel
         }
+        #if(yr >= 2019) browser()
       }
 
       # Constant over space
