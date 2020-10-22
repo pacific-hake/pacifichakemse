@@ -28,13 +28,17 @@ create_tmb_data <- function(om = NULL,
   inc_yr_ind <- which(om$yrs == yr)
 
   # Catch Observations
-  catch_obs_yrs <- om$catch_obs %>% filter(yr <= !!yr) %>% pull(yr)
+  catch_obs_yrs <- om$yrs[as.numeric(rownames(om$catch_obs)) %in% inc_yrs]
   if(!identical(inc_yrs, catch_obs_yrs)){
     stop("The years in the catch observations does not match the number of yrs in the OM")
   }
 
-  om$catch_obs <- om$catch_obs %>%
-    filter(yr <= !!yr) %>%
+  om$catch_obs <- om$catch %>%
+    as_tibble(.name_repair = "unique") %>%
+    rename(value = 1) %>%
+    mutate(yr = om$yrs) %>%
+    select(yr, everything()) %>%
+    filter(yr %in% inc_yrs) %>%
     select(value) %>%
     as.matrix() %>%
     `rownames<-`(inc_yrs)
@@ -61,8 +65,9 @@ create_tmb_data <- function(om = NULL,
   om$parameters$init_n <- om$parameters$init_n %>%
     select(value) %>%
     as.matrix()
+  #browser()
   om$parameters$r_in <- om$parameters$r_in %>%
-    filter(yr <= om$m_yr) %>%
+    filter(yr <= !!yr) %>%
     # Remove the final year
     slice(-n()) %>%
     pull(value)
@@ -135,7 +140,7 @@ create_tmb_data <- function(om = NULL,
   om$b <- om$b[1:inc_yr_ind]
   om$rdev_sd <- log(om$rdev_sd)
 
-  # Include only what appears in the estimation model (pacifichakemse.cpp) - TODO age_catch
+  # Include only what appears in the estimation model (pacifichakemse.cpp)
   keep <- names(om) %in% c("wage_catch", "wage_survey", "wage_survey", "wage_ssb", "wage_mid", "yr_sel",
                            "m_sel", "mat_sel", "n_age", "ages", "sel_change_yr", "yrs", "t_end",
                            "log_q", "flag_sel", "s_min", "s_min_survey", "s_max", "s_max_survey",

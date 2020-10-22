@@ -41,8 +41,8 @@ update_om_data <- function(yr = NULL,
 
   yr_ind <- which(om$yrs == yr)
 
-  # Catch updates -------------------------------------------------------------
-  om$catch_obs[om$catch_obs$yr == yr,] <- list(yr = yr, value = round(f_new$c_new, 0))
+  # Catch updates ------------------------------------------------------------
+  om$catch_obs[as.numeric(rownames(om$catch_obs)) == yr,] <- f_new$c_new
 
     curr_ss_catch <- om$ss_catch[1:(yr_ind - 1)]
   om$ss_catch[yr_ind] <- ceiling(mean(curr_ss_catch[curr_ss_catch > 0]))
@@ -61,7 +61,7 @@ update_om_data <- function(yr = NULL,
                                   mean(curr_survey_err[curr_survey_err < 1]),
                                   1)
 
-  if(om$catch_obs[yr_ind,]$value == 0 && om$flag_survey[yr_ind] == -1){
+  if(om$catch_obs[yr_ind, ] == 0 && om$flag_survey[yr_ind] == -1){
     red(message("Stock in peril! Conducting emergency survey"))
     om$flag_survey[yr_ind] <- 1
     # Emergency survey adds 200 more age samples onto the mean value for all surveys,

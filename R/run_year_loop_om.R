@@ -67,13 +67,12 @@ run_year_loop_om <- function(om = NULL,
 
     # Return from season loop -------------------------------------------------
 
-    #if(yr >= 2019) browser()
-
     # Calculate catch-age -----------------------------------------------------
     if(om$n_season > 1){
       om$catch_age[, yr_ind] <<- apply(om$catch_n_save_age[, yr_ind,,],
                                        MARGIN = 1,
                                        FUN = sum)
+      om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
 
       om$catch_n_age[, yr_ind] <<- apply(om$catch_n_save_age[,yr_ind,,],
                                          MARGIN = 1,
@@ -82,11 +81,13 @@ run_year_loop_om <- function(om = NULL,
 #if(yr >= 2019) browser()
     }else{
       if(om$n_space == 1){
-        om$catch_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
+        om$catch_age[,yr_ind] <<- om$catch_save_age[,yr_ind,,]
+        om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
         om$catch_n_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
       }else{
         om$catch_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
+        om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
         om$catch_n_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
       }
@@ -102,6 +103,7 @@ run_year_loop_om <- function(om = NULL,
           exp(-m_surv_mul * om$z_save[, yr_ind, .x, om$survey_season]) *
             om$surv_sel * om$q * wage$survey)
     })
+    #if(yr == 2019) browser()
 
     # Calculate numbers in survey biomass -------------------------------------
     n_surv <- map(seq_len(om$n_space), ~{
@@ -141,7 +143,6 @@ run_year_loop_om <- function(om = NULL,
       om$age_comps_surv[1:(om$age_max_age - 1), yr_ind] <<-
         (n_surv[age_1_ind:(om$age_max_age)] *
            om$surv_sel[age_1_ind:(om$age_max_age)] * om$q) / surv_tmp
-#if(yr == 2019) browser()
       om$age_comps_surv[om$age_max_age, yr_ind] <<-
         sum(n_surv[(om$age_max_age + 1):om$n_age] *
               om$surv_sel[(om$age_max_age + 1):om$n_age] * om$q) / surv_tmp

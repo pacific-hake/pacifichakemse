@@ -423,6 +423,7 @@ setup_blank_om_objects <- function(yrs,
   lst$catch <- matrix(NA,
                       n_yr,
                       dimnames = list(yrs = yrs))
+
   lst$catch_age <- matrix(NA,
                           n_age,
                           n_yr,

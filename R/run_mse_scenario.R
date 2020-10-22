@@ -85,10 +85,10 @@ run_mse_scenario <- function(om = NULL,
     #if(yr >= 2019) browser()
 
     om_output <<- run_om(om,
-                         n_sim_yrs = n_sim_yrs,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          ...)
+    om$catch_obs <- om_output$catch_obs <- om_output$catch
 
     # Create the data for the Estimation Model (EM)
     # if(yr >= yr_start){
@@ -98,6 +98,7 @@ run_mse_scenario <- function(om = NULL,
     #   om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
     # }
     # Create TMB data for EM --------------------------------------------------
+    #browser()
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
     #browser()
     if(yr >= om$m_yr + 1){
@@ -106,21 +107,21 @@ run_mse_scenario <- function(om = NULL,
     # Evaluate the Objective function
     d <- lst_tmb$om
     p <- lst_tmb$params
-    d1 <- conv_d(yr)
-    p1 <- conv_p(yr)
-    d1$survey_x <- NULL
-    d$survey <- round(d$survey, 0)
     #  Make OM equal old OM ---------------------------------------------------
     # All of this stuff is done to make sure the inputs are exactly the same as the inputs for the old code
     # It can be deleted once everything is proved to be working right.
     # Also go into the load_ss_parameters() function and delete the hardwired parameter values there as well
-    #class(d$yr_sel) <- "integer"
-    #class(d$ss_survey) <- "integer"
-    #d$flag_survey <- as.numeric(d$flag_survey)
-    #d$flag_catch <- as.numeric(d$flag_catch)
-    #d1$flag_survey <- as.numeric(d1$flag_survey)
-    #d1$flag_catch <- as.numeric(d1$flag_catch)
-    #dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
+    # --
+    d1 <- conv_d(yr)
+    p1 <- conv_p(yr)
+    d1$survey_x <- NULL
+    # class(d$yr_sel) <- "integer"
+    # class(d$ss_survey) <- "integer"
+    # d$flag_survey <- as.numeric(d$flag_survey)
+    # d$flag_catch <- as.numeric(d$flag_catch)
+    # d1$flag_survey <- as.numeric(d1$flag_survey)
+    # d1$flag_catch <- as.numeric(d1$flag_catch)
+    # dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
     # if("matrix" %in% class(d$b)){
     #   d$b <- d$b[,1]
     # }
@@ -137,6 +138,7 @@ run_mse_scenario <- function(om = NULL,
     # dimnames(p$p_sel) <- dimnames(p1$p_sel)
     # d$age_max_age <- as.numeric(d$age_max_age)
     # cmp <- compare_tmb_data(d, d1, p, p1)
+    # --
 
 #browser()
     # Run TMB model -----------------------------------------------------------
@@ -179,7 +181,6 @@ run_mse_scenario <- function(om = NULL,
     report <- obj$report()
     pars <- extract_params_tmb(opt)
     plike <- get_likelihoods(report) %>% format(nsmall = 20)
-    #browser()
 
     # Calc ref points for next year vals --------------------------------------
     # Calculate the reference points to be applied to the next year
@@ -188,6 +189,7 @@ run_mse_scenario <- function(om = NULL,
                     matrix(rep(wage_catch, om$n_space),
                            ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == om$m_yr),]))
 
+#browser()
 
     f_new <- get_ref_point(pars,
                            om,
@@ -231,7 +233,6 @@ run_mse_scenario <- function(om = NULL,
     # in the next simulation year.
     if(yr < tail(om$yrs, 1)){
       # No need to call this in the final year as the loop is over
-      om0 <- om
       om <<- update_om_data(yr + 1,
                             om,
                             yr_survey_sims,

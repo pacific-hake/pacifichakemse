@@ -106,7 +106,6 @@ get_ref_point <- function(pars,
     # TODO: fix later (add a very low catch)
     c_new <- 0.05 * v_real
   }
-
   if((ssb_y / ssb_0) > 0.4){
     c_new <- f_x * v
   }

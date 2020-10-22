@@ -16,7 +16,6 @@ load_data_om(
   ages = 0:20,
   age_names = paste("age", 0:20),
   rdev_sd = 1.4,
-  rdev_seed = 42,
   move_init = NULL,
   move_max_init = 0.35,
   move_fifty_init = 6,
@@ -63,8 +62,6 @@ Use \code{n_sim_yrs} for that instead.}
 \item{age_names}{A vector of names for the ages. Length must equal length of \code{ages}}
 
 \item{rdev_sd}{Recruitment deviation Standard deviation}
-
-\item{rdev_seed}{Random seed to use for all future random recruitment deviations}
 
 \item{move_init}{Initial distribution of fish}
 
