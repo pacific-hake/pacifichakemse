@@ -81,6 +81,7 @@ plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
             "AAV",
             "Short term catch",
             "Long term catch")
+
   df <- ps$ssb_catch_indicators %>%
     filter(indicator %in% inds) %>%
     mutate(indicator = fct_relevel(indicator, inds))

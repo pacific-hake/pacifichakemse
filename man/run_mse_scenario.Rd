@@ -18,7 +18,7 @@ run_mse_scenario(
 \arguments{
 \item{om}{List as output by \code{\link[=load_data_om]{load_data_om()}}}
 
-\item{random_seed}{Seed for running the OM if it needs to be run (if \code{om_output} is \code{NULL})}
+\item{random_seed}{Seed for running the OM}
 
 \item{n_sim_yrs}{Number of years to simulate}
 
