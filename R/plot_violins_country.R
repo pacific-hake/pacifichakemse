@@ -11,7 +11,8 @@
 plot_violins_country <- function(ps = NULL,
                                  pidx = NULL,
                                  yrs = NULL){
-  stopifnot(!is.null(ps))
+  #TODO: Fix this
+  verify_argument(ps, "list")
 
   d <- ps$violin_indicators
   if(!is.null(yrs)){
@@ -24,7 +25,7 @@ plot_violins_country <- function(ps = NULL,
   stopifnot(length(pidx) == length(unique(d$hcr)))
 
   melted_d <- melt(d,
-                   id.vars = c("run","hcr","country","year"),
+                   id.vars = c("run", "hcr", "country", "year"),
                    measure.vars = 1:3,
                    variable.name = "season",
                    value.name = "exploitation") %>%
