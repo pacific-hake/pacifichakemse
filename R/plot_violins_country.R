@@ -26,9 +26,10 @@ plot_violins_country <- function(ps = NULL,
 
   melted_d <- melt(d,
                    id.vars = c("run", "hcr", "country", "year"),
-                   measure.vars = 1:3,
+                   measure.vars = 2:4,
                    variable.name = "season",
                    value.name = "exploitation") %>%
+    as_tibble() %>%
     mutate(exploitation = ifelse(exploitation > 1.0, NA, exploitation)) %>%
     mutate(hcr = factor(hcr, levels = unique(hcr)[pidx]))
 
