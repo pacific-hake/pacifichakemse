@@ -119,11 +119,9 @@ get_ref_point <- function(pars,
   # Adjust TAC by JMC/Utilization
   c_exp <- c_new
   if(length(tac) == 1){
-    if(tac != 0){
-      # Floor 50%
-      c_exp <- c_new * 0.5
-      c_exp <- ifelse(c_exp < catch_floor, catch_floor, c_exp)
-    }
+    # Floor 50%
+    c_exp <- c_new * 0.5
+    c_exp <- ifelse(c_exp < catch_floor, catch_floor, c_exp)
   }else{
     c_exp <- tac[1] + tac[2] * c_new
   }
