@@ -4,12 +4,15 @@
 \alias{plot_catch}
 \title{Plot Catch by scenario and country}
 \usage{
-plot_catch(ps = NULL, ci = c(0.05, 0.95))
+plot_catch(ps = NULL, ci = c(0.05, 0.95), yr_lim = c(NA_real_, NA_real_))
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.}
+
+\item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+the limits of the data are used}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

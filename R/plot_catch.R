@@ -2,20 +2,22 @@
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param ci A vector of length two of the lower and upper credible interval values.
-#'
+#' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+#' the limits of the data are used
+
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_catch <- function(ps = NULL,
-                       ci = c(0.05, 0.95)){
+                       ci = c(0.05, 0.95),
+                       yr_lim = c(NA_real_, NA_real_)){
 
-  stopifnot(!is.null(ps))
-  stopifnot(!is.null(ci))
+  verify_argument(ps, "list")
+  verify_argument(ci, "numeric", 2)
+  verify_argument(yr_lim, "numeric", 2)
 
   catch <- ps$mse_quants$catch_quant
   stopifnot("0.5" %in% names(catch))
-  stopifnot(is.numeric(ci))
   stopifnot(all(ci %in% names(catch)))
-  stopifnot(length(ci) == 2)
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
 
@@ -27,7 +29,8 @@ plot_catch <- function(ps = NULL,
     scale_y_continuous(name = "Catch (million tonnes)") +
     geom_line(aes(y = !!ci[[1]] * 1e-6, color = scenario), linetype = 2) +
     geom_line(aes(y = !!ci[[2]] * 1e-6, color = scenario), linetype = 2) +
-    #coord_cartesian(ylim = c(0, 1.5)) +
-    theme(legend.position = c(0.1, 0.8), legend.title = element_blank())
+    theme(legend.position = c(0.1, 0.8), legend.title = element_blank()) +
+    coord_cartesian(xlim = yr_lim)
+
   g
 }
