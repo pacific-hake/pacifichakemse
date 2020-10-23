@@ -8,7 +8,8 @@ plot_aa_country(
   ps = NULL,
   type = NULL,
   ci = c(0.05, 0.95),
-  country_colors = c("darkred", "blue4")
+  country_colors = c("darkred", "blue4"),
+  yr_lim = c(NA_real_, NA_real_)
 )
 }
 \arguments{
@@ -18,7 +19,10 @@ plot_aa_country(
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.}
 
-\item{country_colors}{A vector of two colors, the first for Canada, the second for
+\item{country_colors}{A vector of two colors, the first for Canada, the second for}
+
+\item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+the limits of the data are used
 the US}
 }
 \value{

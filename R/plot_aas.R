@@ -3,15 +3,20 @@
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param type Which data type to plot, "survey" or "catch"
 #' @param ci A vector of length two of the lower and upper credible interval values.
+#' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+#' the limits of the data are used
+#'
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_aa <- function(ps = NULL,
                     type = NULL,
-                    ci = c(0.05, 0.95)){
-  stopifnot(!is.null(ps))
-  stopifnot(!is.null(type))
-  stopifnot(is.numeric(ci))
-  stopifnot(length(ci) == 2)
+                    ci = c(0.05, 0.95),
+                    yr_lim = c(NA_real_, NA_real_)){
+
+  verify_argument(ps, "list")
+  verify_argument(type, "character", 1, c("survey", "catch"))
+  verify_argument(ci, "numeric", 2)
+  verify_argument(yr_lim, "numeric", 2)
 
   if(type == "survey"){
     aa <- ps$mse_quants$ams_quant
@@ -38,7 +43,9 @@ plot_aa <- function(ps = NULL,
     geom_line(aes(y = !!ci[[1]], color = scenario), linetype = 2) +
     geom_line(aes(y = !!ci[[2]], color = scenario), linetype = 2) +
     theme(legend.title = element_blank(),
-          legend.position = c(0.1, 0.9))
+          legend.position = c(0.1, 0.9)) +
+    coord_cartesian(xlim = yr_lim)
+
   g
 }
 
@@ -48,6 +55,8 @@ plot_aa <- function(ps = NULL,
 #' @param type Which data type to plot, "survey" or "catch"
 #' @param ci A vector of length two of the lower and upper credible interval values.
 #' @param country_colors A vector of two colors, the first for Canada, the second for
+#' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+#' the limits of the data are used
 #' the US
 #'
 #' @return A [ggplot2::ggplot()] object
@@ -55,13 +64,14 @@ plot_aa <- function(ps = NULL,
 plot_aa_country <- function(ps = NULL,
                             type = NULL,
                             ci = c(0.05, 0.95),
-                            country_colors = c("darkred", "blue4")){
-  stopifnot(!is.null(ps))
-  stopifnot(!is.null(type))
-  stopifnot(!is.null(ci))
-  stopifnot(!is.null(country_colors))
-  stopifnot(is.numeric(ci))
-  stopifnot(length(ci) == 2)
+                            country_colors = c("darkred", "blue4"),
+                            yr_lim = c(NA_real_, NA_real_)){
+
+  verify_argument(ps, "list")
+  verify_argument(type, "character", 1, c("survey", "catch"))
+  verify_argument(ci, "numeric", 2)
+  verify_argument(country_colors, "character", 2)
+  verify_argument(yr_lim, "numeric", 2)
 
   if(type == "survey"){
     aa <- ps$mse_quants$ams_quant
@@ -97,6 +107,8 @@ plot_aa_country <- function(ps = NULL,
     scale_y_continuous(name = ylab)+
     facet_wrap(~scenario) +
     theme(legend.position = "n") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    coord_cartesian(xlim = yr_lim)
+
   g
 }

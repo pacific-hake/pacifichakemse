@@ -4,7 +4,12 @@
 \alias{plot_aa}
 \title{Plot Average Age in Survey (AAS) or Catch (AAC) by scenario}
 \usage{
-plot_aa(ps = NULL, type = NULL, ci = c(0.05, 0.95))
+plot_aa(
+  ps = NULL,
+  type = NULL,
+  ci = c(0.05, 0.95),
+  yr_lim = c(NA_real_, NA_real_)
+)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
@@ -12,6 +17,9 @@ plot_aa(ps = NULL, type = NULL, ci = c(0.05, 0.95))
 \item{type}{Which data type to plot, "survey" or "catch"}
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.}
+
+\item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+the limits of the data are used}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
