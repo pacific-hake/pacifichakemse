@@ -82,10 +82,10 @@ run_season_loop_om <- function(om,
             filter(year == yr) %>%
             select(contains(paste0("space", space))) %>% pull()
         }else{
-          catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space]
+          catch_space <- om$catch_obs[yr_ind, ]$value * om$f_space[space]
         }
       }else{
-        catch_space <- om$catch_obs[yr_ind, ]
+        catch_space <- om$catch_obs[yr_ind, ]$value
       }
 
       # Calculate catch distribution ------------------------------------------

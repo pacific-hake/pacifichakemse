@@ -60,7 +60,7 @@ run_year_loop_om <- function(om = NULL,
 
     # Calculate catch-age -----------------------------------------------------
     if(om$n_season > 1){
-      om$catch_age[, yr_ind] <<- apply(om$catch_n_save_age[, yr_ind,,],
+      om$catch_age[, yr_ind] <<- apply(om$catch_save_age[, yr_ind,,],
                                        MARGIN = 1,
                                        FUN = sum)
       om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
@@ -177,6 +177,7 @@ run_year_loop_om <- function(om = NULL,
         # Plus group
         sum(catch_tmp[(om$age_max_age + 1):om$n_age]) / catch_tot[.x])
     })
+#    browser()
     om$age_comps_catch_space[1:om$age_max_age, yr_ind,] <<- catch_age_comps_tmp %>%
       set_names(seq_len(length(catch_age_comps_tmp))) %>%
       bind_rows() %>%
