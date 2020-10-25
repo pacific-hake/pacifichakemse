@@ -226,6 +226,7 @@ hake_objectives <- function(lst = NULL,
     }
     x <- map_df(1:nruns, ~{
       if(sim_age_comp_type == "catch"){
+        browser()
         if(space == 1){
           calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], mse_dat[[.x]][[1]]$age_max_age)
         }else if(space == 2){
@@ -582,7 +583,7 @@ hake_objectives <- function(lst = NULL,
   #----------------------------------------------------------------------------
   tmp_ssb_by_run <- out$ssb_plot %>% filter(year > min(short_term_yrs))
   out$ssb_quant_by_run <- calc_quantiles_by_group(tmp_ssb_by_run, grp_col = "run",
-                                                    col = "ssb", probs = quants)
+                                                  col = "ssb", probs = quants)
 
   #----------------------------------------------------------------------------
   tmp_catch_by_run <- out$catch_plot %>% filter(year > min(short_term_yrs), year <= long_term_yrs)
@@ -598,25 +599,25 @@ hake_objectives <- function(lst = NULL,
     data.frame(
       indicator = as.factor(indicator),
       value = c(
-  round(length(which(ssb_future[ssb_future$run == .x,]$ssb <= 0.1)) /
-         length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
-  round(length(which(ssb_future[ssb_future$run == .x,]$ssb > 0.1 & ssb_future[ssb_future$run == .x,]$ssb < 0.4)) /
-          length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
-  round(length(which(ssb_future[ssb_future$run == .x,]$ssb > 0.4)) /
-          length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
-  round(out$aav_quant_by_run[out$aav_quant_by_run$run == .x,]$`0.5`, digits = 2),
-  round(out$ssb_quant_by_run[out$ssb_quant_by_run$run == .x,]$`0.5`, digits = 2),
-  round(out$catch_quant_by_run[out$catch_quant_by_run$run == .x,]$`0.5`, digits = 2),
-  round(tmp_catch_by_run[tmp_catch_by_run$run == .x,]$`0.5`, digits = 2),
-  out$vtac_ca_seas_stat$med_sp,
-  out$vtac_ca_seas_stat$med_su,
-  out$vtac_ca_seas_stat$med_fa,
-  out$vtac_us_seas_stat$med_sp,
-  out$vtac_us_seas_stat$med_su,
-  out$vtac_us_seas_stat$med_fa)) %>%
+        round(length(which(ssb_future[ssb_future$run == .x,]$ssb <= 0.1)) /
+                length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
+        round(length(which(ssb_future[ssb_future$run == .x,]$ssb > 0.1 & ssb_future[ssb_future$run == .x,]$ssb < 0.4)) /
+                length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
+        round(length(which(ssb_future[ssb_future$run == .x,]$ssb > 0.4)) /
+                length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
+        round(out$aav_quant_by_run[out$aav_quant_by_run$run == .x,]$`0.5`, digits = 2),
+        round(out$ssb_quant_by_run[out$ssb_quant_by_run$run == .x,]$`0.5`, digits = 2),
+        round(out$catch_quant_by_run[out$catch_quant_by_run$run == .x,]$`0.5`, digits = 2),
+        round(tmp_catch_by_run[tmp_catch_by_run$run == .x,]$`0.5`, digits = 2),
+        out$vtac_ca_seas_stat$med_sp,
+        out$vtac_ca_seas_stat$med_su,
+        out$vtac_ca_seas_stat$med_fa,
+        out$vtac_us_seas_stat$med_sp,
+        out$vtac_us_seas_stat$med_su,
+        out$vtac_us_seas_stat$med_fa)) %>%
       as_tibble() %>%
       mutate(run = .x)
-    }) %>%
+  }) %>%
     map_df(~{.x})
 
   out

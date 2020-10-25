@@ -94,7 +94,7 @@ plot_aa_country <- function(ps = NULL,
   ci <- as.character(ci) %>% map(~{sym(.x)})
 
   g <- ggplot(aa_can, aes(x = year, y = `0.5`)) +
-    geom_line(size = 2, color = country_colors[1]) +
+    geom_line(size = 3, color = country_colors[1]) +
     geom_ribbon(aes(ymin = !!ci[[1]], ymax = !!ci[[2]]),
                 linetype = 0,
                 fill = alpha(country_colors[1], alpha = 0.2),

@@ -8,10 +8,12 @@
 plot_catch_quota <- function(ps = NULL,
                              ci = c(0.05, 0.95)){
 
-  stopifnot(!is.null(ps))
-  stopifnot(!is.null(ci))
+  verify_argument(ps, "list")
+  verify_argument(ci, "numeric", 2)
 
   cq <- ps$mse_quants$quota_quant
+  ct <- ps$mse_quants$catch_quant
+
   stopifnot("0.5" %in% names(cq))
   stopifnot(is.numeric(ci))
   stopifnot(all(ci %in% names(cq)))

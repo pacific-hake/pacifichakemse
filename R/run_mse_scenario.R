@@ -60,9 +60,10 @@ run_mse_scenario <- function(om = NULL,
   mse_run <- map(c(om$m_yr, om$future_yrs), function(yr = .x){
     yr_ind <- which(yr == om$yrs)
 
-    # Random recruitment deviation --------------------------------------------
+    # Recruitment deviations --------------------------------------------------
     if(yr >= om$m_yr + 1){
-      r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
+      #r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
+      r_dev <<- 0
       om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value <<- r_dev
     }
 
@@ -127,7 +128,7 @@ run_mse_scenario <- function(om = NULL,
     # You can check likelihood components and parameter estimates by placing
     # a browser after the MakeADFun() call above and the nlminb() call below and
     # looking at the `plike` vector and the `psmall` list.
-
+browser()
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -154,6 +155,7 @@ run_mse_scenario <- function(om = NULL,
     report <- obj$report()
     pars <- extract_params_tmb(opt)
     plike <- get_likelihoods(report) %>% format(nsmall = 20)
+browser()
 
     # Calc ref points for next year vals --------------------------------------
     wage_catch <- get_age_dat(om$wage_catch_df, om$m_yr - 1) %>% unlist(use.names = FALSE)
@@ -163,12 +165,14 @@ run_mse_scenario <- function(om = NULL,
 
     f_new <- get_ref_point(pars,
                            om,
+                           yr = yr,
                            ssb_y = report$SSB %>% tail(1),
                            f_in = report$Fyear %>% tail(1),
                            n_end = report$N_beg[, ncol(report$N_beg)],
                            tac = tac,
                            v_real = v_real,
                            ...)
+browser()
 
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 

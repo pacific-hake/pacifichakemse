@@ -29,7 +29,9 @@ plot_catch <- function(ps = NULL,
     scale_y_continuous(name = "Catch (million tonnes)") +
     geom_line(aes(y = !!ci[[1]] * 1e-6, color = scenario), linetype = 2) +
     geom_line(aes(y = !!ci[[2]] * 1e-6, color = scenario), linetype = 2) +
-    theme(legend.position = c(0.1, 0.8), legend.title = element_blank()) +
+    theme(legend.position = c(0.12, 0.8),
+          legend.title = element_blank(),
+          legend.box.background = element_blank()) +
     coord_cartesian(xlim = yr_lim)
 
   g

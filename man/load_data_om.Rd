@@ -14,6 +14,7 @@ load_data_om(
   space_names = c("Canada", "US"),
   n_survey = 2,
   ages = 0:20,
+  age_plus_grp = 15,
   age_names = paste("age", 0:20),
   rdev_sd = 1.4,
   move_init = NULL,

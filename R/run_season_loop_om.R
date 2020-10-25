@@ -123,7 +123,7 @@ run_season_loop_om <- function(om,
              "did you set `n_sim_yrs` instead of `yr_future`?",
              call. = FALSE)
       })
-
+      #if(yr > 2019) browser()
       # Calculate F based on catch distribution -------------------------------
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,
@@ -185,7 +185,7 @@ run_season_loop_om <- function(om,
         n_out_plus <- n_survive_plus * (om$move_mat[space, om$n_age, season, yr_ind])
         # Incoming
         n_in_plus <- (om$n_save_age[om$n_age-1, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age - 1]) +
-                       om$n_save_age[om$n_age, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age])) *
+                        om$n_save_age[om$n_age, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age])) *
           om$move_mat[space_idx, om$n_age, season, yr_ind]
 
         om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus

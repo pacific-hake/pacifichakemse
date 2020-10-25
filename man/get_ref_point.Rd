@@ -7,6 +7,7 @@
 get_ref_point(
   pars,
   df,
+  yr = NULL,
   ssb_y,
   f_in = NA,
   n_end,

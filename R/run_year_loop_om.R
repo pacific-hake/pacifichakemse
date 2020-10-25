@@ -173,15 +173,16 @@ run_year_loop_om <- function(om = NULL,
       sum(om$catch_n_save_age[, yr_ind, .x,])
     })
     catch_age_comps_tmp <- map(seq_len(om$n_space), ~{
-      c(catch_tmp[.x, age_1_ind:(om$age_max_age)] / catch_tot[.x],
+      c(catch_tmp[.x, age_1_ind :om$age_max_age],
         # Plus group
-        sum(catch_tmp[(om$age_max_age + 1):om$n_age]) / catch_tot[.x])
+        sum(catch_tmp[.x, (om$age_max_age + 1):om$n_age])) / catch_tot[.x]
     })
-#    browser()
+
     om$age_comps_catch_space[1:om$age_max_age, yr_ind,] <<- catch_age_comps_tmp %>%
       set_names(seq_len(length(catch_age_comps_tmp))) %>%
       bind_rows() %>%
       as.matrix()
+    #if(yr >= 2019) browser()
 
     if(om$flag_catch[yr_ind] == 1){
       om$age_comps_catch[1:(om$age_max_age - 1), yr_ind] <<-

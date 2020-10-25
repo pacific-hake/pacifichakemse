@@ -389,11 +389,12 @@ get_yrs_mse_list <- function(lst){
 #'
 #' @return A list of the blank OM outputs
 #' @export
-setup_blank_om_objects <- function(yrs,
-                                   ages,
-                                   max_surv_age,
-                                   n_space,
-                                   n_season){
+setup_blank_om_objects <- function(yrs = NULL,
+                                   ages = NULL,
+                                   age_plus_grp = NULL,
+                                   max_surv_age = NULL,
+                                   n_space = NULL,
+                                   n_season = NULL){
 
   n_yr <- length(yrs)
   n_age <- length(ages)
@@ -521,9 +522,10 @@ setup_blank_om_objects <- function(yrs,
                                dim = c(max_surv_age, n_yr),
                                dimnames = list(ages = seq_len(max_surv_age),
                                                yrs = yrs))
+
   lst$age_comps_catch_space <- array(NA,
-                                     dim = c(max(ages), n_yr, n_space),
-                                     dimnames = list(ages = seq_len(max(ages)),
+                                     dim = c(age_plus_grp, n_yr, n_space),
+                                     dimnames = list(ages = seq_len(age_plus_grp),
                                                      yrs = yrs,
                                                      space = seq_len(n_space)))
   lst$age_comps_om <- array(NA,

@@ -4,7 +4,14 @@
 \alias{setup_blank_om_objects}
 \title{Construct blank objects for Operating model outputs}
 \usage{
-setup_blank_om_objects(yrs, ages, max_surv_age, n_space, n_season)
+setup_blank_om_objects(
+  yrs = NULL,
+  ages = NULL,
+  age_plus_grp = NULL,
+  max_surv_age = NULL,
+  n_space = NULL,
+  n_season = NULL
+)
 }
 \arguments{
 \item{yrs}{A vector of years}
