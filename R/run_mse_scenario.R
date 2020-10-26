@@ -62,8 +62,8 @@ run_mse_scenario <- function(om = NULL,
 
     # Recruitment deviations --------------------------------------------------
     if(yr >= om$m_yr + 1){
-      #r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
-      r_dev <<- 0
+      r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
+      #r_dev <<- 0
       om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value <<- r_dev
     }
 
@@ -73,6 +73,7 @@ run_mse_scenario <- function(om = NULL,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          ...)
+    #if(yr == 2020) browser()
 
     om$catch_obs <- om_output$catch_obs <- om_output$catch
 
@@ -114,10 +115,11 @@ run_mse_scenario <- function(om = NULL,
     # dimnames(p$init_n) <- dimnames(p1$init_n)
     # dimnames(p$p_sel) <- dimnames(p1$p_sel)
     # d$age_max_age <- as.numeric(d$age_max_age)
-    # cmp <- compare_tmb_data(d, d1, p, p1)
+    # # cmp <- compare_tmb_data(d, d1, p, p1)
     # --
 
     # Run TMB model -----------------------------------------------------------
+#browser()
     obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
     rsmall <- report %>% map(~{format(.x, nsmall = 20)})
@@ -128,7 +130,7 @@ run_mse_scenario <- function(om = NULL,
     # You can check likelihood components and parameter estimates by placing
     # a browser after the MakeADFun() call above and the nlminb() call below and
     # looking at the `plike` vector and the `psmall` list.
-browser()
+#browser()
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -153,16 +155,18 @@ browser()
                                  eval.max = 1e6))
 
     report <- obj$report()
-    pars <- extract_params_tmb(opt)
     plike <- get_likelihoods(report) %>% format(nsmall = 20)
-browser()
+    pars <- extract_params_tmb(opt)
+    psmall <- opt %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
+
+#browser()
 
     # Calc ref points for next year vals --------------------------------------
-    wage_catch <- get_age_dat(om$wage_catch_df, om$m_yr - 1) %>% unlist(use.names = FALSE)
-    v_real <- sum(om_output$n_save_age[, which(om$yrs == om$m_yr), , om$n_season] *
+    wage_catch <- get_age_dat(om$wage_catch_df, yr - 1) %>% unlist(use.names = FALSE)
+    v_real <- sum(om_output$n_save_age[, which(om$yrs == yr), , om$n_season] *
                     matrix(rep(wage_catch, om$n_space),
-                           ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == om$m_yr),]))
-
+                           ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == yr),]))
+#if(yr == 2020) browser()
     f_new <- get_ref_point(pars,
                            om,
                            yr = yr,
@@ -172,7 +176,7 @@ browser()
                            tac = tac,
                            v_real = v_real,
                            ...)
-browser()
+if(yr == 2019) browser()
 
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 

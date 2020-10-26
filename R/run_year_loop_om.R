@@ -40,15 +40,18 @@ run_year_loop_om <- function(om = NULL,
         wage <- get_wa_dfs(om, yr)
         om$ssb[yr_ind, space] <<- sum(om$n_save_age[, yr_ind, space, 1] * wage$ssb, na.rm = TRUE) * 0.5
       }
-      (4 * om$h * om$r0_space[space] * om$ssb[yr_ind, space] /
+      rec <- (4 * om$h * om$r0_space[space] * om$ssb[yr_ind, space] /
           (om$ssb_0[space] * (1 - om$h) + om$ssb[yr_ind, space] *
              (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                       om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
+      #if(yr >= 2020) browser()
+
+      rec
     }) %>% set_names(om$space_names)
+    #if(yr == 2019) browser()
     om$n_save_age[1, yr_ind, , 1] <<- init_rec
 
     om$r_save[yr_ind, ] <<- init_rec
-
     # Run season loop code ----------------------------------------------------
     om <<- run_season_loop_om(om = om,
                               yr = yr,
@@ -57,6 +60,7 @@ run_year_loop_om <- function(om = NULL,
                               verbose = verbose,
                               ...)
     # Return from season loop -------------------------------------------------
+
 
     # Calculate catch-age -----------------------------------------------------
     if(om$n_season > 1){
@@ -190,6 +194,7 @@ run_year_loop_om <- function(om = NULL,
       om$age_comps_catch[om$age_max_age, yr_ind] <<-
         sum(om$catch_n_age[(om$age_max_age + 1):om$n_age, yr_ind]) / om$catch_n[yr_ind]
     }
+
     if(verbose){
       cat("\n")
     }

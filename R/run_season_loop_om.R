@@ -96,6 +96,7 @@ run_season_loop_om <- function(om,
         }
       }
 
+      #if(yr >= 2020) browser()
       # Calculate catch distribution ------------------------------------------
       e_tmp <- catch_space * om$catch_props_space_season[space, season] %>% pull
       n_tmp <- om$n_save_age[, yr_ind, space, season]
@@ -150,7 +151,7 @@ run_season_loop_om <- function(om,
       # space is the area fish are in and space_idx is the area the fish
       # are coming in from. These indexes are used in the numbers-at-age
       # calculations which include movement
-      if(space - 1 == 0){
+      if(space == 1){
         space_idx <- 2
       }
       if(space == om$n_space){
@@ -162,14 +163,17 @@ run_season_loop_om <- function(om,
       if(!om$move){
         space_idx <- 1
       }
-
+      # There is code needed here for the case if there are more than 2 spaces:
+      # See https://github.com/nissandjac/PacifichakeMSE/blob/f8268f77f13c3989637de3e4a06978c739d65494/R/run_agebased_model_true_Catch.R#L396
       if(season < om$n_season){
+        #if(yr == 2019) browser()
         om$n_save_age[, yr_ind, space, season + 1] <<- om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
           # Add the ones come from the surrounding areas
           om$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (om$move_mat[space_idx, , season, yr_ind])
       }else{
+        #if(yr == 2019) browser()
         om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave
@@ -190,6 +194,7 @@ run_season_loop_om <- function(om,
 
         om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
       }
+      #if(yr >= 2020) browser()
 
       # Calculate age-comps ---------------------------------------------------
       om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] /
