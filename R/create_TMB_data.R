@@ -27,21 +27,16 @@ create_tmb_data <- function(om = NULL,
   inc_yrs <- om$yrs[om$yrs <= yr]
   inc_yr_ind <- which(om$yrs == yr)
 
-  # Catch Observations
-  catch_obs_yrs <- om$yrs[as.numeric(rownames(om$catch_obs)) %in% inc_yrs]
-  if(!identical(inc_yrs, catch_obs_yrs)){
-    stop("The years in the catch observations does not match the number of yrs in the OM")
-  }
-
-  om$catch_obs <- om$catch %>%
-    as_tibble(.name_repair = "minimal") %>%
-    rename(value = 1) %>%
-    mutate(yr = om$yrs) %>%
-    select(yr, everything()) %>%
-    filter(yr %in% inc_yrs) %>%
-    select(value) %>%
-    as.matrix() %>%
-    `rownames<-`(inc_yrs)
+  om$catch_obs <- om$catch[rownames(om$catch) %in% inc_yrs, ]
+  # om$catch_obs <- om$catch %>%
+  #   as_tibble(.name_repair = "minimal") %>%
+  #   rename(value = 1) %>%
+  #   mutate(yr = om$yrs) %>%
+  #   select(yr, everything()) %>%
+  #   filter(yr %in% inc_yrs) %>%
+  #   select(value) %>%
+  #   as.matrix() %>%
+  #   `rownames<-`(inc_yrs)
 
   # Maturity
   om$mat_sel <- om$mat_sel %>%
@@ -65,14 +60,25 @@ create_tmb_data <- function(om = NULL,
   om$parameters$init_n <- om$parameters$init_n %>%
     select(value) %>%
     as.matrix()
-  #browser()
+
   om$parameters$r_in <- om$parameters$r_in %>%
     filter(yr <= !!yr) %>%
     # Remove the final year
     slice(-n()) %>%
     pull(value)
-
   om$parameters$f_0 <- rowSums(om$f_out_save[1:inc_yr_ind, , ])
+  # Set f_0 and r_in values to 0.2 and 0 respectively in the future years
+  if(yr > om$m_yr){
+    start_yr_const_f <- which(inc_yrs == om$m_yr + 1)
+    end_yr_const_f <- which(inc_yrs == yr)
+    om$parameters$f_0[start_yr_const_f:end_yr_const_f] <- 0.2
+  }
+  if(yr > om$m_yr + 1){
+    start_yr_const_r <- which(inc_yrs == om$m_yr + 1)
+    end_yr_const_r <- which(inc_yrs == yr - 1)
+    om$parameters$r_in[start_yr_const_r:end_yr_const_r] <- 0
+  }
+
   om$parameters$p_sel <- om$sel_by_yrs %>%
     as.matrix()
 
@@ -128,7 +134,6 @@ create_tmb_data <- function(om = NULL,
     pull(value)
   params$p_sel_surv <- om$parameters$p_sel_surv %>%
     pull(value)
-  params$f_0 <- rowSums(om$f_out_save[1:inc_yr_ind, , ])
 
   last_catch <- om$catch_obs %>% tail(1)
   if(last_catch == 0){

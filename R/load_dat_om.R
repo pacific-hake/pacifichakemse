@@ -234,7 +234,8 @@ load_data_om <- function(ss_model = NULL,
   lst$age_catch <- ss_model$age_catch
   lst$ss_catch <- ss_model$ss_catch
   lst$catch_obs <- ss_model$catch_obs %>%
-    as_tibble()
+    as_tibble() %>%
+    mutate(value = as.numeric(value))
   if(lst$n_yr > nrow(lst$catch_obs)){
     new_val <- ifelse(populate_future, mean(lst$catch_obs$value), NA)
     new_df <- rep(new_val, lst$n_yr - nrow(lst$catch_obs)) %>%

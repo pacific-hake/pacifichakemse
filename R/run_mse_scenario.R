@@ -69,19 +69,25 @@ run_mse_scenario <- function(om = NULL,
 
     # Run the Operating Model -------------------------------------------------
     cat(green("OM: Year =", yr, "- Seed =", random_seed, "\n"))
+
     om_output <<- run_om(om,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          ...)
     #if(yr == 2020) browser()
 
-    om$catch_obs <- om_output$catch_obs <- om_output$catch
+    #om$catch_obs <- om_output$catch_obs <- om_output$catch
 
     # Create TMB data for EM --------------------------------------------------
+
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
-    if(yr >= om$m_yr + 1){
-      lst_tmb$params$f_0[length(lst_tmb$params$f_0)] <- 0.2
-    }
+    #browser()
+    # if(yr > om$m_yr){
+    #   #browser()
+    #
+    #   yrs <- as.numeric(names(lst_tmb$params$f_0))
+    #   lst_tmb$params$f_0[yrs == yr] <- 0.2
+    # }
     # Evaluate the Objective function
     d <- lst_tmb$om
     p <- lst_tmb$params
@@ -99,6 +105,7 @@ run_mse_scenario <- function(om = NULL,
     # d$flag_catch <- as.numeric(d$flag_catch)
     # d1$flag_survey <- as.numeric(d1$flag_survey)
     # d1$flag_catch <- as.numeric(d1$flag_catch)
+    # d1$catch_obs <- d1$catch_obs[,1]
     # dimnames(d$catch_obs) <- dimnames(d1$catch_obs)
     # if("matrix" %in% class(d$b)){
     #   d$b <- d$b[,1]
@@ -126,11 +133,12 @@ run_mse_scenario <- function(om = NULL,
     plike <- report %>% get_likelihoods %>% format(nsmall = 20)
     objfn <- obj$fn() %>% format(nsmall = 20)
     psmall <- obj %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
+#browser()
 
     # You can check likelihood components and parameter estimates by placing
     # a browser after the MakeADFun() call above and the nlminb() call below and
     # looking at the `plike` vector and the `psmall` list.
-#browser()
+
     # Set up limits of optimization for the objective function minimization
     lower <- obj$par - Inf
     upper <- obj$par + Inf
@@ -176,7 +184,7 @@ run_mse_scenario <- function(om = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
-if(yr == 2019) browser()
+#if(yr == 2019) browser()
 
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 

@@ -40,7 +40,8 @@ update_om_data <- function(yr = NULL,
   yr_ind <- which(om$yrs == yr)
 
   # Catch updates ------------------------------------------------------------
-  om$catch_obs[as.numeric(rownames(om$catch_obs)) == yr,] <- f_new$c_new
+  om$catch_obs[om$catch_obs$yr == yr,]$value <- f_new$c_new
+  #om$catch_obs[as.numeric(rownames(om$catch_obs)) == yr,] <- f_new$c_new
 
   curr_ss_catch <- om$ss_catch[1:(yr_ind - 1)]
   om$ss_catch[yr_ind] <- ceiling(mean(curr_ss_catch[curr_ss_catch > 0]))
