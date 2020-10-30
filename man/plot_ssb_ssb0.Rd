@@ -2,10 +2,9 @@
 % Please edit documentation in R/plot_ssb_ssb0.R
 \name{plot_ssb_ssb0}
 \alias{plot_ssb_ssb0}
-\title{Plot total SSB/SSB0 by scenario where SSB is the Spawning Stock Biomass from the
-Estimation model and SSB0 is the initial SSB from teh Operating model}
+\title{Plot total SSB/SSB0 by scenario}
 \usage{
-plot_ssb_ssb0(ps = NULL, ci = c(0.05, 0.95))
+plot_ssb_ssb0(ps = NULL, ci = c(0.05, 0.95), yr_lim = c(NA_real_, NA_real_))
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
@@ -16,6 +15,5 @@ plot_ssb_ssb0(ps = NULL, ci = c(0.05, 0.95))
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
-Plot total SSB/SSB0 by scenario where SSB is the Spawning Stock Biomass from the
-Estimation model and SSB0 is the initial SSB from teh Operating model
+Plot total SSB/SSB0 by scenario
 }

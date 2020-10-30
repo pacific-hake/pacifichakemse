@@ -202,7 +202,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
       mutate(scenario = factor(scenario, levels = plotnames[porder]))
   }
 
-  # List for holing all the quantiles
+  # List for holding all the quantiles
   mse_quants <- NULL
 
   # AMC quantile objects ------------------------------------------------------
@@ -246,6 +246,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(quota_us_tmp)
 
   # SSB quantile objects ------------------------------------------------------
+  mse_quants$ssb_ssb0_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ssb0_quant")
   mse_quants$ssb_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ca_quant")
   mse_quants$ssb_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_us_quant")
   ssb_ca_tmp <- mse_quants$ssb_ca_quant %>%

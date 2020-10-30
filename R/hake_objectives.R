@@ -59,6 +59,12 @@ hake_objectives <- function(lst = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
+  # ssb_ssb0_quant ------------------------------------------------------------
+  out$ssb_ssb0_quant <- calc_quantiles_by_group(out$ssb_plot,
+                                                "year",
+                                                "ssb",
+                                                probs = quants)
+
   # ssb_mid_plot --------------------------------------------------------------
   out$ssb_mid_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
