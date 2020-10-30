@@ -59,6 +59,8 @@ Use \code{n_sim_yrs} for that instead.}
 
 \item{ages}{A vector of ages}
 
+\item{age_plus_grp}{Plus group for ages. Required for \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
+
 \item{age_names}{A vector of names for the ages. Length must equal length of \code{ages}}
 
 \item{rdev_sd}{Recruitment deviation Standard deviation}

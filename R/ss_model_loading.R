@@ -360,7 +360,6 @@ calc_mcmc <- function(mcmc,
 
 #' Load the SS model input and output data needed by this package in correct format
 #'
-#' @param ss_model SS3 model output as created by [create_rds_file()]
 #' @param s_min Minimum age in fishery selectivity
 #' @param s_max Maximum age in fishery selectivity
 #' @param s_min_survey Minimum age in survey selectivity

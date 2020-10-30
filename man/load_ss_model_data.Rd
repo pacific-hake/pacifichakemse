@@ -35,8 +35,6 @@ selectivity estimates, e.g. Used to fill in Canadian selectivity because the
 estimation model only estimates one selectivity which is used for the USA}
 
 \item{...}{Arguments to be passed to \code{\link[=load_ss_sel_parameters]{load_ss_sel_parameters()}}}
-
-\item{ss_model}{SS3 model output as created by \code{\link[=create_rds_file]{create_rds_file()}}}
 }
 \value{
 A \link{list} with objects to be used throughout the package code

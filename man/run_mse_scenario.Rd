@@ -22,6 +22,11 @@ run_mse_scenario(
 
 \item{n_sim_yrs}{Number of years to simulate}
 
+\item{tac}{The tac vector of length 1 or 2 to apply. e.g. c(a, b): the new catch
+in the OM is c_new * b + a. If instead of a 2-element vector, a single value
+is given, the expanded catch in the OM will be c_new * 0.5 unless below \code{catch_floor} in
+which case it will be c_new = \code{catch_floor}.}
+
 \item{c_increase}{Increase in max movement}
 
 \item{m_increase}{Decrease of spawners returning south}
@@ -29,8 +34,6 @@ run_mse_scenario(
 \item{sel_change}{Time varying selectivity}
 
 \item{...}{Absorb arguments intended for other functions}
-
-\item{ss_model}{Output from \code{\link[=load_ss_model_data]{load_ss_model_data()}}}
 }
 \value{
 A list of length 3: The MSE output, the OM output, and the EM output

@@ -3,8 +3,6 @@
 #' @details Saves the output of the MSE runs to the files specified in `fns`, in the directories
 #' specified in `results_root_dir` and `results_dir`
 #'
-#' @param ss_model_output_dir A directory which contains SS3 model run output. Used to import
-#' estimates from the SS3 model
 #' @param n_runs Then number of runs to do for each simulation
 #' @param n_sim_yrs The number of years to simulate into the future
 #' @param fns A vector of file names for the scenarios (.rds files). .rds extension is optional
@@ -27,6 +25,7 @@
 #' @param random_seed A seed value to use when calling for all random functions
 #' @param results_root_dir The results root directory
 #' @param results_dir The results directory
+#' @param catch_floor The lowest value to allow catch to drop to when applying the tac rule for the catch floor
 #' @param ... Arguments passed to [load_data_om()]
 #'
 #' @return Nothing
@@ -44,7 +43,7 @@ run_mses <- function(n_runs = 10,
                      n_sim_yrs = NULL,
                      fns = NULL,
                      plot_names = NULL,
-                     tacs = 1,
+                     tacs = c(0, 1),
                      c_increases = 0,
                      m_increases = 0,
                      sel_changes = 0,

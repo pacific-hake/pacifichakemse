@@ -13,8 +13,6 @@ get_select <- function(ages = NULL,
                        p_sel = NULL,
                        s_min = NULL,
                        s_max = NULL){
-  # TODO: Check this code again with the original. ptmp is possibly assigned on a previous iteration in a for loop
-  # in the original
 
   verify_argument(ages, "integer")
   verify_argument(p_sel, "tbl_df")

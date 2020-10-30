@@ -12,6 +12,7 @@
 #' @param n_space Number of spatial areas
 #' @param space_names A vector of names for the spaces. Length must equal `n_space`
 #' @param ages A vector of ages
+#' @param age_plus_grp Plus group for ages. Required for [setup_blank_om_objects()]
 #' @param age_names A vector of names for the ages. Length must equal length of `ages`
 #' @param sel_change_yr A year in which a selectivity change took place
 #' @param move_max_init Maximum movement rate

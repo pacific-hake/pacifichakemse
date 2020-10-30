@@ -8,10 +8,9 @@
 #' @param om Operating model output returned by the [run_om()] function
 #' @param ss_model A model input/output list representing the SS model as found in
 #' the RDS file created by  [create_rds_file()]
-#' @param yr The year to trim the data to on the end of the time series. Various objects
+#' @param yr The year to trim the data to on the end of the time series of various objects
+#' @param ...
 #' are populated into the future and must be trimmed
-#' @param .. Absorbs parameters not needed
-#'
 #' @return A list of 2 elements: the data and parameter values needed by [TMB::MakeADFun()]
 #' @importFrom stringr str_split
 #' @export

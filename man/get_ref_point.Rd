@@ -23,6 +23,8 @@ get_ref_point(
 
 \item{df}{data frame of non-estimated parameters}
 
+\item{yr}{The year to calculate the reference points for}
+
 \item{ssb_y}{Spawning biomass}
 
 \item{f_in}{Fishing mortality}

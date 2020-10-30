@@ -2,6 +2,7 @@
 #'
 #' @param pars estimated parameters
 #' @param df data frame of non-estimated parameters
+#' @param yr The year to calculate the reference points for
 #' @param ssb_y Spawning biomass
 #' @param f_in Fishing mortality
 #' @param n_end Numbers at age

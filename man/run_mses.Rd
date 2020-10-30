@@ -9,7 +9,7 @@ run_mses(
   n_sim_yrs = NULL,
   fns = NULL,
   plot_names = NULL,
-  tacs = 1,
+  tacs = c(0, 1),
   c_increases = 0,
   m_increases = 0,
   sel_changes = 0,
@@ -58,10 +58,9 @@ the future, in the same order as the \code{fns} file names, or a single value wh
 
 \item{results_dir}{The results directory}
 
-\item{...}{Arguments passed to \code{\link[=load_data_om]{load_data_om()}}}
+\item{catch_floor}{The lowest value to allow catch to drop to when applying the tac rule for the catch floor}
 
-\item{ss_model_output_dir}{A directory which contains SS3 model run output. Used to import
-estimates from the SS3 model}
+\item{...}{Arguments passed to \code{\link[=load_data_om]{load_data_om()}}}
 }
 \value{
 Nothing
