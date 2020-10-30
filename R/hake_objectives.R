@@ -224,9 +224,10 @@ hake_objectives <- function(lst = NULL,
     if(space != 0 && space != 1 && space != 2){
       stop("space must be 0, 1, or 2", call. = FALSE)
     }
+
     x <- map_df(1:nruns, ~{
       if(sim_age_comp_type == "catch"){
-        browser()
+        #browser()
         if(space == 1){
           calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], mse_dat[[.x]][[1]]$age_max_age)
         }else if(space == 2){
@@ -245,7 +246,7 @@ hake_objectives <- function(lst = NULL,
       }
     }) %>%
       t() %>%
-      as_tibble() %>%
+      as_tibble(.name_repair = ~ as.character(sim_data[[1]]$ages[-1])) %>%
       mutate(yr = yrs)
     names(x) <- c(1:nruns, "yr")
     x <- x %>%
