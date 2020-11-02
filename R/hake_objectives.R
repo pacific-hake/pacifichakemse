@@ -27,6 +27,7 @@ hake_objectives <- function(lst = NULL,
                             quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
                             catch_multiplier = 1e-6,
                             ...){
+
   verify_argument(lst, "list")
   verify_argument(sim_data, "list")
   verify_argument(run_num, "numeric")
@@ -91,7 +92,7 @@ hake_objectives <- function(lst = NULL,
 
   # ssb_mid_ca_quant ----------------------------------------------------------
   out$ssb_mid_ca_quant <- out$ssb_mid_ca %>%
-    calc_quantiles_by_group("year", "ssb")
+    calc_quantiles_by_group("year", "ssb", probs = quants)
 
   # ssb_mid_us ----------------------------------------------------------------
   out$ssb_mid_us <- out$ssb_mid_space %>%
@@ -100,7 +101,7 @@ hake_objectives <- function(lst = NULL,
 
   # ssb_mid_us_quant ----------------------------------------------------------
   out$ssb_mid_us_quant <- out$ssb_mid_us %>%
-    calc_quantiles_by_group("year", "ssb")
+    calc_quantiles_by_group("year", "ssb", probs = quants)
 
   # ssb_space -----------------------------------------------------------------
   out$ssb_space <- map2(sim_data, seq_along(sim_data), ~{
@@ -119,7 +120,7 @@ hake_objectives <- function(lst = NULL,
 
   # ssb_ca_quant --------------------------------------------------------------
   out$ssb_ca_quant <- out$ssb_ca %>%
-    calc_quantiles_by_group("year", "ssb")
+    calc_quantiles_by_group("year", "ssb", probs = quants)
 
   # ssb_us --------------------------------------------------------------------
   out$ssb_us <- out$ssb_space %>%
@@ -128,7 +129,7 @@ hake_objectives <- function(lst = NULL,
 
   # ssb_us_quant --------------------------------------------------------------
   out$ssb_us_quant <- out$ssb_us %>%
-    calc_quantiles_by_group("year", "ssb")
+    calc_quantiles_by_group("year", "ssb", probs = quants)
 
   # v_ca_plot -----------------------------------------------------------------
   # Vulnerable biomass at mid-year start of season 3 for each country
@@ -252,7 +253,7 @@ hake_objectives <- function(lst = NULL,
       }
     }) %>%
       t() %>%
-      as_tibble(.name_repair = ~ as.character(sim_data[[1]]$ages[-1])) %>%
+      as_tibble(.name_repair = ~ as.character(1:nruns)) %>%
       mutate(yr = yrs)
     names(x) <- c(1:nruns, "yr")
     x <- x %>%
@@ -332,6 +333,16 @@ hake_objectives <- function(lst = NULL,
     mutate(quota = `1` + `2`) %>%
     select(year, quota, run)
 
+  # catch_quota_tot -----------------------------------------------------------
+  out$catch_quota_tot <- out$catch_plot %>%
+    left_join(out$quota_tot, by = c("run", "year")) %>%
+    mutate(catch_quota = catch / quota) %>%
+    select(year, catch, quota, catch_quota, run)
+
+  # catch_quota_quant ---------------------------------------------------------
+  out$catch_quota_quant <- out$catch_quota_tot %>%
+    calc_quantiles_by_group("year", "catch_quota", probs = quants)
+
   # quota_ca ------------------------------------------------------------------
   out$quota_ca <- out$quota_space %>%
     select(year, `1`, run) %>%
@@ -339,7 +350,7 @@ hake_objectives <- function(lst = NULL,
 
   # quota_ca_quant ------------------------------------------------------------
   out$quota_ca_quant <- out$quota_ca %>%
-    calc_quantiles_by_group("year", "quota")
+    calc_quantiles_by_group("year", "quota", probs = quants)
 
   # quota_us ------------------------------------------------------------------
   out$quota_us <- out$quota_space %>%
@@ -348,7 +359,7 @@ hake_objectives <- function(lst = NULL,
 
   # quota_us_quant ------------------------------------------------------------
   out$quota_us_quant <- out$quota_us %>%
-    calc_quantiles_by_group("year", "quota")
+    calc_quantiles_by_group("year", "quota", probs = quants)
 
   # quota_quant ---------------------------------------------------------------
   out$quota_quant <- calc_quantiles_by_group(out$quota_tot,
