@@ -7,6 +7,7 @@
 #' @return A [ggplot2::ggplot()] object
 #' @export
 #' @importFrom forcats fct_relevel
+#' @importFrom PNWColors pnw_palette
 plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
 
   # Extract Catch, SSB, and AAV and quantiles for them
@@ -86,7 +87,30 @@ plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
     filter(indicator %in% inds) %>%
     mutate(indicator = fct_relevel(indicator, inds))
 
-  cols <- PNWColors::pnw_palette("Starfish",n = length(unique(df$hcr)), type = "discrete")
+  # Remove tails of data (0.05 and 0.95 percentiles)
+  qs <- df %>%
+    group_by(hcr, indicator) %>%
+    summarize(qlow = quantile(value, 0.05), qhigh = quantile(value, 0.95))
+
+  df <- df %>% left_join(qs, by = c("hcr", "indicator")) %>%
+    group_by(hcr, indicator) %>%
+    #filter(value >= qlow && value <= qhigh) %>%
+    filter(value >= qlow) %>%
+    ungroup() %>%
+    select(-c(qlow, qhigh))
+
+  # Standardize short and long-term catch values
+  df_st <- df %>%
+    filter(indicator ==  "Short term catch") %>%
+    mutate(value = value / max(value))
+  df_lt <- df %>%
+    filter(indicator ==  "Long term catch") %>%
+    mutate(value = value / max(value))
+  df <-  df %>%
+    filter(!indicator %in%  c("Short term catch", "Long term catch")) %>%
+    bind_rows(df_st, df_lt)
+
+  cols <- pnw_palette("Starfish",n = length(unique(df$hcr)), type = "discrete")
   g <- ggplot(df, aes(x = hcr, y = value, fill = hcr)) +
     geom_violin() +
     geom_boxplot(width = 0.15, col = "black", outlier.shape = NA) +
