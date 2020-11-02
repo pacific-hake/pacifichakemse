@@ -236,14 +236,14 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(f0_us_tmp)
 
   # Catch quota quantile objects ----------------------------------------------
+  mse_quants$catch_quota_quant <- merge_dfs_from_scenarios(lst_indicators, "catch_quota_quant")
+  mse_quants$quota_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_quant")
   mse_quants$quota_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_ca_quant")
   mse_quants$quota_us_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_us_quant")
   quota_ca_tmp <- mse_quants$quota_ca_quant %>%
     mutate(country = "Canada")
   quota_us_tmp <- mse_quants$quota_us_quant %>%
     mutate(country = "US")
-  mse_quants$quota_quant <- quota_ca_tmp %>%
-    bind_rows(quota_us_tmp)
 
   # SSB quantile objects ------------------------------------------------------
   mse_quants$ssb_ssb0_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ssb0_quant")
