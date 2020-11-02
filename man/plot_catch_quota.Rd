@@ -4,7 +4,12 @@
 \alias{plot_catch_quota}
 \title{Plot Catch/Quota by scenario}
 \usage{
-plot_catch_quota(ps = NULL, ci = c(0.05, 0.95))
+plot_catch_quota(
+  ps = NULL,
+  ci = c(0.05, 0.95),
+  yr_lim = c(NA_real_, NA_real_),
+  y_lim = c(NA_real_, NA_real_)
+)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}

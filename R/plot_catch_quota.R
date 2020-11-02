@@ -6,43 +6,36 @@
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_catch_quota <- function(ps = NULL,
-                             ci = c(0.05, 0.95)){
+                             ci = c(0.05, 0.95),
+                             yr_lim = c(NA_real_, NA_real_),
+                             y_lim = c(NA_real_, NA_real_)){
 
   verify_argument(ps, "list")
   verify_argument(ci, "numeric", 2)
+  verify_argument(yr_lim, "numeric", 2)
+  verify_argument(y_lim, "numeric", 2)
 
-  cq <- ps$mse_quants$quota_quant
-  ct <- ps$mse_quants$catch_quant
-
-  stopifnot("0.5" %in% names(cq))
-  stopifnot(is.numeric(ci))
-  stopifnot(all(ci %in% names(cq)))
-  stopifnot(length(ci) == 2)
-
-  cq_can <- cq %>%
-    filter(country == "Canada")
-  cq_us <- cq %>%
-    filter(country == "US")
+  cqct <- ps$mse_quants$catch_quota_quant
+  stopifnot("0.5" %in% names(cqct))
+  stopifnot(all(ci %in% names(cqct)))
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
 
-  g <- ggplot(cq_can, aes(x = year, y = `0.5`)) +
-    geom_line(color = "red") +
-    geom_line(aes(y = cq_us$`0.5`), color = "blue") +
-    theme_classic() +
+  g <- ggplot(cqct,
+              aes(x = year, y = `0.5`, color = scenario)) +
+    geom_line(size = 1.5) +
+    scale_color_manual(values = ps$cols) +
     scale_y_continuous(name = "Catch/quota") +
-    facet_wrap(~scenario) +
-    coord_cartesian(ylim = c(0.6, 1.1)) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-    geom_ribbon(aes(ymin = !!ci[[1]], ymax = !!ci[[2]]),
-                fill = alpha("red", alpha = 0.2),
-                linetype = 0) +
-    geom_ribbon(aes(ymin = cq_us[[ci[[1]]]], ymax = cq_us[[ci[[2]]]]),
-                fill = alpha("blue", alpha = 0.2),
-                linetype = 0) +
+    geom_line(aes(y = !!ci[[1]] * 1e-6, color = scenario), linetype = 2) +
+    geom_line(aes(y = !!ci[[2]] * 1e-6, color = scenario), linetype = 2) +
     geom_hline(aes(yintercept = 1),
                color = "black",
-               linetype = 2)
+               linetype = 2) +
+    theme(legend.position = c(0.15, 0.2),
+          legend.title = element_blank(),
+          legend.box.background = element_blank()) +
+    coord_cartesian(xlim = yr_lim, ylim = y_lim)
+
   g
 }
 
