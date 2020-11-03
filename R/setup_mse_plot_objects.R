@@ -34,6 +34,7 @@
 setup_mse_plot_objects <- function(results_dir = NULL,
                                    plotnames = NULL,
                                    porder = NULL,
+                                   quants = c(0.05, 0.5, 0.95),
                                    ...){
   verify_argument(results_dir, "character", 1)
 
@@ -122,7 +123,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # To view structure and names of lst_indicators: str(lst_indicators, 1) and str(lst_indicators[[1]], 1)
   # To see objectives probability table for the first scenario: lst_indicators[[1]]$info
   lst_indicators <- map2(mse_output, om_output, function(.x, .y, ...){
-    tmp <- hake_objectives(.x, .y, ...)
+    tmp <- hake_objectives(.x, .y, quants = quants, ...)
     tmp$info <- tmp$info %>%
       mutate(HCR = names(.x))
     tmp$vtac_seas <- tmp$vtac_seas %>%
@@ -272,7 +273,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # Standard error between the OM and EM (final year) -------------------------
   standard_error_ssb <- map(seq_along(em_output), ~{
     calc_standard_error_ssb(em_output[[.x]], om_output[[.x]]) %>%
-      calc_quantiles_by_group(grp_col = "year", col = "ssb_se", include_mean = FALSE) %>%
+      calc_quantiles_by_group(grp_col = "year", col = "ssb_se", include_mean = FALSE, probs = quants) %>%
       mutate(scenario = plotnames[.x])
   }) %>%
     map_df(~{.x})

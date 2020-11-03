@@ -8,6 +8,7 @@ setup_mse_plot_objects(
   results_dir = NULL,
   plotnames = NULL,
   porder = NULL,
+  quants = c(0.05, 0.5, 0.95),
   ...
 )
 }

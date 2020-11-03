@@ -8,13 +8,15 @@
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_standard_error <- function(ps = NULL,
-                                ci = c(0.05, 0.95)){
-  stopifnot(!is.null(ps))
-  stopifnot(!is.null(ci))
+                                ci = c(0.05, 0.95),
+                                yr_lim = c(NA_real_, NA_real_)){
+
+  verify_argument(ps, "list")
+  verify_argument(ci, "numeric", 2)
+  verify_argument(yr_lim, "numeric", 2)
 
   se <- ps$standard_error_ssb
   stopifnot("0.5" %in% names(se))
-  stopifnot(is.numeric(ci))
   stopifnot(all(ci %in% names(se)))
   stopifnot(length(ci) == 2)
 
@@ -29,6 +31,7 @@ plot_standard_error <- function(ps = NULL,
                     ymax = !!ci[[2]]),
                 fill = alpha("gray",
                              alpha = 0.5)) +
-    scale_y_continuous(name = "Standard error")
+    scale_y_continuous(name = "Standard error") +
+    coord_cartesian(xlim = yr_lim)
   g
 }

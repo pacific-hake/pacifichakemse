@@ -54,6 +54,7 @@ run_mse_scenario <- function(om = NULL,
                     r_save = vector(mode = "list", length = om$n_future_yrs),
                     f40_save = vector(),
                     catch_save = vector(mode = "list", length = om$n_future_yrs),
+                    ssb_values = vector(mode = "list", length = om$n_future_yrs),
                     ssb_se = vector(mode = "list", length = om$n_future_yrs),
                     ssb_min = vector(mode = "list", length = om$n_future_yrs),
                     ssb_max = vector(mode = "list", length = om$n_future_yrs))
@@ -170,8 +171,6 @@ run_mse_scenario <- function(om = NULL,
     pars <- extract_params_tmb(opt)
     psmall <- opt %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
 
-#browser()
-
     # Calc ref points for next year vals --------------------------------------
     wage_catch <- get_age_dat(om$wage_catch_df, yr - 1) %>% unlist(use.names = FALSE)
     v_real <- sum(om_output$n_save_age[, which(om$yrs == yr), , om$n_season] *
@@ -206,12 +205,19 @@ run_mse_scenario <- function(om = NULL,
         suppressWarnings(sdrep <- sdreport(obj))
         suppressWarnings(sdrep_summary <- summary(sdrep))
         rep_names <- rownames(sdrep_summary)
+
+        tmp <- sdrep_summary[rep_names == "SSB", 1]
+        names(tmp) <- om$yrs
+        em_output$ssb_values[[em_iter]] <<- tmp
+
         tmp <- sdrep_summary[rep_names == "SSB", 2]
         names(tmp) <- om$yrs
         em_output$ssb_se[[em_iter]] <<- tmp
+
         tmp <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
         names(tmp) <- om$yrs
         em_output$ssb_min[[em_iter]] <<- tmp
+
         tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
         names(tmp) <- om$yrs
         em_output$ssb_max[[em_iter]] <<- tmp

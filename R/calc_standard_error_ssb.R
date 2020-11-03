@@ -23,7 +23,7 @@ calc_standard_error_ssb <- function(em_output,
       yrs <- as.numeric(names(em_output[[.x]]$ssb_se[[length(em_output[[.x]]$ssb_se)]]))
       nyrs <- length(yrs)
       ssb_true <- rowSums(om_output[[.x]]$ssb)
-      ssb_est <- em_output[[.x]]$ssb_se[length(em_output[[.x]]$ssb_se)][[1]]
+      ssb_est <- em_output[[.x]]$ssb_values[length(em_output[[.x]]$ssb_values)][[1]]
       err <- (ssb_est - ssb_true) / ssb_true
       data.frame(run = rep(.x, nyrs),
                  ssb_se = err,
@@ -32,9 +32,4 @@ calc_standard_error_ssb <- function(em_output,
         select(year, ssb_se, run)
     }
   })
-  #%>%
-    # calc_quantiles_by_group(grp_col = "year",
-    #                         col = "ssb_se",
-    #                         probs = quants,
-    #                         include_mean = inc_mean)
 }

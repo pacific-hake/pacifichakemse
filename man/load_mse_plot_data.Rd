@@ -8,12 +8,13 @@ load_mse_plot_data(
   scenario = NULL,
   overwrite_rds = FALSE,
   main_results_dir = "results",
+  quants = c(0.05, 0.5, 0.95),
   ...
 )
 }
 \arguments{
 \item{scenario}{The name of the scenario. This is the name of a subdirectory found in
-the 'results' directory of the project.}
+the  \code{main_results_dir} directory of the project.}
 
 \item{overwrite_rds}{Logical. If \code{TRUE} and the file exists, it will be overwritten. If \code{FALSE},
 the file will be created if it does not exist and left as-is if it exists.}

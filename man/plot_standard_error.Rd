@@ -5,7 +5,11 @@
 \title{Plot Standard Error of the Spawning Stock Biomass between the Operating model and
 the Estimation model}
 \usage{
-plot_standard_error(ps = NULL, ci = c(0.05, 0.95))
+plot_standard_error(
+  ps = NULL,
+  ci = c(0.05, 0.95),
+  yr_lim = c(NA_real_, NA_real_)
+)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
