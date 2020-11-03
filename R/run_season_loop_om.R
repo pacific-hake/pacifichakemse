@@ -163,17 +163,37 @@ run_season_loop_om <- function(om,
       if(!om$move){
         space_idx <- 1
       }
-      # There is code needed here for the case if there are more than 2 spaces:
-      # See https://github.com/nissandjac/PacifichakeMSE/blob/f8268f77f13c3989637de3e4a06978c739d65494/R/run_agebased_model_true_Catch.R#L396
       if(season < om$n_season){
-        #if(yr == 2019) browser()
+        for(k in 1:length(space_idx)){
+          # Add the ones come to the surrounding areas
+          n_in_tmp <- om$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (om$move_mat[space_idx[k], , season, yr_ind])
+          if(k == 1){
+            n_in <- n_in_tmp
+          }else{
+            n_in <- n_in + n_in_tmp
+          }
+        }
         om$n_save_age[, yr_ind, space, season + 1] <<- om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
           # Add the ones come from the surrounding areas
-          om$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (om$move_mat[space_idx, , season, yr_ind])
+          n_in
       }else{
-        #if(yr == 2019) browser()
+        for(k in 1:length(space_idx)){
+          # Add the ones come to the surrounding areas
+          n_in_tmp <- om$n_save_age[1:(om$n_age - 2), yr_ind, space_idx, season] *
+            exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
+          n_in_plus_tmp <- (om$n_save_age[om$n_age - 1, yr_ind, space_idx[k], om$n_season] * exp(-z[om$n_age - 1]) +
+                              om$n_save_age[om$n_age, yr_ind, space_idx[k], om$n_season] * exp(-z[om$n_age])) *
+            om$move_mat[space_idx[k], om$n_age, season, yr_ind]
+          if(k == 1){
+            n_in <- n_in_tmp
+            n_in_plus <- n_in_plus_tmp
+          }else{
+            n_in <- n_in + n_in_tmp
+            n_in_plus <- n_in_plus + n_in_plus_tmp
+          }
+        }
         om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave
@@ -187,10 +207,6 @@ run_season_loop_om <- function(om,
                              om$n_save_age[om$n_age, yr_ind, space, om$n_season] * exp(-z[om$n_age]))
         # Leaving
         n_out_plus <- n_survive_plus * (om$move_mat[space, om$n_age, season, yr_ind])
-        # Incoming
-        n_in_plus <- (om$n_save_age[om$n_age-1, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age - 1]) +
-                        om$n_save_age[om$n_age, yr_ind, space_idx, om$n_season] * exp(-z[om$n_age])) *
-          om$move_mat[space_idx, om$n_age, season, yr_ind]
 
         om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
       }
