@@ -14,7 +14,7 @@ ss_model <- load_ss_model_data(ss_model_output_dir = ss_model_output_dir,
                                load_extra_mcmc = FALSE,
                                overwrite_ss_rds = TRUE)
 
-om <- load_data_om(ss_model, yr_future = 5)
+om <- load_data_om(ss_model, yr_future = 50)
 
 if(file.exists("fselvals.csv")){
   unlink("fselvals.csv", force = TRUE)
@@ -25,9 +25,10 @@ om_0 <- run_om(om, random_seed = seed, verbose = FALSE, testing = TRUE)
 test_that("Selectivity choice 0 is correct", {
   d <- readr::read_csv("fselvals0.csv", col_types = cols()) %>%
     select(everything())
-  d_new <- readr::read_csv("fselvals.csv", col_types = cols()) %>%
-    head(-8)
-  expect_true(identical(d, d_new))
+  d_new <- readr::read_csv("fselvals.csv", col_types = cols())
+  attr(d_new, c("spec")) <- NULL
+  attr(d, c("class")) <- c("spec_tbl_df", attr(d, c("class")))
+  expect_equal(d, d_new)
 })
 
 if(file.exists("fselvals.csv")){
@@ -38,9 +39,10 @@ om_1 <- run_om(om, random_seed = seed, verbose = FALSE, testing = TRUE)
 test_that("Selectivity choice 1 is correct", {
   d <- readr::read_csv("fselvals1.csv", col_types = cols()) %>%
     select(everything())
-  d_new <- readr::read_csv("fselvals.csv", col_types = cols()) %>%
-    head(-8)
-  expect_true(identical(d, d_new))
+  d_new <- readr::read_csv("fselvals.csv", col_types = cols())
+  attr(d_new, c("spec")) <- NULL
+  attr(d, c("class")) <- c("spec_tbl_df", attr(d, c("class")))
+  expect_equal(d, d_new)
 })
 
 if(file.exists("fselvals.csv")){
@@ -51,9 +53,10 @@ om_2 <- run_om(om, random_seed = seed, verbose = FALSE, testing = TRUE)
 test_that("Selectivity choice 2 is correct", {
   d <- readr::read_csv("fselvals2.csv", col_types = cols()) %>%
     select(everything())
-  d_new <- readr::read_csv("fselvals.csv", col_types = cols()) %>%
-    head(-8)
-  expect_true(identical(d, d_new))
+  d_new <- readr::read_csv("fselvals.csv", col_types = cols())
+  attr(d_new, c("spec")) <- NULL
+  attr(d, c("class")) <- c("spec_tbl_df", attr(d, c("class")))
+  expect_equal(d, d_new)
 })
 
 if(file.exists("fselvals.csv")){

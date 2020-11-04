@@ -6,12 +6,16 @@
 \usage{
 create_plot_objects(
   scenarios = c("biasadjust", "climate", "hcr", "selectivity"),
+  om_only = rep(FALSE, length(scenarios)),
   overwrite_rds = TRUE,
   ...
 )
 }
 \arguments{
 \item{scenarios}{A vector of directory names inside the results directory with MSE results}
+
+\item{om_only}{A vector of logicals of the same length as \code{scenarios} indicating if the run is an
+OM only run (TRUE) or a full MSE with EM estimation (FALSE)}
 
 \item{overwrite_rds}{If TRUE, all RDS files will be re-created (takes a long time). If FALSE,
 the files that exists will be loaded and returned}

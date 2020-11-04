@@ -6,15 +6,17 @@
 #' @return a [ggplot2::ggplot()] object
 #' @export
 compare_biomass <- function(om,
-                            fn = "C:/github/pacific-hake/pacifichakemse/tests/testthat/ssb_out.rds"){
+                            which_om = 0,
+                            fn = paste0("C:/github/pacific-hake/pacifichakemse/tests/testthat/om", which_om, "_old.rds")){
 
   if(!file.exists(fn)){
     stop("File ", fn, " does not exist.", call. = FALSE)
   }
   d <- data.frame(yr = om$yrs,
                   new_code = rowSums(om$ssb))
-  d1 <- readRDS(fn) %>%
-    rename(old_code = ssb)
+  om1 <- readRDS(fn)
+  d1 <- data.frame(yr = om$yrs,
+                   old_code = rowSums(om1$SSB))
   dd <- d %>% left_join(d1, by = "yr") %>% as_tibble()
   ddd <- melt(dd, id = "yr")
 
@@ -36,25 +38,30 @@ compare_biomass <- function(om,
 compare_age_comps <- function(om,
                               country = NULL,
                               season = 3,
-                              fn = paste0("C:/github/pacific-hake/pacifichakemse/tests/testthat/ac_seas", season, "_out.rds")){
+                              which_om = 0,
+                              fn = paste0("C:/github/pacific-hake/pacifichakemse/tests/testthat/om", which_om, "_old.rds")){
 
   if(!file.exists(fn)){
     stop("File ", fn, " does not exist.", call. = FALSE)
   }
+  om1 <- readRDS(fn)
+
   nyr <- om$yrs %>% length
   if(is.null(country)){
-    ac <- om$age_comps_om[,,,season]
+    ac <- om$age_comps_om[, , , season]
     ac <- apply(ac, c(1, 2), sum) / 2
+    ac1 <- om1$age_comps_OM[, , , season]
+    ac1 <- apply(ac1, c(1, 2), sum) / 2
   }else if(country == "ca"){
     ac <- om$age_comps_om[,,1,season]
+    ac1 <- om1$age_comps_OM[, , 1, season]
   }else if(country == "us"){
     ac <- om$age_comps_om[,,2,season]
+    ac1 <- om1$age_comps_OM[, , 2, season]
   }else{
     stop("Country is not correct", call. = FALSE)
   }
   ac <- as_tibble(ac)
-  ac1 <- readRDS(fn)
-  ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as_tibble(ac1)
 
   am <- map_dbl(ac, ~{
@@ -134,7 +141,9 @@ compare_move <- function(om){
 
   d <- data.frame(age = rep(om$ages, 8), movement = NA, country = rep(c("CAN","USA"), each = om$n_age),
                   season = rep(1:4, each = om$n_age * 2))
+
   d$age[d$country == "CAN"] <-  d$age[d$country == "CAN"] + 0.3 # For plotting
+
   for(i in 1:4){
     mm.tmp <- om$move_mat[,,i,1]
     d[d$season == i & d$country == "USA",]$movement <- mm.tmp[2,]

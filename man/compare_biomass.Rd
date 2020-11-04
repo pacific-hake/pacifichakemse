@@ -6,7 +6,9 @@
 \usage{
 compare_biomass(
   om,
-  fn = "C:/github/pacific-hake/pacifichakemse/tests/testthat/ssb_out.rds"
+  which_om = 0,
+  fn = paste0("C:/github/pacific-hake/pacifichakemse/tests/testthat/om", which_om,
+    "_old.rds")
 )
 }
 \arguments{

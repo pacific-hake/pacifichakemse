@@ -9,6 +9,7 @@ setup_mse_plot_objects(
   plotnames = NULL,
   porder = NULL,
   quants = c(0.05, 0.5, 0.95),
+  om_only = FALSE,
   ...
 )
 }

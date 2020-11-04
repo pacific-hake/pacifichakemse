@@ -5,7 +5,6 @@
 \title{Hake objectives (TODO: Improve docs on this function)}
 \usage{
 hake_objectives(
-  lst = NULL,
   sim_data = NULL,
   run_num = 1,
   short_term_yrs = 2018:2022,
@@ -18,8 +17,6 @@ hake_objectives(
 )
 }
 \arguments{
-\item{lst}{list of MSE results}
-
 \item{sim_data}{simulated data from the OM}
 
 \item{run_num}{Which run to calculate the objectives for}

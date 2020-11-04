@@ -35,6 +35,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                                    plotnames = NULL,
                                    porder = NULL,
                                    quants = c(0.05, 0.5, 0.95),
+                                   om_only = FALSE,
                                    ...){
   verify_argument(results_dir, "character", 1)
 
@@ -55,27 +56,39 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # The output of this (mse_output) is a list of lists of MSE output, each list element is a list
   # of the number of runs elements, and each of those sub-lists contains an entry for each simulated year
   # check this using str(mse_output, 3)
-  mse_output <- map(mse_om_output, ~{
-    map(.x, ~{
-      .x[[1]]
+  mse_output <- NULL
+  if(!om_only){
+    mse_output <- map(mse_om_output, ~{
+      map(.x, ~{
+        .x[[1]]
+      })
     })
-  })
+  }
 
   # om_output -----------------------------------------------------------------
   # Operating model output - check this using str(om_output, 2)
-  om_output <- map(mse_om_output, ~{
-    map(.x, ~{
-      .x[[2]]
+  if(om_only){
+    om_output <- map(mse_om_output, ~{
+      map(.x, ~{.x})
     })
-  })
+  }else{
+    om_output <- map(mse_om_output, ~{
+      map(.x, ~{
+        .x[[2]]
+      })
+    })
+  }
 
   # em_output -----------------------------------------------------------------
   #  Estimation model output -  check this using str(em_output, 3)
-  em_output <- map(mse_om_output, ~{
-    map(.x, ~{
-      .x[[3]]
+  em_output <- NULL
+  if(!om_only){
+    em_output <- map(mse_om_output, ~{
+      map(.x, ~{
+        .x[[3]]
+      })
     })
-  })
+  }
 
   # plotnames -----------------------------------------------------------------
   # Use the plot names provided to the function. If those are NULL,
@@ -93,28 +106,31 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     })
   }
   stopifnot(length(mse_om_output) == length(plotnames))
-  names(mse_output) <- plotnames
+  names(om_output) <- plotnames
 
-  # seasons_in_output ---------------------------------------------------------
-  seasons_in_output <- map(mse_output, ~{
-    map_dbl(.x, ~{
-      .x[[1]]$n_season
+  seasons_in_output <- NULL
+  spaces_in_output <- NULL
+  if(!om_only){
+    # seasons_in_output ---------------------------------------------------------
+    seasons_in_output <- map(mse_output, ~{
+      map_dbl(.x, ~{
+        .x[[1]]$n_season
+      })
     })
-  })
 
-  # spaces_in_output ----------------------------------------------------------
-  spaces_in_output <- map(mse_output, ~{
-    map_dbl(.x, ~{
-      .x[[1]]$n_space
+    # spaces_in_output ----------------------------------------------------------
+    spaces_in_output <- map(mse_output, ~{
+      map_dbl(.x, ~{
+        .x[[1]]$n_space
+      })
     })
-  })
-
+  }
 
   # plotting order ------------------------------------------------------------
   if(is.null(porder[1])){
     porder <- 1:length(plotnames)
   }
-  stopifnot(length(porder) == length(mse_output))
+  stopifnot(length(porder) == length(om_output))
 
   # lst_indicators (hake_objectives() output) ---------------------------------
   #cols <- brewer.pal(6, "Dark2")
@@ -122,12 +138,12 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   cols <- pnw_palette("Starfish", n = length(plotnames), type = "discrete")
   # To view structure and names of lst_indicators: str(lst_indicators, 1) and str(lst_indicators[[1]], 1)
   # To see objectives probability table for the first scenario: lst_indicators[[1]]$info
-  lst_indicators <- map2(mse_output, om_output, function(.x, .y, ...){
-    tmp <- hake_objectives(.x, .y, quants = quants, ...)
+  lst_indicators <- map(om_output, function(om = .x, ...){
+    tmp <- hake_objectives(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
-      mutate(HCR = names(.x))
+      mutate(HCR = names(om))
     tmp$vtac_seas <- tmp$vtac_seas %>%
-      mutate(HCR = names(.x))
+      mutate(HCR = names(om))
     tmp
   }, ...)
 

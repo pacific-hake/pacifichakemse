@@ -1,6 +1,5 @@
 #' Hake objectives (TODO: Improve docs on this function)
 #'
-#' @param lst list of MSE results
 #' @param sim_data simulated data from the OM
 #' @param run_num Which run to calculate the objectives for
 #' @param short_term_yrs Years for short term plots
@@ -17,8 +16,7 @@
 #' @importFrom purrr partial map_int
 #' @importFrom stats quantile
 #' @export
-hake_objectives <- function(lst = NULL,
-                            sim_data = NULL,
+hake_objectives <- function(sim_data = NULL,
                             run_num = 1,
                             short_term_yrs = 2018:2022,
                             long_term_yrs = 2022,
@@ -28,7 +26,6 @@ hake_objectives <- function(lst = NULL,
                             catch_multiplier = 1e-6,
                             ...){
 
-  verify_argument(lst, "list")
   verify_argument(sim_data, "list")
   verify_argument(run_num, "numeric")
   verify_argument(short_term_yrs, c("integer", "numeric"))
@@ -38,16 +35,11 @@ hake_objectives <- function(lst = NULL,
   verify_argument(quants,  "numeric")
   verify_argument(catch_multiplier,  "numeric")
 
-  if(run_num > length(lst)){
-    stop("run_num (", run_num, ") is greater than the number of runs completed (", length(lst), ")",
-         call. = FALSE)
-  }
-  yrs <- as.numeric(names(sim_data[[1]]$ssb[,1]))
+  yrs <- sim_data[[1]]$yrs
   min_yr <- min(yrs)
   nyrs <- length(yrs)
   simyears <- nyrs - (length(min_yr:short_term_yrs[1])) + 1
-  nruns <- length(lst)
-  lst_run <- lst[[run_num]]
+  nruns <- length(sim_data)
 
   out <- list()
 
@@ -89,7 +81,7 @@ hake_objectives <- function(lst = NULL,
   out$ssb_mid_ca <- out$ssb_mid_space %>%
     select(year, `1`, run) %>%
     rename(ssb = `1`)
-
+browser()
   # ssb_mid_ca_quant ----------------------------------------------------------
   out$ssb_mid_ca_quant <- out$ssb_mid_ca %>%
     calc_quantiles_by_group("year", "ssb", probs = quants)
@@ -223,8 +215,7 @@ hake_objectives <- function(lst = NULL,
   # conv_am function ----------------------------------------------------------
   # TODO: Need to check generation of age_comps_catch_space because there are no age 15's they are NA!!
   # sim_data[[1]]$age_comps_catch_space[,,1]
-  yrs <- rownames(sim_data[[1]]$ssb)
-  conv_am <- function(space, sim_age_comp_type = "catch", mse_dat = lst){
+  conv_am <- function(space, sim_age_comp_type = "catch"){
     if(sim_age_comp_type != "catch" && sim_age_comp_type != "surv"){
       stop("sim_age_comp_type must be catch or surv", call. = FALSE)
     }
@@ -236,19 +227,19 @@ hake_objectives <- function(lst = NULL,
       if(sim_age_comp_type == "catch"){
         #browser()
         if(space == 1){
-          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], mse_dat[[.x]][[1]]$age_max_age)
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], sim_data[[.x]]$age_max_age)
         }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,2], mse_dat[[.x]][[1]]$age_max_age)
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,2], sim_data[[.x]]$age_max_age)
         }else{
-          calc_mean_age(sim_data[[.x]]$age_comps_catch, mse_dat[[.x]][[1]]$age_max_age)
+          calc_mean_age(sim_data[[.x]]$age_comps_catch, sim_data[[.x]]$age_max_age)
         }
       }else{
         if(space == 1){
-          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,1], mse_dat[[.x]][[1]]$age_max_age)
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,1], sim_data[[.x]]$age_max_age)
         }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,2], mse_dat[[.x]][[1]]$age_max_age)
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,2], sim_data[[.x]]$age_max_age)
         }else{
-          calc_mean_age(sim_data[[.x]]$age_comps_surv, mse_dat[[.x]][[1]]$age_max_age)
+          calc_mean_age(sim_data[[.x]]$age_comps_surv, sim_data[[.x]]$age_max_age)
         }
       }
     }) %>%

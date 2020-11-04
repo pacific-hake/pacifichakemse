@@ -8,8 +8,9 @@ compare_age_comps(
   om,
   country = NULL,
   season = 3,
-  fn = paste0("C:/github/pacific-hake/pacifichakemse/tests/testthat/ac_seas", season,
-    "_out.rds")
+  which_om = 0,
+  fn = paste0("C:/github/pacific-hake/pacifichakemse/tests/testthat/om", which_om,
+    "_old.rds")
 )
 }
 \arguments{

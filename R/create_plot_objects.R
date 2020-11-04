@@ -3,6 +3,8 @@
 #' @param scenarios A vector of directory names inside the results directory with MSE results
 #' @param overwrite_rds If TRUE, all RDS files will be re-created (takes a long time). If FALSE,
 #' the files that exists will be loaded and returned
+#' @param om_only A vector of logicals of the same length as `scenarios` indicating if the run is an
+#' OM only run (TRUE) or a full MSE with EM estimation (FALSE)
 #' @param ...
 #'
 #' @return A list of length of `scenarios` containing MSE output data
@@ -12,12 +14,13 @@ create_plot_objects <- function(scenarios = c("biasadjust",
                                               "climate",
                                               "hcr",
                                               "selectivity"),
+                                om_only = rep(FALSE, length(scenarios)),
                                 overwrite_rds = TRUE,
                                 ...){
 
-  ps <- map(scenarios, function(scen = .x, ...){
+  ps <- map2(scenarios, om_only, function(scen = .x, om_only = .y, ...){
     tic()
-    lst <- load_mse_plot_data(scenario = scen, overwrite_rds = overwrite_rds, ...)
+    lst <- load_mse_plot_data(scenario = scen, overwrite_rds = overwrite_rds, om_only = om_only, ...)
     if(overwrite_rds){
       cat(crayon::green(symbol$tick), green(" Created and loaded plot objects for scenario:", scen, "\n"))
     }else{
