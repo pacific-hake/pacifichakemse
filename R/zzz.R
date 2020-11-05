@@ -202,5 +202,10 @@ globalVariables(c(
 "om",
 "am",
 "Country",
-"movement"
+"movement",
+".x",
+".y",
+"catch_quota",
+"qlow",
+"qhigh"
 ))

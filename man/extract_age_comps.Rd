@@ -17,7 +17,7 @@ extract_age_comps(
 )
 }
 \arguments{
-\item{ss_model}{SS model input/output as read in by \code{\link[=load_ss_model_from_rds]{load_ss_model_from_rds()}}}
+\item{ss_model}{SS model input/output as read in by \code{\link[=load_ss_model_data]{load_ss_model_data()}}}
 
 \item{age_comps_fleet}{1 for fishery, 2 for survey}
 

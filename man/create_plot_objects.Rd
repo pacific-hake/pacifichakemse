@@ -20,7 +20,7 @@ OM only run (TRUE) or a full MSE with EM estimation (FALSE)}
 \item{overwrite_rds}{If TRUE, all RDS files will be re-created (takes a long time). If FALSE,
 the files that exists will be loaded and returned}
 
-\item{...}{}
+\item{...}{Arguments to pass to \code{\link[=load_mse_plot_data]{load_mse_plot_data()}}}
 }
 \value{
 A list of length of \code{scenarios} containing MSE output data

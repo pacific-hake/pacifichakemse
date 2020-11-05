@@ -1,6 +1,7 @@
 #' Plot a comparison biomass (SSB) from the OM and the old OM, which is read in as an rds object
 #'
 #' @param om Output from the [run_om()] function
+#' @param which_om Which number OM to use. These correspond to selectivity change values
 #' @param fn Location of the om_output.rds file from the old code"s base OM run
 #'
 #' @return a [ggplot2::ggplot()] object
@@ -31,6 +32,7 @@ compare_biomass <- function(om,
 #' @param om Output from the [run_om()] function
 #' @param country If NULL, a sum of both countries, if "ca" data for Canada and if "us", data for the US
 #' @param season Numeric 1 through 4
+#' @param which_om Which number OM to use. These correspond to selectivity change values
 #' @param fn Location of the om_output.rds file from the old code"s base OM run
 #'
 #' @return a [ggplot2::ggplot()] object

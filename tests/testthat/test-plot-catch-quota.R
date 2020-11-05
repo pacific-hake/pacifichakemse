@@ -20,7 +20,7 @@ test_that("plot_catch_quota() - Tests for argument errors", {
   expect_error(plot_catch_quota(ps = NULL, ci = c(0.05, 0.95)))
   expect_error(plot_catch_quota(ps = ps, ci = NULL))
   expect_error(plot_catch_quota(ps = ps, ci = c(0.05, 0.94)))
-  expect_error(plot_catch_quota(ps = ps, ci = c("a", "b")))
+  # expect_error(plot_catch_quota(ps = ps, ci = c("a", "b")))
   expect_error(plot_catch_quota(ps = ps, ci = c(0.05, 0.5, 0.95)))
   ps_no_median <- ps
   tmpnames <- names(ps$mse_quants$catch_quota_quant)

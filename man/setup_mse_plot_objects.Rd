@@ -22,6 +22,10 @@ in this directory that end in '.rds' and contain 'MSE' will be loaded}
 \item{porder}{Order of the scenarios in the figures. Default is the order they appear in the
 \code{results_dir} directory. All outputs will be ordered in this way}
 
+\item{quants}{Quantiles to use}
+
+\item{om_only}{If TRUE, this was an OM-only MSE run. If FALSE, the full MSE was run including estimation model}
+
 \item{...}{Arguments to be passed to \code{\link[=hake_objectives]{hake_objectives()}} and \code{\link[=calc_standard_error_ssb]{calc_standard_error_ssb()}}}
 }
 \value{

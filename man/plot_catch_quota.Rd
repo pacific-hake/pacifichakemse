@@ -15,6 +15,11 @@ plot_catch_quota(
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.}
+
+\item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+the limits of the data are used}
+
+\item{y_lim}{A vector of 2 for minimum and maximum y axis values}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

@@ -18,6 +18,8 @@ setup_blank_om_objects(
 
 \item{ages}{A vector of ages}
 
+\item{age_plus_grp}{Age for age plus group}
+
 \item{max_surv_age}{The maximum age in the survey age comp data}
 
 \item{n_space}{The number of spaces in the movement model}

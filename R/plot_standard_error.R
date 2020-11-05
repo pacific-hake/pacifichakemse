@@ -4,6 +4,8 @@
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param ci A vector of length two of the lower and upper credible interval values.
 #' These values will be passed to [stats::quantile()]
+#' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+#' the limits of the data are used
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export

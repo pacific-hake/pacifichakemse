@@ -8,6 +8,8 @@
 #' @param plotnames Names for the plots
 #' @param porder Order of the scenarios in the figures. Default is the order they appear in the
 #' `results_dir` directory. All outputs will be ordered in this way
+#' @param quants Quantiles to use
+#' @param om_only If TRUE, this was an OM-only MSE run. If FALSE, the full MSE was run including estimation model
 #' @param ... Arguments to be passed to [hake_objectives()] and [calc_standard_error_ssb()]
 #'
 #' @return A list of length 10: The items are (1) A [data.frame] containing the SSB/AAV/Catch

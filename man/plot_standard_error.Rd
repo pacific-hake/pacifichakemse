@@ -16,6 +16,9 @@ plot_standard_error(
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.
 These values will be passed to \code{\link[stats:quantile]{stats::quantile()}}}
+
+\item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+the limits of the data are used}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

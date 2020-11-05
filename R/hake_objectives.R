@@ -81,7 +81,7 @@ hake_objectives <- function(sim_data = NULL,
   out$ssb_mid_ca <- out$ssb_mid_space %>%
     select(year, `1`, run) %>%
     rename(ssb = `1`)
-browser()
+
   # ssb_mid_ca_quant ----------------------------------------------------------
   out$ssb_mid_ca_quant <- out$ssb_mid_ca %>%
     calc_quantiles_by_group("year", "ssb", probs = quants)

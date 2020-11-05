@@ -2,7 +2,9 @@
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #' @param ci A vector of length two of the lower and upper credible interval values.
-#'
+#' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+#' the limits of the data are used
+#' @param y_lim A vector of 2 for minimum and maximum y axis values
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_catch_quota <- function(ps = NULL,

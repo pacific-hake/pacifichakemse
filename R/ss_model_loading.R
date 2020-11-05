@@ -643,7 +643,7 @@ load_ss_model_data <- function(s_min = 1,
 #'
 #' @details Proportions at age for each year are calculated and returned
 #'
-#' @param ss_model SS model input/output as read in by [load_ss_model_from_rds()]
+#' @param ss_model SS model input/output as read in by [load_ss_model_data()]
 #' @param age_comps_fleet 1 for fishery, 2 for survey
 #' @param s_yr See [load_data_om()]
 #' @param m_yr See [load_data_om()]
@@ -737,7 +737,7 @@ extract_age_comps <- function(ss_model = NULL,
 #'
 #' @details Proportions at age for each year are calculated and returned
 #'
-#' @param ss_model SS model input/output as read in by [load_ss_model_from_rds()]
+#' @param ss_model SS model input/output as read in by [load_ss_model_data()]
 #' @param age_comps_fleet 1 for fishery, 2 for survey
 #' @param s_yr See [load_data_om()]
 #' @param m_yr See [load_data_om()]

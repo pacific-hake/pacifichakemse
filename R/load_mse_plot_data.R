@@ -10,6 +10,7 @@
 #' the file will be created if it does not exist and left as-is if it exists.
 #' @param main_results_dir The name of the results directory which holds the mse output subdirectories
 #' in the project.
+#' @param quants Quantile values to use
 #' @param ... Arguments to send to [hake_objectives()]
 #'
 #' @return The object which was returned by [setup_mse_plot_objects()]

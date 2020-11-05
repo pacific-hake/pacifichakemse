@@ -14,6 +14,8 @@ compare_biomass(
 \arguments{
 \item{om}{Output from the \code{\link[=run_om]{run_om()}} function}
 
+\item{which_om}{Which number OM to use. These correspond to selectivity change values}
+
 \item{fn}{Location of the om_output.rds file from the old code"s base OM run}
 }
 \value{

@@ -383,6 +383,7 @@ get_yrs_mse_list <- function(lst){
 #'
 #' @param yrs A vector of years
 #' @param ages A vector of ages
+#' @param age_plus_grp Age for age plus group
 #' @param max_surv_age The maximum age in the survey age comp data
 #' @param n_space The number of spaces in the movement model
 #' @param n_season The number of seasons in the movement model

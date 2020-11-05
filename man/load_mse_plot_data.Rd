@@ -22,6 +22,8 @@ the file will be created if it does not exist and left as-is if it exists.}
 \item{main_results_dir}{The name of the results directory which holds the mse output subdirectories
 in the project.}
 
+\item{quants}{Quantile values to use}
+
 \item{...}{Arguments to send to \code{\link[=hake_objectives]{hake_objectives()}}}
 }
 \value{

@@ -20,6 +20,8 @@ compare_age_comps(
 
 \item{season}{Numeric 1 through 4}
 
+\item{which_om}{Which number OM to use. These correspond to selectivity change values}
+
 \item{fn}{Location of the om_output.rds file from the old code"s base OM run}
 }
 \value{
