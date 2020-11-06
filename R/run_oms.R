@@ -6,7 +6,8 @@
 #' @param fns A vector of scenario names. See [run_mses()]
 #' @param n_surveys The number of surveys. See [run_mses()]
 #' @param b_futures Bias adjustment factors. See [run_mses()]
-#' @param sel_changes Selectivity cahnges. See [run_mses()]
+#' @param sel_changes Selectivity changes. See [run_mses()]
+#' @param catch_in Catch into the future in kg
 #' @param plot_names A vector of names to show on plots. See [run_mses()]
 #' @param random_seed The random seed to base run random seeds from. See [run_mses()]
 #' @param results_root_dir The results root directory
@@ -22,6 +23,7 @@ run_oms <- function(ss_model = NULL,
                     n_surveys = 2,
                     b_futures = 0.5,
                     sel_changes = 0,
+                    catch_in = 0,
                     plot_names = NULL,
                     random_seed = NULL,
                     results_root_dir = here("results"),
@@ -34,6 +36,7 @@ run_oms <- function(ss_model = NULL,
   verify_argument(n_surveys, c("integer", "numeric"))
   verify_argument(b_futures, c("integer", "numeric"))
   verify_argument(sel_changes, c("integer", "numeric"))
+  verify_argument(catch_in, c("integer", "numeric"), 1)
   verify_argument(plot_names, "character")
   verify_argument(random_seed, c("integer", "numeric"))
   verify_argument(results_root_dir, "character", 1)
@@ -71,16 +74,19 @@ run_oms <- function(ss_model = NULL,
   # Begin MSEs loop -----------------------------------------------------------
   map2(fns, 1:length(fns), function(fn = .x, fn_ind = .y, ...){
     cat(white("Scenario:", fn, "\n"))
-    om <- load_data_om(ss_model,
-                       yr_future = yr_future,
-                       n_survey = n_surveys[fn_ind],
-                       b_future = b_futures[fn_ind],
-                       selectivity_change = sel_changes[fn_ind],
-                       ...)
-    om_out <- NULL
-    lst <- map(1:n_runs, function(run = .x, ...){
-      om_out[[run]] <<- run_om(om, random_seed = random_seeds[run], verbose = FALSE)
-    }, ...)
+    # Begin run loop ----------------------------------------------------------
+    lst <- map(1:n_runs, function(run = .x){
+      cat(green("OM run", run, ": Seed =", random_seeds[run], "\n"))
+      om <- load_data_om(ss_model,
+                         yr_future = yr_future,
+                         n_survey = n_surveys[fn_ind],
+                         b_future = b_futures[fn_ind],
+                         selectivity_change = sel_changes[fn_ind],
+                         ...)
+      om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
+      run_om(om, random_seed = random_seeds[run], verbose = FALSE)
+    })
+    # End run loop ------------------------------------------------------------
     attr(lst, "plotname") <- plot_names[fn_ind]
     saveRDS(lst, file = file.path(results_dir, fn))
   })

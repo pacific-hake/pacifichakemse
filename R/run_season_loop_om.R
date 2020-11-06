@@ -107,23 +107,23 @@ run_season_loop_om <- function(om,
       om$catch_quota[yr_ind, space, season] <<- e_tmp
 
       tryCatch({
-        if(e_tmp / b_tmp >= 0.9){
-          if(om$yrs[yr_ind] < om$m_yr){
-            # Stop if in the past
-            stop("Catch exceeds available biomass in yrs: ",
-                 om$yrs[yr_ind], " and season ",
-                 season, " , space ", space,
-                 call. = FALSE)
-          }
-          e_tmp <- 0.75 * b_tmp
-          om$catch_quota_n[yr_ind, space, season] <<- 1
-        }
+        tmp <- e_tmp / b_tmp
       }, error = function(e){
-        #browser()
         stop("Error in the Operating model. If running a standalone OM outside the MSE, ",
              "did you set `n_sim_yrs` instead of `yr_future`?",
              call. = FALSE)
       })
+
+      if(e_tmp / b_tmp >= 0.9){
+        if(om$yrs[yr_ind] < om$m_yr){
+          # Stop if in the past
+          message("Catch exceeds available biomass in yrs: ",
+                  om$yrs[yr_ind], " and season ",
+                  season, " , space ", space)
+        }
+        e_tmp <- 0.75 * b_tmp
+        om$catch_quota_n[yr_ind, space, season] <<- 1
+      }
       #if(yr > 2019) browser()
       # Calculate F based on catch distribution -------------------------------
       f_out <- get_f(e_tmp = e_tmp,

@@ -12,6 +12,7 @@ run_oms(
   n_surveys = 2,
   b_futures = 0.5,
   sel_changes = 0,
+  catch_in = 0,
   plot_names = NULL,
   random_seed = NULL,
   results_root_dir = here("results"),
@@ -32,7 +33,9 @@ run_oms(
 
 \item{b_futures}{Bias adjustment factors. See \code{\link[=run_mses]{run_mses()}}}
 
-\item{sel_changes}{Selectivity cahnges. See \code{\link[=run_mses]{run_mses()}}}
+\item{sel_changes}{Selectivity changes. See \code{\link[=run_mses]{run_mses()}}}
+
+\item{catch_in}{Catch into the future in kg}
 
 \item{plot_names}{A vector of names to show on plots. See \code{\link[=run_mses]{run_mses()}}}
 
