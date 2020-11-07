@@ -210,7 +210,6 @@ run_season_loop_om <- function(om,
 
         om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
       }
-      #if(yr >= 2020) browser()
 
       # Calculate age-comps ---------------------------------------------------
       om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] /
@@ -222,10 +221,11 @@ run_season_loop_om <- function(om,
       }
       om$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season] * wage_catch
       om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
+      #if(yr >= 2020) browser()
 
       # Calculate catch quota -------------------------------------------------
       if(om$catch_quota[yr_ind, space, season] > 0){
-        if((sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season]) > 1.1){
+        if(sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season] > 1.1){
           stop("F estimation overshoots more than 10% in year ", yr, ", season ", season, "space ", space,
                call. = FALSE)
         }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_ssb.R
 \name{plot_ssb}
 \alias{plot_ssb}
-\title{Plot Spawning Stock Biomass (SSB) by scenario and country}
+\title{Plot Spawning Stock Biomass (SSB) by scenario all in one panel}
 \usage{
 plot_ssb(
   ps = NULL,
@@ -25,5 +25,5 @@ the limits of the data are used}
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
-Plot Spawning Stock Biomass (SSB) by scenario and country
+Plot Spawning Stock Biomass (SSB) by scenario all in one panel
 }

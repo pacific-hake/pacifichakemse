@@ -265,6 +265,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     mutate(country = "US")
 
   # SSB quantile objects ------------------------------------------------------
+  mse_quants$ssb_all_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_all_quant")
   mse_quants$ssb_ssb0_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ssb0_quant")
   mse_quants$ssb_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ca_quant")
   mse_quants$ssb_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_us_quant")
@@ -272,17 +273,18 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     mutate(country = "Canada")
   ssb_us_tmp <- mse_quants$ssb_us_quant %>%
     mutate(country = "US")
-  mse_quants$ssb_quant <- ssb_ca_tmp %>%
+  mse_quants$ssb_quant_country <- ssb_ca_tmp %>%
     bind_rows(ssb_us_tmp)
 
   # SSB mid-year quantile objects ---------------------------------------------
+  mse_quants$ssb_mid_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_quant")
   mse_quants$ssb_mid_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_ca_quant")
   mse_quants$ssb_mid_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_us_quant")
   ssb_mid_ca_tmp <- mse_quants$ssb_mid_ca_quant %>%
     mutate(country = "Canada")
   ssb_mid_us_tmp <- mse_quants$ssb_mid_us_quant %>%
     mutate(country = "US")
-  mse_quants$ssb_mid_quant <- ssb_mid_ca_tmp %>%
+  mse_quants$ssb_mid_quant_country <- ssb_mid_ca_tmp %>%
     bind_rows(ssb_mid_us_tmp)
 
   # catch_quant ---------------------------------------------------------------

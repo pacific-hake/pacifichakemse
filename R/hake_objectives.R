@@ -61,7 +61,7 @@ hake_objectives <- function(sim_data = NULL,
   # ssb_mid_plot --------------------------------------------------------------
   out$ssb_mid_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               ssb = rowSums(.x$ssb_all[, , 3]) / sum(.x$ssb_0),
+               ssb = rowSums(.x$ssb_all[ , , 3]) / sum(.x$ssb_0),
                run = .y)
   }) %>%
     map_df(~{.x}) %>%
@@ -97,13 +97,31 @@ hake_objectives <- function(sim_data = NULL,
 
   # ssb_space -----------------------------------------------------------------
   out$ssb_space <- map2(sim_data, seq_along(sim_data), ~{
-    yrs <- as.numeric(rownames(.x$ssb))
-    .x$ssb %>%
+    yrs <- as.numeric(rownames(.x$ssb_all[ , , 1]))
+    .x$ssb_all[ , , 1] %>%
       as_tibble() %>%
       mutate(run = .y, year = yrs) %>%
       select(year, everything())
   }) %>%
     map_df(~{.x})
+
+  # ssb_all -------------------------------------------------------------------
+  out$ssb_all <- out$ssb_space %>%
+    mutate(ssb = `1` + `2`) %>%
+    select(year, ssb, run)
+
+  # ssb_all_mid ---------------------------------------------------------------
+  out$ssb_mid_all <- out$ssb_mid_space %>%
+    mutate(ssb = `1` + `2`) %>%
+    select(year, ssb, run)
+
+  # ssb_all_quant -------------------------------------------------------------
+  out$ssb_all_quant <- out$ssb_all %>%
+    calc_quantiles_by_group("year", "ssb", probs = quants)
+
+  # ssb_mid_quant -------------------------------------------------------------
+  out$ssb_mid_quant <- out$ssb_mid_all %>%
+    calc_quantiles_by_group("year", "ssb", probs = quants)
 
   # ssb_ca --------------------------------------------------------------------
   out$ssb_ca <- out$ssb_space %>%
