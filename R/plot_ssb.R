@@ -28,7 +28,7 @@ plot_ssb <- function(ps = NULL,
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
   #cols <- pnw_palette("Starfish", n = length(ps$plotnames), type = "discrete")
-  cols <- brewer.pal(2 * length(ps$plotnames), "Dark2")
+  cols <- brewer.pal(length(ps$plotnames), "Dark2")
 
   # Reorder the legend and colors
   ssb <- ssb %>%
@@ -39,13 +39,15 @@ plot_ssb <- function(ps = NULL,
 
   g <- ggplot(ssb, aes(x = year, y = `0.5` * 1e-6 / 2, color = scenario, fill = scenario)) +
     geom_line(size = 1.5) +
-    scale_y_continuous(name ='Spawning biomass \n(million tonnes)') +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-          legend.position = c(0.1,0.9),
+    scale_y_continuous(name ="Spawning biomass \n(million tonnes)") +
+    theme(axis.text.x = element_text(angle = 90,
+                                     hjust = 1,
+                                     vjust = 0.5),
+          legend.position = c(0.1, 0.9),
           legend.title = element_text("Bias asjustment"))+
-    scale_color_manual(values = cols[1:length(ps$plotnames)])+
+    scale_color_manual(values = cols)+
     geom_ribbon(aes(ymin = !!ci[[1]] * 1e-6 / 2, ymax = !!ci[[2]] * 1e-6 / 2), linetype = 0) +
-    scale_fill_manual(values = alpha(cols[1:length(plotnames)], alpha = 0.2)) +
+    scale_fill_manual(values = alpha(cols, alpha = 0.2)) +
     coord_cartesian(xlim = yr_lim) +
     geom_hline(aes(yintercept = ssb0), color = "black", linetype = 2)
 

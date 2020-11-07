@@ -20,16 +20,21 @@ plot_catch <- function(ps = NULL,
   stopifnot(all(ci %in% names(catch)))
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
+  #cols <- pnw_palette("Starfish", n = length(ps$plotnames), type = "discrete")
+  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+
+  # Reorder the legend and colors
+  catch <- catch %>%
+    mutate(scenario = fct_relevel(scenario, rev(levels(catch$scenario))))
+
 
   g <- ggplot(catch,
               aes(x = year, y = `0.5` * 1e-6, color = scenario)) +
     geom_line(size = 1.5) +
     #geom_ribbon(aes(ymin = p5 * 1e-6, ymax = p95 * 1e-6), linetype = 2, fill = alpha(alpha =0.2, colour = ps$cols)) +
-    scale_color_manual(values = ps$cols) +
+    scale_color_manual(values = cols) +
     scale_y_continuous(name = "Catch (million tonnes)") +
-    geom_line(aes(y = !!ci[[1]] * 1e-6, color = scenario), linetype = 2) +
-    geom_line(aes(y = !!ci[[2]] * 1e-6, color = scenario), linetype = 2) +
-    theme(legend.position = c(0.12, 0.8),
+    theme(legend.position = c(0.1, 0.9),
           legend.title = element_blank(),
           legend.box.background = element_blank()) +
     coord_cartesian(xlim = yr_lim)

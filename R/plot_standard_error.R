@@ -18,6 +18,12 @@ plot_standard_error <- function(ps = NULL,
   verify_argument(yr_lim, "numeric", 2)
 
   se <- ps$standard_error_ssb
+  if(is.null(se) || !length(se)){
+    stop("The ps$standard_error_ssb data frame is empty.\n",
+         "Supply a `ps` object that holds the results of a full MSE.\n",
+         "This `ps` object you supplied is likely an OM-only model.",
+         call. = FALSE)
+  }
   stopifnot("0.5" %in% names(se))
   stopifnot(all(ci %in% names(se)))
   stopifnot(length(ci) == 2)

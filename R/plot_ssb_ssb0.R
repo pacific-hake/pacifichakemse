@@ -25,18 +25,29 @@ plot_ssb_ssb0 <- function(ps = NULL,
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
 
+  #cols <- pnw_palette("Starfish", n = length(ps$plotnames), type = "discrete")
+  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+
+  # Reorder the legend and colors
+  ssb_ssb0 <- ssb_ssb0 %>%
+    mutate(scenario = fct_relevel(scenario, rev(levels(ssb_ssb0$scenario))))
+
+  subsc <- 0
+
   g <- ggplot(ssb_ssb0, aes(x = year, y = `0.5`, color = scenario, fill = scenario)) +
     geom_line(size = 1.5) +
-    geom_line(aes(y = !!ci[[1]]), linetype = 2, size = 1.2) +
-    geom_line(aes(y = !!ci[[2]]), linetype = 2, size = 1.2) +
-    scale_color_manual(values = ps$cols) +
-    theme_classic() +
-    scale_y_continuous(name ="Total SSB/SSB0") +
+    #geom_line(aes(y = !!ci[[1]]), linetype = 2, size = 1.2) +
+    #geom_line(aes(y = !!ci[[2]]), linetype = 2, size = 1.2) +
+    scale_color_manual(values = cols) +
+    scale_y_continuous(name = bquote("Total SSB / SSB"[.(subsc)])) +
     coord_cartesian(ylim  = c(0, 4)) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
-          legend.position = c(0.2,.8),
+    theme(axis.text.x = element_text(angle = 90,
+                                     hjust = 1,
+                                     vjust = 0.5),
+          legend.position = c(0.1, 0.9),
           legend.title = element_blank()) +
-    scale_fill_manual(values = alpha(ps$cols, alpha = 0.2)) +
+    geom_ribbon(aes(ymin = !!ci[[1]], ymax = !!ci[[2]]), linetype = 0) +
+    scale_fill_manual(values = alpha(cols, alpha = 0.2)) +
     geom_hline(aes(yintercept = 1), color = "black", linetype = 2) +
     coord_cartesian(xlim = yr_lim)
 

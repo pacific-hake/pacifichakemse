@@ -34,16 +34,21 @@ plot_aa <- function(ps = NULL,
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
   aa$year <- as.numeric(aa$year)
+  #cols <- pnw_palette("Starfish", n = length(ps$plotnames), type = "discrete")
+  cols <- brewer.pal(length(ps$plotnames), "Dark2")
 
-  g <- ggplot(aa, aes(x = year, y = `0.5`, color = scenario)) +
+  # Reorder the legend and colors
+  aa <- aa %>%
+    mutate(scenario = fct_relevel(scenario, rev(levels(aa$scenario))))
+
+  g <- ggplot(aa, aes(x = year, y = `0.5`, color = scenario, fill = scenario)) +
     geom_line(size = 2) +
-    #geom_ribbon(aes(ymin = p5, ymax = p95, color = scenario), linetype = 2, fill = NA) +
-    scale_color_manual(values = ps$cols) +
     scale_y_continuous(name = ylab) +
-    geom_line(aes(y = !!ci[[1]], color = scenario), linetype = 2) +
-    geom_line(aes(y = !!ci[[2]], color = scenario), linetype = 2) +
     theme(legend.title = element_blank(),
           legend.position = c(0.1, 0.9)) +
+    scale_color_manual(values = cols) +
+    geom_ribbon(aes(ymin = !!ci[[1]], ymax = !!ci[[2]]), linetype = 0) +
+    scale_fill_manual(values = alpha(cols, alpha = 0.2)) +
     coord_cartesian(xlim = yr_lim)
 
   g
