@@ -31,6 +31,6 @@ create_plot_objects <- function(scenarios = c("biasadjust",
   }, ...)
   names(ps) <- scenarios
 
-  ps
+  invisible(ps)
 }
 
