@@ -1,11 +1,8 @@
 #' Hake objectives (TODO: Improve docs on this function)
 #'
 #' @param sim_data simulated data from the OM
-#' @param run_num Which run to calculate the objectives for
-#' @param short_term_yrs Years for short term plots
+#' @param short_term_yrs Years included in short term plots
 #' @param long_term_yrs Years greater than this will be in long term plots
-#' @param can.prop Proportion of the coastwide TAC that Canada receives
-#' @param us.prop Proportion of the coastwide TAC that the US receives
 #' @param quants Quantiles to calculate for plotting output [data.frame]s
 #' @param catch_multiplier Value to multiply all catch calculations by
 #' @param ... Absorbs extra parameters
@@ -17,21 +14,15 @@
 #' @importFrom stats quantile
 #' @export
 hake_objectives <- function(sim_data = NULL,
-                            run_num = 1,
-                            short_term_yrs = 2018:2022,
-                            long_term_yrs = 2022,
-                            can.prop = 0.2488,
-                            us.prop = 0.7612,
-                            quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
+                            short_term_yrs = NULL,
+                            long_term_yrs = NULL,
+                            quants = c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975),
                             catch_multiplier = 1e-6,
                             ...){
 
   verify_argument(sim_data, "list")
-  verify_argument(run_num, "numeric")
   verify_argument(short_term_yrs, c("integer", "numeric"))
-  verify_argument(long_term_yrs, c("integer", "numeric"))
-  verify_argument(can.prop,  "numeric")
-  verify_argument(us.prop,  "numeric")
+  verify_argument(long_term_yrs, c("integer", "numeric"), 1)
   verify_argument(quants,  "numeric")
   verify_argument(catch_multiplier,  "numeric")
 

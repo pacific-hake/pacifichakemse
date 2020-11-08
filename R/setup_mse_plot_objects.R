@@ -36,7 +36,7 @@
 setup_mse_plot_objects <- function(results_dir = NULL,
                                    plotnames = NULL,
                                    porder = NULL,
-                                   quants = c(0.05, 0.5, 0.95),
+                                   quants = c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975),
                                    om_only = FALSE,
                                    ...){
   verify_argument(results_dir, "character", 1)

@@ -18,6 +18,7 @@
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom ggplot2 ggplot_build ggplot_gtable
 #' @importFrom grid grid.draw
+#' @importFrom RColorBrewer brewer.pal
 #' @export
 plot_timeseries <- function(ps = NULL,
                             type = "ssb",

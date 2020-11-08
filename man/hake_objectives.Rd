@@ -6,12 +6,9 @@
 \usage{
 hake_objectives(
   sim_data = NULL,
-  run_num = 1,
-  short_term_yrs = 2018:2022,
-  long_term_yrs = 2022,
-  can.prop = 0.2488,
-  us.prop = 0.7612,
-  quants = c(0.05, 0.25, 0.5, 0.75, 0.95),
+  short_term_yrs = NULL,
+  long_term_yrs = NULL,
+  quants = c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975),
   catch_multiplier = 1e-06,
   ...
 )
@@ -19,15 +16,9 @@ hake_objectives(
 \arguments{
 \item{sim_data}{simulated data from the OM}
 
-\item{run_num}{Which run to calculate the objectives for}
-
-\item{short_term_yrs}{Years for short term plots}
+\item{short_term_yrs}{Years included in short term plots}
 
 \item{long_term_yrs}{Years greater than this will be in long term plots}
-
-\item{can.prop}{Proportion of the coastwide TAC that Canada receives}
-
-\item{us.prop}{Proportion of the coastwide TAC that the US receives}
 
 \item{quants}{Quantiles to calculate for plotting output \link{data.frame}s}
 
