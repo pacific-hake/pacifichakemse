@@ -16,7 +16,8 @@
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #'
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 ggplot_build ggplot_gtable
+#' @importFrom grid grid.draw
 #' @export
 plot_timeseries <- function(ps = NULL,
                             type = "ssb",
@@ -98,6 +99,7 @@ plot_timeseries <- function(ps = NULL,
   #cols <- pnw_palette("Starfish", n = length(ps$plotnames), type = "discrete")
   if(by_country){
     cols <- c("red", "blue")
+    facet_back_cols <- brewer.pal(length(ps$plotnames), "Dark2")
   }else{
     cols <- brewer.pal(length(ps$plotnames), "Dark2")
   }
@@ -149,7 +151,20 @@ plot_timeseries <- function(ps = NULL,
       geom_hline(aes(yintercept = ssb0 * 0.1), color = "black", linetype = 2)
   }
   if(by_country){
-    g <- g + facet_wrap(~scenario)
+    strip_back_alpha <- 50
+    g <- g + ggplot2::facet_grid(~scenario)
+
+    # Add scenario colors to the strip backgrounds
+    gt <- ggplot_gtable(ggplot_build(g))
+    stript <- which(grepl('strip-', gt$layout$name))
+
+    k <- 1
+    for(i in stript){
+      j <- which(grepl('rect', gt$grobs[[i]]$grobs[[1]]$childrenOrder))
+      gt$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- paste0(facet_back_cols[k], strip_back_alpha)
+      k <- k + 1
+    }
+    return(grid.draw(gt))
   }
 
   g
