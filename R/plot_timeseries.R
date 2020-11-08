@@ -1,7 +1,7 @@
 #' Plot time series data from an MSE or OM simulation run
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()].
-#' @param type One of 'ssb', 'ssb_ssb0', catch'
+#' @param type One of 'ssb', 'ssb_ssb0', catch', 'aas', 'aac'
 #' @param time Either 'beg' for beginning of the year SSB or 'mid' for mid-year SSB.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param ci A vector of length two of the lower and upper credible interval values.
@@ -29,10 +29,14 @@ plot_timeseries <- function(ps = NULL,
                             show_40_10 = TRUE){
 
   verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch"))
+  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac"))
   verify_argument(time, "character", 1, c("beg", "mid"))
   verify_argument(ci, "numeric", 2)
+  verify_argument(by_country, "logical", 1)
   verify_argument(yr_lim, "numeric", 2)
+  verify_argument(ci_lines, "logical", 1)
+  verify_argument(show_ssb0, "logical", 1)
+  verify_argument(show_40_10, "logical", 1)
 
   if(type == "ssb"){
     if(by_country){
@@ -65,6 +69,22 @@ plot_timeseries <- function(ps = NULL,
     d <- ps$mse_quants$catch_quant
     y_label <- "Catch (million tonnes)"
     y_factor <- 1e-6
+  }else if(type == "aas"){
+    if(by_country){
+      d <- ps$mse_quants$ams_quant
+    }else{
+      d <- ps$mse_quants$ams_all_quant
+    }
+    y_label <- "Average age in survey"
+    y_factor <- 1
+  }else if(type == "aac"){
+    if(by_country){
+      d <- ps$mse_quants$amc_quant
+    }else{
+      d <- ps$mse_quants$amc_all_quant
+    }
+    y_label <- "Average age in catch"
+    y_factor <- 1
   }
 
   stopifnot("0.5" %in% names(d))
@@ -86,6 +106,9 @@ plot_timeseries <- function(ps = NULL,
   d <- d %>%
     mutate(scenario = fct_relevel(scenario, rev(levels(d$scenario))))
 
+  d <- d %>%
+    filter(!is.na(`0.5`))
+
   if(by_country){
     g <- ggplot(d, aes(x = year, y = `0.5` * y_factor, color = country, fill = country))
   }else{
@@ -102,9 +125,15 @@ plot_timeseries <- function(ps = NULL,
     coord_cartesian(xlim = yr_lim)
 
   if(ci_lines){
-    g <- g +
-      geom_line(aes(y = !!ci[[1]] * y_factor, color = scenario), linetype = 2) +
-      geom_line(aes(y = !!ci[[2]] * y_factor, color = scenario), linetype = 2)
+    if(by_country){
+      g <- g +
+        geom_line(aes(y = !!ci[[1]] * y_factor, color = country), linetype = 2) +
+        geom_line(aes(y = !!ci[[2]] * y_factor, color = country), linetype = 2)
+    }else{
+      g <- g +
+        geom_line(aes(y = !!ci[[1]] * y_factor, color = scenario), linetype = 2) +
+        geom_line(aes(y = !!ci[[2]] * y_factor, color = scenario), linetype = 2)
+    }
   }else{
     g <- g +
       geom_ribbon(aes(ymin = !!ci[[1]] * y_factor, ymax = !!ci[[2]] * y_factor), linetype = 0) +

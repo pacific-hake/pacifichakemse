@@ -245,6 +245,9 @@ hake_objectives <- function(sim_data = NULL,
       if(sim_age_comp_type == "catch"){
         #browser()
         if(space == 1){
+          # TODO: This code is all correct, but the space age_comps_catch_space[,,1], age_comps_catch_space[,,2],
+          # age_comps_surv_space[,,1], age_comps_surv_space[,,2] are fully populated when I think they should
+          # have NAs for non-data years. Populated correctly is age_comps_catch and age_comps_surv
           calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], sim_data[[.x]]$age_max_age)
         }else if(space == 2){
           calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,2], sim_data[[.x]]$age_max_age)
@@ -297,7 +300,7 @@ hake_objectives <- function(sim_data = NULL,
                                               "year",
                                               "val",
                                               probs = quants)
-  # amc_tot_quant -------------------------------------------------------------
+  # ams_tot_quant -------------------------------------------------------------
   out$ams_tot <- conv_am(0, "surv")
   out$ams_tot_quant <- melt(out$ams_tot, id.vars = "yr") %>%
     as_tibble() %>%

@@ -225,6 +225,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   mse_quants <- NULL
 
   # AMC quantile objects ------------------------------------------------------
+  mse_quants$amc_all_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_tot_quant")
   mse_quants$amc_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_ca_quant")
   mse_quants$amc_us_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_us_quant")
   amc_ca_tmp <- mse_quants$amc_ca_quant %>%
@@ -235,6 +236,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(amc_us_tmp)
 
   # AMS quantile objects ------------------------------------------------------
+  mse_quants$ams_all_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_tot_quant")
   mse_quants$ams_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_ca_quant")
   mse_quants$ams_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_us_quant")
   ams_ca_tmp <- mse_quants$ams_ca_quant %>%

@@ -19,7 +19,7 @@ plot_timeseries(
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}.}
 
-\item{type}{One of 'ssb', 'ssb_ssb0', catch'}
+\item{type}{One of 'ssb', 'ssb_ssb0', catch', 'aas', 'aac'}
 
 \item{time}{Either 'beg' for beginning of the year SSB or 'mid' for mid-year SSB.
 Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
