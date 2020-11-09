@@ -10,41 +10,49 @@
 #' @export
 plot_violins_country <- function(ps = NULL,
                                  pidx = NULL,
-                                 yrs = NULL){
+                                 yrs = NULL,
+                                 facet_back_cols = c("red", "blue"),
+                                 ...){
   #TODO: Fix this
   verify_argument(ps, "list")
 
   d <- ps$violin_indicators
+  stopifnot("scenario" %in% names(d))
+
   if(!is.null(yrs)){
     d <- d %>%
       filter(year %in% yrs)
   }
   if(is.null(pidx)){
-    pidx <- seq_along(unique(d$hcr))
+    pidx <- seq_along(unique(d$scenario))
   }
-  stopifnot(length(pidx) == length(unique(d$hcr)))
+  stopifnot(length(pidx) == length(unique(d$scenario)))
 
   melted_d <- melt(d,
-                   id.vars = c("run", "hcr", "country", "year"),
+                   id.vars = c("run", "scenario", "country", "year"),
                    measure.vars = 2:4,
                    variable.name = "season",
                    value.name = "exploitation") %>%
     as_tibble() %>%
     mutate(exploitation = ifelse(exploitation > 1.0, NA, exploitation)) %>%
-    mutate(hcr = factor(hcr, levels = unique(hcr)[pidx]))
+    mutate(scenario= factor(scenario, levels = unique(scenario)[pidx]))
 
   dodge <- position_dodge(width = 0.5)
-  g <- ggplot(melted_d, aes(x = hcr, y = exploitation, factor = season, fill = hcr))+
+
+  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+
+  g <- ggplot(melted_d, aes(x = scenario, y = exploitation, factor = season, fill = scenario))+
     geom_violin(position = dodge) +
     geom_boxplot(width = 0.15,
                  col = "black",
                  outlier.shape = NA,
                  position = dodge) +
-    scale_fill_manual(values = ps$cols) +
+    scale_fill_manual(values = cols) +
     facet_wrap(~country, dir = "v", ncol = 2) +
     theme(legend.position = "none",
           axis.text.x = element_text(angle = 90, vjust = 0.5)) +
     scale_x_discrete(name = "") +
     scale_y_continuous(name = "", limits = c(0, 0.5))
-  g
+
+  color_facet_backgrounds(g, facet_back_cols, ...)
 }
