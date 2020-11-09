@@ -11,7 +11,8 @@
 #' @export
 plot_standard_error <- function(ps = NULL,
                                 ci = c(0.05, 0.95),
-                                yr_lim = c(NA_real_, NA_real_)){
+                                yr_lim = c(NA_real_, NA_real_),
+                                ...){
 
   verify_argument(ps, "list")
   verify_argument(ci, "numeric", 2)
@@ -29,6 +30,7 @@ plot_standard_error <- function(ps = NULL,
   stopifnot(length(ci) == 2)
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
+  facet_back_cols <- brewer.pal(length(ps$plotnames), "Dark2")
 
   g <- ggplot(se, aes(x = year, y = `0.5`)) +
     theme_classic() +
@@ -39,7 +41,12 @@ plot_standard_error <- function(ps = NULL,
                     ymax = !!ci[[2]]),
                 fill = alpha("gray",
                              alpha = 0.5)) +
+    theme(axis.text.x = element_text(angle = 90,
+                                     hjust = 1,
+                                     vjust = 0.5),
+          legend.position = c(0.1, 0.9)) +
     scale_y_continuous(name = "Standard error") +
     coord_cartesian(xlim = yr_lim)
-  g
+
+  color_facet_backgrounds(g, facet_back_cols, ...)
 }
