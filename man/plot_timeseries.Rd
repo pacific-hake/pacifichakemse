@@ -13,7 +13,8 @@ plot_timeseries(
   yr_lim = c(NA_real_, NA_real_),
   ci_lines = TRUE,
   show_ssb0 = TRUE,
-  show_40_10 = TRUE
+  show_40_10 = TRUE,
+  ...
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 
 \item{show_40_10}{If TRUE, show the 0.4 initial biomass and 0.1 initial biomass lines.
 Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
+
+\item{...}{Extra arguments to pass to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

@@ -143,71 +143,11 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   lst_indicators <- map(om_output, function(om = .x, ...){
     tmp <- hake_objectives(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
-      mutate(HCR = names(om))
+      mutate(scenario = names(om))
     tmp$vtac_seas <- tmp$vtac_seas %>%
-      mutate(HCR = names(om))
+      mutate(scenario = names(om))
     tmp
   }, ...)
-
-  # df_all_indicators ---------------------------------------------------------
-  df_all_indicators <- map2(lst_indicators, 1:length(lst_indicators), ~{
-    .x$info %>%
-      mutate(hcr = names(lst_indicators)[.y])
-  }) %>%
-    map_df(~{.x}) %>%
-    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
-
-  # df_violin_indicators ------------------------------------------------------
-  df_violin_indicators <-  map2(lst_indicators, 1:length(lst_indicators), ~{
-    .x$vtac_seas %>%
-      mutate(hcr = names(lst_indicators)[.y])
-  }) %>%
-    map_df(~{.x}) %>%
-    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
-  violin_names <- names(df_violin_indicators)
-  violin_last_word <- gsub("v_tac_", "", violin_names)
-  season_inds <- grep("sp|su|fa", violin_last_word)
-  month_strings <- ifelse(violin_last_word == "sp",
-                          "Apr-Jun",
-                          ifelse(violin_last_word == "su",
-                                 "July-Sept",
-                                 "Oct-Dec"))
-  violin_names[season_inds] <- month_strings[season_inds]
-  names(df_violin_indicators) <- violin_names
-
-  indicators <- unique(df_all_indicators$indicator) %>% as.character
-  cutoff_ind <- grep("ong term", indicators)
-
-  # df_ssb_catch_indicators ---------------------------------------------------
-  df_ssb_catch_indicators <- df_all_indicators %>%
-    filter(indicator %in% indicators[1:cutoff_ind]) %>%
-    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
-
-  # df_country_season_indicators ----------------------------------------------
-  df_country_season_indicators <- df_all_indicators %>%
-    filter(indicator %in% indicators[(cutoff_ind + 1):length(indicators)]) %>%
-    mutate(country = str_extract(indicator, "^\\w+")) %>%
-    mutate(season = str_extract(indicator, "\\w+$")) %>%
-    mutate(season = ifelse(season == "spr",
-                           "Apr-Jun",
-                           ifelse(season == "sum",
-                                  "July-Sept",
-                                  "Oct-Dec"))) %>%
-    mutate(hcr = factor(hcr, levels = names(lst_indicators)[porder]))
-
-  # df_violin -----------------------------------------------------------------
-  df_violin <- map2(lst_indicators, seq_along(lst_indicators), ~{
-    tmp <- list(yrs_quota_met = .x$yrs_quota_met, # years between 0.1 and 0.4
-                ssb_10 = .x$ssb_10,
-                ssb_40 = .x$ssb_40,
-                catch_short_term = .x$catch_short_term,
-                catch_long_term = .x$catch_long_term,
-                aav_plot = .x$aav_plot,
-                catch_plot = .x$catch_plot,
-                ssb_plot = .x$ssb_plot)
-    tmp[[1]]$hcr <- plotnames[.y]
-    tmp
-  })
 
   # merge_dfs_from_scenarios() function ---------------------------------------
   # Bind rows of all list[[3]] data frames into single data frame, and order it by scenario
@@ -221,8 +161,62 @@ setup_mse_plot_objects <- function(results_dir = NULL,
       mutate(scenario = factor(scenario, levels = plotnames[porder]))
   }
 
+  # df_violin_indicators ------------------------------------------------------
+  df_violin_indicators <-  map2(lst_indicators, 1:length(lst_indicators), ~{
+    .x$vtac_seas %>%
+      mutate(scenario = names(lst_indicators)[.y])
+  }) %>%
+    map_df(~{.x}) %>%
+    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+  violin_names <- names(df_violin_indicators)
+  violin_last_word <- gsub("v_tac_", "", violin_names)
+  season_inds <- grep("sp|su|fa", violin_last_word)
+  month_strings <- ifelse(violin_last_word == "sp",
+                          "Apr-Jun",
+                          ifelse(violin_last_word == "su",
+                                 "July-Sept",
+                                 "Oct-Dec"))
+  violin_names[season_inds] <- month_strings[season_inds]
+  names(df_violin_indicators) <- violin_names
+
+  # df_violin -----------------------------------------------------------------
+  df_violin <- map2(lst_indicators, seq_along(lst_indicators), ~{
+    tmp <- list(yrs_quota_met = .x$yrs_quota_met, # years between 0.1 and 0.4
+                ssb_10 = .x$ssb_10,
+                ssb_40 = .x$ssb_40,
+                catch_short_term = .x$catch_short_term,
+                catch_long_term = .x$catch_long_term,
+                aav_plot = .x$aav_plot,
+                catch_plot = .x$catch_plot,
+                ssb_plot = .x$ssb_plot)
+    tmp[[1]]$scenario <- plotnames[.y]
+    tmp
+  })
+
   # List for holding all the quantiles
   mse_quants <- NULL
+
+  # Indicator quantile objects ------------------------------------------------
+  mse_quants$info_quant <- merge_dfs_from_scenarios(lst_indicators, "info_quant")
+  indicators <- unique(mse_quants$info_quant$indicator) %>% as.character
+  cutoff_ind <- grep("ong term", indicators)
+
+  # df_ssb_catch_indicators ---------------------------------------------------
+  mse_quants$ssb_catch_indicators_quant <- mse_quants$info_quant %>%
+    filter(indicator %in% indicators[1:cutoff_ind]) %>%
+    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+
+  # df_country_season_indicators_quant ----------------------------------------
+  mse_quants$country_season_indicators_quant <- mse_quants$info_quant %>%
+    filter(indicator %in% indicators[(cutoff_ind + 1):length(indicators)]) %>%
+    mutate(country = str_extract(indicator, "^\\w+")) %>%
+    mutate(season = str_extract(indicator, "\\w+$")) %>%
+    mutate(season = ifelse(season == "spr",
+                           "Apr-Jun",
+                           ifelse(season == "sum",
+                                  "July-Sept",
+                                  "Oct-Dec"))) %>%
+    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
 
   # AMC quantile objects ------------------------------------------------------
   mse_quants$amc_all_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_tot_quant")
@@ -301,9 +295,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     map_df(~{.x})
 
   # Return list ---------------------------------------------------------------
-  list(ssb_catch_indicators = df_ssb_catch_indicators,
-       country_season_indicators = df_country_season_indicators,
-       violin_indicators = df_violin_indicators,
+  list(violin_indicators = df_violin_indicators,
        violin_data = df_violin,
        cols = cols,
        plotnames = plotnames,

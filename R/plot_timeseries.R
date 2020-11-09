@@ -14,10 +14,9 @@
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param show_40_10 If TRUE, show the 0.4 initial biomass and 0.1 initial biomass lines.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
+#' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom ggplot2 ggplot_build ggplot_gtable
-#' @importFrom grid grid.draw
 #' @importFrom RColorBrewer brewer.pal
 #' @export
 plot_timeseries <- function(ps = NULL,
@@ -28,7 +27,8 @@ plot_timeseries <- function(ps = NULL,
                             yr_lim = c(NA_real_, NA_real_),
                             ci_lines = TRUE,
                             show_ssb0 = TRUE,
-                            show_40_10 = TRUE){
+                            show_40_10 = TRUE,
+                            ...){
 
   verify_argument(ps, "list")
   verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac"))
@@ -152,20 +152,8 @@ plot_timeseries <- function(ps = NULL,
       geom_hline(aes(yintercept = ssb0 * 0.1), color = "black", linetype = 2)
   }
   if(by_country){
-    strip_back_alpha <- 50
-    g <- g + ggplot2::facet_grid(~scenario)
-
-    # Add scenario colors to the strip backgrounds
-    gt <- ggplot_gtable(ggplot_build(g))
-    stript <- which(grepl('strip-', gt$layout$name))
-
-    k <- 1
-    for(i in stript){
-      j <- which(grepl('rect', gt$grobs[[i]]$grobs[[1]]$childrenOrder))
-      gt$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- paste0(facet_back_cols[k], strip_back_alpha)
-      k <- k + 1
-    }
-    return(grid.draw(gt))
+    g <- g + facet_wrap(~scenario)
+    return(color_facet_backgrounds(g, facet_back_cols, ...))
   }
 
   g

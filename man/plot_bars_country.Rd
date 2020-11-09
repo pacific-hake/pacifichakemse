@@ -4,12 +4,10 @@
 \alias{plot_bars_country}
 \title{Plot season indicators barplots by country and scenario}
 \usage{
-plot_bars_country(ps = NULL, run = 1)
+plot_bars_country(ps = NULL, facet_back_cols = c("red", "blue"), ...)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
-
-\item{run}{Which run number to use for the plot}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

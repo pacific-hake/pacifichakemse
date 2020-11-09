@@ -603,6 +603,7 @@ hake_objectives <- function(sim_data = NULL,
                  "US TAC/V spr",
                  "US TAC/V sum",
                  "US TAC/V fall")
+  indicator_key <- seq_along(indicator)
 
   # aav_quant_by_run ----------------------------------------------------------
   out$aav_quant_by_run <- calc_quantiles_by_group(out$aav_plot, grp_col = "run",
@@ -625,7 +626,8 @@ hake_objectives <- function(sim_data = NULL,
   # info (indicator table) ----------------------------------------------------
   out$info <- map(1:nruns, ~{
     data.frame(
-      indicator = as.factor(indicator),
+      indicator_key = indicator_key,
+      indicator = indicator,
       value = c(
         round(length(which(ssb_future[ssb_future$run == .x,]$ssb <= 0.1)) /
                 length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
@@ -647,6 +649,17 @@ hake_objectives <- function(sim_data = NULL,
       mutate(run = .x)
   }) %>%
     map_df(~{.x})
+
+  # info_quant (indicator table) ----------------------------------------------
+  out$info_quant <- out$info %>%
+    calc_quantiles_by_group(grp_col = "indicator_key",
+                            col = "value",
+                            grp_names = "indicator",
+                            probs = quants)
+
+  out$info <- out$info %>%
+    select(-indicator_key) %>%
+    mutate(indicator = as.factor(indicator))
 
   out
 }

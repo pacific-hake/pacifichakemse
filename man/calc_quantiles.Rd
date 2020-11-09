@@ -17,6 +17,7 @@ calc_quantiles_by_group(
   df = NULL,
   grp_col = NULL,
   col = NULL,
+  grp_names = grp_col,
   probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
   include_mean = TRUE
 )
@@ -42,6 +43,9 @@ the string assigned to \code{col}}
 \item{include_mean}{If TRUE, include the mean in the output}
 
 \item{grp_col}{The column name to use for grouping the data}
+
+\item{grp_names}{The column name to use for labeling the grouped column. By default it is the same as the
+grouping column (\code{grp_col}).}
 
 \item{min_yr}{The minimum year in the term. If \code{NA}, the minimum value in the \link{data.frame}
 will be used}

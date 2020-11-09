@@ -47,9 +47,11 @@ calc_quantiles <- function(df = NULL,
                            probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
                            include_mean = TRUE){
 
-  stopifnot(!is.null(df))
-  stopifnot(!is.null(col))
-  stopifnot(!is.null(probs))
+  verify_argument(df, c("data.frame", "tbl_df"))
+  verify_argument(col, "character", 1)
+  verify_argument(probs, "numeric")
+  verify_argument(include_mean, "logical", 1)
+
   stopifnot(col %in% names(df))
   stopifnot(class(df[[col]]) == "numeric")
   col_sym <- sym(col)
@@ -58,6 +60,7 @@ calc_quantiles <- function(df = NULL,
                map(probs,
                    ~partial(quantile, probs = .x, na.rm = TRUE)) %>%
                  set_names(probs))
+
   if(include_mean){
     out <- out %>%
       mutate(avg = mean(df[[col]]))
@@ -76,6 +79,8 @@ calc_quantiles <- function(df = NULL,
 #' @param col The column name to use as values to calculate quantiles for
 #' @param probs A vector of quantiles to pass to [stats::quantile()]
 #' @param include_mean If TRUE, include the mean in the output
+#' @param grp_names The column name to use for labeling the grouped column. By default it is the same as the
+#' grouping column (`grp_col`).
 #'
 #' @return A [data.frame] containing the quantile values with one row per group represented by `grp_col`
 #' @importFrom rlang sym
@@ -112,25 +117,31 @@ calc_quantiles <- function(df = NULL,
 calc_quantiles_by_group <- function(df = NULL,
                                     grp_col = NULL,
                                     col = NULL,
+                                    grp_names = grp_col,
                                     probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
                                     include_mean = TRUE){
-  stopifnot(!is.null(df))
-  stopifnot(!is.null(grp_col))
-  stopifnot(!is.null(col))
+
+  verify_argument(df, c("data.frame", "tbl_df"))
+  verify_argument(grp_col, "character", 1)
+  verify_argument(col, "character", 1)
+  verify_argument(grp_names, "character", 1)
+  verify_argument(probs, "numeric")
+  verify_argument(include_mean, "logical", 1)
+
   stopifnot(grp_col %in% names(df))
   stopifnot(col %in% names(df))
-  stopifnot(class(df[[col]]) == "numeric")
+
   grp_col_sym <- sym(grp_col)
+  grp_names_sym <- sym(grp_names)
   col_sym <- sym(col)
-  stopifnot(!is.null(probs))
-  grp_vals <- unique(df[[grp_col]])
+  grp_vals <- unique(df[[grp_names]])
 
   df %>%
     group_by(!!grp_col_sym) %>%
     group_map(~ calc_quantiles(.x, col = col, probs = probs, include_mean = include_mean)) %>%
     map_df(~{.x}) %>%
-    mutate(!!grp_col_sym := grp_vals) %>%
-    select(!!grp_col_sym, everything()) %>%
+    mutate(!!grp_names_sym := grp_vals) %>%
+    select(!!grp_names_sym, everything()) %>%
     ungroup()
 }
 
@@ -828,4 +839,69 @@ compare_tmb_data <- function(d1, d2, p1, p2){
     mutate(type = "parameter")
 
   bind_rows(d, p)
+}
+
+#' Color the backgrounds of the facet labels in a ggplot object
+#'
+#' @param g The ggplot object
+#' @param facet_back_cols A vector of the colors to apply to the facet backgrounds
+#' @param facet_back_alpha transparency between 0 and 99
+#'
+#' @return The modified ggplot object
+#' @importFrom ggplot2 ggplot_gtable ggplot_build
+#' @importFrom grid grid.draw
+#' @export
+color_facet_backgrounds <- function(g = NULL,
+                                    facet_back_cols = NULL,
+                                    facet_back_alpha = 99){
+
+  verify_argument(g, "ggplot")
+  verify_argument(facet_back_cols, "character")
+  verify_argument(facet_back_alpha, c("integer", "numeric"), 1)
+
+  if(facet_back_alpha < 0){
+    facet_back_alpha <- 0
+  }
+  if(facet_back_alpha > 99){
+    facet_back_alpha <- 99
+  }
+  if(facet_back_alpha < 10){
+    # Needs to be two digits for the alpha string
+    facet_back_alpha <- paste0("0", facet_back_alpha)
+  }
+
+  # Add scenario colors to the strip backgrounds
+  gt <- ggplot_gtable(ggplot_build(g))
+  strip <- which(grepl('strip-', gt$layout$name))
+  if(!length(strip)){
+    warning("The ggplot object does not contain facets, returning the original object")
+    return(g)
+  }
+  if(length(facet_back_cols) < length(strip)){
+    warning("The facet_back_cols vector is shorter than the number of facet backgrounds. Recycling the colors")
+    facet_back_cols <- rep(facet_back_cols, length(strip) %/% length(facet_back_cols) + 1)
+  }
+  facet_back_cols <- facet_back_cols[seq_along(strip)]
+
+  k <- 1
+  for(i in strip){
+    j <- which(grepl('rect', gt$grobs[[i]]$grobs[[1]]$childrenOrder))
+    gt$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- paste0(col2hex(facet_back_cols[k]), facet_back_alpha)
+    k <- k + 1
+  }
+  grid.draw(gt)
+}
+
+#' Convert color name to hex string. Code borrowed from [gplots::col2hex()]
+#'
+#' @param cname Color name as a common name. If a hex string is supplied, it will be returned unchanged.
+#'
+#' @return The HEX string representing the color
+#' @export
+col2hex <- function(cname){
+
+  verify_argument(cname, "character", 1)
+
+  col_mat <- col2rgb(cname)
+  rgb(red = col_mat[1, ] / 255, green = col_mat[2, ] / 255, blue = col_mat[3, ] / 255)
 }
