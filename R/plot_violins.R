@@ -1,80 +1,17 @@
-#' Plot faceted violin plots for scenarios
+#' Plot faceted violin plots for scenarios, showing performance metrics
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
-#' @param quants Quantile values to calculate
-#' @param min_yr The minimum year to show on the plot
+#' @param quants Quantile values as limits to remove tail data from plot
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
 #' @importFrom forcats fct_relevel
 #' @importFrom PNWColors pnw_palette
-plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
+plot_violins <- function(ps = NULL,
+                         quants = c(0.05, 0.95)){
 
-  # Extract Catch, SSB, and AAV and quantiles for them
-  # catch <- map2(ps$violin_data, seq_along(ps$violin_data), ~{
-  #   .x$catch_plot %>%
-  #     mutate(hcr = ps$plotnames[.y]) %>%
-  #     rename(value = catch)
-  # }) %>%
-  #   map_df(~{.x}) %>%
-  #   filter(year >= min_yr)
-  #
-  # catch_quants <- map2(ps$violin_data, seq_along(ps$violin_data), ~{
-  #   .x$catch_plot %>%
-  #     calc_quantiles_by_group(grp_col = "year",
-  #                             col = "catch",
-  #                             probs = quants,
-  #                             include_mean = FALSE) %>%
-  #     mutate(hcr = ps$plotnames[.y])
-  #
-  # }) %>%
-  #   map_df(~{.x}) %>%
-  #   filter(year >= min_yr) %>%
-  #   mutate(col = "catch")
-  #
-  # ssb <- map2(ps$violin_data, seq_along(ps$violin_data), ~{
-  #   .x$ssb_plot  %>%mutate(hcr = ps$plotnames[.y]) %>%
-  #     rename(value = ssb)
-  # }) %>%
-  #   map_df(~{.x}) %>%
-  #   filter(year >= min_yr)
-  #
-  # ssb_quants <- map2(ps$violin_data, seq_along(ps$violin_data), ~{
-  #   .x$ssb_plot  %>%
-  #     calc_quantiles_by_group(grp_col = "year",
-  #                             col = "ssb",
-  #                             probs = quants,
-  #                             include_mean = FALSE) %>%
-  #     mutate(hcr = ps$plotnames[.y])
-  # }) %>%
-  #   map_df(~{.x}) %>%
-  #   filter(year >= min_yr) %>%
-  #   mutate(col = "ssb")
-  #
-  # aav <- map2(ps$violin_data, seq_along(ps$violin_data), ~{
-  #   .x$aav_plot  %>%
-  #     mutate(hcr = ps$plotnames[.y]) %>%
-  #     rename(value = aav)
-  # }) %>%
-  #   map_df(~{.x}) %>%
-  #   filter(year >= min_yr)
-  #
-  # aav_quants <- map2(ps$violin_data, seq_along(ps$violin_data), ~{
-  #   .x$aav_plot  %>%
-  #     calc_quantiles_by_group(grp_col = "year",
-  #                             col = "aav",
-  #                             probs = quants,
-  #                             include_mean = FALSE) %>%
-  #     mutate(hcr = ps$plotnames[.y])
-  # }) %>%
-  #   map_df(~{.x}) %>%
-  #   filter(year >= min_yr) %>%
-  #   mutate(col = "aav")
-  #
-  # df <- catch %>%
-  #   bind_rows(ssb) %>%
-  #   bind_rows(aav)
-  # TODO: Need to remove all values which lie outside the quantile range. Set them to NA
+  verify_argument(ps, "list")
+  verify_argument(quants, "numeric")
 
   inds <- c("SSB < 0.10 SSB0",
             "0.10 < SSB < 0.4 SSB0",
@@ -83,19 +20,23 @@ plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
             "Short term catch",
             "Long term catch")
 
-  df <- ps$ssb_catch_indicators %>%
+  d <- ps$df_ssb_catch_indicators
+  stopifnot("value" %in% names(d))
+  stopifnot("scenario" %in% names(d))
+
+  df <-  d %>%
     filter(indicator %in% inds) %>%
     mutate(indicator = fct_relevel(indicator, inds))
 
-  # Remove tails of data (0.05 and 0.95 percentiles)
+  # Remove tails of data
   qs <- df %>%
-    group_by(hcr, indicator) %>%
-    summarize(qlow = quantile(value, 0.05), qhigh = quantile(value, 0.95))
+    group_by(scenario, indicator) %>%
+    summarize(qlow = quantile(value, quants[1]), qhigh = quantile(value, quants[2])) %>%
+    ungroup()
 
-  df <- df %>% left_join(qs, by = c("hcr", "indicator")) %>%
-    group_by(hcr, indicator) %>%
-    #filter(value >= qlow && value <= qhigh) %>%
-    filter(value >= qlow) %>%
+  df <- df %>% left_join(qs, by = c("scenario", "indicator")) %>%
+    group_by(scenario, indicator) %>%
+    filter(value >= qlow & value <= qhigh) %>%
     ungroup() %>%
     select(-c(qlow, qhigh))
 
@@ -110,8 +51,8 @@ plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
     filter(!indicator %in%  c("Short term catch", "Long term catch")) %>%
     bind_rows(df_st, df_lt)
 
-  cols <- pnw_palette("Starfish",n = length(unique(df$hcr)), type = "discrete")
-  g <- ggplot(df, aes(x = hcr, y = value, fill = hcr)) +
+  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+  g <- ggplot(df, aes(x = scenario, y = value, fill = scenario)) +
     geom_violin() +
     geom_boxplot(width = 0.15, col = "black", outlier.shape = NA) +
     scale_fill_manual(values = cols) +
@@ -120,5 +61,6 @@ plot_violins <- function(ps, quants = c(0.05, 0.95), min_yr = 2020){
           axis.text.x = element_text(angle = 90, vjust = 0.5)) +
     scale_x_discrete(name = "") +
     scale_y_continuous(name = "")
+
   g
 }

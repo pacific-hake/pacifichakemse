@@ -2,20 +2,18 @@
 % Please edit documentation in R/plot_violins.R
 \name{plot_violins}
 \alias{plot_violins}
-\title{Plot faceted violin plots for scenarios}
+\title{Plot faceted violin plots for scenarios, showing performance metrics}
 \usage{
-plot_violins(ps, quants = c(0.05, 0.95), min_yr = 2020)
+plot_violins(ps = NULL, quants = c(0.05, 0.95))
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
-\item{quants}{Quantile values to calculate}
-
-\item{min_yr}{The minimum year to show on the plot}
+\item{quants}{Quantile values as limits to remove tail data from plot}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
 }
 \description{
-Plot faceted violin plots for scenarios
+Plot faceted violin plots for scenarios, showing performance metrics
 }
