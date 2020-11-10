@@ -33,7 +33,6 @@ plot_standard_error <- function(ps = NULL,
   facet_back_cols <- brewer.pal(length(ps$plotnames), "Dark2")
 
   g <- ggplot(se, aes(x = year, y = `0.5`)) +
-    theme_classic() +
     geom_line(size = 1.5) +
     facet_wrap(~scenario) +
     geom_hline(yintercept = 0.0, linetype = 2) +

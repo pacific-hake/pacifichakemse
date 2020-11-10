@@ -8,7 +8,8 @@ the Estimation model}
 plot_standard_error(
   ps = NULL,
   ci = c(0.05, 0.95),
-  yr_lim = c(NA_real_, NA_real_)
+  yr_lim = c(NA_real_, NA_real_),
+  ...
 )
 }
 \arguments{

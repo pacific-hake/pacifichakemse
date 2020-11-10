@@ -4,7 +4,13 @@
 \alias{plot_violins_country}
 \title{Plot faceted violin plots by Country for scenarios}
 \usage{
-plot_violins_country(ps = NULL, pidx = NULL, yrs = NULL)
+plot_violins_country(
+  ps = NULL,
+  pidx = NULL,
+  yrs = NULL,
+  facet_back_cols = c("red", "blue"),
+  ...
+)
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
