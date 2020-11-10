@@ -12,7 +12,7 @@ plot_bars_country <- function(ps = NULL,
 
   cols <- brewer.pal(length(ps$plotnames), "Dark2")
 
-  g <- ggplot(ps$mse_quants$df_country_season_indicators_quant,
+  g <- ggplot(ps$mse_quants$country_season_indicators_quant,
               aes(x = scenario, y = `0.5`, factor = season)) +
     geom_bar(stat = "identity", aes(fill = season), position = "dodge2") +
     scale_x_discrete(name = "") +
