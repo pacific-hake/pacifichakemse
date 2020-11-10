@@ -96,7 +96,6 @@ run_season_loop_om <- function(om,
         }
       }
 
-      #if(yr >= 2020) browser()
       # Calculate catch distribution ------------------------------------------
       e_tmp <- catch_space * om$catch_props_space_season[space, season] %>% pull
       n_tmp <- om$n_save_age[, yr_ind, space, season]
@@ -124,7 +123,7 @@ run_season_loop_om <- function(om,
         e_tmp <- 0.75 * b_tmp
         om$catch_quota_n[yr_ind, space, season] <<- 1
       }
-      #if(yr > 2019) browser()
+
       # Calculate F based on catch distribution -------------------------------
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,
@@ -221,7 +220,6 @@ run_season_loop_om <- function(om,
       }
       om$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season] * wage_catch
       om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
-      #if(yr >= 2020) browser()
 
       # Calculate catch quota -------------------------------------------------
       if(om$catch_quota[yr_ind, space, season] > 0){

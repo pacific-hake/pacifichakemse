@@ -234,7 +234,6 @@ hake_objectives <- function(sim_data = NULL,
 
     x <- map_df(1:nruns, ~{
       if(sim_age_comp_type == "catch"){
-        #browser()
         if(space == 1){
           # TODO: This code is all correct, but the space age_comps_catch_space[,,1], age_comps_catch_space[,,2],
           # age_comps_surv_space[,,1], age_comps_surv_space[,,2] are fully populated when I think they should

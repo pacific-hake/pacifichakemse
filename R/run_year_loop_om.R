@@ -44,11 +44,9 @@ run_year_loop_om <- function(om = NULL,
           (om$ssb_0[space] * (1 - om$h) + om$ssb[yr_ind, space] *
              (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                       om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
-      #if(yr >= 2020) browser()
-
       rec
     }) %>% set_names(om$space_names)
-    #if(yr == 2019) browser()
+
     om$n_save_age[1, yr_ind, , 1] <<- init_rec
 
     om$r_save[yr_ind, ] <<- init_rec
@@ -186,7 +184,6 @@ run_year_loop_om <- function(om = NULL,
       set_names(seq_len(length(catch_age_comps_tmp))) %>%
       bind_rows() %>%
       as.matrix()
-    #if(yr >= 2019) browser()
 
     if(om$flag_catch[yr_ind] == 1){
       om$age_comps_catch[1:(om$age_max_age - 1), yr_ind] <<-

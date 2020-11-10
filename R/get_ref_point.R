@@ -41,7 +41,7 @@ get_ref_point <- function(pars,
     filter(Yr == yr) %>%
     select(-Yr) %>%
     unlist(use.names = FALSE)
-  #browser()
+
   m_age <- rep(m_est, df$n_age)
   n_0 <- NULL
   n_0[1] <- r_0
@@ -120,7 +120,6 @@ get_ref_point <- function(pars,
   }
 
   # Adjust TAC by JMC/Utilization
-#browser()
   if(length(tac) == 1){
     # Floor 50%
     c_exp <- c_new * 0.5

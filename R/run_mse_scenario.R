@@ -78,20 +78,11 @@ run_mse_scenario <- function(om = NULL,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          ...)
-    #if(yr == 2020) browser()
-
-    #om$catch_obs <- om_output$catch_obs <- om_output$catch
 
     # Create TMB data for EM --------------------------------------------------
 
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
-    #browser()
-    # if(yr > om$m_yr){
-    #   #browser()
-    #
-    #   yrs <- as.numeric(names(lst_tmb$params$f_0))
-    #   lst_tmb$params$f_0[yrs == yr] <- 0.2
-    # }
+
     # Evaluate the Objective function
     d <- lst_tmb$om
     p <- lst_tmb$params
@@ -130,14 +121,12 @@ run_mse_scenario <- function(om = NULL,
     # --
 
     # Run TMB model -----------------------------------------------------------
-#browser()
     obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
     rsmall <- report %>% map(~{format(.x, nsmall = 20)})
     plike <- report %>% get_likelihoods %>% format(nsmall = 20)
     objfn <- obj$fn() %>% format(nsmall = 20)
     psmall <- obj %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
-#browser()
 
     # You can check likelihood components and parameter estimates by placing
     # a browser after the MakeADFun() call above and the nlminb() call below and
@@ -176,7 +165,7 @@ run_mse_scenario <- function(om = NULL,
     v_real <- sum(om_output$n_save_age[, which(om$yrs == yr), , om$n_season] *
                     matrix(rep(wage_catch, om$n_space),
                            ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == yr),]))
-#if(yr == 2020) browser()
+
     f_new <- get_ref_point(pars,
                            om,
                            yr = yr,
@@ -186,7 +175,6 @@ run_mse_scenario <- function(om = NULL,
                            tac = tac,
                            v_real = v_real,
                            ...)
-#if(yr == 2019) browser()
 
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
