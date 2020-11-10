@@ -14,6 +14,7 @@
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param show_40_10 If TRUE, show the 0.4 initial biomass and 0.1 initial biomass lines.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
+#' @param rev_scenarios If TRUE, reverse the order of the scenarios in the legend.
 #' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
@@ -28,6 +29,7 @@ plot_timeseries <- function(ps = NULL,
                             ci_lines = TRUE,
                             show_ssb0 = TRUE,
                             show_40_10 = TRUE,
+                            rev_scenarios = FALSE,
                             ...){
 
   verify_argument(ps, "list")
@@ -106,8 +108,10 @@ plot_timeseries <- function(ps = NULL,
   }
 
   # Reorder the legend and colors
-  d <- d %>%
-    mutate(scenario = fct_relevel(scenario, rev(levels(d$scenario))))
+  if(rev_scenarios){
+    d <- d %>%
+      mutate(scenario = fct_relevel(scenario, rev(levels(d$scenario))))
+  }
 
   d <- d %>%
     filter(!is.na(`0.5`))
