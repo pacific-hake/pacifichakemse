@@ -527,7 +527,7 @@ hake_objectives <- function(sim_data = NULL,
                                             grp_col = "run",
                                             col = "aav",
                                             min_yr = min(short_term_yrs),
-                                            max_yr = long_term_yrs,
+                                            max_yr = max(short_term_yrs),
                                             probs = quants)
 
   # v_ca_stat -----------------------------------------------------------------
