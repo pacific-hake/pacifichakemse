@@ -86,20 +86,20 @@ update_om_data <- function(yr = NULL,
   # This includes the updates for the different selectivity scenarios
 
   # Movement model updates ----------------------------------------------------
-  if(yr > om$m_yr){
-    move_max_tmp <- om$move_max[1] + c_increase
+  if(is.null(om$move_max_tmp)){
+    om$move_max_tmp <- om$move_max[1] + c_increase
     om$move_out <- om$move_out - m_increase
   }else{
-    move_max_tmp <- move_max_tmp + c_increase
+    om$move_max_tmp <- om$move_max_tmp + c_increase
     om$move_out <- om$move_out - m_increase
   }
   # Do not allow more than 90% to move out
-  move_max_tmp <- ifelse(move_max_tmp > 0.9, 0.9, move_max_tmp)
+  om$move_max_tmp <- ifelse(om$move_max_tmp > 0.9, 0.9, om$move_max_tmp)
   # If less than 50% move out, move 50% out
   om$move_out <- ifelse(om$move_out <= 0.5, 0.5, om$move_out)
   for(i in 1:om$n_space){
     for(j in 1:om$n_season){
-      om$move_mat[i, , j, yr_ind] <- move_max_tmp /
+      om$move_mat[i, , j, yr_ind] <- om$move_max_tmp /
         (1 + exp(-om$move_slope * (om$ages - om$move_fifty)))
     }
   }
