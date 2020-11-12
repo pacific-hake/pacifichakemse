@@ -199,21 +199,24 @@ calc_quantiles_by_group <- function(df = NULL,
 calc_term_quantiles <- function(df = NULL,
                                 grp_col = NULL,
                                 col = NULL,
-                                min_yr = NA,
-                                max_yr = NA,
+                                min_yr = NA_real_,
+                                max_yr = NA_real_,
                                 probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
                                 mean_multiplier = 1){
-  stopifnot(!is.null(df))
-  stopifnot(!is.null(grp_col))
-  stopifnot(!is.null(col))
+
+  verify_argument(df, c("data.frame", "tbl_df"))
+  verify_argument(grp_col, "character", 1)
+  verify_argument(col, "character", 1)
+  verify_argument(min_yr, c("integer", "numeric"), 1)
+  verify_argument(max_yr, c("integer", "numeric"), 1)
+  verify_argument(probs, "numeric")
+  verify_argument(mean_multiplier, c("integer", "numeric"), 1)
+
   stopifnot(grp_col %in% names(df))
   stopifnot(col %in% names(df))
   stopifnot(class(df[[col]]) == "numeric")
   grp_col_sym <- sym(grp_col)
   col_sym <- sym(col)
-  stopifnot(!is.null(min_yr))
-  stopifnot(!is.null(max_yr))
-  stopifnot(!is.null(probs))
   if(is.na(min_yr)){
     min_yr <- min(df$year)
   }
@@ -225,6 +228,7 @@ calc_term_quantiles <- function(df = NULL,
     return(NULL)
   }
   if(!df %>% filter(df$year %in% min_yr:max_yr) %>% nrow){
+    warning("There are no rows in the data frame within the years specified. Returning NULL")
     return(NULL)
   }
 
