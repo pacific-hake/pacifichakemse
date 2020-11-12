@@ -33,7 +33,7 @@ plot_timeseries <- function(ps = NULL,
                             ...){
 
   verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac"))
+  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "catch_quota"))
   verify_argument(time, "character", 1, c("beg", "mid"))
   verify_argument(ci, "numeric", 2)
   verify_argument(by_country, "logical", 1)
@@ -89,6 +89,11 @@ plot_timeseries <- function(ps = NULL,
     }
     y_label <- "Average age in catch"
     y_factor <- 1
+  }else if(type == "catch_quota"){
+    d <- ps$mse_quants$catch_quota_quant
+    y_label <- "Catch / Quota"
+    ssb0 <- 1
+    y_factor <- 1
   }
 
   stopifnot("0.5" %in% names(d))
@@ -127,7 +132,7 @@ plot_timeseries <- function(ps = NULL,
     theme(axis.text.x = element_text(angle = 90,
                                      hjust = 1,
                                      vjust = 0.5),
-          legend.position = c(0.1, 0.9)) +
+          legend.position = c(0.08, 0.85)) +
     scale_color_manual(values = cols) +
     coord_cartesian(xlim = yr_lim)
 
@@ -146,7 +151,7 @@ plot_timeseries <- function(ps = NULL,
       geom_ribbon(aes(ymin = !!ci[[1]] * y_factor, ymax = !!ci[[2]] * y_factor), linetype = 0) +
       scale_fill_manual(values = alpha(cols, alpha = 0.2))
   }
-  if(show_ssb0 && type %in% c("ssb", "ssb_ssb0")){
+  if(show_ssb0 && type %in% c("ssb", "ssb_ssb0", "catch_quota")){
     g <- g +
       geom_hline(aes(yintercept = ssb0), color = "black", linetype = 2)
   }
@@ -154,6 +159,13 @@ plot_timeseries <- function(ps = NULL,
     g <- g +
       geom_hline(aes(yintercept = ssb0 * 0.4), color = "black", linetype = 2) +
       geom_hline(aes(yintercept = ssb0 * 0.1), color = "black", linetype = 2)
+  }
+  if(type == "catch_quota"){
+    g <- g + coord_cartesian(ylim = c(.4, 1.1)) +
+      theme(axis.text.x = element_text(angle = 90,
+                                       hjust = 1,
+                                       vjust = 0.5),
+            legend.position = c(0.08, 0.15))
   }
   if(by_country){
     g <- g + facet_wrap(~scenario)

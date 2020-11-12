@@ -335,11 +335,26 @@ hake_objectives <- function(sim_data = NULL,
     mutate(quota = `1` + `2`) %>%
     select(year, quota, run)
 
+  # quota ---------------------------------------------------------------------
+  out$quota <- map2(sim_data, seq_along(sim_data), ~{
+    yrs <- as.numeric(rownames(.x$catch_quota[,,1]))
+    rowSums(.x$catch_quota) %>%
+      as_tibble() %>%
+      mutate(run = .y) %>%
+      mutate(year = yrs) %>%
+      rename(quota = value) %>%
+      select(year, everything())
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
+
   # catch_quota_tot -----------------------------------------------------------
   out$catch_quota_tot <- out$catch_plot %>%
-    left_join(out$quota_tot, by = c("run", "year")) %>%
+    left_join(out$quota, by = c("run", "year")) %>%
     mutate(catch_quota = catch / quota) %>%
     select(year, catch, quota, catch_quota, run)
+
+  #out$catch_quota_tot[is.na(out$catch_quota_tot)] <- 0
 
   # catch_quota_quant ---------------------------------------------------------
   out$catch_quota_quant <- out$catch_quota_tot %>%
