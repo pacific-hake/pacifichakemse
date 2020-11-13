@@ -185,40 +185,32 @@ hake_objectives <- function(sim_data = NULL,
                                              probs = quants)
 
   # catch_plot ----------------------------------------------------------------
+  out$catch_for_aav <- map2(sim_data, seq_along(sim_data), ~{
+    apply(.x$catch_save_age, MARGIN = 2, FUN = sum) %>%
+      as_tibble() %>%
+      mutate(year = .x$yrs, run = .y) %>%
+      rename(catch = value) %>%
+      select(year, everything())
+      #mutate(run = .y) %>%
+  }) %>%
+    bind_rows()
+
+  # catch_plot ----------------------------------------------------------------
   out$catch_plot <- map2(sim_data, seq_along(sim_data), ~{
-    ct <- apply(.x$catch_save_age, MARGIN = 2, FUN = sum)
-    if(length(ct) == 1){
-      data.frame(year = yrs,
-                 catch = .x$catch_save_age,
-                 run = .y)
-    }else{
-      data.frame(year = yrs,
-                 catch = ct,
-                 run = .y)
-    }
+    .x$catch %>%
+      as_tibble() %>%
+      rename(catch = 1) %>%
+      mutate(year = .x$yrs) %>%
+      mutate(run = .y) %>%
+      select(year, catch, run)
   }) %>%
     map_df(~{.x}) %>%
     as_tibble()
 
   # catch_quant ---------------------------------------------------------------
-  out$catch_quant <- map2(sim_data, 1:nruns,~{
-    tmp <- .x$catch %>%
-      as.data.frame()
-    names(tmp) <- "value"
-    tmp <- tmp %>%
-      as_tibble() %>%
-      mutate(year = yrs) %>%
-      mutate(run = .y)
-  })
-  names(out$catch_quant) <- 1:nruns
-  out$catch_quant <- out$catch_quant %>%
-    map_dfr(~{.x}) %>%
-    select(year, run, value)
-
-  # catch_quant ---------------------------------------------------------------
-  out$catch_quant <- calc_quantiles_by_group(out$catch_quant,
+  out$catch_quant <- calc_quantiles_by_group(out$catch_plot,
                                              "year",
-                                             "value",
+                                             "catch",
                                              probs = quants)
 
   # conv_am function ----------------------------------------------------------
@@ -472,7 +464,7 @@ hake_objectives <- function(sim_data = NULL,
   out$vtac_seas <- bind_rows(out$vtac_ca_seas, out$vtac_us_seas)
 
   # aav_plot ------------------------------------------------------------------
-  out$aav_plot <- map2(list(out$catch_plot), seq_along(list(out$catch_plot)), ~{
+  out$aav_plot <- map2(list(out$catch_for_aav), seq_along(list(out$catch_for_aav)), ~{
     .x %>%
       group_by(run) %>%
       mutate(catch_lag = lag(catch, 1)) %>%
@@ -481,7 +473,10 @@ hake_objectives <- function(sim_data = NULL,
       filter(!is.na(aav)) %>%
       select(year, aav, run)
   }) %>%
-    map_df(~{.x})
+    map_df(~{.x}) %>%
+    filter(year > sim_data[[1]]$m_yr) %>%
+    group_by(run) %>%
+    summarize(aav = median(aav))
 
   # v_ca_quant ----------------------------------------------------------------
   out$v_ca_quant <- calc_quantiles_by_group(out$v_ca_plot, grp_col = "year", col = "v", probs = quants)
@@ -491,9 +486,6 @@ hake_objectives <- function(sim_data = NULL,
 
   # catch_quant ----------------------------------------------------------------
   out$catch_quant <- calc_quantiles_by_group(out$catch_plot, grp_col = "year", col = "catch", probs = quants)
-
-  # aav_quant ----------------------------------------------------------------
-  out$aav_quant <- calc_quantiles_by_group(out$aav_plot, grp_col = "year", col = "aav", probs = quants)
 
   # quota_frac_quant ----------------------------------------------------------------
   out$quota_frac_quant <- calc_quantiles_by_group(out$quota_frac, grp_col = "year", col = "quota_frac", probs = quants)
@@ -538,12 +530,12 @@ hake_objectives <- function(sim_data = NULL,
                                              mean_multiplier = catch_multiplier)
 
   # aav_short_term ------------------------------------------------------------
-  out$aav_short_term <- calc_term_quantiles(out$aav_plot,
-                                            grp_col = "run",
-                                            col = "aav",
-                                            min_yr = min(short_term_yrs),
-                                            max_yr = max(short_term_yrs),
-                                            probs = quants)
+  # out$aav_short_term <- calc_term_quantiles(out$aav_plot,
+  #                                           grp_col = "run",
+  #                                           col = "aav",
+  #                                           min_yr = min(short_term_yrs),
+  #                                           max_yr = max(short_term_yrs),
+  #                                           probs = quants)
 
   # v_ca_stat -----------------------------------------------------------------
   out$v_ca_stat <- calc_term_quantiles(out$v_ca_plot,
@@ -619,10 +611,6 @@ hake_objectives <- function(sim_data = NULL,
                  "US TAC/V fall")
   indicator_key <- seq_along(indicator)
 
-  # aav_quant_by_run ----------------------------------------------------------
-  out$aav_quant_by_run <- calc_quantiles_by_group(out$aav_plot, grp_col = "run",
-                                                  col = "aav", probs = quants)
-
   # ssb_quant_by_run ----------------------------------------------------------
   tmp_ssb_by_run <- out$ssb_plot %>% filter(year > min(short_term_yrs))
   out$ssb_quant_by_run <- calc_quantiles_by_group(tmp_ssb_by_run, grp_col = "run",
@@ -649,7 +637,7 @@ hake_objectives <- function(sim_data = NULL,
                 length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
         round(length(which(ssb_future[ssb_future$run == .x,]$ssb > 0.4)) /
                 length(ssb_future[ssb_future$run == .x,]$ssb), digits = 2),
-        round(out$aav_quant_by_run[out$aav_quant_by_run$run == .x,]$`0.5`, digits = 2),
+        round(out$aav_plot[out$aav_plot$run == .x,]$aav, digits = 2),
         round(out$ssb_quant_by_run[out$ssb_quant_by_run$run == .x,]$`0.5`, digits = 2),
         round(out$catch_quant_by_run[out$catch_quant_by_run$run == .x,]$`0.5`, digits = 2),
         round(tmp_catch_by_run[tmp_catch_by_run$run == .x,]$`0.5`, digits = 2),
