@@ -918,6 +918,7 @@ color_facet_backgrounds <- function(g = NULL,
 #' @param cname Color name as a common name. If a hex string is supplied, it will be returned unchanged.
 #'
 #' @return The HEX string representing the color
+#' @importFrom grDevices rgb col2rgb
 #' @export
 col2hex <- function(cname){
 

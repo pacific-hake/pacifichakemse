@@ -207,5 +207,6 @@ globalVariables(c(
 ".y",
 "catch_quota",
 "qlow",
-"qhigh"
+"qhigh",
+"aav"
 ))

@@ -26,8 +26,8 @@ calc_term_quantiles(
   df = NULL,
   grp_col = NULL,
   col = NULL,
-  min_yr = NA,
-  max_yr = NA,
+  min_yr = NA_real_,
+  max_yr = NA_real_,
   probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
   mean_multiplier = 1
 )

@@ -14,6 +14,7 @@ plot_timeseries(
   ci_lines = TRUE,
   show_ssb0 = TRUE,
   show_40_10 = TRUE,
+  rev_scenarios = FALSE,
   ...
 )
 }
@@ -40,6 +41,8 @@ Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 
 \item{show_40_10}{If TRUE, show the 0.4 initial biomass and 0.1 initial biomass lines.
 Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
+
+\item{rev_scenarios}{If TRUE, reverse the order of the scenarios in the legend.}
 
 \item{...}{Extra arguments to pass to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }
