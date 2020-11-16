@@ -104,7 +104,7 @@ run_season_loop_om <- function(om,
       b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel, na.rm = TRUE)
       om$v_save[yr_ind, space, season] <<- b_tmp
       om$catch_quota[yr_ind, space, season] <<- e_tmp
-#if(yr >= 2021 & season == 4 & space == 2) browser()
+
       tryCatch({
         tmp <- e_tmp / b_tmp
       }, error = function(e){
