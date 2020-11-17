@@ -20,6 +20,10 @@ order of the \link{data.frame}}
 
 \item{yrs}{The years to include in the plot. If \code{NULL}, all available data will be
 used}
+
+\item{facet_back_cols}{A vector of the facet text background colors}
+
+\item{...}{Extra arguments to be passed to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

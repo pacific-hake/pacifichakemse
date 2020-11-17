@@ -1,6 +1,8 @@
 #' Plot season indicators barplots by country and scenario
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
+#' @param facet_back_cols A vector of the facet text background colors
+#' @param ... Extra arguments to be passed to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export

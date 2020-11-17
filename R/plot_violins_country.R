@@ -5,6 +5,8 @@
 #' order of the [data.frame]
 #' @param yrs The years to include in the plot. If `NULL`, all available data will be
 #' used
+#' @param facet_back_cols  A vector of the facet text background colors
+#' @param ...  Extra arguments to be passed to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export

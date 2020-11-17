@@ -20,6 +20,8 @@ These values will be passed to \code{\link[stats:quantile]{stats::quantile()}}}
 
 \item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
 the limits of the data are used}
+
+\item{...}{Extra arguments to be passed to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

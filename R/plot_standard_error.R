@@ -6,6 +6,7 @@
 #' These values will be passed to [stats::quantile()]
 #' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
 #' the limits of the data are used
+#' @param ... Extra arguments to be passed to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
