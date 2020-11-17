@@ -15,14 +15,13 @@ estimation model which is coded in C++ using the [TMB](https://github.com/kaskr/
 devtools::install_github("pacific-hake/pacifichakemse")
 ```
 
-To get started, clone or download the [companion project](https://github.com/cgrandin/runhakemse) which contains the calls to the package functions necessary for running the MSE and plotting the results.
+To get started, clone or download the [companion project](https://github.com/pacific-hake/runhakemse) which contains the calls to the package functions necessary for running the MSE and plotting the results.
 
 ## Operating model
 The MSE runs with a spatial operating model and the estimation model used in the hake assessment using the file run_MSE_all.R
-The file runs six hake management strategy evaluations, with 3 different harvest control rules, and 3 different movement rates. Run the file 'compare_MSE.R'to plot the results of the MSEs
-
+The file runs six hake management strategy evaluations, with 3 different harvest control rules, and 3 different movement rates. 
 ## Hake stock assessment
-Besides the MSE, the repository also contains the hake stock assessment rewritten in TMB. The assessment can be run from the file runHakeassessment.R
+Besides the MSE, the repository also contains the hake stock assessment rewritten in TMB.
 
 # Description
 Detailed technical description is in progress.
