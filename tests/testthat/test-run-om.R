@@ -82,14 +82,14 @@ test_that("SSBs are the same", {
     rename(ssb.1 = 1, ssb.2 = 2) %>%
     select(yr, everything())
   d1$yr <- as.integer(d1$yr)
-  expect_true(identical(d, d1))
+  expect_equal(d, d1)
 })
 
 test_that("SSBs by space and season are the same", {
   ssb_all <- om_0$ssb_all
   ssb_all1 <- om0_old$SSB.all
   names(dimnames(ssb_all1))[1] <- "yrs"
-  expect_true(identical(ssb_all, ssb_all1))
+  expect_equal(ssb_all, ssb_all1)
 })
 
 test_that("Age proportions in season 1 are the same", {
@@ -100,7 +100,7 @@ test_that("Age proportions in season 1 are the same", {
   ac1 <- om0_old$age_comps_OM[,,,1]
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as_tibble(ac1)
-  expect_true(identical(ac, ac1))
+  expect_equal(ac, ac1)
 })
 
 test_that("Age proportions in season 2 are the same", {
@@ -112,7 +112,7 @@ test_that("Age proportions in season 2 are the same", {
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as_tibble(ac1)
 
-  expect_true(identical(ac, ac1))
+  expect_equal(ac, ac1)
 })
 
 test_that("Age proportions in season 3 are the same", {
@@ -124,7 +124,7 @@ test_that("Age proportions in season 3 are the same", {
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as_tibble(ac1)
 
-  expect_true(identical(ac, ac1))
+  expect_equal(ac, ac1)
 })
 
 test_that("Age proportions in season 4 are the same", {
@@ -136,7 +136,7 @@ test_that("Age proportions in season 4 are the same", {
   ac1 <- apply(ac1, c(1, 2), sum) / 2
   ac1 <- as.data.frame(ac1)
 
-  expect_true(identical(ac, ac1))
+  expect_equal(ac, ac1)
 })
 
 test_that("Age in catch is the same", {
@@ -145,7 +145,7 @@ test_that("Age in catch is the same", {
   names(dimnames(age_catch1))[1] <- "ages"
   names(dimnames(age_catch1))[2] <- "yrs"
 
-  expect_true(identical(age_catch, age_catch1))
+  expect_equal(age_catch, age_catch1)
 })
 
 test_that("Age in catch with weight-at-age applied is the same", {
@@ -154,7 +154,7 @@ test_that("Age in catch with weight-at-age applied is the same", {
   names(dimnames(age_catch1))[1] <- "ages"
   names(dimnames(age_catch1))[2] <- "yrs"
 
-  expect_true(identical(age_catch, age_catch1))
+  expect_equal(age_catch, age_catch1)
 })
 
 test_that("Numbers at age by season and space are the same", {
@@ -163,14 +163,14 @@ test_that("Numbers at age by season and space are the same", {
   names(dimnames(nage1))[1] <- "ages"
   names(dimnames(nage1))[2] <- "yrs"
 
-  expect_true(identical(nage, nage1))
+  expect_equal(nage, nage1)
 })
 
 test_that("Recruitment values are the same", {
   r <- om_0$r_save
   r1 <- om_0$r_save
 
-  expect_true(identical(r, r1))
+  expect_equal(r, r1)
 })
 
 test_that("Vulnerability by season and space are the same", {
@@ -178,7 +178,7 @@ test_that("Vulnerability by season and space are the same", {
   v1 <- om0_old$V.save
   names(dimnames(v1))[1] <- "yrs"
 
-  expect_true(identical(v, v1))
+  expect_equal(v, v1)
 })
 
 test_that("Catch quota by season and space are the same", {
@@ -186,7 +186,7 @@ test_that("Catch quota by season and space are the same", {
   cq1 <- om0_old$Catch.quota
   names(dimnames(cq1))[1] <- "yrs"
 
-  expect_true(identical(cq, cq1))
+  expect_equal(cq, cq1)
 })
 
 test_that("Standalone OM run catches n_sim_yrs set", {
