@@ -60,8 +60,7 @@ table_timeseries <- function(ps = NULL,
       }
     }
     # SSB0 - All scenarios and runs are the same so just use the first scenario, first run
-    ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0) * 1e-6
-    y_factor <- 1e-6 / 2
+    ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0)
   }else if(type == "ssb_ssb0"){
     d <- ps$mse_quants$ssb_ssb0_quant
   }else if(type == "catch"){
@@ -166,9 +165,8 @@ table_timeseries <- function(ps = NULL,
   k <- kable(d,
              format = format,
              format.args = list(decimal.mark = '.', big.mark = ","),
-
              ...) %>%
-    collapse_rows(latex_hline = "none") %>%
+    collapse_rows(columns = 1, latex_hline = "none") %>%
     row_spec(0, bold = TRUE)
 
   if(by_country){
