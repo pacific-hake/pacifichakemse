@@ -24,6 +24,8 @@ Imports:
     gfutilities,
     gridExtra,
     here,
+    kableExtra,
+    knitr,
     PNWColors,
     r4ss,
     RColorBrewer,
