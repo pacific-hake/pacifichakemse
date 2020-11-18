@@ -11,3 +11,5 @@ Management Strategy Evaluation (MSE) for Pacific hake
 To use this package, you must have [Rtools 4](https://cran.r-project.org/bin/windows/Rtools/) installed to allow compilation of the Estimation Model which is coded in C++ using the [TMB](https://github.com/kaskr/adcomp) package.
 
 To get started, clone or download this repository and the [companion project](https://github.com/pacific-hake/runhakemse) which contains the calls to the package functions necessary for running the MSE and plotting the results.
+
+This package originated from the [Pacific hake MSE written by Nis Sand Jacobsen](https://github.com/nissandjac/PacifichakeMSE). The [Estimation Model](https://github.com/pacific-hake/pacifichakemse/blob/master/src/pacifichakemse.cpp) was entirely written by him and has not been modified in this version.
