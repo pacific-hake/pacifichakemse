@@ -2,7 +2,8 @@
 % Please edit documentation in R/get_ref_point.R
 \name{get_ref_point}
 \alias{get_ref_point}
-\title{Get reference points (TODO: improve docs on this function)}
+\title{Calculate the catch and F40 value to apply to the next year in the MSE loop. TACs will be applied
+to the catch value.}
 \usage{
 get_ref_point(
   pars,
@@ -19,9 +20,9 @@ get_ref_point(
 )
 }
 \arguments{
-\item{pars}{estimated parameters}
+\item{pars}{Estimated parameters}
 
-\item{df}{data frame of non-estimated parameters}
+\item{df}{Data frame of non-estimated parameters}
 
 \item{yr}{The year to calculate the reference points for}
 
@@ -31,7 +32,7 @@ get_ref_point(
 
 \item{n_end}{Numbers at age}
 
-\item{tac}{which tac function to use?}
+\item{tac}{TAC values to apply to the catch before returning the function.}
 
 \item{v_real}{Vulnerable biomass in OM}
 
@@ -42,8 +43,9 @@ get_ref_point(
 \item{...}{Absorb arguments meant for other functions}
 }
 \value{
-A list of reference points
+A list of two, catch and F40 for the next year
 }
 \description{
-Get reference points (TODO: improve docs on this function)
+Calculate the catch and F40 value to apply to the next year in the MSE loop. TACs will be applied
+to the catch value.
 }
