@@ -1,18 +1,19 @@
-#' Get reference points (TODO: improve docs on this function)
+#' Calculate the catch and F40 value to apply to the next year in the MSE loop. TACs will be applied
+#' to the catch value.
 #'
-#' @param pars estimated parameters
-#' @param df data frame of non-estimated parameters
+#' @param pars Estimated parameters
+#' @param df Data frame of non-estimated parameters
 #' @param yr The year to calculate the reference points for
 #' @param ssb_y Spawning biomass
 #' @param f_in Fishing mortality
 #' @param n_end Numbers at age
-#' @param tac which tac function to use?
+#' @param tac TAC values to apply to the catch before returning the function.
 #' @param v_real Vulnerable biomass in OM
 #' @param space The space (area) to use the selectivity values for. Defaults to USA (2)
 #' @param catch_floor The lowest catch to be allowed
 #' @param ... Absorb arguments meant for other functions
 #'
-#' @return A list of reference points
+#' @return A list of two, catch and F40 for the next year
 #' @export
 get_ref_point <- function(pars,
                           df,
