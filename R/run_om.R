@@ -23,6 +23,4 @@ run_om <- function(om = NULL,
   om <- init_agebased_model(om)
 
   run_year_loop_om(om, yrs = yrs, ...)
-
-  # Catch.age[,idx]  <- (Fyrs/(Fyrs+m_yrs))*(1-exp(-(Fyrs+m_yrs)))*rowSums(N.save.age[,idx,,1])*wage$catch # Calculate the catch in kg
 }
