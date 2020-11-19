@@ -36,6 +36,7 @@ table_timeseries <- function(ps = NULL,
   verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "catch_quota"))
   verify_argument(time, "character", 1, c("beg", "mid"))
   verify_argument(ci, "numeric")
+  verify_argument(decimals, "numeric", 1)
   verify_argument(by_country, "logical", 1)
   verify_argument(scen, c("integer", "numeric"))
   verify_argument(yr_lim, "numeric", 2)
