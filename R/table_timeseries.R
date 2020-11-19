@@ -37,13 +37,15 @@ table_timeseries <- function(ps = NULL,
   verify_argument(time, "character", 1, c("beg", "mid"))
   verify_argument(ci, "numeric")
   verify_argument(by_country, "logical", 1)
-  verify_argument(scen, "numeric", 1)
+  verify_argument(scen, c("integer", "numeric"))
   verify_argument(yr_lim, "numeric", 2)
   verify_argument(inc_mean, "logical", 1)
   verify_argument(format, "character", 1)
 
+  stopifnot(!(by_country & length(scen) > 1))
+
   scenario_names <- names(ps$sim_data)
-  stopifnot(scen %in% seq_along(scenario_names))
+  stopifnot(all(scen %in% seq_along(scenario_names)))
 
   if(type == "ssb"){
     if(by_country){
@@ -126,20 +128,27 @@ table_timeseries <- function(ps = NULL,
       })
     }
   }else{
+    d <- d %>%
+      group_by(scenario) %>%
+      dplyr::group_split()
     if(inc_mean){
-      d <- d %>%
-        select(-year) %>%
-        select_at(.vars = vars(as.character(ci), "avg")) %>%
-        mutate_at(.vars = vars(as.character(ci), "avg"), .funs = function(x){
-          round(x, decimals)
-        })
+      d <- map_dfc(d, ~{
+        .x <- .x %>%
+          select(-year) %>%
+          select_at(.vars = vars(as.character(ci), "avg")) %>%
+          mutate_at(.vars = vars(as.character(ci), "avg"), .funs = function(x){
+            round(x, decimals)
+          })
+      })
     }else{
-      d <- d %>%
-        select(-year) %>%
-        select_at(.vars = vars(as.character(ci))) %>%
-        mutate_at(.vars = vars(as.character(ci)), .funs = function(x){
-          round(x, decimals)
-        })
+      d <- map_dfc(d, ~{
+        .x <- .x %>%
+          select(-year) %>%
+          select_at(.vars = vars(as.character(ci))) %>%
+          mutate_at(.vars = vars(as.character(ci)), .funs = function(x){
+            round(x, decimals)
+          })
+      })
     }
   }
 
@@ -155,9 +164,9 @@ table_timeseries <- function(ps = NULL,
     }
   }else{
     if(inc_mean){
-      names(d) <- c("Year", ci, "Mean")
+      names(d) <- c("Year", rep(c(ci, "Mean"), length(scen)))
     }else{
-      names(d) <- c("Year", ci)
+      names(d) <- c("Year", rep(ci, length(scen)))
     }
   }
   len_dat <- length(ci) + ifelse(inc_mean, 1, 0)
@@ -172,6 +181,14 @@ table_timeseries <- function(ps = NULL,
   if(by_country){
     k <- k %>%
       add_header_above(c(" ", "Canada" = len_dat, "US" = len_dat), bold = TRUE)
+  }
+
+  if(length(scen) > 1){
+    scen_header <- rep(len_dat, length(scen))
+    names(scen_header) <- scenario_names[scen]
+
+    k <- k %>%
+      add_header_above(c(" ", scen_header), bold = TRUE)
   }
 
   k
