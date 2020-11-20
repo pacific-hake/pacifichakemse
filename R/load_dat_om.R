@@ -433,7 +433,9 @@ load_data_om <- function(ss_model = NULL,
     })
     lst$flag_survey <- c(lst$flag_survey, future_flag_survey)
     lst$flag_catch <- c(lst$flag_catch, rep(-1, lst$n_future_yrs))
-    lst$b <- c(ss_model$b, rep(lst$b_future, lst$n_future_yrs))
+    b_tmp <- ss_model$b
+    b_tmp[length(b_tmp)] <- b_future
+    lst$b <- c(b_tmp, rep(lst$b_future, lst$n_future_yrs))
   }
 
   lst

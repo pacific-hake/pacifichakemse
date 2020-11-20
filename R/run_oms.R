@@ -83,6 +83,7 @@ run_oms <- function(ss_model = NULL,
                          b_future = b_futures[fn_ind],
                          selectivity_change = sel_changes[fn_ind],
                          ...)
+
       om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
       run_om(om, random_seed = random_seeds[run], verbose = FALSE)
     })

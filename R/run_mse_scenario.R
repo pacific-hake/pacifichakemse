@@ -7,6 +7,8 @@
 #' in the OM is c_new * b + a. If instead of a 2-element vector, a single value
 #' is given, the expanded catch in the OM will be c_new * 0.5 unless below `catch_floor` in
 #' which case it will be c_new = `catch_floor`.
+#' @param attain The attainment vector of length 2, in the order Canada, US. These are proportions
+#' of the catch to take.
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
@@ -22,6 +24,7 @@ run_mse_scenario <- function(om = NULL,
                              random_seed = NULL,
                              n_sim_yrs = NULL,
                              tac = NULL,
+                             attain = NULL,
                              c_increase = 0,
                              m_increase = 0,
                              sel_change = 0,
@@ -31,6 +34,7 @@ run_mse_scenario <- function(om = NULL,
   verify_argument(random_seed, c("integer", "numeric"), 1)
   verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
   verify_argument(tac, c("integer", "numeric"))
+  verify_argument(attain, c("integer", "numeric"))
   verify_argument(c_increase, c("integer", "numeric"), 1)
   verify_argument(m_increase, c("integer", "numeric"), 1)
   verify_argument(sel_change, c("integer", "numeric"), 1)
@@ -77,6 +81,7 @@ run_mse_scenario <- function(om = NULL,
     om_output <<- run_om(om,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
+                         attain = attain,
                          ...)
 
     # Create TMB data for EM --------------------------------------------------
@@ -220,13 +225,15 @@ run_mse_scenario <- function(om = NULL,
     # in the next simulation year.
     if(yr < tail(om$yrs, 1)){
       # No need to call this in the final year as the loop is finished
-      om <<- update_om_data(yr + 1,
-                            om,
-                            yr_survey_sims,
-                            f_new,
-                            c_increase,
-                            m_increase,
-                            sel_change)
+      om <<- update_om_data(yr = yr + 1,
+                            om = om,
+                            yr_survey_sims = yr_survey_sims,
+                            f_new = f_new,
+                            c_increase = c_increase,
+                            m_increase = m_increase,
+                            sel_change = sel_change,
+                            ...)
+
     }else{
       NA
     }

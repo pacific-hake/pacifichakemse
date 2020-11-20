@@ -8,6 +8,7 @@
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
 #' @param wage_only Only update the wage_ [data.frame]s, nothing else
+#' @param ... Absorb unused parameters
 #' return a random normal using mean = 0 and sd = exp(om$rdev_sd)
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
@@ -20,7 +21,8 @@ update_om_data <- function(yr = NULL,
                            c_increase = NULL,
                            m_increase = NULL,
                            sel_change = NULL,
-                           wage_only = FALSE){
+                           wage_only = FALSE,
+                           ...){
 
   verify_argument(om, "list")
   verify_argument(wage_only, "logical", 1)

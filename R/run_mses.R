@@ -10,6 +10,7 @@
 #' `NULL` or the same length as `fns`
 #' @param tacs A vector of TAC values to be passed to the [run_mse_scenario()] function, in the same
 #' order as the `fns` file names, or a single value
+#' @param attains A vector of 2, in the order Canada, US for proportion of catch to include
 #' @param c_increases Increase in max movement. A vector of values to be passed to the [run_mse_scenario()]
 #' function, in the same order as the `fns` file names, or a single value which will be used for all scenarios
 #' @param m_increases Decrease of spawners returning south. A vector of values to be passed to the
@@ -44,6 +45,7 @@ run_mses <- function(n_runs = 10,
                      fns = NULL,
                      plot_names = NULL,
                      tacs = c(0, 1),
+                     attains = c(1, 1),
                      c_increases = 0,
                      m_increases = 0,
                      sel_changes = 0,
@@ -57,6 +59,7 @@ run_mses <- function(n_runs = 10,
 
   verify_argument(fns, chk_len = length(plot_names))
   verify_argument(tacs, c("numeric", "list"))
+  verify_argument(attains, c("numeric", "list"))
   verify_argument(c_increases, c("integer", "numeric"))
   verify_argument(m_increases, c("integer", "numeric"))
   verify_argument(sel_changes, c("integer", "numeric"))
@@ -89,6 +92,7 @@ run_mses <- function(n_runs = 10,
   n_surveys <- fill_vec(n_surveys)
   b_futures <- fill_vec(b_futures)
   tacs <- fill_vec(tacs)
+  attains <- fill_vec(attains)
 
   if(any(map_lgl(tacs, ~{length(.x) == 1 && .x != 0})) && is.null(catch_floor)){
     stop("`catch_floor` argument is NULL with at least one of the `tac` argument list ",
@@ -137,6 +141,7 @@ run_mses <- function(n_runs = 10,
                               c_increase = c_increases[fn_ind],
                               m_increase = m_increases[fn_ind],
                               tac = tacs[[fn_ind]],
+                              attain = attains[[fn_ind]],
                               catch_floor = catch_floor,
                               ...)
       if(is.list(tmp)) tmp else NA

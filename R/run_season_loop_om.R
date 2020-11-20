@@ -19,6 +19,7 @@ run_season_loop_om <- function(om,
                                yr,
                                yr_ind,
                                m_season,
+                               attain = c(1, 1),
                                ages_no_move = c(0, 1),
                                pope_mul = 0.5,
                                verbose = TRUE,
@@ -76,6 +77,8 @@ run_season_loop_om <- function(om,
       }
 
       om$f_sel_save[, yr_ind, space] <<- f_sel
+
+      # Calculate catch space -------------------------------------------------
       if(om$n_space > 1){
         if(om$yrs[yr_ind] <= om$m_yr){
           catch_space <- om$catch_country %>%
@@ -97,7 +100,7 @@ run_season_loop_om <- function(om,
       }
 
       # Calculate catch distribution ------------------------------------------
-      e_tmp <- catch_space * om$catch_props_space_season[space, season] %>% pull
+      e_tmp <- catch_space * attain[space] * om$catch_props_space_season[space, season] %>% pull
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
@@ -172,6 +175,7 @@ run_season_loop_om <- function(om,
             n_in <- n_in + n_in_tmp
           }
         }
+        #if(yr == 2019 && season == 3) browser()
         om$n_save_age[, yr_ind, space, season + 1] <<- om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
@@ -193,6 +197,7 @@ run_season_loop_om <- function(om,
             n_in_plus <- n_in_plus + n_in_plus_tmp
           }
         }
+        #if(yr == 2019) browser()
         om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave
