@@ -25,8 +25,7 @@ plot_ssb_ssb0 <- function(ps = NULL,
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
 
-  #cols <- pnw_palette("Starfish", n = length(ps$plotnames), type = "discrete")
-  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+  cols <- ps$cols
 
   # Reorder the legend and colors
   ssb_ssb0 <- ssb_ssb0 %>%

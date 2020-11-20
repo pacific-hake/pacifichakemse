@@ -30,6 +30,7 @@ plot_timeseries <- function(ps = NULL,
                             show_ssb0 = TRUE,
                             show_40_10 = TRUE,
                             rev_scenarios = FALSE,
+                            legend_position = c(0.08, 0.15),
                             ...){
 
   verify_argument(ps, "list")
@@ -107,9 +108,9 @@ plot_timeseries <- function(ps = NULL,
   #cols <- pnw_palette("Starfish", n = length(ps$plotnames), type = "discrete")
   if(by_country){
     cols <- c("red", "blue")
-    facet_back_cols <- brewer.pal(length(ps$plotnames), "Dark2")
+    facet_back_cols <- ps$cols
   }else{
-    cols <- brewer.pal(length(ps$plotnames), "Dark2")
+    cols <- ps$cols
   }
 
   # Reorder the legend and colors
@@ -132,7 +133,7 @@ plot_timeseries <- function(ps = NULL,
     theme(axis.text.x = element_text(angle = 90,
                                      hjust = 1,
                                      vjust = 0.5),
-          legend.position = c(0.08, 0.85)) +
+          legend.position = legend_position) +
     scale_color_manual(values = cols) +
     coord_cartesian(xlim = yr_lim)
 
@@ -165,7 +166,7 @@ plot_timeseries <- function(ps = NULL,
       theme(axis.text.x = element_text(angle = 90,
                                        hjust = 1,
                                        vjust = 0.5),
-            legend.position = c(0.08, 0.15))
+            legend.position = legend_position)
   }
   if(by_country){
     g <- g + facet_wrap(~scenario)

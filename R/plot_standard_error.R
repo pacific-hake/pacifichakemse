@@ -31,7 +31,7 @@ plot_standard_error <- function(ps = NULL,
   stopifnot(length(ci) == 2)
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
-  facet_back_cols <- brewer.pal(length(ps$plotnames), "Dark2")
+  facet_back_cols <- ps$cols
 
   g <- ggplot(se, aes(x = year, y = `0.5`)) +
     geom_line(size = 1.5) +

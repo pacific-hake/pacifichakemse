@@ -12,7 +12,7 @@ plot_bars_country <- function(ps = NULL,
 
   verify_argument(ps, "list")
 
-  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+  cols <- brewer.pal(3, "Dark2")
 
   g <- ggplot(ps$mse_quants$country_season_indicators_quant,
               aes(x = scenario, y = `0.5`, factor = season)) +

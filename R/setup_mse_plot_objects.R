@@ -135,9 +135,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   stopifnot(length(porder) == length(om_output))
 
   # lst_indicators (hake_objectives() output) ---------------------------------
-  #cols <- brewer.pal(6, "Dark2")
+  cols <- brewer.pal(length(plotnames), "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
-  cols <- pnw_palette("Starfish", n = length(plotnames), type = "discrete")
+  #cols <- pnw_palette("Starfish", n = length(plotnames), type = "continuous")
   # To view structure and names of lst_indicators: str(lst_indicators, 1) and str(lst_indicators[[1]], 1)
   # To see objectives probability table for the first scenario: lst_indicators[[1]]$info
   lst_indicators <- map(om_output, function(om = .x, ...){

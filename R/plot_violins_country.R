@@ -41,7 +41,7 @@ plot_violins_country <- function(ps = NULL,
 
   dodge <- position_dodge(width = 0.5)
 
-  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+  cols <- ps$cols
 
   g <- ggplot(melted_d, aes(x = scenario, y = exploitation, factor = season, fill = scenario))+
     geom_violin(position = dodge) +

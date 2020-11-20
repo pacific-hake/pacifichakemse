@@ -51,7 +51,7 @@ plot_violins <- function(ps = NULL,
     filter(!indicator %in%  c("Short term catch", "Long term catch")) %>%
     bind_rows(df_st, df_lt)
 
-  cols <- brewer.pal(length(ps$plotnames), "Dark2")
+  cols <- ps$cols
   g <- ggplot(df, aes(x = scenario, y = value, fill = scenario)) +
     geom_violin() +
     geom_boxplot(width = 0.15, col = "black", outlier.shape = NA) +
