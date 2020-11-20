@@ -100,7 +100,7 @@ run_season_loop_om <- function(om,
       }
 
       # Calculate catch distribution ------------------------------------------
-      e_tmp <- catch_space * attain[space] * om$catch_props_space_season[space, season] %>% pull
+      e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
