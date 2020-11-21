@@ -217,8 +217,8 @@ hake_objectives <- function(sim_data = NULL,
   # TODO: Need to check generation of age_comps_catch_space because there are no age 15's they are NA!!
   # sim_data[[1]]$age_comps_catch_space[,,1]
   conv_am <- function(space, sim_age_comp_type = "catch"){
-    if(sim_age_comp_type != "catch" && sim_age_comp_type != "surv"){
-      stop("sim_age_comp_type must be catch or surv", call. = FALSE)
+    if(!sim_age_comp_type %in% c("catch", "surv", "om")){
+      stop("sim_age_comp_type must be catch, surv, or om", call. = FALSE)
     }
     if(space != 0 && space != 1 && space != 2){
       stop("space must be 0, 1, or 2", call. = FALSE)
@@ -236,13 +236,21 @@ hake_objectives <- function(sim_data = NULL,
         }else{
           calc_mean_age(sim_data[[.x]]$age_comps_catch, sim_data[[.x]]$age_max_age)
         }
-      }else{
+      }else if(sim_age_comp_type == "surv"){
         if(space == 1){
           calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,1], sim_data[[.x]]$age_max_age)
         }else if(space == 2){
           calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,2], sim_data[[.x]]$age_max_age)
         }else{
           calc_mean_age(sim_data[[.x]]$age_comps_surv, sim_data[[.x]]$age_max_age)
+        }
+      }else{
+        if(space == 1){
+          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 1, 3], sim_data[[.x]]$age_max_age)
+        }else if(space == 2){
+          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 2, 3], sim_data[[.x]]$age_max_age)
+        }else{
+          calc_mean_age(apply(sim_data[[.x]]$age_comps_om[, , , 3], c(1, 2), sum), sim_data[[.x]]$age_max_age)
         }
       }
     }) %>%
@@ -254,6 +262,16 @@ hake_objectives <- function(sim_data = NULL,
       select(yr, everything())
     x
   }
+
+  # Average age in population -------------------------------------------------
+  out$aap_tot <- conv_am(0, "om")
+  out$aap_tot_quant <- melt(out$aap_tot, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$aap_tot_quant <- calc_quantiles_by_group(out$aap_tot_quant,
+                                               "year",
+                                               "val",
+                                               probs = quants)
 
   # amc_tot_quant -------------------------------------------------------------
   out$amc_tot <- conv_am(0)

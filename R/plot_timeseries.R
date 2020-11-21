@@ -1,7 +1,7 @@
 #' Plot time series data from an MSE or OM simulation run
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()].
-#' @param type One of 'ssb', 'ssb_ssb0', catch', 'aas', 'aac'
+#' @param type One of 'ssb', 'ssb_ssb0', catch', 'aas', 'aac','aap'
 #' @param time Either 'beg' for beginning of the year SSB or 'mid' for mid-year SSB.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param ci A vector of length two of the lower and upper credible interval values.
@@ -34,7 +34,7 @@ plot_timeseries <- function(ps = NULL,
                             ...){
 
   verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "catch_quota"))
+  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "aap","catch_quota"))
   verify_argument(time, "character", 1, c("beg", "mid"))
   verify_argument(ci, "numeric", 2)
   verify_argument(by_country, "logical", 1)
@@ -89,6 +89,10 @@ plot_timeseries <- function(ps = NULL,
       d <- ps$mse_quants$amc_all_quant
     }
     y_label <- "Average age in catch"
+    y_factor <- 1
+  }else if(type == "aap"){
+    d <- ps$mse_quants$aap_all_quant
+    y_label <- "Average age in the population"
     y_factor <- 1
   }else if(type == "catch_quota"){
     d <- ps$mse_quants$catch_quota_quant

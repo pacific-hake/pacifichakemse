@@ -242,6 +242,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp
   })
 
+  # AAP (Average age in population) quantile objects --------------------------
+  mse_quants$aap_all_quant <- merge_dfs_from_scenarios(lst_indicators, "aap_tot_quant")
+
   # AMC quantile objects ------------------------------------------------------
   mse_quants$amc_all_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_tot_quant")
   mse_quants$amc_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_ca_quant")
