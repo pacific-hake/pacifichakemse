@@ -15,6 +15,7 @@
 #' @param show_40_10 If TRUE, show the 0.4 initial biomass and 0.1 initial biomass lines.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param rev_scenarios If TRUE, reverse the order of the scenarios in the legend.
+#' @param legend_position A vector of two - X and Y position for the legend. See [ggplot2::theme()]
 #' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object

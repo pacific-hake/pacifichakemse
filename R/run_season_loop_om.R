@@ -4,6 +4,8 @@
 #' @param yr The year to run the operating model for
 #' @param yr_ind The index of `yr` in the `om$yrs` vector
 #' @param m_season A vector of natural mortality-at-age
+#' @param attain The attainment vector of length 2, in the order Canada, US. These are proportions
+#' of the catch to take.
 #' @param ages_no_move Ages that don't move in the movement model
 #' @param pope_mul Multiplier used in Pope's method
 #' @param verbose Print the loop information to the console

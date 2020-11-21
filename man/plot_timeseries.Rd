@@ -45,6 +45,8 @@ Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 
 \item{rev_scenarios}{If TRUE, reverse the order of the scenarios in the legend.}
 
+\item{legend_position}{A vector of two - X and Y position for the legend. See \code{\link[ggplot2:theme]{ggplot2::theme()}}}
+
 \item{...}{Extra arguments to pass to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }
 \value{

@@ -9,7 +9,7 @@ run_mse_scenario(
   random_seed = NULL,
   n_sim_yrs = NULL,
   tac = NULL,
-  attain = NULL,
+  attain = c(1, 1),
   c_increase = 0,
   m_increase = 0,
   sel_change = 0,

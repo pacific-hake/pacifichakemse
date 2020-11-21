@@ -26,6 +26,9 @@ run_season_loop_om(
 
 \item{m_season}{A vector of natural mortality-at-age}
 
+\item{attain}{The attainment vector of length 2, in the order Canada, US. These are proportions
+of the catch to take.}
+
 \item{ages_no_move}{Ages that don't move in the movement model}
 
 \item{pope_mul}{Multiplier used in Pope's method}
