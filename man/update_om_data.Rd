@@ -12,7 +12,8 @@ update_om_data(
   c_increase = NULL,
   m_increase = NULL,
   sel_change = NULL,
-  wage_only = FALSE
+  wage_only = FALSE,
+  ...
 )
 }
 \arguments{
@@ -30,7 +31,9 @@ update_om_data(
 
 \item{sel_change}{Time varying selectivity}
 
-\item{wage_only}{Only update the wage_ \link{data.frame}s, nothing else
+\item{wage_only}{Only update the wage_ \link{data.frame}s, nothing else}
+
+\item{...}{Absorb unused parameters
 return a random normal using mean = 0 and sd = exp(om$rdev_sd)}
 }
 \value{

@@ -10,6 +10,7 @@ run_mses(
   fns = NULL,
   plot_names = NULL,
   tacs = c(0, 1),
+  attains = c(1, 1),
   c_increases = 0,
   m_increases = 0,
   sel_changes = 0,
@@ -34,6 +35,8 @@ run_mses(
 
 \item{tacs}{A vector of TAC values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}} function, in the same
 order as the \code{fns} file names, or a single value}
+
+\item{attains}{A vector of 2, in the order Canada, US for proportion of catch to include}
 
 \item{c_increases}{Increase in max movement. A vector of values to be passed to the \code{\link[=run_mse_scenario]{run_mse_scenario()}}
 function, in the same order as the \code{fns} file names, or a single value which will be used for all scenarios}

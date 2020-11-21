@@ -9,6 +9,7 @@ run_mse_scenario(
   random_seed = NULL,
   n_sim_yrs = NULL,
   tac = NULL,
+  attain = NULL,
   c_increase = 0,
   m_increase = 0,
   sel_change = 0,
@@ -26,6 +27,9 @@ run_mse_scenario(
 in the OM is c_new * b + a. If instead of a 2-element vector, a single value
 is given, the expanded catch in the OM will be c_new * 0.5 unless below \code{catch_floor} in
 which case it will be c_new = \code{catch_floor}.}
+
+\item{attain}{The attainment vector of length 2, in the order Canada, US. These are proportions
+of the catch to take.}
 
 \item{c_increase}{Increase in max movement}
 
