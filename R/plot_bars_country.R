@@ -23,5 +23,5 @@ plot_bars_country <- function(ps = NULL,
     facet_wrap(~country, scales = "fixed", ncol = 2, dir="v") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
-  color_facet_backgrounds(g, facet_back_cols, ...)
+    color_facet_backgrounds(g, facet_back_cols, ...)
 }

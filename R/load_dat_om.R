@@ -433,9 +433,12 @@ load_data_om <- function(ss_model = NULL,
     })
     lst$flag_survey <- c(lst$flag_survey, future_flag_survey)
     lst$flag_catch <- c(lst$flag_catch, rep(-1, lst$n_future_yrs))
-    b_tmp <- ss_model$b
-    b_tmp[length(b_tmp)] <- b_future
-    lst$b <- c(b_tmp, rep(lst$b_future, lst$n_future_yrs))
+    # These lines remove the zero at the end and replace it with b_future
+    # This was testing to try and make it the same as the old code but broke all tests
+    # b_tmp <- ss_model$b
+    # b_tmp[length(b_tmp)] <- b_future
+    # lst$b <- c(b_tmp, rep(lst$b_future, lst$n_future_yrs))
+    lst$b <- c(ss_model$b, rep(lst$b_future, lst$n_future_yrs))
   }
 
   lst

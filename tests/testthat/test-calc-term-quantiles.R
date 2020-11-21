@@ -79,32 +79,32 @@ test_that("calc_term_quantiles() - Tests for outputs, no years given", {
 })
 
 test_that("calc_term_quantiles() - Tests for outputs, years not in data frame given", {
-  df <- calc_term_quantiles(df = pq,
-                            grp_col = "run",
-                            min_yr = 2021,
-                            max_yr = 2047,
-                            col = "val",
-                            probs = probs)
+  expect_warning(df <- calc_term_quantiles(df = pq,
+                                           grp_col = "run",
+                                           min_yr = 2021,
+                                           max_yr = 2047,
+                                           col = "val",
+                                           probs = probs))
   expect_true(is.null(df))
-  df <- calc_term_quantiles(df = pq,
-                            grp_col = "run",
-                            min_yr = 1900,
-                            max_yr = 1930,
-                            col = "val",
-                            probs = probs)
+  expect_warning(df <- calc_term_quantiles(df = pq,
+                                           grp_col = "run",
+                                           min_yr = 1900,
+                                           max_yr = 1930,
+                                           col = "val",
+                                           probs = probs))
   expect_true(is.null(df))
-  df <- calc_term_quantiles(df = pq,
-                            grp_col = "run",
-                            min_yr = 1999,
-                            max_yr = 1999,
-                            col = "val",
-                            probs = probs)
+  expect_warning(df <- calc_term_quantiles(df = pq,
+                                           grp_col = "run",
+                                           min_yr = 1999,
+                                           max_yr = 1999,
+                                           col = "val",
+                                           probs = probs))
   expect_true(is.null(df))
-  df <- calc_term_quantiles(df = pq,
-                            grp_col = "run",
-                            min_yr = 2005,
-                            max_yr = 2005,
-                            col = "val",
-                            probs = probs)
+  expect_warning(df <- calc_term_quantiles(df = pq,
+                                           grp_col = "run",
+                                           min_yr = 2005,
+                                           max_yr = 2005,
+                                           col = "val",
+                                           probs = probs))
   expect_true(is.null(df))
 })
