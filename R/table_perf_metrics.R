@@ -5,6 +5,8 @@
 #' @param ci A vector of credible interval values. 0.5 must be included if the median is desired.
 #' @param decimals The number of decimals to round values to
 #' @param inc_mean If TRUE, include the mean in the table
+#' @param scen_names Names to show in the columns for scenarios. You can experiment by shortening names
+#' so that the table fits on the page. If `NULL`, scenario names from the `ps` object will be used.
 #' @param format See [knitr::kable()]
 #' @param ... Arguments passed to [knitr::kable()]
 #'
@@ -15,6 +17,7 @@ table_perf_metrics <- function(ps,
                                decimals = 0,
                                scen = NULL,
                                inc_mean = TRUE,
+                               scen_names = NULL,
                                format = "latex",
                                ...){
 
@@ -92,8 +95,13 @@ table_perf_metrics <- function(ps,
     row_spec(0, bold = TRUE)
 
   if(length(scen) > 1){
-    scen_header <- rep(len_dat, length(scen))
-    names(scen_header) <- scenario_names[scen]
+    if(is.null(scen_names)){
+      scen_header <- rep(len_dat, length(scen))
+      names(scen_header) <- scenario_names[scen]
+    }else{
+      scen_header <- rep(len_dat, length(scen_names))
+      names(scen_header) <- scen_names[scen]
+    }
 
     k <- k %>%
       add_header_above(c(" ", scen_header), bold = TRUE)

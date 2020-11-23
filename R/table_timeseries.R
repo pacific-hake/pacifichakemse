@@ -12,6 +12,8 @@
 #' a table with aggregated output will be produced
 #' @param scen The scenario number to use. This is an integer representing the names given by `names(ps$sim_data)`
 #' @param inc_mean If TRUE, include the mean in the table
+#' @param scen_names Names to show in the columns for scenarios. You can experiment by shortening names
+#' so that the table fits on the page. If `NULL`, scenario names from the `ps` object will be used.
 #' @param format See [knitr::kable()]
 #' @param ... Arguments passed to [knitr::kable()]
 #'
@@ -29,6 +31,7 @@ table_timeseries <- function(ps = NULL,
                              scen = NULL,
                              yr_lim = c(NA_real_, NA_real_),
                              inc_mean = TRUE,
+                             scen_names = NULL,
                              format = "latex",
                              ...){
 
@@ -185,8 +188,13 @@ table_timeseries <- function(ps = NULL,
   }
 
   if(length(scen) > 1){
-    scen_header <- rep(len_dat, length(scen))
-    names(scen_header) <- scenario_names[scen]
+    if(is.null(scen_names)){
+      scen_header <- rep(len_dat, length(scen))
+      names(scen_header) <- scenario_names[scen]
+    }else{
+      scen_header <- rep(len_dat, length(scen_names))
+      names(scen_header) <- scen_names[scen]
+    }
 
     k <- k %>%
       add_header_above(c(" ", scen_header), bold = TRUE)

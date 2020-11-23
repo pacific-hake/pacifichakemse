@@ -14,6 +14,7 @@ table_timeseries(
   scen = NULL,
   yr_lim = c(NA_real_, NA_real_),
   inc_mean = TRUE,
+  scen_header = NULL,
   format = "latex",
   ...
 )
@@ -39,6 +40,9 @@ a table with aggregated output will be produced}
 the limits of the data are used.}
 
 \item{inc_mean}{If TRUE, include the mean in the table}
+
+\item{scen_header}{Names to show in the columns for scenarios. You can experiment by shortening names
+so that the table fits on the page. If \code{NULL}, scenario names from the \code{ps} object will be used.}
 
 \item{format}{See \code{\link[knitr:kable]{knitr::kable()}}}
 

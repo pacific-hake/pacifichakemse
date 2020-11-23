@@ -10,6 +10,7 @@ table_perf_metrics(
   decimals = 0,
   scen = NULL,
   inc_mean = TRUE,
+  scen_names = NULL,
   format = "latex",
   ...
 )
@@ -24,6 +25,9 @@ table_perf_metrics(
 \item{scen}{The scenario number to use. This is an integer representing the names given by \code{names(ps$sim_data)}}
 
 \item{inc_mean}{If TRUE, include the mean in the table}
+
+\item{scen_names}{Names to show in the columns for scenarios. You can experiment by shortening names
+so that the table fits on the page. If \code{NULL}, scenario names from the \code{ps} object will be used.}
 
 \item{format}{See \code{\link[knitr:kable]{knitr::kable()}}}
 
