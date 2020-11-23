@@ -17,9 +17,14 @@
 #' @param rev_scenarios If TRUE, reverse the order of the scenarios in the legend.
 #' @param legend_position A vector of two - X and Y position for the legend. See [ggplot2::theme()]
 #' @param ... Extra arguments to pass to [color_facet_backgrounds()]
+#' @param ssb_line_txt_cex Size multiplier for SSB reference point line labels.
+#' @param ssb_line_col Color for SSB reference point line labels.
+#' @param ssb_line_type Line type for SSB reference point line labels.
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom RColorBrewer brewer.pal
+#' @importFrom ggplot2 annotation_custom ggplot_build
+#' @importFrom grid textGrob gpar
 #' @export
 plot_timeseries <- function(ps = NULL,
                             type = "ssb",
@@ -32,6 +37,9 @@ plot_timeseries <- function(ps = NULL,
                             show_40_10 = TRUE,
                             rev_scenarios = FALSE,
                             legend_position = c(0.08, 0.15),
+                            ssb_line_txt_cex = 0.8,
+                            ssb_line_col = "black",
+                            ssb_line_type = 3,
                             ...){
 
   verify_argument(ps, "list")
@@ -161,14 +169,54 @@ plot_timeseries <- function(ps = NULL,
       geom_ribbon(aes(ymin = !!ci[[1]] * y_factor, ymax = !!ci[[2]] * y_factor), linetype = 0) +
       scale_fill_manual(values = alpha(cols, alpha = 0.2))
   }
+
+  # Get actual ranges of the plot as shown (includes coord_cartesian effect, not just data limits)
+  gp <- ggplot_build(g)
+  x_range <- gp$layout$panel_params[[1]]$x.range
+  y_range <- gp$layout$panel_params[[1]]$y.range
+
   if(show_ssb0 && type %in% c("ssb", "ssb_ssb0", "catch_quota")){
+    y_tx_ln_spacing <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
     g <- g +
-      geom_hline(aes(yintercept = ssb0), color = "black", linetype = 2)
+      geom_hline(aes(yintercept = ssb0),
+                 color = ssb_line_col,
+                 linetype = ssb_line_type) +
+      annotation_custom(grob = textGrob(label = bquote("SSB"[.(0)] == .(round(ssb0, 2))),
+                                        hjust = 0,
+                                        gp = gpar(cex = ssb_line_txt_cex,
+                                                  col = ssb_line_col)),
+                        ymin = ssb0 + y_tx_ln_spacing,
+                        ymax = ssb0 + y_tx_ln_spacing,
+                        xmin = x_range[1] + 0.5,
+                        xmax = x_range[1] + 0.5)
   }
   if(show_40_10 && type %in% c("ssb", "ssb_ssb0")){
+    y_tx_ln_spacing_40 <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
+    y_tx_ln_spacing_10 <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
     g <- g +
-      geom_hline(aes(yintercept = ssb0 * 0.4), color = "black", linetype = 2) +
-      geom_hline(aes(yintercept = ssb0 * 0.1), color = "black", linetype = 2)
+      geom_hline(aes(yintercept = ssb0 * 0.4),
+                 color = ssb_line_col,
+                 linetype = ssb_line_type) +
+      geom_hline(aes(yintercept = ssb0 * 0.1),
+                 color = ssb_line_col,
+                 linetype = ssb_line_type) +
+      annotation_custom(grob = textGrob(label = bquote("SSB"[.(0.4)] == .(round(ssb0 * 0.4, 2))),
+                                        hjust = 0,
+                                        gp = gpar(cex = ssb_line_txt_cex,
+                                                  col = ssb_line_col)),
+                        ymin = ssb0 * 0.4 + y_tx_ln_spacing_40,
+                        ymax = ssb0 * 0.4 + y_tx_ln_spacing_40,
+                        xmin = x_range[1] + 0.5,
+                        xmax = x_range[1] + 0.5) +
+      annotation_custom(grob = textGrob(label = bquote("SSB"[.(0.1)] == .(round(ssb0 * 0.1, 2))),
+                                        hjust = 0,
+                                        gp = gpar(cex = ssb_line_txt_cex,
+                                                  col = ssb_line_col)),
+                        ymin = ssb0 * 0.1 + y_tx_ln_spacing_10,
+                        ymax = ssb0 * 0.1 + y_tx_ln_spacing_10,
+                        xmin = x_range[1] + 0.5,
+                        xmax = x_range[1] + 0.5)
+
   }
   if(type == "catch_quota"){
     g <- g + coord_cartesian(ylim = c(.4, 1.1)) +
@@ -182,5 +230,11 @@ plot_timeseries <- function(ps = NULL,
     return(color_facet_backgrounds(g, facet_back_cols, ...))
   }
 
+  # Code to override clipping (allow plot lines to extend outside plot area)
+  # gt <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(g))
+  # gt$layout$clip[gt$layout$name == "panel"] <- "off"
+  # grid::grid.draw(gt)
+
   g
 }
+

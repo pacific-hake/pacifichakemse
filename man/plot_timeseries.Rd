@@ -16,6 +16,9 @@ plot_timeseries(
   show_40_10 = TRUE,
   rev_scenarios = FALSE,
   legend_position = c(0.08, 0.15),
+  ssb_line_txt_cex = 0.8,
+  ssb_line_col = "black",
+  ssb_line_type = 3,
   ...
 )
 }
@@ -46,6 +49,12 @@ Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 \item{rev_scenarios}{If TRUE, reverse the order of the scenarios in the legend.}
 
 \item{legend_position}{A vector of two - X and Y position for the legend. See \code{\link[ggplot2:theme]{ggplot2::theme()}}}
+
+\item{ssb_line_txt_cex}{Size multiplier for SSB reference point line labels.}
+
+\item{ssb_line_col}{Color for SSB reference point line labels.}
+
+\item{ssb_line_type}{Line type for SSB reference point line labels.}
 
 \item{...}{Extra arguments to pass to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }
