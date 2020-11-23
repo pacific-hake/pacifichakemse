@@ -273,6 +273,26 @@ hake_objectives <- function(sim_data = NULL,
                                                "val",
                                                probs = quants)
 
+  # Average age in population for Canada --------------------------------------
+  out$aap_ca <- conv_am(1, "om")
+  out$aap_ca_quant <- melt(out$aap_ca, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$aap_ca_quant <- calc_quantiles_by_group(out$aap_ca_quant,
+                                               "year",
+                                               "val",
+                                               probs = quants)
+
+  # Average age in population for the US --------------------------------------
+  out$aap_us <- conv_am(2, "om")
+  out$aap_us_quant <- melt(out$aap_us, id.vars = "yr") %>%
+    as_tibble() %>%
+    set_names(c("year", "run", "val"))
+  out$aap_us_quant <- calc_quantiles_by_group(out$aap_us_quant,
+                                              "year",
+                                              "val",
+                                              probs = quants)
+
   # amc_tot_quant -------------------------------------------------------------
   out$amc_tot <- conv_am(0)
   out$amc_tot_quant <- melt(out$amc_tot, id.vars = "yr") %>%

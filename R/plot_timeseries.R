@@ -92,7 +92,11 @@ plot_timeseries <- function(ps = NULL,
     y_label <- "Average age in catch"
     y_factor <- 1
   }else if(type == "aap"){
-    d <- ps$mse_quants$aap_all_quant
+    if(by_country){
+      d <- ps$mse_quants$aap_quant
+    }else{
+      d <- ps$mse_quants$aap_all_quant
+    }
     y_label <- "Average age in the population"
     y_factor <- 1
   }else if(type == "catch_quota"){
