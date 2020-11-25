@@ -52,19 +52,13 @@ table_perf_metrics <- function(ps,
     d <- map_dfc(d, ~{
       .x <- .x %>%
         select(-indicator) %>%
-        select_at(.vars = vars(as.character(ci), "avg")) %>%
-        mutate_at(.vars = vars(as.character(ci), "avg"), .funs = function(x){
-          round(x, decimals)
-        })
+        select_at(.vars = vars(as.character(ci), "avg"))
     })
   }else{
     d <- map_dfc(d, ~{
       .x <- .x %>%
         select(-indicator) %>%
-        select_at(.vars = vars(as.character(ci))) %>%
-        mutate_at(.vars = vars(as.character(ci)), .funs = function(x){
-          round(x, decimals)
-        })
+        select_at(.vars = vars(as.character(ci)))
     })
   }
   d <- d %>%
@@ -89,6 +83,7 @@ table_perf_metrics <- function(ps,
 
   k <- kable(d,
              format = format,
+             digits = decimals,
              format.args = list(decimal.mark = '.', big.mark = ","),
              ...) %>%
     collapse_rows(columns = 1, latex_hline = "none") %>%
@@ -106,6 +101,8 @@ table_perf_metrics <- function(ps,
     k <- k %>%
       add_header_above(c(" ", scen_header), bold = TRUE)
   }
+
+  k <- k %>% kable_styling(latex_options = "HOLD_position")
 
   k
 }

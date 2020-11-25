@@ -20,7 +20,7 @@
 #' @return a [knitr::kable()] table object
 #' @importFrom knitr kable
 #' @importFrom dplyr select_at mutate_at
-#' @importFrom kableExtra collapse_rows row_spec add_header_above
+#' @importFrom kableExtra collapse_rows row_spec add_header_above kable_styling
 #' @export
 table_timeseries <- function(ps = NULL,
                              type = "ssb",
@@ -36,7 +36,7 @@ table_timeseries <- function(ps = NULL,
                              ...){
 
   verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "catch_quota"))
+  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "aap", "catch_quota"))
   verify_argument(time, "character", 1, c("beg", "mid"))
   verify_argument(ci, "numeric")
   verify_argument(decimals, "numeric", 1)
@@ -51,6 +51,7 @@ table_timeseries <- function(ps = NULL,
   scenario_names <- names(ps$sim_data)
   stopifnot(all(scen %in% seq_along(scenario_names)))
 
+  scale <- 1
   if(type == "ssb"){
     if(by_country){
       if(time == "beg"){
@@ -67,6 +68,7 @@ table_timeseries <- function(ps = NULL,
     }
     # SSB0 - All scenarios and runs are the same so just use the first scenario, first run
     ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0)
+    scale <- 1e-6 / 2
   }else if(type == "ssb_ssb0"){
     d <- ps$mse_quants$ssb_ssb0_quant
   }else if(type == "catch"){
@@ -82,6 +84,12 @@ table_timeseries <- function(ps = NULL,
       d <- ps$mse_quants$amc_quant
     }else{
       d <- ps$mse_quants$amc_all_quant
+    }
+  }else if(type == "aap"){
+    if(by_country){
+      d <- ps$mse_quants$aap_quant
+    }else{
+      d <- ps$mse_quants$aap_all_quant
     }
   }else if(type == "catch_quota"){
     d <- ps$mse_quants$catch_quota_quant
@@ -116,19 +124,13 @@ table_timeseries <- function(ps = NULL,
       d <- map_dfc(d, ~{
         .x <- .x %>%
           select(-c(year, country)) %>%
-          select_at(.vars = vars(as.character(ci), "avg")) %>%
-          mutate_at(.vars = vars(as.character(ci), "avg"), .funs = function(x){
-            round(x, decimals)
-          })
+          select_at(.vars = vars(as.character(ci), "avg"))
       })
     }else{
       d <- map_dfc(d, ~{
         .x <- .x %>%
           select(-c(year, country)) %>%
-          select_at(.vars = vars(as.character(ci))) %>%
-          mutate_at(.vars = vars(as.character(ci)), .funs = function(x){
-            round(x, decimals)
-          })
+          select_at(.vars = vars(as.character(ci)))
       })
     }
   }else{
@@ -139,26 +141,21 @@ table_timeseries <- function(ps = NULL,
       d <- map_dfc(d, ~{
         .x <- .x %>%
           select(-year) %>%
-          select_at(.vars = vars(as.character(ci), "avg")) %>%
-          mutate_at(.vars = vars(as.character(ci), "avg"), .funs = function(x){
-            round(x, decimals)
-          })
+          select_at(.vars = vars(as.character(ci), "avg"))
       })
     }else{
       d <- map_dfc(d, ~{
         .x <- .x %>%
           select(-year) %>%
-          select_at(.vars = vars(as.character(ci))) %>%
-          mutate_at(.vars = vars(as.character(ci)), .funs = function(x){
-            round(x, decimals)
-          })
+          select_at(.vars = vars(as.character(ci)))
       })
     }
   }
 
   d <- d %>%
     mutate(Year = as.character(yrs)) %>%
-    select(Year, everything())
+    select(Year, everything()) %>%
+    mutate_at(.vars = vars(-Year), .funs = function(x){x * scale})
 
   if(by_country){
     if(inc_mean){
@@ -177,6 +174,7 @@ table_timeseries <- function(ps = NULL,
 
   k <- kable(d,
              format = format,
+             digits = decimals,
              format.args = list(decimal.mark = '.', big.mark = ","),
              ...) %>%
     collapse_rows(columns = 1, latex_hline = "none") %>%
@@ -199,6 +197,8 @@ table_timeseries <- function(ps = NULL,
     k <- k %>%
       add_header_above(c(" ", scen_header), bold = TRUE)
   }
+
+  k <- k %>% kable_styling(latex_options = "HOLD_position")
 
   k
 }

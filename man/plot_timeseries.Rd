@@ -18,7 +18,7 @@ plot_timeseries(
   legend_position = c(0.08, 0.15),
   ssb_line_txt_cex = 0.8,
   ssb_line_col = "black",
-  ssb_line_type = 3,
+  ssb_line_type = 2,
   ...
 )
 }

@@ -39,7 +39,7 @@ plot_timeseries <- function(ps = NULL,
                             legend_position = c(0.08, 0.15),
                             ssb_line_txt_cex = 0.8,
                             ssb_line_col = "black",
-                            ssb_line_type = 3,
+                            ssb_line_type = 2,
                             ...){
 
   verify_argument(ps, "list")
@@ -152,7 +152,8 @@ plot_timeseries <- function(ps = NULL,
                                      vjust = 0.5),
           legend.position = legend_position) +
     scale_color_manual(values = cols) +
-    coord_cartesian(xlim = yr_lim)
+    coord_cartesian(xlim = yr_lim) +
+    theme(legend.title = element_blank())
 
   if(ci_lines){
     if(by_country){
@@ -177,11 +178,16 @@ plot_timeseries <- function(ps = NULL,
 
   if(show_ssb0 && type %in% c("ssb", "ssb_ssb0", "catch_quota")){
     y_tx_ln_spacing <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
+    if(type == "ssb"){
+      ssb0_lab <- bquote("SSB"[.(0)] == .(round(ssb0, 2)))
+    }else{
+      ssb0_lab <- bquote("SSB"[.(0)])
+    }
     g <- g +
       geom_hline(aes(yintercept = ssb0),
                  color = ssb_line_col,
                  linetype = ssb_line_type) +
-      annotation_custom(grob = textGrob(label = bquote("SSB"[.(0)] == .(round(ssb0, 2))),
+      annotation_custom(grob = textGrob(label = ssb0_lab,
                                         hjust = 0,
                                         gp = gpar(cex = ssb_line_txt_cex,
                                                   col = ssb_line_col)),
@@ -193,6 +199,14 @@ plot_timeseries <- function(ps = NULL,
   if(show_40_10 && type %in% c("ssb", "ssb_ssb0")){
     y_tx_ln_spacing_40 <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
     y_tx_ln_spacing_10 <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
+    if(type == "ssb"){
+      ssb40_lab <- bquote("SSB"[.(0.4)] == .(round(ssb0 * 0.4, 2)))
+      ssb10_lab <- bquote("SSB"[.(0.1)] == .(round(ssb0 * 0.1, 2)))
+    }else{
+      ssb40_lab <- bquote("SSB"[.(0.4)])
+      ssb10_lab <- bquote("SSB"[.(0.1)])
+    }
+
     g <- g +
       geom_hline(aes(yintercept = ssb0 * 0.4),
                  color = ssb_line_col,
@@ -200,7 +214,7 @@ plot_timeseries <- function(ps = NULL,
       geom_hline(aes(yintercept = ssb0 * 0.1),
                  color = ssb_line_col,
                  linetype = ssb_line_type) +
-      annotation_custom(grob = textGrob(label = bquote("SSB"[.(0.4)] == .(round(ssb0 * 0.4, 2))),
+      annotation_custom(grob = textGrob(label = ssb40_lab,
                                         hjust = 0,
                                         gp = gpar(cex = ssb_line_txt_cex,
                                                   col = ssb_line_col)),
@@ -208,7 +222,7 @@ plot_timeseries <- function(ps = NULL,
                         ymax = ssb0 * 0.4 + y_tx_ln_spacing_40,
                         xmin = x_range[1] + 0.5,
                         xmax = x_range[1] + 0.5) +
-      annotation_custom(grob = textGrob(label = bquote("SSB"[.(0.1)] == .(round(ssb0 * 0.1, 2))),
+      annotation_custom(grob = textGrob(label = ssb10_lab,
                                         hjust = 0,
                                         gp = gpar(cex = ssb_line_txt_cex,
                                                   col = ssb_line_col)),
