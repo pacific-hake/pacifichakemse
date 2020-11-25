@@ -255,7 +255,8 @@ load_data_om <- function(ss_model = NULL,
   #lst$catch <- lst$catch_obs
 
   lst$catch_country <- ss_model$catch_country %>%
-    mutate(total = rowSums(.)) %>% set_names(c("year", "space1", "space2", "total"))
+    mutate(total = can + us) %>%
+    set_names(c("year", "space1", "space2", "total"))
   # TODO: Check why the sum of the catch country file does not add up to the total in the SS data file
   # lst$catch_obs <- lst$catch_country %>% pull(total)
   # If n_yr greater than the number of catch observations, append the mean catch across
