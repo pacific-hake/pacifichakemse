@@ -25,8 +25,14 @@ create_tmb_data <- function(om = NULL,
 
   inc_yrs <- om$yrs[om$yrs <= yr]
   inc_yr_ind <- which(om$yrs == yr)
-
   om$catch_obs <- om$catch[rownames(om$catch) %in% inc_yrs, ]
+  if(yr > om$m_yr){
+    ct <- om$catch_country %>%
+      select_at(.vars = vars(contains("space"))) %>%
+      rowSums
+    om$catch_obs[inc_yr_ind] <- ct[inc_yr_ind]
+  }
+
   # om$catch_obs <- om$catch %>%
   #   as_tibble(.name_repair = "minimal") %>%
   #   rename(value = 1) %>%

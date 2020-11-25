@@ -103,6 +103,15 @@ run_season_loop_om <- function(om,
 
       # Calculate catch distribution ------------------------------------------
       e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
+      # Save the catch actually applied to each country so the EM can access it
+      if(yr > om$m_yr){
+        tmp_space_catch <- om$catch_country[[grep(space, names(om$catch_country))]][yr_ind]
+        if(season == 1){
+          tmp_space_catch <- 0
+        }
+        om$catch_country[[grep(space, names(om$catch_country))]][yr_ind] <<- tmp_space_catch + e_tmp
+      }
+
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
