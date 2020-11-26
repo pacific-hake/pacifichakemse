@@ -213,6 +213,17 @@ hake_objectives <- function(sim_data = NULL,
                                              "catch",
                                              probs = quants)
 
+  # catch_country ----------------------------------------------------------------
+  out$catch_country <- map2(sim_data, seq_along(sim_data), ~{
+    .x$catch_country %>%
+      as_tibble() %>%
+      rename(catch_ca = space1, catch_us = space2) %>%
+      mutate(run = .y) %>%
+      select(year, catch_ca, catch_us, run)
+  }) %>%
+    map_df(~{.x}) %>%
+    as_tibble()
+
   # conv_am function ----------------------------------------------------------
   # TODO: Need to check generation of age_comps_catch_space because there are no age 15's they are NA!!
   # sim_data[[1]]$age_comps_catch_space[,,1]
