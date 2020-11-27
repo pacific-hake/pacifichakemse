@@ -69,14 +69,24 @@ get_em_outputs <- function(em,
     map_dfr(~{.x}) %>%
     mutate(scenario = scen_name) %>%
     select(scenario, everything())
-
-  out$ssb <- out$ssb %>%
-    mutate(scenario = scen_name) %>%
-    select(scenario, everything())
+  nms <- names(out$ssb_quants_by_year)
+  quant_inds <- grep("%", nms)
+  nms[quant_inds] <- gsub("([0-9]+)\\%", "\\1", nms[quant_inds])
+  nms[quant_inds] <- as.numeric(nms[quant_inds]) / 100
+  names(out$ssb_quants_by_year) <- nms
 
   out$ssb_quants_by_run <- out$ssb_quants_by_run %>%
     mutate(scenario = scen_name) %>%
     select(scenario, year, everything())
+  nms <- names(out$ssb_quants_by_run)
+  quant_inds <- grep("%", nms)
+  nms[quant_inds] <- gsub("([0-9]+)\\%", "\\1", nms[quant_inds])
+  nms[quant_inds] <- as.numeric(nms[quant_inds]) / 100
+  names(out$ssb_quants_by_run) <- nms
+
+  out$ssb <- out$ssb %>%
+    mutate(scenario = scen_name) %>%
+    select(scenario, everything())
 
   out
 }

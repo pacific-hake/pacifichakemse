@@ -4,10 +4,12 @@
 \alias{get_em_outputs}
 \title{Get outputs from the Estimation models}
 \usage{
-get_em_outputs(em, quants = c(0.05, 0.5, 0.95), ...)
+get_em_outputs(em, scen_name = NULL, quants = c(0.05, 0.5, 0.95), ...)
 }
 \arguments{
-\item{em}{The esimation model object for a single scenario}
+\item{em}{The estimation model object for a single scenario}
+
+\item{scen_name}{Scenario name to be appended to each table}
 
 \item{quants}{A vector of quantiles to apply}
 
