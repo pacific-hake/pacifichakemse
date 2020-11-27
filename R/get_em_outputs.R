@@ -1,8 +1,8 @@
 #' Get outputs from the Estimation models
 #'
-#' @param em The esimation model object for a single scenario
+#' @param em The estimation model object for a single scenario
 #' @param quants A vector of quantiles to apply
-#' @param scen_name Scenario name to be appeded to each table
+#' @param scen_name Scenario name to be appended to each table
 #' @param ... Absorbs unused arguments
 #'
 #' @return A list of the EM outputs
