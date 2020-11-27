@@ -24,6 +24,7 @@ calc_standard_error_ssb <- function(em_output,
       nyrs <- length(yrs)
       ssb_true <- rowSums(om_output[[.x]]$ssb)
       ssb_est <- em_output[[.x]]$ssb_values[length(em_output[[.x]]$ssb_values)][[1]]
+      ssb_est <- em_output[[.x]]$ssb_values[length(em_output[[.x]]$ssb_values)][[1]]
       err <- (ssb_est - ssb_true) / ssb_true
       data.frame(run = rep(.x, nyrs),
                  ssb_se = err,

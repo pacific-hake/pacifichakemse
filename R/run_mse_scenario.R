@@ -84,8 +84,10 @@ run_mse_scenario <- function(om = NULL,
                          attain = attain,
                          ...)
 
-    # Create TMB data for EM --------------------------------------------------
+    om$catch_country <- om_output$catch_country
+    om$catch <- om_output$catch
 
+    # Create TMB data for EM --------------------------------------------------
     lst_tmb <- create_tmb_data(om = om_output, yr = yr, ...)
 
     # Evaluate the Objective function
@@ -189,7 +191,7 @@ run_mse_scenario <- function(om = NULL,
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
-      if(yr == tail(om$yrs, 1)){
+      #if(yr == tail(om$yrs, 1)){
         # Suppress these warnings:
         # In sqrt(diag(object$cov.fixed)) : NaNs produced
         # In sqrt(diag(cov)) : NaNs produced
@@ -200,21 +202,21 @@ run_mse_scenario <- function(om = NULL,
         rep_names <- rownames(sdrep_summary)
 
         tmp <- sdrep_summary[rep_names == "SSB", 1]
-        names(tmp) <- om$yrs
+        names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_values[[em_iter]] <<- tmp
 
         tmp <- sdrep_summary[rep_names == "SSB", 2]
-        names(tmp) <- om$yrs
+        names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_se[[em_iter]] <<- tmp
 
         tmp <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
-        names(tmp) <- om$yrs
+        names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_min[[em_iter]] <<- tmp
 
         tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
-        names(tmp) <- om$yrs
+        names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_max[[em_iter]] <<- tmp
-      }
+      #}
       em_iter <<- em_iter + 1
     }
 

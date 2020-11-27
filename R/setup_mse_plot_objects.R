@@ -134,6 +134,31 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   }
   stopifnot(length(porder) == length(om_output))
 
+  # EM outputs ----------------------------------------------------------------
+  em_outputs <- map2(em_output, names(om_output), function(em = .x, nm = .y, ...){
+    get_em_outputs(em, scen_name = nm, quants = quants, ...)
+  }, ...)
+  tmp_em <- NULL
+  tmp_em$ssb <- map_dfr(em_outputs, ~{
+    .x$ssb
+  })
+  tmp_em$ssb_quants_by_year <- map_dfr(em_outputs, ~{
+    .x$ssb_quants_by_year
+  })
+  tmp_em$ssb_quants_by_run <- map_dfr(em_outputs, ~{
+    .x$ssb_quants_by_run
+  })
+  em_outputs <- tmp_em
+
+  lst_indicators <- map(om_output, function(om = .x, ...){
+    tmp <- hake_objectives(om, quants = quants, ...)
+    tmp$info <- tmp$info %>%
+      mutate(scenario = names(om))
+    tmp$vtac_seas <- tmp$vtac_seas %>%
+      mutate(scenario = names(om))
+    tmp
+  }, ...)
+
   # lst_indicators (hake_objectives() output) ---------------------------------
   cols <- brewer.pal(length(plotnames), "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
@@ -341,6 +366,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        violin_data = df_violin,
        cols = cols,
        plotnames = plotnames,
+       em_outputs = em_outputs,
        lst_indicators = lst_indicators,
        mse_quants = mse_quants,
        standard_error_ssb = standard_error_ssb,
