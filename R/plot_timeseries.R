@@ -16,10 +16,10 @@
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param rev_scenarios If TRUE, reverse the order of the scenarios in the legend.
 #' @param legend_position A vector of two - X and Y position for the legend. See [ggplot2::theme()]
-#' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #' @param ssb_line_txt_cex Size multiplier for SSB reference point line labels.
 #' @param ssb_line_col Color for SSB reference point line labels.
 #' @param ssb_line_type Line type for SSB reference point line labels.
+#' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @importFrom RColorBrewer brewer.pal

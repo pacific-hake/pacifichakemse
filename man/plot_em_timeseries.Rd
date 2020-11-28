@@ -6,17 +6,16 @@
 \usage{
 plot_em_timeseries(
   ps,
-  scen = 1,
   ci = c(0.05, 0.95),
   ci_lines = TRUE,
   yr_lim = c(NA_real_, NA_real_),
-  legend_position = "none"
+  rev_scenarios = TRUE,
+  legend_position = c(0.15, 0.92),
+  ...
 )
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}.}
-
-\item{scen}{A number representing which scenario to plot}
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.}
 
@@ -25,7 +24,11 @@ plot_em_timeseries(
 \item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
 the limits of the data are used.}
 
+\item{rev_scenarios}{If TRUE, reverse the order of the scenarios in the legend.}
+
 \item{legend_position}{A vector of two - X and Y position for the legend. See \code{\link[ggplot2:theme]{ggplot2::theme()}}}
+
+\item{...}{Extra arguments to pass to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object

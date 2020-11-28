@@ -148,6 +148,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   tmp_em$ssb_quants_by_run <- map_dfr(em_outputs, ~{
     .x$ssb_quants_by_run
   })
+  tmp_em$ssb_quants_by_year_runmeans <- map_dfr(em_outputs, ~{
+    .x$ssb_quants_by_year_runmeans
+  })
   em_outputs <- tmp_em
 
   lst_indicators <- map(om_output, function(om = .x, ...){

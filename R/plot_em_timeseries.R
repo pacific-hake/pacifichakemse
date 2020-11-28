@@ -1,62 +1,68 @@
 #' Plot the mean of the year medians SSB for all Estimation models
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()].
-#' @param scen A number representing which scenario to plot
 #' @param ci A vector of length two of the lower and upper credible interval values.
 #' @param ci_lines If TRUE, use dashed lines for the CI envelope. If FALSE, use a shaded ribbon.
 #' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
 #' the limits of the data are used.
+#' @param rev_scenarios If TRUE, reverse the order of the scenarios in the legend.
 #' @param legend_position A vector of two - X and Y position for the legend. See [ggplot2::theme()]
+#' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_em_timeseries <- function(ps,
-                               scen = 1,
                                ci = c(0.05, 0.95),
                                ci_lines = TRUE,
                                yr_lim = c(NA_real_, NA_real_),
-                               legend_position = "none"){
+                               rev_scenarios = TRUE,
+                               legend_position = c(0.15, 0.92),
+                               ...){
 
   verify_argument(ps, "list")
   verify_argument(ci, "numeric", 2)
 
-  d <- ps$em_outputs$ssb_quants_by_year
+  d <- ps$em_outputs$ssb_quants_by_year_runmeans %>%
+    mutate(scenario = as.factor(scenario)) %>%
+    mutate(year = as.double(year)) %>%
+    mutate(grp = "EM - Mean of run quantiles")
+  o <- ps$mse_quants$ssb_all_quant %>%
+    select(-avg) %>%
+    select(scenario, everything()) %>%
+    mutate(grp = "OM - Quantiles")
+
+  d <- d %>%
+    bind_rows(o)
+
   y_label = "Spawning biomass \n(million tonnes)"
   y_factor <- 1e-6 / 2
-
-  scen_names <- unique(d$scenario)
-  d <- d %>%
-    filter(scenario == scen_names[scen])
-  message("Plotting scenario ", scen_names[scen], " for EM SSB plot.")
-
-  df <- d %>%
-    group_by(year) %>%
-    group_map(~{
-      summarize_at(.x, .vars = vars(-scenario, -run), .funs = mean)
-    }) %>%
-    map_dfr(~{.x}) %>%
-    mutate(year = as.numeric(unique(d$year))) %>%
-    select(year, everything())
+  facet_back_cols <- ps$cols
 
   stopifnot("scenario" %in% names(d))
   stopifnot("year" %in% names(d))
   stopifnot(all(ci %in% names(d)))
 
   ci <- as.character(ci) %>% map(~{sym(.x)})
-  cols <- ps$cols
 
-  g <- ggplot(df, aes(x = year, y = `0.5` * y_factor, fill = "black"))
+  # Reorder the legend and colors
+  if(rev_scenarios){
+    d <- d %>%
+      mutate(scenario = fct_relevel(scenario, rev(levels(d$scenario))))
+  }
+
+  cols <- c("black", "blue")
+
+  g <- ggplot(d, aes(x = year, y = `0.5` * y_factor, fill = grp, color = grp, group = grp))
 
   if(ci_lines){
     g <- g +
       geom_line(aes(y = !!ci[[1]] * y_factor), linetype = 2) +
       geom_line(aes(y = !!ci[[2]] * y_factor), linetype = 2)
+
   }else{
     g <- g +
-      geom_ribbon(aes(ymin = !!ci[[1]] * y_factor, ymax = !!ci[[2]] * y_factor), linetype = 0) +
-      scale_fill_manual(values = alpha("grey", alpha = 0.7))
+      geom_ribbon(aes(ymin = !!ci[[1]] * y_factor, ymax = !!ci[[2]] * y_factor), linetype = 0, alpha = 0.3)
   }
-
   g <- g +
     geom_line(size = 1.5) +
     scale_y_continuous(name = y_label) +
@@ -65,9 +71,10 @@ plot_em_timeseries <- function(ps,
                                      vjust = 0.5),
           legend.position = legend_position) +
     scale_color_manual(values = cols) +
+    scale_fill_manual(values = cols) +
     coord_cartesian(xlim = yr_lim) +
-    theme(legend.title = element_blank())
+    theme(legend.title = element_blank()) +
+    facet_wrap(~scenario)
 
-
-  g
+    color_facet_backgrounds(g, facet_back_cols, ...)
 }

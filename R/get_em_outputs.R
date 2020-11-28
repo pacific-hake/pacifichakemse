@@ -64,7 +64,6 @@ get_em_outputs <- function(em,
       mutate(run = i) %>%
       select(year, run, everything())
   }
-
   out$ssb_quants_by_year <- j %>%
     map_dfr(~{.x}) %>%
     mutate(scenario = scen_name) %>%
@@ -75,6 +74,19 @@ get_em_outputs <- function(em,
   nms[quant_inds] <- as.numeric(nms[quant_inds]) / 100
   names(out$ssb_quants_by_year) <- nms
 
+  # SSB runmeans of quants ----------------------------------------------------
+  out$ssb_quants_by_year_runmeans <- out$ssb_quants_by_year %>%
+    select(-scenario) %>%
+    group_by(year) %>%
+    group_map(~{
+      summarize_at(.x, .vars = vars(-run), .funs = mean)
+    }) %>%
+    map_dfr(~{.x}) %>%
+    mutate(scenario = scen_name,
+           year = yrs) %>%
+    select(scenario, year, everything())
+
+  # Outputs -------------------------------------------------------------------
   out$ssb_quants_by_run <- out$ssb_quants_by_run %>%
     mutate(scenario = scen_name) %>%
     select(scenario, year, everything())
