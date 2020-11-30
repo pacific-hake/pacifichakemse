@@ -186,7 +186,6 @@ run_season_loop_om <- function(om,
             n_in <- n_in + n_in_tmp
           }
         }
-        #if(yr == 2019 && season == 3) browser()
         om$n_save_age[, yr_ind, space, season + 1] <<- om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
@@ -208,7 +207,6 @@ run_season_loop_om <- function(om,
             n_in_plus <- n_in_plus + n_in_plus_tmp
           }
         }
-        #if(yr == 2019) browser()
         om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave

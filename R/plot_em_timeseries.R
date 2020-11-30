@@ -1,6 +1,7 @@
 #' Plot the mean of the year medians SSB for all Estimation models
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()].
+#' @param type One of 'ssb', 'ssb_ssb0', catch', 'aas', 'aac','aap'
 #' @param ci A vector of length two of the lower and upper credible interval values.
 #' @param ci_lines If TRUE, use dashed lines for the CI envelope. If FALSE, use a shaded ribbon.
 #' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
@@ -12,6 +13,7 @@
 #' @return A [ggplot2::ggplot()] object
 #' @export
 plot_em_timeseries <- function(ps,
+                               type = "ssb",
                                ci = c(0.05, 0.95),
                                ci_lines = TRUE,
                                yr_lim = c(NA_real_, NA_real_),
@@ -20,23 +22,43 @@ plot_em_timeseries <- function(ps,
                                ...){
 
   verify_argument(ps, "list")
+  verify_argument(type, "character", 1, c("catch", "f", "r", "ssb", "survey"))
   verify_argument(ci, "numeric", 2)
 
-  d <- ps$em_outputs$ssb_quants_by_year_runmeans %>%
+  y_factor <- 1
+  if(type == "catch"){
+    d <- ps$em_outputs$catch_quants_by_year_runmeans
+    o <- ps$mse_quants$catch_quant
+    y_label = "Catch\n(million tonnes)"
+    y_factor <- 1e-6
+  # }else if(type == "f"){
+  #   d <- ps$em_outputs$f_quants_by_year_runmeans
+  #   y_label = "Fishing mortality"
+  # }else if(type == "r"){
+  #   d <- ps$em_outputs$r_quants_by_year_runmeans
+  #   y_label = "Recruitment"
+  }else if(type == "ssb"){
+    d <- ps$em_outputs$ssb_quants_by_year_runmeans
+    o <- ps$mse_quants$ssb_all_quant
+    y_label = "Spawning biomass \n(million tonnes)"
+    y_factor <- 1e-6 / 2
+  }#else if(type == "survey"){
+  #   d <- ps$em_outputs$survey_quants_by_year_runmeans
+  #   y_label = "Survey biomass"
+  # }
+  facet_back_cols <- ps$cols
+
+  d <- d %>%
     mutate(scenario = as.factor(scenario)) %>%
     mutate(year = as.double(year)) %>%
     mutate(grp = "EM - Mean of run quantiles")
-  o <- ps$mse_quants$ssb_all_quant %>%
+  o <- o %>%
     select(-avg) %>%
     select(scenario, everything()) %>%
     mutate(grp = "OM - Quantiles")
 
   d <- d %>%
     bind_rows(o)
-
-  y_label = "Spawning biomass \n(million tonnes)"
-  y_factor <- 1e-6 / 2
-  facet_back_cols <- ps$cols
 
   stopifnot("scenario" %in% names(d))
   stopifnot("year" %in% names(d))

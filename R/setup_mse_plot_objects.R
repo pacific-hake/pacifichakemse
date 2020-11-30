@@ -138,19 +138,15 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   em_outputs <- map2(em_output, names(om_output), function(em = .x, nm = .y, ...){
     get_em_outputs(em, scen_name = nm, quants = quants, ...)
   }, ...)
+  # Bind the scenario data frames for all EM outputs into single data frames
+  nms <- names(em_outputs[[1]])
   tmp_em <- NULL
-  tmp_em$ssb <- map_dfr(em_outputs, ~{
-    .x$ssb
-  })
-  tmp_em$ssb_quants_by_year <- map_dfr(em_outputs, ~{
-    .x$ssb_quants_by_year
-  })
-  tmp_em$ssb_quants_by_run <- map_dfr(em_outputs, ~{
-    .x$ssb_quants_by_run
-  })
-  tmp_em$ssb_quants_by_year_runmeans <- map_dfr(em_outputs, ~{
-    .x$ssb_quants_by_year_runmeans
-  })
+  for(i in seq_along(nms)){
+    nm <- sym(nms[i])
+    tmp_em[[nm]] <- map_dfr(em_outputs, ~{
+      .x[[nm]]
+    })
+  }
   em_outputs <- tmp_em
 
   lst_indicators <- map(om_output, function(om = .x, ...){

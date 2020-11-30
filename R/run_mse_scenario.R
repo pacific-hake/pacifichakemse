@@ -12,6 +12,8 @@
 #' @param c_increase Increase in max movement
 #' @param m_increase Decrease of spawners returning south
 #' @param sel_change Time varying selectivity
+#' @param save_all_em If TRUE, the EM output will be saved for every year. If FALSE, it will be
+#' saved for the last simulation year only.
 #' @param ... Absorb arguments intended for other functions
 #'
 #' @return A list of length 3: The MSE output, the OM output, and the EM output
@@ -28,6 +30,7 @@ run_mse_scenario <- function(om = NULL,
                              c_increase = 0,
                              m_increase = 0,
                              sel_change = 0,
+                             save_all_em = FALSE,
                              ...){
 
   verify_argument(om, "list")
@@ -61,7 +64,15 @@ run_mse_scenario <- function(om = NULL,
                     ssb_values = vector(mode = "list", length = om$n_future_yrs),
                     ssb_se = vector(mode = "list", length = om$n_future_yrs),
                     ssb_min = vector(mode = "list", length = om$n_future_yrs),
-                    ssb_max = vector(mode = "list", length = om$n_future_yrs))
+                    ssb_max = vector(mode = "list", length = om$n_future_yrs),
+                    catch_values = vector(mode = "list", length = om$n_future_yrs),
+                    catch_se = vector(mode = "list", length = om$n_future_yrs),
+                    r_values = vector(mode = "list", length = om$n_future_yrs),
+                    r_se = vector(mode = "list", length = om$n_future_yrs),
+                    fyear_values = vector(mode = "list", length = om$n_future_yrs),
+                    fyear_se = vector(mode = "list", length = om$n_future_yrs),
+                    survey_values = vector(mode = "list", length = om$n_future_yrs),
+                    survey_se = vector(mode = "list", length = om$n_future_yrs))
   em_iter <- 1
 
   # Begin MSE loop ------------------------------------------------------------
@@ -143,7 +154,7 @@ run_mse_scenario <- function(om = NULL,
     lower <- obj$par - Inf
     upper <- obj$par + Inf
     upper[names(upper) == "log_h"] <- log(0.999)
-    upper[names(upper) == "f_0"] <- 2
+    upper[names(upper) == "f_0"] <- 2.0
     lower[names(lower) == "log_sd_surv"] <- log(0.01)
     lower[names(lower) == "f_0"] <- 0.01
     if(lst_tmb$om$catch_obs[length(lst_tmb$om$catch_obs)] == 1){
@@ -191,7 +202,7 @@ run_mse_scenario <- function(om = NULL,
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
-      #if(yr == tail(om$yrs, 1)){
+      if(yr == tail(om$yrs, 1) || save_all_em){
         # Suppress these warnings:
         # In sqrt(diag(object$cov.fixed)) : NaNs produced
         # In sqrt(diag(cov)) : NaNs produced
@@ -216,7 +227,39 @@ run_mse_scenario <- function(om = NULL,
         tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
         names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_max[[em_iter]] <<- tmp
-      #}
+
+        tmp <- sdrep_summary[rep_names == "Catch", 1]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$catch_values[[em_iter]] <<- tmp
+
+        tmp <- sdrep_summary[rep_names == "Catch", 2]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$catch_se[[em_iter]] <<- tmp
+
+        tmp <- sdrep_summary[rep_names == "R", 1]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$r_values[[em_iter]] <<- tmp
+
+        tmp <- sdrep_summary[rep_names == "R", 2]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$r_se[[em_iter]] <<- tmp
+
+        tmp <- sdrep_summary[rep_names == "Surveyobs", 1]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$survey_values[[em_iter]] <<- tmp
+
+        tmp <- sdrep_summary[rep_names == "Surveyobs", 2]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$survey_se[[em_iter]] <<- tmp
+
+        tmp <- sdrep_summary[rep_names == "Fyear", 1]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$fyear_values[[em_iter]] <<- tmp
+
+        tmp <- sdrep_summary[rep_names == "Fyear", 2]
+        names(tmp) <- om$yrs[1:yr_ind]
+        em_output$fyear_se[[em_iter]] <<- tmp
+      }
       em_iter <<- em_iter + 1
     }
 

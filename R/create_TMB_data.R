@@ -83,7 +83,6 @@ create_tmb_data <- function(om = NULL,
     end_yr_const_r <- which(inc_yrs == yr - 1)
     om$parameters$r_in[start_yr_const_r:end_yr_const_r] <- 0
   }
-
   om$parameters$p_sel <- om$sel_by_yrs %>%
     as.matrix()
 

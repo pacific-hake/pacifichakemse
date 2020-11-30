@@ -6,6 +6,7 @@
 \usage{
 plot_em_timeseries(
   ps,
+  type = "ssb",
   ci = c(0.05, 0.95),
   ci_lines = TRUE,
   yr_lim = c(NA_real_, NA_real_),
@@ -16,6 +17,8 @@ plot_em_timeseries(
 }
 \arguments{
 \item{ps}{A plot setup object as output by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}.}
+
+\item{type}{One of 'ssb', 'ssb_ssb0', catch', 'aas', 'aac','aap'}
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.}
 

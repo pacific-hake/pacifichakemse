@@ -13,6 +13,7 @@ run_mse_scenario(
   c_increase = 0,
   m_increase = 0,
   sel_change = 0,
+  save_all_em = FALSE,
   ...
 )
 }
@@ -36,6 +37,9 @@ of the catch to take.}
 \item{m_increase}{Decrease of spawners returning south}
 
 \item{sel_change}{Time varying selectivity}
+
+\item{save_all_em}{If TRUE, the EM output will be saved for every year. If FALSE, it will be
+saved for the last simulation year only.}
 
 \item{...}{Absorb arguments intended for other functions}
 }
