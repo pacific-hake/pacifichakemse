@@ -10,6 +10,7 @@
 #' @return A list of length of `scenarios` containing MSE output data
 #' @export
 #' @importFrom tictoc tic toc
+#' @importFrom furrr future_map2
 create_plot_objects <- function(scenarios = c("biasadjust",
                                               "climate",
                                               "hcr",
@@ -18,7 +19,7 @@ create_plot_objects <- function(scenarios = c("biasadjust",
                                 overwrite_rds = TRUE,
                                 ...){
 
-  ps <- map2(scenarios, om_only, function(scen = .x, om_only = .y, ...){
+  ps <- future_map2(scenarios, om_only, function(scen = .x, om_only = .y, ...){
     tic()
     lst <- load_mse_plot_data(scenario = scen, overwrite_rds = overwrite_rds, om_only = om_only, ...)
     if(overwrite_rds){

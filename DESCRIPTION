@@ -20,6 +20,7 @@ Imports:
     data.table,
     dplyr,
     forcats,
+    furrr,
     ggplot2,
     gfutilities,
     gridExtra,
