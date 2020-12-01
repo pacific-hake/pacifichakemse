@@ -83,7 +83,7 @@ calc_catch_seas_country <- function(data_csv_dir = NULL,
   # values up to 2010. It is likely the newer data file has slightly different values.
   # To return to correct, comment the statement below out and return j
   k <- tibble(can = c(0.001,0.188,0.603,0.208),
-              usa = c(0.000,0.317,0.382,0.302)/sum(c(0.000,0.317,0.382,0.302))) %>% t() %>%
+              usa = c(0.001,0.316,0.382,0.302)/sum(c(0.001,0.316,0.382,0.302))) %>% t() %>%
     as_tibble(.name_repair = "unique")
   names(k) <- c("seas1", "seas2", "seas3", "seas4")
 
