@@ -12,6 +12,7 @@ plot_em_timeseries(
   yr_lim = c(NA_real_, NA_real_),
   rev_scenarios = TRUE,
   legend_position = c(0.15, 0.92),
+  free_y_scale = FALSE,
   ...
 )
 }
@@ -30,6 +31,8 @@ the limits of the data are used.}
 \item{rev_scenarios}{If TRUE, reverse the order of the scenarios in the legend.}
 
 \item{legend_position}{A vector of two - X and Y position for the legend. See \code{\link[ggplot2:theme]{ggplot2::theme()}}}
+
+\item{free_y_scale}{See the \code{scales} argument of \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}}
 
 \item{...}{Extra arguments to pass to \code{\link[=color_facet_backgrounds]{color_facet_backgrounds()}}}
 }

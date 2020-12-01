@@ -8,6 +8,7 @@
 #' the limits of the data are used.
 #' @param rev_scenarios If TRUE, reverse the order of the scenarios in the legend.
 #' @param legend_position A vector of two - X and Y position for the legend. See [ggplot2::theme()]
+#' @param free_y_scale See the `scales` argument of [ggplot2::facet_wrap()]
 #' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
@@ -19,6 +20,7 @@ plot_em_timeseries <- function(ps,
                                yr_lim = c(NA_real_, NA_real_),
                                rev_scenarios = TRUE,
                                legend_position = c(0.15, 0.92),
+                               free_y_scale = FALSE,
                                ...){
 
   verify_argument(ps, "list")
@@ -95,8 +97,15 @@ plot_em_timeseries <- function(ps,
     scale_color_manual(values = cols) +
     scale_fill_manual(values = cols) +
     coord_cartesian(xlim = yr_lim) +
-    theme(legend.title = element_blank()) +
-    facet_wrap(~scenario)
+    theme(legend.title = element_blank())
 
-    color_facet_backgrounds(g, facet_back_cols, ...)
+  if(free_y_scale){
+    g <- g +
+      facet_wrap(~scenario, scales = "free_y")
+  }else{
+    g <- g +
+      facet_wrap(~scenario)
+  }
+
+  color_facet_backgrounds(g, facet_back_cols, ...)
 }
