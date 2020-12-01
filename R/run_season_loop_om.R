@@ -138,8 +138,8 @@ run_season_loop_om <- function(om,
                   om$yrs[yr_ind], " and season ",
                   season, " , space ", space)
         }
-        e_tmp <- 0.75 * b_tmp
-        om$catch_quota_n[yr_ind, space, season] <<- 1
+        #e_tmp <- 0.75 * b_tmp
+        #om$catch_quota_n[yr_ind, space, season] <<- 1
       }
 
       # Calculate F based on catch distribution -------------------------------
