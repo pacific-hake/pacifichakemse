@@ -102,7 +102,11 @@ run_season_loop_om <- function(om,
       }
 
       # Calculate catch distribution ------------------------------------------
-      e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
+      if(attain[space] == 0){
+        e_tmp <- 3000
+      }else{
+        e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
+      }
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
         tmp_space_catch <- om$catch_country[[grep(space, names(om$catch_country))]][yr_ind]
