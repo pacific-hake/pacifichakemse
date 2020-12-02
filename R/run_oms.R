@@ -23,7 +23,7 @@ run_oms <- function(ss_model = NULL,
                     n_surveys = 2,
                     b_futures = 0.5,
                     sel_changes = 0,
-                    catch_in = 0,
+                    catch_in = NA_real_,
                     plot_names = NULL,
                     random_seed = NULL,
                     results_root_dir = here("results"),
@@ -83,8 +83,9 @@ run_oms <- function(ss_model = NULL,
                          b_future = b_futures[fn_ind],
                          selectivity_change = sel_changes[fn_ind],
                          ...)
-
-      om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
+      if(!is.na(catch_in)){
+        om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
+      }
       run_om(om, random_seed = random_seeds[run], verbose = FALSE)
     })
     # End run loop ------------------------------------------------------------
