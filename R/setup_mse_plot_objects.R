@@ -135,19 +135,22 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   stopifnot(length(porder) == length(om_output))
 
   # EM outputs ----------------------------------------------------------------
-  em_outputs <- map2(em_output, names(om_output), function(em = .x, nm = .y, ...){
-    get_em_outputs(em, scen_name = nm, quants = quants, ...)
-  }, ...)
-  # Bind the scenario data frames for all EM outputs into single data frames
-  nms <- names(em_outputs[[1]])
-  tmp_em <- NULL
-  for(i in seq_along(nms)){
-    nm <- sym(nms[i])
-    tmp_em[[nm]] <- map_dfr(em_outputs, ~{
-      .x[[nm]]
-    })
+  em_outputs <- NULL
+  if(!is.null(em_output)){
+    em_outputs <- map2(em_output, names(om_output), function(em = .x, nm = .y, ...){
+      get_em_outputs(em, scen_name = nm, quants = quants, ...)
+    }, ...)
+    # Bind the scenario data frames for all EM outputs into single data frames
+    nms <- names(em_outputs[[1]])
+    tmp_em <- NULL
+    for(i in seq_along(nms)){
+      nm <- sym(nms[i])
+      tmp_em[[nm]] <- map_dfr(em_outputs, ~{
+        .x[[nm]]
+      })
+    }
+    em_outputs <- tmp_em
   }
-  em_outputs <- tmp_em
 
   lst_indicators <- map(om_output, function(om = .x, ...){
     tmp <- hake_objectives(om, quants = quants, ...)
