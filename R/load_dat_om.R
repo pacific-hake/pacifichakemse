@@ -34,6 +34,10 @@
 #' the second is the US
 #' @param log_phi_survey Survey phi parameter value
 #' If FALSE, they will be given random normal values based on rdev_sd
+#' @param set_rec_devs_zero Logical. If `TRUE`, recruitment deviations will be
+#' set to zero in the projection period. If `FALSE`, recruitment deviations will be set
+#' to random values in the projection period
+
 #' @param ... Absorb arguments destined for other functions
 #'
 #' @return A list of Parameters, Input parameters, Survey, Catch, and others
@@ -74,6 +78,7 @@ load_data_om <- function(ss_model = NULL,
                          sel_change_yr = 1991,
                          f_space = c(0.2612, 0.7388),
                          log_phi_survey = log(11.46),
+                         set_rec_devs_zero = FALSE,
                          ...){
 
   verify_argument(ss_model, "list")
@@ -354,9 +359,15 @@ load_data_om <- function(ss_model = NULL,
   # Recdevs in future years of OM ---------------------------------------------
   r_devs <- rep(NA, lst$n_future_yrs)
   if(populate_future){
-    r_devs <- rnorm(n = lst$n_future_yrs,
-                    mean = 0,
-                    sd = exp(lst$rdev_sd))
+    if(set_rec_devs_zero){
+      r_devs <- rep(0, lst$n_future_yrs)
+    }else{
+      r_devs <- rnorm(n = lst$n_future_yrs,
+                      mean = 0,
+                      sd = exp(lst$rdev_sd))
+    }
+    # rds <- readRDS("rec_devs.rds")
+    # r_devs <- c(rds[[iter]], 1.1, 0.02)
   }
 
   lst$r_dev <- ss_model$r_dev
@@ -370,7 +381,7 @@ load_data_om <- function(ss_model = NULL,
   if(populate_future){
     new_df <- tibble(yr = lst$future_yrs, value = r_devs)
   }else{
-   new_df <- tibble(yr = lst$future_yrs, value = NA)
+    new_df <- tibble(yr = lst$future_yrs, value = NA)
   }
   lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
 

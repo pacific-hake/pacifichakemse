@@ -12,7 +12,7 @@ run_oms(
   n_surveys = 2,
   b_futures = 0.5,
   sel_changes = 0,
-  catch_in = 0,
+  catch_in = NA_real_,
   plot_names = NULL,
   random_seed = NULL,
   results_root_dir = here("results"),
