@@ -51,7 +51,7 @@ LinkingTo:
 Remotes:
     jakelawlor/PNWColors,
     pbs-assess/gfutilities,
-    cgrandin/r4ss/archive/hake2020.zip
+    cgrandin/r4ss/hake2020
 ByteCompile: true
 Encoding: UTF-8
 LazyData: true

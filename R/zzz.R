@@ -214,5 +214,5 @@ globalVariables(c(
 "sim_year",
 "grp",
 "om_output",
-"iter",
+"iter"
 ))
