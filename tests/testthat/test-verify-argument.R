@@ -1,4 +1,3 @@
-context("Test the verify_argument() function")
 
 test_that("verify_argument() - Tests for argument errors", {
   expect_error(verify_argument(NULL, chk_class = "numeric", chk_len = 1, chk_is_in = 1:20))

@@ -1,4 +1,3 @@
-context("Test the extract_age_comps() function")
 
 ss_agecomps <- tibble::tribble(
   ~Yr,   ~Fleet,  ~Bin,    ~Obs,
@@ -101,7 +100,7 @@ test_that("extract_age_comps() - Tests for outputs, simple case", {
                           age_comps_fill = -1)
   expect_true(nrow(df) == 5)
   expect_true(ncol(df) == 10)
-  expect_equivalent(colnames(df), as.character(1993:2002))
+  expect_equal(colnames(df), as.character(1993:2002))
 
   df_na <- df[, as.character(c(1993, 1994, 1996, 1997, 1999, 2000, 2002))]
   expect_true(all(df_na == -1))

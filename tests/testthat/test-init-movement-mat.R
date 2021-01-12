@@ -1,4 +1,3 @@
-context("Test the init_movement_mat() function")
 
 test_that("init_movement_mat() - Tests for argument errors", {
   # n_space
@@ -442,8 +441,8 @@ test_that("init_movement_mat() - Tests for correct output", {
                            ages = ages,
                            age_names = paste("age", ages),
                            f_space = c(0.26, 0.74))
-  expect_equivalent(names(out), c("move_mat", "move_init", "f_space"))
-  expect_equivalent(dim(out$move_mat), c(2, 5, 4, 2))
+  expect_equal(names(out), c("move_mat", "move_init", "f_space"))
+  expect_equal(dim(out$move_mat), c(2, 5, 4, 2))
   expect_equal(length(out$move_mat[1,,,]), 40)
   expect_equal(length(out$move_mat[,1,,]), 16)
   expect_equal(length(out$move_mat[,,1,]), 20)
@@ -457,14 +456,18 @@ test_that("init_movement_mat() - Tests for correct output", {
                         V3 = c(0.05, 0.00931),
                         V4 = c(0.05, 0.02204),
                         V5 = c(0.05, 0.04965))
-  expect_equivalent(df, comp_df, tolerance = 0.0002)
-  expect_equivalent(df2, comp_df, tolerance = 0.0002)
+  rownames(comp_df) <- c("Canada", "US")
+  names(comp_df) <- names(df)
+  expect_equal(df, comp_df, tolerance = 0.0002)
+  expect_equal(df2, comp_df, tolerance = 0.0002)
   df3 <- out$move_mat[1,,1,] %>%
     as.data.frame()
   df4 <- out$move_mat[1,,2,] %>%
     as.data.frame()
   comp_df2 <- data.frame(V1 = c(0, 0, 0.05, 0.05, 0.05),
                          V2 = c(0, 0, 0.05, 0.05, 0.05))
-  expect_equivalent(df3, comp_df2, tolerance = 0.0001)
-  expect_equivalent(df4, comp_df2, tolerance = 0.0001)
+  rownames(comp_df2) <- rownames(df3)
+  names(comp_df2) <- names(df3)
+  expect_equal(df3, comp_df2, tolerance = 0.0001)
+  expect_equal(df4, comp_df2, tolerance = 0.0001)
 })

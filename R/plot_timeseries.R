@@ -146,14 +146,15 @@ plot_timeseries <- function(ps = NULL,
   }
   g <- g +
     geom_line(size = 1.5) +
-    scale_y_continuous(name = y_label) +
+    scale_y_continuous(name = y_label, expand = c(0, 0)) +
     theme(axis.text.x = element_text(angle = 90,
                                      hjust = 1,
                                      vjust = 0.5),
           legend.position = legend_position) +
     scale_color_manual(values = cols) +
     coord_cartesian(xlim = yr_lim) +
-    theme(legend.title = element_blank())
+    theme(legend.title = element_blank()) +
+    ggplot2::expand_limits(y = c(0, 11.5))
 
   if(ci_lines){
     if(by_country){

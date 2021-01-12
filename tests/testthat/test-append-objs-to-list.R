@@ -1,4 +1,3 @@
-context("Test the append_objs_to_list() function")
 
 lst <- list(a = 1,
             b = c(4, 5),

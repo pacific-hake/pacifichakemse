@@ -1,4 +1,3 @@
-context("Test the func_name() function")
 
 test_that("func_name() - Tests for argument errors", {
   expect_error(func_name(NULL))

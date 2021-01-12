@@ -11,6 +11,7 @@ Maintainer: Chris Grandin <chris.grandin@gmail.com>
 Description: Management strategy evaluation framework with a Spatial Operating Model.
 License: GPL (>=3)
 BugReports: https://github.com/pacific-hake/pacifichakemse/issues
+Config/testthat/edition: 3
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -50,9 +51,11 @@ LinkingTo:
 Remotes:
     jakelawlor/PNWColors,
     pbs-assess/gfutilities,
-    r4ss/r4ss
+    cgrandin/r4ss/archive/hake2020.zip
 ByteCompile: true
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+
+

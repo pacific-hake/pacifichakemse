@@ -1,4 +1,3 @@
-context("Test the conv_vec_to_mse_df() function")
 
 pq <- tibble::tribble(
   ~year, ~grp, ~val,
@@ -82,8 +81,13 @@ test_that("calc_quantiles() - Tests for outputs, complex grouped case", {
     2003, 5.70, 6.1, 6.6, 11.6, 15.6,
     2004, 6.9, 7.7, 8.7, 13.7, 17.7) %>%
     as.data.frame
+  names(df$`0.05`) <- NULL
+  names(df$`0.25`) <- NULL
+  names(df$`0.5`) <- NULL
+  names(df$`0.75`) <- NULL
+  names(df$`0.95`) <- NULL
   # Note you can't compare tibbles because of this: https://github.com/tidyverse/tibble/issues/287 and
   # this: https://github.com/tidyverse/dplyr/issues/2751
   # which is why df and correct_df are cast to data.frames before this call
-  expect_equivalent(df, correct_df, tolerance = 1)
+  expect_equal(df, correct_df)
 })

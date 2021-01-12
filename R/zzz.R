@@ -210,5 +210,9 @@ globalVariables(c(
 "qhigh",
 "aav",
 "Indicator",
-"can"
+"can",
+"sim_year",
+"grp",
+"om_output",
+"iter",
 ))

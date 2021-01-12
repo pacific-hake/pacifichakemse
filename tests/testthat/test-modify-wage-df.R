@@ -1,4 +1,3 @@
-context("Test the modify_wage_df() function")
 
 df <- tibble::tribble(
   ~Yr,  ~Fleet,  ~`0`,  ~`1`,

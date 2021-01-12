@@ -1,4 +1,3 @@
-context("Test the calc_term_quantiles() function")
 
 pq <- tibble::tribble(
   ~year, ~run, ~val,
@@ -62,7 +61,9 @@ test_that("calc_term_quantiles() - Tests for outputs, simple case", {
   # Note you can't compare tibbles because of this: https://github.com/tidyverse/tibble/issues/287 and
   # this: https://github.com/tidyverse/dplyr/issues/2751
   # which is why df and correct_df are cast to data.frames before this call
-  expect_equivalent(df, quant_out, tolerance = 1)
+  actual <- as.numeric(df[1,])
+  names(actual) <- names(quant_out)
+  expect_equal(actual, quant_out)
 })
 
 test_that("calc_term_quantiles() - Tests for outputs, no years given", {
@@ -75,7 +76,9 @@ test_that("calc_term_quantiles() - Tests for outputs, no years given", {
   mean_run2 <- mean((pq %>% filter(run == 2))$val)
   mean_run3 <- mean((pq %>% filter(run == 3))$val)
   quant_out <- quantile(c(mean_run1, mean_run2, mean_run3), probs = probs)
-  expect_equivalent(df, quant_out, tolerance = 1)
+  actual <- as.numeric(df[1,])
+  names(actual) <- names(quant_out)
+  expect_equal(actual, quant_out)
 })
 
 test_that("calc_term_quantiles() - Tests for outputs, years not in data frame given", {

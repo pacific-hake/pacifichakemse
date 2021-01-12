@@ -1,4 +1,3 @@
-context("Test the plot_tac_estimated_vs_realized() function")
 
 # ps <- NULL
 # ps$cols <- PNWColors::pnw_palette("Starfish", n = 4, type = "discrete")

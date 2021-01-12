@@ -1,4 +1,3 @@
-context("Test the get_yrs_mse_list() function")
 
 year <- 2001:2010
 lst <- list()
@@ -29,7 +28,7 @@ test_that("get_yrs_mse_list() - Tests for argument errors", {
 })
 
 test_that("get_yrs_mse_list() - Tests for correct output", {
-  expect_equivalent(get_yrs_mse_list(lst), 2001:2010)
+  expect_equal(get_yrs_mse_list(lst), 2001:2010)
 })
 
 test_that("get_yrs_mse_list() - Tests for different numbers of years between runs", {
