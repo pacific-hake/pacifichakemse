@@ -160,8 +160,7 @@ plot_timeseries <- function(ps = NULL,
     scale_color_manual(values = cols) +
     coord_cartesian(xlim = yr_lim,
                     ylim = ylim) +
-    theme(legend.title = element_blank()) #+
-    #expand_limits(y = ylim)
+    theme(legend.title = element_blank())
 
   if(ci_lines){
     if(by_country){
