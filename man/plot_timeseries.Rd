@@ -11,11 +11,12 @@ plot_timeseries(
   ci = c(0.05, 0.95),
   by_country = FALSE,
   yr_lim = c(NA_real_, NA_real_),
+  ylim = c(NA_real_, NA_real_),
   ci_lines = TRUE,
   show_ssb0 = TRUE,
   show_40_10 = TRUE,
   rev_scenarios = FALSE,
-  legend_position = c(0.08, 0.15),
+  legend_position = c(0.26, 0.85),
   ssb_line_txt_cex = 0.8,
   ssb_line_col = "black",
   ssb_line_type = 2,
@@ -36,6 +37,9 @@ Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 N is the number of scenarios. If FALSE the plot will be one panel comparing the scenarios.}
 
 \item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
+the limits of the data are used.}
+
+\item{ylim}{A vector of 2 for limits of the y-axis. If either are NA,
 the limits of the data are used.}
 
 \item{ci_lines}{If TRUE, use dashed lines for the CI envelope. If FALSE, use a shaded ribbon.}

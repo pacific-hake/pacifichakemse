@@ -9,6 +9,8 @@
 #' N is the number of scenarios. If FALSE the plot will be one panel comparing the scenarios.
 #' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
 #' the limits of the data are used.
+#' @param ylim A vector of 2 for limits of the y-axis. If either are NA,
+#' the limits of the data are used.
 #' @param ci_lines If TRUE, use dashed lines for the CI envelope. If FALSE, use a shaded ribbon.
 #' @param show_ssb0 If TRUE, show the initial biomass, SSB0 line.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
@@ -22,9 +24,7 @@
 #' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom ggplot2 annotation_custom ggplot_build
-#' @importFrom grid textGrob gpar
+#' @importFrom ggplot2 expand_limits sec_axis
 #' @export
 plot_timeseries <- function(ps = NULL,
                             type = "ssb",
@@ -32,18 +32,25 @@ plot_timeseries <- function(ps = NULL,
                             ci = c(0.05, 0.95),
                             by_country = FALSE,
                             yr_lim = c(NA_real_, NA_real_),
+                            ylim = c(NA_real_, NA_real_),
                             ci_lines = TRUE,
                             show_ssb0 = TRUE,
                             show_40_10 = TRUE,
                             rev_scenarios = FALSE,
-                            legend_position = c(0.08, 0.15),
+                            legend_position = c(0.26, 0.85),
                             ssb_line_txt_cex = 0.8,
                             ssb_line_col = "black",
                             ssb_line_type = 2,
                             ...){
 
   verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "aap","catch_quota"))
+  verify_argument(type, "character", 1, c("ssb",
+                                          "ssb_ssb0",
+                                          "catch",
+                                          "aas",
+                                          "aac",
+                                          "aap",
+                                          "catch_quota"))
   verify_argument(time, "character", 1, c("beg", "mid"))
   verify_argument(ci, "numeric", 2)
   verify_argument(by_country, "logical", 1)
@@ -146,15 +153,15 @@ plot_timeseries <- function(ps = NULL,
   }
   g <- g +
     geom_line(size = 1.5) +
-    scale_y_continuous(name = y_label, expand = c(0, 0)) +
     theme(axis.text.x = element_text(angle = 90,
                                      hjust = 1,
                                      vjust = 0.5),
           legend.position = legend_position) +
     scale_color_manual(values = cols) +
-    coord_cartesian(xlim = yr_lim) +
-    theme(legend.title = element_blank()) +
-    ggplot2::expand_limits(y = c(0, 11.5))
+    coord_cartesian(xlim = yr_lim,
+                    ylim = ylim) +
+    theme(legend.title = element_blank()) #+
+    #expand_limits(y = ylim)
 
   if(ci_lines){
     if(by_country){
@@ -172,41 +179,39 @@ plot_timeseries <- function(ps = NULL,
       scale_fill_manual(values = alpha(cols, alpha = 0.2))
   }
 
-  # Get actual ranges of the plot as shown (includes coord_cartesian effect, not just data limits)
-  gp <- ggplot_build(g)
-  x_range <- gp$layout$panel_params[[1]]$x.range
-  y_range <- gp$layout$panel_params[[1]]$y.range
-
+  # Breaks and labels for the SSB lines if they are to be shown. This is for the third axis on the right
+  b_brks <- NULL
+  b_lbls <- NULL
   if(show_ssb0 && type %in% c("ssb", "ssb_ssb0", "catch_quota")){
-    y_tx_ln_spacing <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
+
     if(type == "ssb"){
-      ssb0_lab <- bquote("SSB"[.(0)] == .(round(ssb0, 2)))
+      ssb0_lab <- as.expression(bquote(SSB[.(0)] == .(round(ssb0, 2))))
     }else{
-      ssb0_lab <- bquote("SSB"[.(0)])
+      ssb0_lab <- as.expression(bquote((SSB[.(0)])))
     }
+    b_brks <- round(ssb0, 2)
+    b_lbls <- ssb0_lab
+
     g <- g +
       geom_hline(aes(yintercept = ssb0),
                  color = ssb_line_col,
-                 linetype = ssb_line_type) +
-      annotation_custom(grob = textGrob(label = ssb0_lab,
-                                        hjust = 0,
-                                        gp = gpar(cex = ssb_line_txt_cex,
-                                                  col = ssb_line_col)),
-                        ymin = ssb0 + y_tx_ln_spacing,
-                        ymax = ssb0 + y_tx_ln_spacing,
-                        xmin = x_range[1] + 0.5,
-                        xmax = x_range[1] + 0.5)
+                 linetype = ssb_line_type)
   }
+
   if(show_40_10 && type %in% c("ssb", "ssb_ssb0")){
-    y_tx_ln_spacing_40 <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
-    y_tx_ln_spacing_10 <- ssb0 / (y_range[2] - ifelse(y_range[1] > 0, y_range[1], -y_range[1])) / 2
     if(type == "ssb"){
-      ssb40_lab <- bquote("SSB"[.(0.4)] == .(round(ssb0 * 0.4, 2)))
-      ssb10_lab <- bquote("SSB"[.(0.1)] == .(round(ssb0 * 0.1, 2)))
+      ssb40_lab <- as.expression(bquote(SSB[.(0.4)] == .(round(ssb0 * 0.4, 2))))
+      ssb10_lab <- as.expression(bquote(SSB[.(0.1)] == .(round(ssb0 * 0.1, 2))))
     }else{
-      ssb40_lab <- bquote("SSB"[.(0.4)])
-      ssb10_lab <- bquote("SSB"[.(0.1)])
+      ssb40_lab <- as.expression(bquote(SSB[.(0.4)]))
+      ssb10_lab <- as.expression(bquote(SSB[.(0.1)]))
     }
+    b_brks <- c(b_brks,
+                round(ssb0 * 0.4, 2),
+                round(ssb0 * 0.1, 2))
+    b_lbls <- c(b_lbls,
+                ssb40_lab,
+                ssb10_lab)
 
     g <- g +
       geom_hline(aes(yintercept = ssb0 * 0.4),
@@ -214,25 +219,20 @@ plot_timeseries <- function(ps = NULL,
                  linetype = ssb_line_type) +
       geom_hline(aes(yintercept = ssb0 * 0.1),
                  color = ssb_line_col,
-                 linetype = ssb_line_type) +
-      annotation_custom(grob = textGrob(label = ssb40_lab,
-                                        hjust = 0,
-                                        gp = gpar(cex = ssb_line_txt_cex,
-                                                  col = ssb_line_col)),
-                        ymin = ssb0 * 0.4 + y_tx_ln_spacing_40,
-                        ymax = ssb0 * 0.4 + y_tx_ln_spacing_40,
-                        xmin = x_range[1] + 0.5,
-                        xmax = x_range[1] + 0.5) +
-      annotation_custom(grob = textGrob(label = ssb10_lab,
-                                        hjust = 0,
-                                        gp = gpar(cex = ssb_line_txt_cex,
-                                                  col = ssb_line_col)),
-                        ymin = ssb0 * 0.1 + y_tx_ln_spacing_10,
-                        ymax = ssb0 * 0.1 + y_tx_ln_spacing_10,
-                        xmin = x_range[1] + 0.5,
-                        xmax = x_range[1] + 0.5)
-
+                 linetype = ssb_line_type)
   }
+
+  if(is.null(b_brks)){
+    g <- g +
+      scale_y_continuous(name = y_label,
+                         expand = c(0, 0))
+  }else{
+    g <- g +
+      scale_y_continuous(name = y_label,
+                         expand = c(0, 0),
+                         sec.axis = sec_axis(~ ., breaks = b_brks, labels = b_lbls))
+  }
+
   if(type == "catch_quota"){
     g <- g + coord_cartesian(ylim = c(.4, 1.1)) +
       theme(axis.text.x = element_text(angle = 90,
