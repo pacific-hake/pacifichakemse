@@ -24,6 +24,7 @@
 #' from the function [run_om()] (the operating model output)
 #' @importFrom dplyr filter summarise summarize group_by select %>% mutate
 #' @importFrom PNWColors pnw_palette
+#' @importFrom RColorBrewer brewer.pal
 #' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
 #' @importFrom ggplot2 facet_wrap element_text position_dodge geom_violin geom_boxplot
 #' @importFrom ggplot2 theme_classic coord_cartesian element_blank element_rect geom_hline
