@@ -520,7 +520,7 @@ load_ss_model_data <- function(s_min = 1,
 
   # Sample sizes for fishery and survey ---------------------------------------
   ss <- ss_model$agedbase %>%
-    transmute(yr = Yr, fleet = Fleet, ss = N) %>%
+    transmute(yr = Yr, fleet = Fleet, ss = Nsamp_adj) %>%
     distinct()
   ss_catch <- ss %>%
     filter(fleet == 1) %>%
