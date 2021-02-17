@@ -88,7 +88,7 @@ run_oms <- function(ss_model = NULL,
       if(!is.na(catch_in)){
         om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
       }
-      run_om(om, random_seed = random_seeds[run], verbose = FALSE)
+      run_om(om, random_seed = random_seeds[run], verbose = FALSE, ...)
     }, ...)
     # End run loop ------------------------------------------------------------
     attr(lst, "plotname") <- plot_names[fn_ind]

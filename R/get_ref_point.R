@@ -25,6 +25,7 @@ get_ref_point <- function(pars,
                           v_real = NA,
                           space = 2,
                           catch_floor = NULL,
+                          upper_ref = 0.4,
                           ...){
 
   r_0 <- exp(pars$log_r_init)
@@ -57,7 +58,7 @@ get_ref_point <- function(pars,
   ssb_0 <- sum(ssb_age)
 
   #ssb_pr <- ssb_0 / r_0
-  #sb_eq <- 4 * h * r_0 * 0.4 * ssb_0 - ssb_0 * (1 - h) / (5 * h - 1)
+  #sb_eq <- 4 * h * r_0 * upper_ref * ssb_0 - ssb_0 * (1 - h) / (5 * h - 1)
 
   z_age <- m_age + f_in * f_sel
   n_1 <- NULL
@@ -82,7 +83,7 @@ get_ref_point <- function(pars,
     #adjust plus group sum of geometric series as a/(1-r)
     n_1[df$n_age] <- n_1[df$n_age] / (1 - z_age[df$n_age])
     ssb_eq <- sum(mat_sel * n_1) * 0.5
-    (ssb_eq / ssb_0 - 0.4) ^ 2
+    (ssb_eq / ssb_0 - upper_ref) ^ 2
   }
   f_40 <- optim(par = 0.1,
                 fn = get_f,
@@ -110,14 +111,14 @@ get_ref_point <- function(pars,
     # TODO: fix later (add a very low catch)
     c_new <- 0.05 * v_real
   }
-  if((ssb_y / ssb_0) > 0.4){
+  if((ssb_y / ssb_0) > upper_ref){
     c_new <- f_x * v
   }
 
-  if(((ssb_y / ssb_0) <= 0.4) & ((ssb_y / ssb_0) >= 0.1)){
+  if(((ssb_y / ssb_0) <= upper_ref) & ((ssb_y / ssb_0) >= 0.1)){
     c_new <- f_x * v *((ssb_y - 0.1 * ssb_0) *
-                         ((0.4 * ssb_0 / ssb_y) /
-                            (0.4 * ssb_0 - 0.1 * ssb_0)))
+                         ((upper_ref * ssb_0 / ssb_y) /
+                            (upper_ref * ssb_0 - 0.1 * ssb_0)))
   }
 
   # Adjust TAC by JMC/Utilization
