@@ -19,7 +19,7 @@ create_plot_objects <- function(scenarios = c("biasadjust",
                                 overwrite_rds = TRUE,
                                 ...){
 
-  ps <- future_map2(scenarios, om_only, function(scen = .x, om_only = .y, ...){
+  ps <- future_map2(scenarios, om_only, function(scen = .x, om_only = .y, overwrite_rds = overwrite_rds, ...){
     tic()
     lst <- load_mse_plot_data(scenario = scen, overwrite_rds = overwrite_rds, om_only = om_only, ...)
     if(overwrite_rds){
@@ -29,7 +29,7 @@ create_plot_objects <- function(scenarios = c("biasadjust",
     }
     toc()
     lst
-  }, ...)
+  }, overwrite_rds, ...)
   names(ps) <- scenarios
 
   invisible(ps)
