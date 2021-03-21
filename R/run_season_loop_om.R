@@ -22,6 +22,7 @@ run_season_loop_om <- function(om,
                                yr_ind,
                                m_season,
                                attain = c(1, 1),
+                               zero_catch_val = 2000,
                                ages_no_move = c(0, 1),
                                pope_mul = 0.5,
                                verbose = TRUE,
@@ -103,7 +104,7 @@ run_season_loop_om <- function(om,
 
       # Calculate catch distribution ------------------------------------------
       if(attain[space] == 0){
-        e_tmp <- ifelse(yr > om$m_yr, 2000, catch_space * om$catch_props_space_season[space, season] %>% pull)
+        e_tmp <- ifelse(yr > om$m_yr, zero_catch_val, catch_space * om$catch_props_space_season[space, season] %>% pull)
       }else{
         e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
       }
