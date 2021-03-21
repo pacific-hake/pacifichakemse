@@ -15,6 +15,7 @@ plot_timeseries(
   ci_lines = TRUE,
   show_ssb0 = TRUE,
   show_40_10 = TRUE,
+  show_25 = FALSE,
   rev_scenarios = FALSE,
   legend_position = c(0.26, 0.85),
   ssb_line_txt_cex = 0.8,

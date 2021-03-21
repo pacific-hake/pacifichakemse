@@ -26,6 +26,7 @@ get_ref_point <- function(pars,
                           space = 2,
                           catch_floor = NULL,
                           upper_ref = 0.4,
+                          f_ref = 0.4,
                           ...){
 
   r_0 <- exp(pars$log_r_init)
@@ -72,7 +73,7 @@ get_ref_point <- function(pars,
   ssb_eq <- sum(mat_sel * n_1) * 0.5
   spr <- ssb_eq / ssb_0
 
-  # Calculate the F40 reference point
+  # Calculate the F40 (actually f_ref) reference point
   get_f <- function(par){
     z_age <- m_age + par[1] * f_sel
     n_1 <- NULL
@@ -80,12 +81,12 @@ get_ref_point <- function(pars,
     for(a in 1:(df$n_age - 1)){
       n_1[a + 1] <- n_1[a] * exp(-z_age[a])
     }
-    #adjust plus group sum of geometric series as a/(1-r)
+    # Adjust plus group sum of geometric series as a/(1-r)
     n_1[df$n_age] <- n_1[df$n_age] / (1 - z_age[df$n_age])
     ssb_eq <- sum(mat_sel * n_1) * 0.5
-    (ssb_eq / ssb_0 - upper_ref) ^ 2
+    (ssb_eq / ssb_0 - f_ref) ^ 2
   }
-  f_40 <- optim(par = 0.1,
+  f_xx <- optim(par = 0.1,
                 fn = get_f,
                 method = "Brent",
                 lower = 0,
@@ -102,7 +103,7 @@ get_ref_point <- function(pars,
 
   ssb_new <- sum(mat_sel * n_eq) * 0.5
   spr_new <- ssb_new / ssb_0
-  f_new <- f_40$par
+  f_new <- f_xx$par
   v <- sum(n_end * c_w * f_sel)
   # Convert to harvest rate
   f_x <- 1 - exp(-f_new)
@@ -114,11 +115,12 @@ get_ref_point <- function(pars,
   if((ssb_y / ssb_0) > upper_ref){
     c_new <- f_x * v
   }
-
   if(((ssb_y / ssb_0) <= upper_ref) & ((ssb_y / ssb_0) >= 0.1)){
-    c_new <- f_x * v *((ssb_y - 0.1 * ssb_0) *
-                         ((upper_ref * ssb_0 / ssb_y) /
-                            (upper_ref * ssb_0 - 0.1 * ssb_0)))
+    # (B_t - B_10) / (B_40 - B_10)
+    # c_new <- f_x * v *((ssb_y - 0.1 * ssb_0) *
+    #                      ((upper_ref * ssb_0 / ssb_y) /
+    #                         (upper_ref * ssb_0 - 0.1 * ssb_0)))
+    c_new <- f_x * v * ((ssb_y - 0.1 * ssb_0) / ((upper_ref * ssb_0 - 0.1 * ssb_0)))
   }
 
   # Adjust TAC by JMC/Utilization
@@ -132,5 +134,5 @@ get_ref_point <- function(pars,
   # Never go over the JTC recommendation
   c_exp <- ifelse(c_exp > c_new, c_new, c_exp)
 
-  list(c_new = c_exp, f_new = f_40$par)
+  list(c_new = c_exp, f_new = f_new)
 }
