@@ -58,6 +58,7 @@ run_mse_scenario <- function(om = NULL,
   # Save Estimation Model outputs in lists. iter is used to keep track of the
   # positions for these
   em_output <- list(ssb_save = vector(mode = "list", length = om$n_future_yrs),
+                    ssb0_save = vector(),
                     r_save = vector(mode = "list", length = om$n_future_yrs),
                     f40_save = vector(),
                     catch_save = vector(mode = "list", length = om$n_future_yrs),
@@ -199,6 +200,7 @@ run_mse_scenario <- function(om = NULL,
     # Save EM outputs ---------------------------------------------------------
     if(yr >= om$m_yr + 1){
       em_output$ssb_save[[em_iter]] <<- report$SSB
+      em_output$ssb0_save[em_iter] <<- report$SSBzero
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
