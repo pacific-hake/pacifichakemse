@@ -9,29 +9,34 @@ init_agebased_model <- function(om = NULL){
 
   verify_argument(om, "list")
 
-  # Natural mortality - males = females
+  # Natural mortality - males = females ---------------------------------------
   om$m_sel <- om$m_sel
   om$m0 <- exp(om$parameters$log_m_init)
   om$m_age <- om$m0 * om$m_sel
   om$m_cumu_age <- c(0, cumsum(om$m_age[1:(om$n_age - 1)]))
-  # Recruitment
+
+  # Recruitment ---------------------------------------------------------------
   om$r0 <- exp(om$parameters$log_r_init)
   om$rdev_sd <- exp(om$rdev_sd)
   om$r0_space <- om$r0 * om$move_init
-  # Survey selectivity - constant over time
 
+  # Survey selectivity - constant over time -----------------------------------
   om$surv_sel <- get_select(om$ages,
                              om$parameters$p_sel_surv,
                              om$s_min_survey,
                              om$s_max_survey)
 
-  om$surv_sd <- exp(om$parameters$log_sd_surv) # Survey error
-  # Catchability -  constant over time
+  # Survey error --------------------------------------------------------------
+  om$surv_sd <- exp(om$parameters$log_sd_surv)
+
+  # Catchability -  constant over time ----------------------------------------
   om$q <- exp(om$log_q)
-  # Maturity and fecundity
+
+  # Maturity and fecundity ----------------------------------------------------
   om$mat_sel <- om$mat_sel
   om$h <- exp(om$parameters$log_h)
-  # Numbers-at-age - calculate n0 based on r0
+
+  # Numbers-at-age - calculate n0 based on r0 ---------------------------------
   # Extrapolate the N0 out to three times the max age for sum for max age
   ages_3 <- min(om$ages):(om$n_age * 3)
   n_age_3 <- length(ages_3)
@@ -44,15 +49,16 @@ init_agebased_model <- function(om = NULL){
   om$n0[1:(om$n_age - 1)] <- n0_tmp[1:(om$n_age - 1)]
   om$n0[om$n_age] <- sum(n0_tmp[om$n_age:n_age_3])
 
-  # Weight-at-age
+  # Weight-at-age -------------------------------------------------------------
   om$wage_ssb <- get_age_dat(om$wage_ssb_df, om$s_yr)
   om$wage_survey <- get_age_dat(om$wage_survey_df, om$s_yr)
-  # Initial biomass
+
+  # Initial biomass -----------------------------------------------------------
   om$ssb_0 <- map_dbl(seq_len(om$n_space), ~{
     sum(om$n0 * om$move_init[.x] * om$wage_ssb) * 0.5
   }) %>% set_names(paste0(rep("space", each = om$n_space), seq_len(om$n_space)))
 
-  # Set m-at-age for year 1, space 1, season 1
+  # Set m-at-age for year 1, space 1, season 1 --------------------------------
   om$z_save[, 1, 1, 1] <- om$m_age
   # Assumed no fishing before data started
   # An alternate way of doing it, where the year column is used
@@ -69,12 +75,12 @@ init_agebased_model <- function(om = NULL){
   om$n_init_dev <- om$parameters$init_n
   om$age_1_ind <- which(om$ages == 1)
 
-  # Initial numbers-at-age for all older than age 0
+  # Initial numbers-at-age for all older than age 0 ---------------------------
   om$n_init[om$age_1_ind:(om$n_age - 1)] <- om$r0 *
     exp(-om$m_cumu_age[om$age_1_ind:(om$n_age - 1)]) *
     exp(-0.5 * om$rdev_sd ^ 2 * 0 + om$n_init_dev[1:(om$n_age - 2),]$value)
 
-  # Plus group (ignore recruitment devs in first yrs )
+  # Plus group (ignore recruitment devs in first yrs ) ------------------------
   om$n_init[om$n_age] <- om$r0 *
     exp(-(om$m_age[om$n_age] * om$ages[om$n_age])) / (1 - exp(-om$m_age[om$n_age])) *
     exp(-0.5 * om$rdev_sd ^ 2 * 0 + om$n_init_dev[om$n_age - 1,]$value)
@@ -93,17 +99,20 @@ init_agebased_model <- function(om = NULL){
                                        om$surv_sel * om$q * om$wage_survey)
   }
 
-  # Calculate initial year-1 spawning biomass by numbers-at-age * weight-at-age (ssb) and
-  # numbers-at-age * selectivity (ssb_all)
+  # Calculate initial year-1 spawning biomass ---------------------------------
+  #  by numbers-at-age * weight-at-age (ssb) and
+  #  numbers-at-age * selectivity (ssb_all)
   mat_sel <- om$mat_sel %>% select(-Yr)
   yr_ind <- 1
   wage <- get_wa_dfs(om, om$yrs[yr_ind])
   n_save_age <- om$n_save_age[, yr_ind, , 1] %>% as.data.frame() %>% map(~{.x})
-  # Calculate initial SSB for each space
+
+  # Calculate initial SSB for each space --------------------------------------
   om$init_ssb <- map_dbl(n_save_age, function(space_num_at_age = .x){
     sum(space_num_at_age * wage$ssb, na.rm = TRUE) * 0.5
   })
-  # Calculate SSB with selectivity applied for the initial year in season 1
+
+  # Calculate SSB with selectivity applied for the initial year in season 1 ---
   om$init_ssb_all <- map_dbl(n_save_age, function(space_num_at_age = .x){
     sum(space_num_at_age * mat_sel, na.rm = TRUE) * 0.5
   })
