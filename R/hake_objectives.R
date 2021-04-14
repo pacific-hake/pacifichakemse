@@ -184,7 +184,7 @@ hake_objectives <- function(sim_data = NULL,
                                              "f",
                                              probs = quants)
 
-  # catch_plot ----------------------------------------------------------------
+  # catch_for_aav -------------------------------------------------------------
   out$catch_for_aav <- map2(sim_data, seq_along(sim_data), ~{
     apply(.x$catch_save_age, MARGIN = 2, FUN = sum) %>%
       as_tibble() %>%
@@ -197,15 +197,26 @@ hake_objectives <- function(sim_data = NULL,
 
   # catch_plot ----------------------------------------------------------------
   out$catch_plot <- map2(sim_data, seq_along(sim_data), ~{
-    .x$catch %>%
-      as_tibble() %>%
-      rename(catch = 1) %>%
-      mutate(year = .x$yrs) %>%
+    .x$catch_obs %>%
+      rename(catch = value,
+             year = yr) %>%
       mutate(run = .y) %>%
       select(year, catch, run)
   }) %>%
     map_df(~{.x}) %>%
     as_tibble()
+  # out$catch_plot <- map2(sim_data, seq_along(sim_data), ~{
+  #   .x$catch %>%
+  #     as_tibble() %>%
+  #     rename(catch = 1) %>%
+  #     mutate(year = .x$yrs) %>%
+  #     mutate(run = .y) %>%
+  #     select(year, catch, run)
+  # }) %>%
+  #   map_df(~{.x}) %>%
+  #   as_tibble()
+  #
+
 
   # catch_quant ---------------------------------------------------------------
   out$catch_quant <- calc_quantiles_by_group(out$catch_plot,
