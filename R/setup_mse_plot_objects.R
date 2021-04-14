@@ -16,7 +16,7 @@
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
-#' (6) A vector of plot names, one for each scenario, (7) lst_indicators which is a list, one for
+#' (6) A vector of plot names, one for each scenario, (7) merged_run_data which is a list, one for
 #' each scenario, and each containing a list of length 3, which is the output of [merge_run_data()],
 #' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`,
 #' (9) A list of length = number of scenarios, containing three-column [data.frame]s with `run`, `SE.SSB`,
@@ -153,7 +153,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     em_outputs <- tmp_em
   }
 
-  lst_indicators <- map(om_output, function(om = .x, ...){
+  merged_run_data <- map(om_output, function(om = .x, ...){
     tmp <- merge_run_data(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
       mutate(scenario = names(om))
@@ -162,13 +162,13 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp
   }, ...)
 
-  # lst_indicators (merge_run_data() output) ---------------------------------
+  # merged_run_data (merge_run_data() output) ---------------------------------
   cols <- brewer.pal(length(plotnames), "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
   #cols <- pnw_palette("Starfish", n = length(plotnames), type = "continuous")
-  # To view structure and names of lst_indicators: str(lst_indicators, 1) and str(lst_indicators[[1]], 1)
-  # To see objectives probability table for the first scenario: lst_indicators[[1]]$info
-  lst_indicators <- map(om_output, function(om = .x, ...){
+  # To view structure and names of merged_run_data: str(merged_run_data, 1) and str(merged_run_data[[1]], 1)
+  # To see objectives probability table for the first scenario: merged_run_data[[1]]$info
+  merged_run_data <- map(om_output, function(om = .x, ...){
     tmp <- merge_run_data(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
       mutate(scenario = names(om))
@@ -193,14 +193,14 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   mse_quants <- NULL
 
   # Indicator quantile objects ------------------------------------------------
-  mse_quants$info_quant <- merge_dfs_from_scenarios(lst_indicators, "info_quant")
+  mse_quants$info_quant <- merge_dfs_from_scenarios(merged_run_data, "info_quant")
   indicators <- unique(mse_quants$info_quant$indicator) %>% as.character
   cutoff_ind <- grep("ong term", indicators)
 
   # df_ssb_catch_indicators_quant ---------------------------------------------
   mse_quants$ssb_catch_indicators_quant <- mse_quants$info_quant %>%
     filter(indicator %in% indicators[1:cutoff_ind]) %>%
-    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+    mutate(scenario = factor(scenario, levels = names(merged_run_data)[porder]))
 
   # df_country_season_indicators_quant ----------------------------------------
   mse_quants$country_season_indicators_quant <- mse_quants$info_quant %>%
@@ -212,19 +212,19 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                            ifelse(season == "sum",
                                   "July-Sept",
                                   "Oct-Dec"))) %>%
-    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+    mutate(scenario = factor(scenario, levels = names(merged_run_data)[porder]))
   # df_all_indicators ---------------------------------------------------------
-  df_all_indicators <- map2(lst_indicators, 1:length(lst_indicators), ~{
+  df_all_indicators <- map2(merged_run_data, 1:length(merged_run_data), ~{
     .x$info %>%
-      mutate(scenario = names(lst_indicators)[.y])
+      mutate(scenario = names(merged_run_data)[.y])
   }) %>%
     map_df(~{.x}) %>%
-    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+    mutate(scenario = factor(scenario, levels = names(merged_run_data)[porder]))
 
   # df_ssb_catch_indicators ---------------------------------------------------
   df_ssb_catch_indicators <- df_all_indicators %>%
     filter(indicator %in% indicators[1:cutoff_ind]) %>%
-    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+    mutate(scenario = factor(scenario, levels = names(merged_run_data)[porder]))
 
   # df_country_season_indicators ----------------------------------------------
   df_country_season_indicators <- df_all_indicators %>%
@@ -236,15 +236,15 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                            ifelse(season == "sum",
                                   "July-Sept",
                                   "Oct-Dec"))) %>%
-    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+    mutate(scenario = factor(scenario, levels = names(merged_run_data)[porder]))
 
   # df_violin_indicators ------------------------------------------------------
-  df_violin_indicators <-  map2(lst_indicators, 1:length(lst_indicators), ~{
+  df_violin_indicators <-  map2(merged_run_data, 1:length(merged_run_data), ~{
     .x$vtac_seas %>%
-      mutate(scenario = names(lst_indicators)[.y])
+      mutate(scenario = names(merged_run_data)[.y])
   }) %>%
     map_df(~{.x}) %>%
-    mutate(scenario = factor(scenario, levels = names(lst_indicators)[porder]))
+    mutate(scenario = factor(scenario, levels = names(merged_run_data)[porder]))
   violin_names <- names(df_violin_indicators)
   violin_last_word <- gsub("v_tac_", "", violin_names)
   season_inds <- grep("sp|su|fa", violin_last_word)
@@ -257,7 +257,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   names(df_violin_indicators) <- violin_names
 
   # df_violin -----------------------------------------------------------------
-  df_violin <- map2(lst_indicators, seq_along(lst_indicators), ~{
+  df_violin <- map2(merged_run_data, seq_along(merged_run_data), ~{
     tmp <- list(yrs_quota_met = .x$yrs_quota_met, # years between 0.1 and 0.4
                 ssb_10 = .x$ssb_10,
                 ssb_40 = .x$ssb_40,
@@ -271,9 +271,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   })
 
   # AAP (Average age in population) quantile objects --------------------------
-  mse_quants$aap_all_quant <- merge_dfs_from_scenarios(lst_indicators, "aap_tot_quant")
-  mse_quants$aap_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "aap_ca_quant")
-  mse_quants$aap_us_quant <- merge_dfs_from_scenarios(lst_indicators, "aap_us_quant")
+  mse_quants$aap_all_quant <- merge_dfs_from_scenarios(merged_run_data, "aap_tot_quant")
+  mse_quants$aap_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "aap_ca_quant")
+  mse_quants$aap_us_quant <- merge_dfs_from_scenarios(merged_run_data, "aap_us_quant")
   aap_ca_tmp <- mse_quants$aap_ca_quant %>%
     mutate(country = "Canada")
   aap_us_tmp <- mse_quants$aap_us_quant %>%
@@ -282,9 +282,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(aap_us_tmp)
 
   # AMC quantile objects ------------------------------------------------------
-  mse_quants$amc_all_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_tot_quant")
-  mse_quants$amc_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_ca_quant")
-  mse_quants$amc_us_quant <- merge_dfs_from_scenarios(lst_indicators, "amc_us_quant")
+  mse_quants$amc_all_quant <- merge_dfs_from_scenarios(merged_run_data, "amc_tot_quant")
+  mse_quants$amc_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "amc_ca_quant")
+  mse_quants$amc_us_quant <- merge_dfs_from_scenarios(merged_run_data, "amc_us_quant")
   amc_ca_tmp <- mse_quants$amc_ca_quant %>%
     mutate(country = "Canada")
   amc_us_tmp <- mse_quants$amc_us_quant %>%
@@ -293,9 +293,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(amc_us_tmp)
 
   # AMS quantile objects ------------------------------------------------------
-  mse_quants$ams_all_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_tot_quant")
-  mse_quants$ams_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_ca_quant")
-  mse_quants$ams_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ams_us_quant")
+  mse_quants$ams_all_quant <- merge_dfs_from_scenarios(merged_run_data, "ams_tot_quant")
+  mse_quants$ams_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "ams_ca_quant")
+  mse_quants$ams_us_quant <- merge_dfs_from_scenarios(merged_run_data, "ams_us_quant")
   ams_ca_tmp <- mse_quants$ams_ca_quant %>%
     mutate(country = "Canada")
   ams_us_tmp <- mse_quants$ams_us_quant %>%
@@ -304,8 +304,8 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(ams_us_tmp)
 
   # F0 quantile objects -------------------------------------------------------
-  mse_quants$f0_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "f0_ca_quant")
-  mse_quants$f0_us_quant <- merge_dfs_from_scenarios(lst_indicators, "f0_us_quant")
+  mse_quants$f0_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "f0_ca_quant")
+  mse_quants$f0_us_quant <- merge_dfs_from_scenarios(merged_run_data, "f0_us_quant")
   f0_ca_tmp <- mse_quants$f0_ca_quant %>%
     mutate(country = "Canada")
   f0_us_tmp <- mse_quants$f0_us_quant %>%
@@ -314,20 +314,20 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(f0_us_tmp)
 
   # Catch quota quantile objects ----------------------------------------------
-  mse_quants$catch_quota_quant <- merge_dfs_from_scenarios(lst_indicators, "catch_quota_quant")
-  mse_quants$quota_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_quant")
-  mse_quants$quota_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_ca_quant")
-  mse_quants$quota_us_quant <- merge_dfs_from_scenarios(lst_indicators, "quota_us_quant")
+  mse_quants$catch_quota_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_quota_quant")
+  mse_quants$quota_quant <- merge_dfs_from_scenarios(merged_run_data, "quota_quant")
+  mse_quants$quota_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "quota_ca_quant")
+  mse_quants$quota_us_quant <- merge_dfs_from_scenarios(merged_run_data, "quota_us_quant")
   quota_ca_tmp <- mse_quants$quota_ca_quant %>%
     mutate(country = "Canada")
   quota_us_tmp <- mse_quants$quota_us_quant %>%
     mutate(country = "US")
 
   # SSB quantile objects ------------------------------------------------------
-  mse_quants$ssb_all_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_all_quant")
-  mse_quants$ssb_ssb0_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ssb0_quant")
-  mse_quants$ssb_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_ca_quant")
-  mse_quants$ssb_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_us_quant")
+  mse_quants$ssb_all_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_all_quant")
+  mse_quants$ssb_ssb0_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_ssb0_quant")
+  mse_quants$ssb_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_ca_quant")
+  mse_quants$ssb_us_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_us_quant")
   ssb_ca_tmp <- mse_quants$ssb_ca_quant %>%
     mutate(country = "Canada")
   ssb_us_tmp <- mse_quants$ssb_us_quant %>%
@@ -336,9 +336,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(ssb_us_tmp)
 
   # SSB mid-year quantile objects ---------------------------------------------
-  mse_quants$ssb_mid_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_quant")
-  mse_quants$ssb_mid_ca_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_ca_quant")
-  mse_quants$ssb_mid_us_quant <- merge_dfs_from_scenarios(lst_indicators, "ssb_mid_us_quant")
+  mse_quants$ssb_mid_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_mid_quant")
+  mse_quants$ssb_mid_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_mid_ca_quant")
+  mse_quants$ssb_mid_us_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_mid_us_quant")
   ssb_mid_ca_tmp <- mse_quants$ssb_mid_ca_quant %>%
     mutate(country = "Canada")
   ssb_mid_us_tmp <- mse_quants$ssb_mid_us_quant %>%
@@ -347,8 +347,8 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(ssb_mid_us_tmp)
 
   # catch_quant ---------------------------------------------------------------
-  mse_quants$catch_quant <- merge_dfs_from_scenarios(lst_indicators, "catch_quant")
-  mse_quants$catch_obs_quant <- merge_dfs_from_scenarios(lst_indicators, "catch_obs_quant")
+  mse_quants$catch_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_quant")
+  mse_quants$catch_obs_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_obs_quant")
 
   # Standard error between the OM and EM (final year) -------------------------
   standard_error_ssb <- NULL
@@ -371,7 +371,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
        cols = cols,
        plotnames = plotnames,
        em_outputs = em_outputs,
-       lst_indicators = lst_indicators,
+       merged_run_data = merged_run_data,
        mse_quants = mse_quants,
        standard_error_ssb = standard_error_ssb,
        sim_data = om_output)

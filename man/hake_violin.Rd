@@ -4,14 +4,14 @@
 \alias{hake_violin}
 \title{Violin plot of the MSE results}
 \usage{
-hake_violin(mse_output, om_output, lst_indicators, move = NA)
+hake_violin(mse_output, om_output, merged_run_data, move = NA)
 }
 \arguments{
 \item{mse_output}{MSE output of a single scenario in the format enforced in \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
 \item{om_output}{OM output of a single scenario in the format enforced in \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}}
 
-\item{lst_indicators}{Objectives output of a single scenario in the format enforced in \code{\link[=merge_run_data]{merge_run_data()}}}
+\item{merged_run_data}{Objectives output of a single scenario in the format enforced in \code{\link[=merge_run_data]{merge_run_data()}}}
 
 \item{move}{Logical. If TRUE, stock movement is included}
 }

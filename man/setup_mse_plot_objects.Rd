@@ -33,7 +33,7 @@ A list of length 10: The items are (1) A \link{data.frame} containing the SSB/AA
 indicators, (2) A \link{data.frame} containing the country and season indicators, (3) A \link{data.frame}
 containing the violin indicators (data in format for violin plots), (4) A \link{data.frame} of data
 to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
-(6) A vector of plot names, one for each scenario, (7) lst_indicators which is a list, one for
+(6) A vector of plot names, one for each scenario, (7) merged_run_data which is a list, one for
 each scenario, and each containing a list of length 3, which is the output of \code{\link[=merge_run_data]{merge_run_data()}},
 (8) A list of data frames, which are the scenario-aggregated data frames from \code{mse_out_data[[N]][[3]]},
 (9) A list of length = number of scenarios, containing three-column \link{data.frame}s with \code{run}, \code{SE.SSB},

@@ -2,7 +2,7 @@
 #'
 #' @param mse_output MSE output of a single scenario in the format enforced in [setup_mse_plot_objects()]
 #' @param om_output OM output of a single scenario in the format enforced in [setup_mse_plot_objects()]
-#' @param lst_indicators Objectives output of a single scenario in the format enforced in [merge_run_data()]
+#' @param merged_run_data Objectives output of a single scenario in the format enforced in [merge_run_data()]
 #' @param move Logical. If TRUE, stock movement is included
 #'
 #' @return A [data.frame] with columns SSB, SSB.10, SSB.40, Catch.short,
@@ -10,7 +10,7 @@
 #' @export
 hake_violin <- function(mse_output,
                         om_output,
-                        lst_indicators,
+                        merged_run_data,
                         move = NA){
 
   mse_output_run1 <- mse_output[[1]][[1]]
@@ -43,7 +43,7 @@ hake_violin <- function(mse_output,
       map_df(~{.x}) %>%
       as_tibble()
   }else{
-    ssb_plot <- lst_indicators$ssb_plot
+    ssb_plot <- merged_run_data$ssb_plot
   }
 
   if(is.na(move)){
@@ -59,13 +59,13 @@ hake_violin <- function(mse_output,
     #   as_tibble()
     # Catch.plot <- data.frame(Catch = ls.MSE[[idx]]$Catch, year = yr, run = paste('run',1, sep=''))
   }else{
-    catch_plot <- lst_indicators$catch_plot
-    quota_tot <- lst_indicators$quota_tot
-    quota_frac <- lst_indicators$quota_frac
-    quota_ca_tot <- lst_indicators$quota_ca_tot
-    quota_us_tot <- lst_indicators$quota_us_tot
+    catch_plot <- merged_run_data$catch_plot
+    quota_tot <- merged_run_data$quota_tot
+    quota_frac <- merged_run_data$quota_frac
+    quota_ca_tot <- merged_run_data$quota_ca_tot
+    quota_us_tot <- merged_run_data$quota_us_tot
   }
-  aav_plot <- lst_indicators$aav_plot
+  aav_plot <- merged_run_data$aav_plot
 
   ## Probability of S < S10
   SSB.future <- SSB.plot[SSB.plot$year > 2018,]
