@@ -10,14 +10,14 @@
 #' `results_dir` directory. All outputs will be ordered in this way
 #' @param quants Quantiles to use
 #' @param om_only If TRUE, this was an OM-only MSE run. If FALSE, the full MSE was run including estimation model
-#' @param ... Arguments to be passed to [hake_objectives()] and [calc_standard_error_ssb()]
+#' @param ... Arguments to be passed to [merge_run_data()] and [calc_standard_error_ssb()]
 #'
 #' @return A list of length 10: The items are (1) A [data.frame] containing the SSB/AAV/Catch
 #' indicators, (2) A [data.frame] containing the country and season indicators, (3) A [data.frame]
 #' containing the violin indicators (data in format for violin plots), (4) A [data.frame] of data
 #' to be used to create violin plots, (5) A vector of colors, one for each file loaded (scenario),
 #' (6) A vector of plot names, one for each scenario, (7) lst_indicators which is a list, one for
-#' each scenario, and each containing a list of length 3, which is the output of [hake_objectives()],
+#' each scenario, and each containing a list of length 3, which is the output of [merge_run_data()],
 #' (8) A list of data frames, which are the scenario-aggregated data frames from `mse_out_data[[N]][[3]]`,
 #' (9) A list of length = number of scenarios, containing three-column [data.frame]s with `run`, `SE.SSB`,
 #' and `year` as columns/ SE.SSB is the standard error between the OM and EM, (10) `sim_data` - output
@@ -154,7 +154,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   }
 
   lst_indicators <- map(om_output, function(om = .x, ...){
-    tmp <- hake_objectives(om, quants = quants, ...)
+    tmp <- merge_run_data(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
       mutate(scenario = names(om))
     tmp$vtac_seas <- tmp$vtac_seas %>%
@@ -162,14 +162,14 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     tmp
   }, ...)
 
-  # lst_indicators (hake_objectives() output) ---------------------------------
+  # lst_indicators (merge_run_data() output) ---------------------------------
   cols <- brewer.pal(length(plotnames), "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
   #cols <- pnw_palette("Starfish", n = length(plotnames), type = "continuous")
   # To view structure and names of lst_indicators: str(lst_indicators, 1) and str(lst_indicators[[1]], 1)
   # To see objectives probability table for the first scenario: lst_indicators[[1]]$info
   lst_indicators <- map(om_output, function(om = .x, ...){
-    tmp <- hake_objectives(om, quants = quants, ...)
+    tmp <- merge_run_data(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
       mutate(scenario = names(om))
     tmp$vtac_seas <- tmp$vtac_seas %>%
@@ -348,6 +348,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
 
   # catch_quant ---------------------------------------------------------------
   mse_quants$catch_quant <- merge_dfs_from_scenarios(lst_indicators, "catch_quant")
+  mse_quants$catch_obs_quant <- merge_dfs_from_scenarios(lst_indicators, "catch_obs_quant")
 
   # Standard error between the OM and EM (final year) -------------------------
   standard_error_ssb <- NULL

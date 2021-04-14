@@ -24,7 +24,7 @@ in the project.}
 
 \item{quants}{Quantile values to use}
 
-\item{...}{Arguments to send to \code{\link[=hake_objectives]{hake_objectives()}}}
+\item{...}{Arguments to send to \code{\link[=merge_run_data]{merge_run_data()}}}
 }
 \value{
 The object which was returned by \code{\link[=setup_mse_plot_objects]{setup_mse_plot_objects()}}

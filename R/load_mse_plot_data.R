@@ -11,7 +11,7 @@
 #' @param main_results_dir The name of the results directory which holds the mse output subdirectories
 #' in the project.
 #' @param quants Quantile values to use
-#' @param ... Arguments to send to [hake_objectives()]
+#' @param ... Arguments to send to [merge_run_data()]
 #'
 #' @return The object which was returned by [setup_mse_plot_objects()]
 #' @export

@@ -2,7 +2,7 @@
 #'
 #' @param mse_output MSE output of a single scenario in the format enforced in [setup_mse_plot_objects()]
 #' @param om_output OM output of a single scenario in the format enforced in [setup_mse_plot_objects()]
-#' @param lst_indicators Objectives output of a single scenario in the format enforced in [hake_objectives()]
+#' @param lst_indicators Objectives output of a single scenario in the format enforced in [merge_run_data()]
 #' @param move Logical. If TRUE, stock movement is included
 #'
 #' @return A [data.frame] with columns SSB, SSB.10, SSB.40, Catch.short,
