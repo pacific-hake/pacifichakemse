@@ -12,6 +12,9 @@
 #' @export
 get_f <- function(e_tmp = NULL,
                   b_tmp = NULL,
+                  yr = yr,
+                  season = season,
+                  space = space,
                   m_season = NULL,
                   f_sel = NULL,
                   n_tmp = NULL,
@@ -43,9 +46,9 @@ get_f <- function(e_tmp = NULL,
         c_tmp <- sum((f_new / z) * (n_tmp * wage_catch * f_sel) * alpha)
         z_adj <- e_tmp/(c_tmp + 0.0001)
         z_prime <- m_season + z_adj * (z - m_season)
-        alpha <- (1 - exp(-z_prime)) / (z_prime)
+        alpha <- (1 - exp(-z_prime)) / z_prime
         tmp <- sum(n_tmp * wage_catch * f_sel * alpha)
-        f_tmp <-  e_tmp / (tmp + 0.0001)
+        f_tmp <- e_tmp / (tmp + 0.0001)
         j2 <- 1 / (1 + exp(30 * (f_tmp - 0.95 * 1)))
         f_new <- j2 * f_tmp + (1 - j2)
       }

@@ -24,6 +24,7 @@ run_oms <- function(ss_model = NULL,
                     b_futures = 0.5,
                     sel_changes = 0,
                     catch_in = NA_real_,
+                    attain = c(1, 1),
                     plot_names = NULL,
                     random_seed = NULL,
                     results_root_dir = here("results"),
@@ -85,10 +86,18 @@ run_oms <- function(ss_model = NULL,
                          selectivity_change = sel_changes[fn_ind],
                          ...)
       iter <<- iter + 1
+      const_catch <- FALSE
       if(!is.na(catch_in)){
         om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
+        const_catch <- TRUE
       }
-      run_om(om, random_seed = random_seeds[run], verbose = FALSE, ...)
+      run_om(om,
+             random_seed = random_seeds[run],
+             verbose = FALSE,
+             zero_catch_val = 0,
+             const_catch = const_catch,
+             attain = attain,
+             ...)
     }, ...)
     # End run loop ------------------------------------------------------------
     attr(lst, "plotname") <- plot_names[fn_ind]

@@ -417,11 +417,11 @@ setup_blank_om_objects <- function(yrs = NULL,
 
   lst <- NULL
 
-  lst$ssb <- matrix(NA,
-                    n_yr,
-                    n_space,
-                    dimnames = list(yrs = yrs,
-                                    space = seq_len(n_space)))
+  lst$ssb_initial <- matrix(NA,
+                            n_yr,
+                            n_space,
+                            dimnames = list(yrs = yrs,
+                                            space = seq_len(n_space)))
   lst$ssb_all <- array(NA,
                        dim = c(n_yr, n_space, n_season),
                        dimnames = list(yrs = yrs,

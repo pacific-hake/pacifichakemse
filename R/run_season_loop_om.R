@@ -25,8 +25,10 @@ run_season_loop_om <- function(om,
                                zero_catch_val = 2000,
                                ages_no_move = c(0, 1),
                                pope_mul = 0.5,
+                               hcr_apply = FALSE,
                                verbose = TRUE,
                                testing = FALSE,
+                               const_catch = FALSE,
                                ...){
 
   verify_argument(om, "list")
@@ -83,22 +85,22 @@ run_season_loop_om <- function(om,
 
       # Calculate catch space -------------------------------------------------
       if(om$n_space > 1){
-        if(om$yrs[yr_ind] <= om$m_yr){
+        if(yr <= om$m_yr){
           catch_space <- om$catch_country %>%
             filter(year == yr) %>%
             select(contains(paste0("space", space))) %>% pull()
         }else{
           if("tbl_df" %in% class(om$catch_obs)){
-            catch_space <- om$catch_obs[yr_ind, ]$value * om$f_space[space]
+            catch_space <- om$catch_obs[yr_ind, ]$value * om$f_space[space] * attain[space]
           }else{
-            catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space]
+            catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space] * attain[space]
           }
         }
       }else{
         if("tbl_df" %in% class(om$catch_obs)){
-          catch_space <- om$catch_obs[yr_ind, ]$value * om$f_space[space]
+          catch_space <- om$catch_obs[yr_ind, ]$value * om$f_space[space] * attain[space]
         }else{
-          catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space]
+          catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space] * attain[space]
         }
       }
 
@@ -106,18 +108,31 @@ run_season_loop_om <- function(om,
       if(attain[space] == 0){
         e_tmp <- ifelse(yr > om$m_yr, zero_catch_val, catch_space * om$catch_props_space_season[space, season] %>% pull)
       }else{
-        e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
+        # Apply harvest control rule --------------------------------------------
+        if(hcr_apply & yr > om$m_yr){
+          e_tmp <- apply_hcr_om(om = om,
+                                yr = yr,
+                                yr_ind = yr_ind,
+                                season = season,
+                                space = space,
+                                ...)
+          e_tmp <- e_tmp * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
+          #if(yr == 2032) browser()
+        }else{
+          e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
+        }
       }
+
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
-        tmp_space_catch <- om$catch_country[[grep(space, names(om$catch_country))]][yr_ind]
+        col <- sym(grep(paste0("space", space), names(om$catch_country), value = TRUE))
+        tmp_space_catch <- om$catch_country[yr_ind, col] %>% pull
         tmp_space_catch <- ifelse(is.na(tmp_space_catch), 0, tmp_space_catch)
         if(season == 1){
           tmp_space_catch <- 0
         }
-        om$catch_country[[grep(space, names(om$catch_country))]][yr_ind] <<- tmp_space_catch + e_tmp
+        om$catch_country[yr_ind, col] <<- tmp_space_catch + e_tmp
       }
-
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
@@ -147,17 +162,19 @@ run_season_loop_om <- function(om,
       # Calculate F based on catch distribution -------------------------------
       f_out <- get_f(e_tmp = e_tmp,
                      b_tmp = b_tmp,
+                     #b_tmp = om$ssb_all[yr_ind, space, season],
+                     yr = yr,
+                     season = season,
+                     space = space,
                      m_season = m_season,
                      f_sel = f_sel,
                      n_tmp = n_tmp,
                      wage_catch = wage_catch,
                      method = "Hybrid")
 
+      f_season <- 0
       if(e_tmp > 0){
-        f_new <- f_out
-        f_season <- f_new * f_sel
-      }else{
-        f_season <- 0
+        f_season <- f_out * f_sel
       }
       # Terminal fishing mortality
       om$f_out_save[yr_ind, season, space] <<- f_out
@@ -238,8 +255,9 @@ run_season_loop_om <- function(om,
       }else{
         om$ssb_all[yr_ind, space, season] <<- sum(om$n_save_age[, yr_ind, space, season] * mat_sel, na.rm = TRUE)
       }
-      om$catch_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season] * wage_catch
-      om$catch_n_save_age[, yr_ind, space, season] <<- (f_season / z) * (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
+      om$catch_n_save_age[, yr_ind, space, season] <<- (om$f_season_save[, yr_ind, space, season] / z) *
+        (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
+      om$catch_save_age[, yr_ind, space, season] <<- om$catch_n_save_age[, yr_ind, space, season] * wage_catch
 
       # Calculate catch quota -------------------------------------------------
       # if(om$catch_quota[yr_ind, space, season] > 0){

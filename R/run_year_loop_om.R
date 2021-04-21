@@ -35,13 +35,13 @@ run_year_loop_om <- function(om = NULL,
     init_rec <- map_dbl(seq_len(om$n_space), function(space = .x){
       # Recruitment only in season 1
       if(yr_ind == 1){
-        om$ssb[1, space] <<- om$init_ssb[space]
+        om$ssb_initial[1, space] <<- om$init_ssb[space]
       }else{
         wage <- get_wa_dfs(om, yr)
-        om$ssb[yr_ind, space] <<- sum(om$n_save_age[, yr_ind, space, 1] * wage$ssb, na.rm = TRUE) * 0.5
+        om$ssb_initial[yr_ind, space] <<- sum(om$n_save_age[, yr_ind, space, 1] * wage$ssb, na.rm = TRUE) * 0.5
       }
-      rec <- (4 * om$h * om$r0_space[space] * om$ssb[yr_ind, space] /
-          (om$ssb_0[space] * (1 - om$h) + om$ssb[yr_ind, space] *
+      rec <- (4 * om$h * om$r0_space[space] * om$ssb_initial[yr_ind, space] /
+          (om$ssb_0[space] * (1 - om$h) + om$ssb_initial[yr_ind, space] *
              (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                       om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
       rec
@@ -60,16 +60,11 @@ run_year_loop_om <- function(om = NULL,
     # Return from season loop -------------------------------------------------
 
 
-    # Calculate catch-age -----------------------------------------------------
+    # Calculate catch and catch-age -------------------------------------------
     if(om$n_season > 1){
-      om$catch_age[, yr_ind] <<- apply(om$catch_save_age[, yr_ind,,],
-                                       MARGIN = 1,
-                                       FUN = sum)
+      om$catch_age[, yr_ind] <<- rowSums(om$catch_save_age[, yr_ind,,])
       om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
-
-      om$catch_n_age[, yr_ind] <<- apply(om$catch_n_save_age[,yr_ind,,],
-                                         MARGIN = 1,
-                                         FUN = sum)
+      om$catch_n_age[, yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
       om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
     }else{
       if(om$n_space == 1){
@@ -78,7 +73,7 @@ run_year_loop_om <- function(om = NULL,
         om$catch_n_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
       }else{
-        om$catch_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
+        om$catch_age[,yr_ind] <<- rowSums(om$catch_save_age[,yr_ind,,])
         om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
         om$catch_n_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])

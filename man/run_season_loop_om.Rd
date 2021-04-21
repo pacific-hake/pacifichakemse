@@ -13,6 +13,7 @@ run_season_loop_om(
   zero_catch_val = 2000,
   ages_no_move = c(0, 1),
   pope_mul = 0.5,
+  hcr_apply = FALSE,
   verbose = TRUE,
   testing = FALSE,
   ...

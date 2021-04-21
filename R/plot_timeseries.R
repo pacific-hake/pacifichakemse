@@ -5,18 +5,19 @@
 #' @param time Either 'beg' for beginning of the year SSB or 'mid' for mid-year SSB.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param ci A vector of length two of the lower and upper credible interval values.
-#' @param by_country If TRUE, the plot will be N panels of plots comparing the scenarios by country.
-#' N is the number of scenarios. If FALSE the plot will be one panel comparing the scenarios.
+#' @param by_country If `TRUE`, the plot will be N panels of plots comparing the scenarios by country.
+#' N is the number of scenarios. If `FALSE` the plot will be one panel comparing the scenarios.
 #' @param yr_lim A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
 #' the limits of the data are used.
 #' @param ylim A vector of 2 for limits of the y-axis. If either are NA,
 #' the limits of the data are used.
-#' @param ci_lines If TRUE, use dashed lines for the CI envelope. If FALSE, use a shaded ribbon.
-#' @param show_ssb0 If TRUE, show the initial biomass, SSB0 line.
+#' @param ci_lines If `TRUE`, use dashed lines for the CI envelope. If `FALSE`, use a shaded ribbon.
+#' @param show_ci If `TRUE`, show the confidence interval, if `FALSE`, only show the median
+#' @param show_ssb0 If `TRUE`, show the initial biomass, SSB0 line.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
-#' @param show_40_10 If TRUE, show the 0.4 initial biomass and 0.1 initial biomass lines.
+#' @param show_40_10 If `TRUE`, show the 0.4 initial biomass and 0.1 initial biomass lines.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
-#' @param rev_scenarios If TRUE, reverse the order of the scenarios in the legend.
+#' @param rev_scenarios If `TRUE`, reverse the order of the scenarios in the legend.
 #' @param legend_position A vector of two - X and Y position for the legend. See [ggplot2::theme()]
 #' @param ssb_line_txt_cex Size multiplier for SSB reference point line labels.
 #' @param ssb_line_col Color for SSB reference point line labels.
@@ -34,6 +35,7 @@ plot_timeseries <- function(ps = NULL,
                             yr_lim = c(NA_real_, NA_real_),
                             ylim = c(NA_real_, NA_real_),
                             ci_lines = TRUE,
+                            show_ci = TRUE,
                             show_ssb0 = TRUE,
                             show_40_10 = TRUE,
                             show_25 = FALSE,
@@ -47,7 +49,9 @@ plot_timeseries <- function(ps = NULL,
   verify_argument(ps, "list")
   verify_argument(type, "character", 1, c("ssb",
                                           "ssb_ssb0",
+                                          "vb",
                                           "catch",
+                                          "catch_obs",
                                           "aas",
                                           "aac",
                                           "aap",
@@ -57,6 +61,7 @@ plot_timeseries <- function(ps = NULL,
   verify_argument(by_country, "logical", 1)
   verify_argument(yr_lim, "numeric", 2)
   verify_argument(ci_lines, "logical", 1)
+  verify_argument(show_ci, "logical", 1)
   verify_argument(show_ssb0, "logical", 1)
   verify_argument(show_40_10, "logical", 1)
   verify_argument(show_25, "logical", 1)
@@ -88,8 +93,16 @@ plot_timeseries <- function(ps = NULL,
     subsc <- 0
     y_label <- bquote("Total SSB / SSB"[.(subsc)])
     y_factor <- 1
+  }else if(type == "vb"){
+    d <- ps$mse_quants$v_all_quant
+    y_label <- "Vulnerable Biomass (million tonnes)"
+    y_factor <- 1
   }else if(type == "catch"){
     d <- ps$mse_quants$catch_quant
+    y_label <- "Catch (million tonnes)"
+    y_factor <- 1e-6
+  }else if(type == "catch_obs"){
+    d <- ps$mse_quants$catch_obs_quant
     y_label <- "Catch (million tonnes)"
     y_factor <- 1e-6
   }else if(type == "aas"){
@@ -164,22 +177,23 @@ plot_timeseries <- function(ps = NULL,
                     ylim = ylim) +
     theme(legend.title = element_blank())
 
-  if(ci_lines){
-    if(by_country){
-      g <- g +
-        geom_line(aes(y = !!ci[[1]] * y_factor, color = country), linetype = 2) +
-        geom_line(aes(y = !!ci[[2]] * y_factor, color = country), linetype = 2)
+  if(show_ci){
+    if(ci_lines){
+      if(by_country){
+        g <- g +
+          geom_line(aes(y = !!ci[[1]] * y_factor, color = country), linetype = 2) +
+          geom_line(aes(y = !!ci[[2]] * y_factor, color = country), linetype = 2)
+      }else{
+        g <- g +
+          geom_line(aes(y = !!ci[[1]] * y_factor, color = scenario), linetype = 2) +
+          geom_line(aes(y = !!ci[[2]] * y_factor, color = scenario), linetype = 2)
+      }
     }else{
       g <- g +
-        geom_line(aes(y = !!ci[[1]] * y_factor, color = scenario), linetype = 2) +
-        geom_line(aes(y = !!ci[[2]] * y_factor, color = scenario), linetype = 2)
+        geom_ribbon(aes(ymin = !!ci[[1]] * y_factor, ymax = !!ci[[2]] * y_factor), linetype = 0) +
+        scale_fill_manual(values = alpha(cols, alpha = 0.2))
     }
-  }else{
-    g <- g +
-      geom_ribbon(aes(ymin = !!ci[[1]] * y_factor, ymax = !!ci[[2]] * y_factor), linetype = 0) +
-      scale_fill_manual(values = alpha(cols, alpha = 0.2))
   }
-
   # Breaks and labels for the SSB lines if they are to be shown. This is for the third axis on the right
   b_brks <- NULL
   b_lbls <- NULL

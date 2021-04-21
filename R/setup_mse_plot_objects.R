@@ -346,6 +346,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   mse_quants$ssb_mid_quant_country <- ssb_mid_ca_tmp %>%
     bind_rows(ssb_mid_us_tmp)
 
+  # vulnerable biomass quantile objects ---------------------------------------
+  mse_quants$v_all_quant <- merge_dfs_from_scenarios(merged_run_data, "v_all_quant")
+
   # catch_quant ---------------------------------------------------------------
   mse_quants$catch_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_quant")
   mse_quants$catch_obs_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_obs_quant")

@@ -37,7 +37,7 @@ merge_run_data <- function(sim_data = NULL,
   # ssb_plot ------------------------------------------------------------------
   out$ssb_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
-               ssb = rowSums(.x$ssb) / sum(.x$ssb_0),
+               ssb = rowSums(.x$ssb_all[, , 1]) / sum(.x$ssb_0),
                run = .y)
   }) %>%
     map_df(~{.x}) %>%
@@ -539,6 +539,25 @@ merge_run_data <- function(sim_data = NULL,
     filter(year > sim_data[[1]]$m_yr) %>%
     group_by(run) %>%
     summarize(aav = median(aav))
+
+  # v_space ------------------------------------------------------------------
+  out$v_space <- map2(sim_data, seq_along(sim_data), ~{
+    yrs <- as.numeric(rownames(.x$v_save[ , , 1]))
+    .x$v_save[ , , 1] %>%
+      as_tibble() %>%
+      mutate(run = .y, year = yrs) %>%
+      select(year, everything())
+  }) %>%
+    map_df(~{.x})
+
+  # v_all ---------------------------------------------------------------------
+  out$v_all <- out$v_space %>%
+    mutate(v = `1` + `2`) %>%
+    select(year, v, run)
+
+  # v_all_quant ---------------------------------------------------------------
+  out$v_all_quant <- out$v_all %>%
+    calc_quantiles_by_group("year", "v", probs = quants)
 
   # v_ca_quant ----------------------------------------------------------------
   out$v_ca_quant <- calc_quantiles_by_group(out$v_ca_plot, grp_col = "year", col = "v", probs = quants)

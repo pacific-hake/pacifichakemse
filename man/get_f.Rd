@@ -7,6 +7,9 @@
 get_f(
   e_tmp = NULL,
   b_tmp = NULL,
+  yr = yr,
+  season = season,
+  space = space,
   m_season = NULL,
   f_sel = NULL,
   n_tmp = NULL,
