@@ -13,6 +13,7 @@ plot_timeseries(
   yr_lim = c(NA_real_, NA_real_),
   ylim = c(NA_real_, NA_real_),
   ci_lines = TRUE,
+  show_ci = TRUE,
   show_ssb0 = TRUE,
   show_40_10 = TRUE,
   show_25 = FALSE,
@@ -34,8 +35,8 @@ Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 
 \item{ci}{A vector of length two of the lower and upper credible interval values.}
 
-\item{by_country}{If TRUE, the plot will be N panels of plots comparing the scenarios by country.
-N is the number of scenarios. If FALSE the plot will be one panel comparing the scenarios.}
+\item{by_country}{If \code{TRUE}, the plot will be N panels of plots comparing the scenarios by country.
+N is the number of scenarios. If \code{FALSE} the plot will be one panel comparing the scenarios.}
 
 \item{yr_lim}{A vector of 2 for minimum and maximum yrs to show on the plot. If either are NA,
 the limits of the data are used.}
@@ -43,15 +44,17 @@ the limits of the data are used.}
 \item{ylim}{A vector of 2 for limits of the y-axis. If either are NA,
 the limits of the data are used.}
 
-\item{ci_lines}{If TRUE, use dashed lines for the CI envelope. If FALSE, use a shaded ribbon.}
+\item{ci_lines}{If \code{TRUE}, use dashed lines for the CI envelope. If \code{FALSE}, use a shaded ribbon.}
 
-\item{show_ssb0}{If TRUE, show the initial biomass, SSB0 line.
+\item{show_ci}{If \code{TRUE}, show the confidence interval, if \code{FALSE}, only show the median}
+
+\item{show_ssb0}{If \code{TRUE}, show the initial biomass, SSB0 line.
 Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 
-\item{show_40_10}{If TRUE, show the 0.4 initial biomass and 0.1 initial biomass lines.
+\item{show_40_10}{If \code{TRUE}, show the 0.4 initial biomass and 0.1 initial biomass lines.
 Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 
-\item{rev_scenarios}{If TRUE, reverse the order of the scenarios in the legend.}
+\item{rev_scenarios}{If \code{TRUE}, reverse the order of the scenarios in the legend.}
 
 \item{legend_position}{A vector of two - X and Y position for the legend. See \code{\link[ggplot2:theme]{ggplot2::theme()}}}
 

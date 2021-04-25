@@ -11,11 +11,17 @@
 #' @param verbose Print the loop information to the console
 #' @param testing Logical. If TRUE, write out testing files
 #' @param ... Absorbs additional arguments meant for other functions
+#' @param zero_catch_val The value to use instead of zero for catch (necessary for EM to converge)
+#' @param hcr_apply If `TRUE`, apply the Harvest control rule inside the Operating model. Set to `FALSE`
+#' when running MSE as the HCR is already applied
+#' @param const_catch If `TRUE` make the catch constant for trhe projection period. `catch_in` still
+#' needs to be set to some value when running `run_oms()`
 #'
 #' @return A modified version of `om` with the current data for `yr` populated
 #' in all it's arrays and other objects
 #' @importFrom crayon red yellow
 #' @importFrom tidyselect contains
+#' @importFrom tibble is_tibble
 #' @export
 run_season_loop_om <- function(om,
                                yr,
@@ -88,50 +94,60 @@ run_season_loop_om <- function(om,
         if(yr <= om$m_yr){
           catch_space <- om$catch_country %>%
             filter(year == yr) %>%
-            select(contains(paste0("space", space))) %>% pull()
+            select(contains(paste0("space", space))) %>%
+            pull()
         }else{
-          if("tbl_df" %in% class(om$catch_obs)){
-            catch_space <- om$catch_obs[yr_ind, ]$value * om$f_space[space] * attain[space]
+          if(is_tibble(om$catch_obs)){
+            catch_space <- om$catch_obs[yr_ind, ]$value
           }else{
-            catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space] * attain[space]
+            catch_space <- om$catch_obs[yr_ind, ]
           }
         }
       }else{
-        if("tbl_df" %in% class(om$catch_obs)){
-          catch_space <- om$catch_obs[yr_ind, ]$value * om$f_space[space] * attain[space]
+        if(is_tibble(om$catch_obs)){
+          catch_space <- om$catch_obs[yr_ind, ]$value
         }else{
-          catch_space <- om$catch_obs[yr_ind, ] * om$f_space[space] * attain[space]
+          catch_space <- om$catch_obs[yr_ind, ]
         }
       }
 
       # Calculate catch distribution ------------------------------------------
+      #browser()
+      e_tmp <- catch_space
       if(attain[space] == 0){
-        e_tmp <- ifelse(yr > om$m_yr, zero_catch_val, catch_space * om$catch_props_space_season[space, season] %>% pull)
-      }else{
-        # Apply harvest control rule --------------------------------------------
-        if(hcr_apply & yr > om$m_yr){
+        e_tmp <- ifelse(yr > om$m_yr, zero_catch_val, e_tmp)
+      }else if(hcr_apply & yr > om$m_yr){
           e_tmp <- apply_hcr_om(om = om,
                                 yr = yr,
                                 yr_ind = yr_ind,
                                 season = season,
                                 space = space,
                                 ...)
-          e_tmp <- e_tmp * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
-          #if(yr == 2032) browser()
-        }else{
-          e_tmp <- catch_space * ifelse(yr > om$m_yr, attain[space], 1) * om$catch_props_space_season[space, season] %>% pull
-        }
       }
-
+      #if(yr > om$m_yr) browser()
+      if(yr > om$m_yr){
+        e_tmp <- e_tmp *
+          om$f_space[space] *
+          ifelse(attain[space] == 0, 1, attain[space]) *
+          pull(om$catch_props_space_season[space, season])
+      }else{
+        e_tmp <- e_tmp *
+          om$f_space[space] *
+          pull(om$catch_props_space_season[space, season])
+      }
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
         col <- sym(grep(paste0("space", space), names(om$catch_country), value = TRUE))
-        tmp_space_catch <- om$catch_country[yr_ind, col] %>% pull
+        tmp_space_catch <- pull(om$catch_country[yr_ind, col])
         tmp_space_catch <- ifelse(is.na(tmp_space_catch), 0, tmp_space_catch)
         if(season == 1){
           tmp_space_catch <- 0
         }
         om$catch_country[yr_ind, col] <<- tmp_space_catch + e_tmp
+        if(season == 4 & space == 2){
+          om$catch_country[yr_ind, "total"] <<- om$catch_country[yr_ind, "space1"] +
+            om$catch_country[yr_ind, "space2"]
+        }
       }
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
@@ -257,7 +273,18 @@ run_season_loop_om <- function(om,
       }
       om$catch_n_save_age[, yr_ind, space, season] <<- (om$f_season_save[, yr_ind, space, season] / z) *
         (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
-      om$catch_save_age[, yr_ind, space, season] <<- om$catch_n_save_age[, yr_ind, space, season] * wage_catch
+      # Inputting constant catch value alone is not enough to guarantee constant catch, because the get_f() function
+      # is used to approximate F based on catch for each space/season sub-unit within a year and it is not exact
+      if(const_catch && yr > om$m_yr && !hcr_apply){
+        val <- om$catch_obs %>% filter(!!yr == yr) %>% pull(value)
+        val <- val * om$f_space[space] * attain[space] * pull(om$catch_props_space_season[space, season])
+        # Prevent NaNs in the division below
+        val <- ifelse(val == 0, 1e-5, val)
+        val <- f_sel * rep(val, om$n_age) / sum(f_sel * rep(val, om$n_age)) * val
+        om$catch_save_age[, yr_ind, space, season] <<- val
+      }else{
+        om$catch_save_age[, yr_ind, space, season] <<- om$catch_n_save_age[, yr_ind, space, season] * wage_catch
+      }
 
       # Calculate catch quota -------------------------------------------------
       # if(om$catch_quota[yr_ind, space, season] > 0){

@@ -88,14 +88,15 @@ run_oms <- function(ss_model = NULL,
       iter <<- iter + 1
       const_catch <- FALSE
       if(!is.na(catch_in)){
+        #om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in * (attain[1] * om$f_space[1] + attain[2] * om$f_space[2])
         om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
         const_catch <- TRUE
       }
       run_om(om,
              random_seed = random_seeds[run],
              verbose = FALSE,
-             zero_catch_val = 0,
              const_catch = const_catch,
+             zero_catch_val = 0,
              attain = attain,
              ...)
     }, ...)

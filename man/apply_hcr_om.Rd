@@ -2,13 +2,15 @@
 % Please edit documentation in R/apply_hcr_om.R
 \name{apply_hcr_om}
 \alias{apply_hcr_om}
-\title{Calculate the catch value to apply to the next year in the OM loop. TACs can be applied
+\title{Calculate the catch value to apply to the current year in the OM loop. TACs can be applied
 to the catch value also.}
 \usage{
 apply_hcr_om(
   om,
   yr = NULL,
   yr_ind = NULL,
+  season,
+  space,
   tac = NULL,
   catch_floor = NULL,
   hcr_lower = 0.1,
@@ -42,6 +44,6 @@ apply_hcr_om(
 Catch for the next year
 }
 \description{
-Calculate the catch value to apply to the next year in the OM loop. TACs can be applied
+Calculate the catch value to apply to the current year in the OM loop. TACs can be applied
 to the catch value also.
 }

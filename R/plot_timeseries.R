@@ -88,17 +88,26 @@ plot_timeseries <- function(ps = NULL,
     ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0) * 1e-6
     y_factor <- 1e-6 / 2
   }else if(type == "ssb_ssb0"){
-    d <- ps$mse_quants$ssb_ssb0_quant
     ssb0 <- 1
     subsc <- 0
-    y_label <- bquote("Total SSB / SSB"[.(subsc)])
     y_factor <- 1
+    if(time == "beg"){
+      y_label <- bquote("Beginning-of-year total SSB / SSB"[.(subsc)])
+      d <- ps$mse_quants$ssb_ssb0_quant
+    }else{
+      y_label <- bquote("Mid-year total SSB / SSB"[.(subsc)])
+      d <- ps$mse_quants$ssb_ssb0_mid_quant
+    }
   }else if(type == "vb"){
     d <- ps$mse_quants$v_all_quant
     y_label <- "Vulnerable Biomass (million tonnes)"
     y_factor <- 1
   }else if(type == "catch"){
-    d <- ps$mse_quants$catch_quant
+    if(by_country){
+      d <- ps$mse_quants$catch_quant_country
+    }else{
+      d <- ps$mse_quants$catch_quant
+    }
     y_label <- "Catch (million tonnes)"
     y_factor <- 1e-6
   }else if(type == "catch_obs"){
@@ -197,12 +206,12 @@ plot_timeseries <- function(ps = NULL,
   # Breaks and labels for the SSB lines if they are to be shown. This is for the third axis on the right
   b_brks <- NULL
   b_lbls <- NULL
-  if(show_ssb0 && type %in% c("ssb", "ssb_ssb0", "catch_quota")){
+  if(show_ssb0 && type %in% c("ssb", "catch_quota")){
 
     if(type == "ssb"){
       ssb0_lab <- as.expression(bquote(SSB[.(0)] == .(round(ssb0, 2))))
     }else{
-      ssb0_lab <- as.expression(bquote((SSB[.(0)])))
+      ssb0_lab <- as.expression(bquote(SSB[.(0)]))
     }
     b_brks <- round(ssb0, 2)
     b_lbls <- ssb0_lab
@@ -213,13 +222,10 @@ plot_timeseries <- function(ps = NULL,
                  linetype = ssb_line_type)
   }
 
-  if(show_40_10 && type %in% c("ssb", "ssb_ssb0")){
+  if(show_40_10 && type %in% c("ssb")){
     if(type == "ssb"){
       ssb40_lab <- as.expression(bquote(SSB[.(0.4)] == .(round(ssb0 * 0.4, 2))))
       ssb10_lab <- as.expression(bquote(SSB[.(0.1)] == .(round(ssb0 * 0.1, 2))))
-    }else{
-      ssb40_lab <- as.expression(bquote(SSB[.(0.4)]))
-      ssb10_lab <- as.expression(bquote(SSB[.(0.1)]))
     }
     b_brks <- c(b_brks,
                 round(ssb0 * 0.4, 2),
@@ -237,11 +243,9 @@ plot_timeseries <- function(ps = NULL,
                  linetype = ssb_line_type)
   }
 
-  if(show_25 && type %in% c("ssb", "ssb_ssb0")){
+  if(show_25 && type %in% c("ssb")){
     if(type == "ssb"){
       ssb25_lab <- as.expression(bquote(SSB[.(0.25)] == .(round(ssb0 * 0.25, 2))))
-    }else{
-      ssb25_lab <- as.expression(bquote(SSB[.(0.25)]))
     }
     b_brks <- c(b_brks,
                 round(ssb0 * 0.25, 2))

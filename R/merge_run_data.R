@@ -43,12 +43,6 @@ merge_run_data <- function(sim_data = NULL,
     map_df(~{.x}) %>%
     as_tibble()
 
-  # ssb_ssb0_quant ------------------------------------------------------------
-  out$ssb_ssb0_quant <- calc_quantiles_by_group(out$ssb_plot,
-                                                "year",
-                                                "ssb",
-                                                probs = quants)
-
   # ssb_mid_plot --------------------------------------------------------------
   out$ssb_mid_plot <- map2(sim_data, seq_along(sim_data), ~{
     data.frame(year = yrs,
@@ -57,6 +51,18 @@ merge_run_data <- function(sim_data = NULL,
   }) %>%
     map_df(~{.x}) %>%
     as_tibble()
+
+  # ssb_ssb0_quant ------------------------------------------------------------
+  out$ssb_ssb0_quant <- calc_quantiles_by_group(out$ssb_plot,
+                                                "year",
+                                                "ssb",
+                                                probs = quants)
+
+  out$ssb_ssb0_mid_quant <- calc_quantiles_by_group(out$ssb_mid_plot,
+                                                    "year",
+                                                    "ssb",
+                                                    probs = quants)
+
 
   # ssb_mid_space--------------------------------------------------------------
   out$ssb_mid_space <- map2(sim_data, seq_along(sim_data), ~{
@@ -236,6 +242,24 @@ merge_run_data <- function(sim_data = NULL,
   }) %>%
     map_df(~{.x}) %>%
     as_tibble()
+
+  # catch_ca ------------------------------------------------------------------
+  out$catch_ca <- out$catch_country %>%
+    select(year, catch_ca, run) %>%
+    rename(catch = catch_ca)
+
+  # catch_ca_quant ------------------------------------------------------------
+  out$catch_ca_quant <- out$catch_ca %>%
+    calc_quantiles_by_group("year", "catch", probs = quants)
+
+  # catch_us ------------------------------------------------------------------
+  out$catch_us <- out$catch_country %>%
+    select(year, catch_us, run) %>%
+    rename(catch = catch_us)
+
+  # catch_us_quant ------------------------------------------------------------
+  out$catch_us_quant <- out$catch_us %>%
+    calc_quantiles_by_group("year", "catch", probs = quants)
 
   # conv_am function ----------------------------------------------------------
   # TODO: Need to check generation of age_comps_catch_space because there are no age 15's they are NA!!

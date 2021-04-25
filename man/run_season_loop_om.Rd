@@ -16,6 +16,7 @@ run_season_loop_om(
   hcr_apply = FALSE,
   verbose = TRUE,
   testing = FALSE,
+  const_catch = FALSE,
   ...
 )
 }

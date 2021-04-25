@@ -13,6 +13,7 @@ run_oms(
   b_futures = 0.5,
   sel_changes = 0,
   catch_in = NA_real_,
+  attain = c(1, 1),
   plot_names = NULL,
   random_seed = NULL,
   results_root_dir = here("results"),

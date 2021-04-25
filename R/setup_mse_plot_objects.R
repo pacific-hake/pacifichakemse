@@ -326,6 +326,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # SSB quantile objects ------------------------------------------------------
   mse_quants$ssb_all_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_all_quant")
   mse_quants$ssb_ssb0_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_ssb0_quant")
+  mse_quants$ssb_ssb0_mid_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_ssb0_mid_quant")
   mse_quants$ssb_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_ca_quant")
   mse_quants$ssb_us_quant <- merge_dfs_from_scenarios(merged_run_data, "ssb_us_quant")
   ssb_ca_tmp <- mse_quants$ssb_ca_quant %>%
@@ -352,6 +353,14 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # catch_quant ---------------------------------------------------------------
   mse_quants$catch_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_quant")
   mse_quants$catch_obs_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_obs_quant")
+  mse_quants$catch_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_ca_quant")
+  mse_quants$catch_us_quant <- merge_dfs_from_scenarios(merged_run_data, "catch_us_quant")
+  catch_ca_tmp <- mse_quants$catch_ca_quant %>%
+    mutate(country = "Canada")
+  catch_us_tmp <- mse_quants$catch_us_quant %>%
+    mutate(country = "US")
+  mse_quants$catch_quant_country <- catch_ca_tmp %>%
+    bind_rows(catch_us_tmp)
 
   # Standard error between the OM and EM (final year) -------------------------
   standard_error_ssb <- NULL
