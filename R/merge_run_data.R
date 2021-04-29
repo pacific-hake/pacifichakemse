@@ -472,6 +472,38 @@ merge_run_data <- function(sim_data = NULL,
       select(year, quota_frac, run)
   }) %>% map_df(~{.x})
 
+  # r_country (recruitment) ---------------------------------------------------
+  out$r_country <- map2(sim_data, seq_along(sim_data), ~{
+    .x$r_save %>% as_tibble %>% mutate(year = .x$yrs, run = .y)
+  }) %>%
+    map_df(~{.x}) %>%
+    rename(canada = V1, us = V2) %>%
+    select(year, canada, us, run)
+
+  # r_ca ----------------------------------------------------------------------
+  out$r_ca <- out$r_country %>%
+    select(year, canada, run) %>%
+    rename(value = canada)
+
+  # r_ca_quant ----------------------------------------------------------------
+  out$r_ca_quant <- out$r_ca %>%
+    calc_quantiles_by_group("year", "value", probs = quants)
+
+  # r_us ----------------------------------------------------------------------
+  out$r_us <- out$r_country %>%
+    select(year, us, run) %>%
+    rename(value = us)
+
+  # r_us_quant ----------------------------------------------------------------
+  out$r_us_quant <- out$r_us %>%
+    calc_quantiles_by_group("year", "value", probs = quants)
+
+  # r_all ---------------------------------------------------------------------
+  out$r_all <- out$r_country %>% transmute(year, value = canada + us, run)
+
+  # r_quant ---------------------------------------------------------------------
+  out$r_quant <- calc_quantiles_by_group(out$r_all, "year", "value", probs = quants)
+
   # yrs_quota_met -------------------------------------------------------------
   out$yrs_quota_met <- out$ssb_plot %>%
     group_by(run) %>%

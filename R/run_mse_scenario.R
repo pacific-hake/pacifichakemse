@@ -55,7 +55,7 @@ run_mse_scenario <- function(om = NULL,
   params_save <- array(NA, dim = c(n_sim_yrs, length(leading_params)))
 
   # Create EM objects for saving ----------------------------------------------
-  # Save Estimation Model outputs in lists. iter is used to keep track of the
+  # Save Estimation Model outputs in lists. em_iter is used to keep track of the
   # positions for these
   em_output <- list(ssb_save = vector(mode = "list", length = om$n_future_yrs),
                     ssb0_save = vector(),

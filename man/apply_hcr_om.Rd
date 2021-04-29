@@ -9,8 +9,6 @@ apply_hcr_om(
   om,
   yr = NULL,
   yr_ind = NULL,
-  season,
-  space,
   tac = NULL,
   catch_floor = NULL,
   hcr_lower = 0.1,
@@ -34,11 +32,10 @@ apply_hcr_om(
 
 \item{hcr_upper}{If \code{hcr_apply} is \code{TRUE}, this is the upper limit for the rule}
 
-\item{hcr_fspr}{If \code{hcr_apply} is \code{TRUE}, this is the value to set the Fspr at for catch above \code{hcr_upper}}
+\item{hcr_fspr}{If \code{hcr_apply} is \code{TRUE}, this is the value to set the Fspr at
+for catch above \code{hcr_upper}}
 
 \item{...}{Absorb arguments meant for other functions}
-
-\item{hcr_apply}{Logical. If \code{TRUE} apply the Harvest control rule}
 }
 \value{
 Catch for the next year

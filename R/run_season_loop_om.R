@@ -112,7 +112,6 @@ run_season_loop_om <- function(om,
       }
 
       # Calculate catch distribution ------------------------------------------
-      #browser()
       e_tmp <- catch_space
       if(attain[space] == 0){
         e_tmp <- ifelse(yr > om$m_yr, zero_catch_val, e_tmp)
@@ -120,11 +119,8 @@ run_season_loop_om <- function(om,
           e_tmp <- apply_hcr_om(om = om,
                                 yr = yr,
                                 yr_ind = yr_ind,
-                                season = season,
-                                space = space,
                                 ...)
       }
-      #if(yr > om$m_yr) browser()
       if(yr > om$m_yr){
         e_tmp <- e_tmp *
           om$f_space[space] *

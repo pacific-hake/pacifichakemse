@@ -25,8 +25,9 @@ get_ref_point <- function(pars,
                           v_real = NA,
                           space = 2,
                           catch_floor = NULL,
-                          upper_ref = 0.4,
-                          f_ref = 0.4,
+                          hcr_lower = 0.1,
+                          hcr_upper = 0.4,
+                          hcr_fspr = 0.4,
                           ...){
 
   r_0 <- exp(pars$log_r_init)
@@ -84,7 +85,7 @@ get_ref_point <- function(pars,
     # Adjust plus group sum of geometric series as a/(1-r)
     n_1[df$n_age] <- n_1[df$n_age] / (1 - z_age[df$n_age])
     ssb_eq <- sum(mat_sel * n_1) * 0.5
-    (ssb_eq / ssb_0 - f_ref) ^ 2
+    (ssb_eq / ssb_0 - hcr_fspr) ^ 2
   }
   f_xx <- optim(par = 0.1,
                 fn = get_f,
@@ -107,20 +108,20 @@ get_ref_point <- function(pars,
   v <- sum(n_end * c_w * f_sel)
   # Convert to harvest rate
   f_x <- 1 - exp(-f_new)
+  depl <- ssb_y / ssb_0
 
-  if((ssb_y / ssb_0) < 0.1){
-    # TODO: fix later (add a very low catch)
+
+  if(depl < hcr_lower){
     c_new <- 0.05 * v_real
-  }
-  if((ssb_y / ssb_0) > upper_ref){
+  }else if(depl > hcr_upper){
     c_new <- f_x * v
-  }
-  if(((ssb_y / ssb_0) <= upper_ref) & ((ssb_y / ssb_0) >= 0.1)){
-    # (B_t - B_10) / (B_40 - B_10)
-    # c_new <- f_x * v *((ssb_y - 0.1 * ssb_0) *
-    #                      ((upper_ref * ssb_0 / ssb_y) /
-    #                         (upper_ref * ssb_0 - 0.1 * ssb_0)))
-    c_new <- f_x * v * ((ssb_y - 0.1 * ssb_0) / ((upper_ref * ssb_0 - 0.1 * ssb_0)))
+  }else{
+    # c_new <- f_x * v *((ssb_y - hcr_lower * ssb_0) *
+    #                      ((hcr_upper * ssb_0 / ssb_y) /
+    #                         (hcr_upper * ssb_0 - hcr_lower * ssb_0)))
+    # 40:10 adjustment (actually hcr_upper:hcr_lower)
+    fct <- ((ssb_y - hcr_lower * ssb_0) * ((hcr_upper * ssb_0 / ssb_y) / (hcr_upper * ssb_0 - hcr_lower * ssb_0)))
+    c_new <- fct * f_x * v
   }
 
   # Adjust TAC by JMC/Utilization

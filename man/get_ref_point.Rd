@@ -16,8 +16,9 @@ get_ref_point(
   v_real = NA,
   space = 2,
   catch_floor = NULL,
-  upper_ref = 0.4,
-  f_ref = 0.4,
+  hcr_lower = 0.1,
+  hcr_upper = 0.4,
+  hcr_fspr = 0.4,
   ...
 )
 }

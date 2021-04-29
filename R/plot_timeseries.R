@@ -1,7 +1,7 @@
 #' Plot time series data from an MSE or OM simulation run
 #'
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()].
-#' @param type One of 'ssb', 'ssb_ssb0', catch', 'aas', 'aac','aap'
+#' @param type One of 'ssb', 'ssb_ssb0', catch', 'recr', aas', 'aac','aap'
 #' @param time Either 'beg' for beginning of the year SSB or 'mid' for mid-year SSB.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
 #' @param ci A vector of length two of the lower and upper credible interval values.
@@ -52,6 +52,7 @@ plot_timeseries <- function(ps = NULL,
                                           "vb",
                                           "catch",
                                           "catch_obs",
+                                          "recr",
                                           "aas",
                                           "aac",
                                           "aap",
@@ -85,7 +86,7 @@ plot_timeseries <- function(ps = NULL,
       }
     }
     # SSB0 - All scenarios and runs are the same so just use the first scenario, first run
-    ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0) * 1e-6
+    ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0) / 2 * 1e-6
     y_factor <- 1e-6 / 2
   }else if(type == "ssb_ssb0"){
     ssb0 <- 1
@@ -122,6 +123,14 @@ plot_timeseries <- function(ps = NULL,
     }
     y_label <- "Average age in survey"
     y_factor <- 1
+  }else if(type == "recr"){
+    if(by_country){
+      d <- ps$mse_quants$r_quant_country
+    }else{
+      d <- ps$mse_quants$r_quant
+    }
+    y_label <- "Recruitment (millions)"
+    y_factor <- 1e-6
   }else if(type == "aac"){
     if(by_country){
       d <- ps$mse_quants$amc_quant
@@ -206,7 +215,7 @@ plot_timeseries <- function(ps = NULL,
   # Breaks and labels for the SSB lines if they are to be shown. This is for the third axis on the right
   b_brks <- NULL
   b_lbls <- NULL
-  if(show_ssb0 && type %in% c("ssb", "catch_quota")){
+  if(show_ssb0 && type %in% c("ssb", "ssb_ssb0", "catch_quota")){
 
     if(type == "ssb"){
       ssb0_lab <- as.expression(bquote(SSB[.(0)] == .(round(ssb0, 2))))
@@ -222,10 +231,13 @@ plot_timeseries <- function(ps = NULL,
                  linetype = ssb_line_type)
   }
 
-  if(show_40_10 && type %in% c("ssb")){
+  if(show_40_10 && type %in% c("ssb", "ssb_ssb0")){
     if(type == "ssb"){
       ssb40_lab <- as.expression(bquote(SSB[.(0.4)] == .(round(ssb0 * 0.4, 2))))
       ssb10_lab <- as.expression(bquote(SSB[.(0.1)] == .(round(ssb0 * 0.1, 2))))
+    }else{
+      ssb40_lab <- as.expression(bquote(SSB[.(0.4)]))
+      ssb10_lab <- as.expression(bquote(SSB[.(0.1)]))
     }
     b_brks <- c(b_brks,
                 round(ssb0 * 0.4, 2),
@@ -243,9 +255,11 @@ plot_timeseries <- function(ps = NULL,
                  linetype = ssb_line_type)
   }
 
-  if(show_25 && type %in% c("ssb")){
+  if(show_25 && type %in% c("ssb", "ssb_ssb0")){
     if(type == "ssb"){
       ssb25_lab <- as.expression(bquote(SSB[.(0.25)] == .(round(ssb0 * 0.25, 2))))
+    }else{
+      ssb25_lab <- as.expression(bquote(SSB[.(0.25)]))
     }
     b_brks <- c(b_brks,
                 round(ssb0 * 0.25, 2))

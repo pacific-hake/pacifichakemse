@@ -153,15 +153,6 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     em_outputs <- tmp_em
   }
 
-  merged_run_data <- map(om_output, function(om = .x, ...){
-    tmp <- merge_run_data(om, quants = quants, ...)
-    tmp$info <- tmp$info %>%
-      mutate(scenario = names(om))
-    tmp$vtac_seas <- tmp$vtac_seas %>%
-      mutate(scenario = names(om))
-    tmp
-  }, ...)
-
   # merged_run_data (merge_run_data() output) ---------------------------------
   cols <- brewer.pal(length(plotnames), "Dark2")
   #cols <- LaCroixColoR::lacroix_palette("PassionFruit", n = 4, type = "discrete")
@@ -361,6 +352,9 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     mutate(country = "US")
   mse_quants$catch_quant_country <- catch_ca_tmp %>%
     bind_rows(catch_us_tmp)
+
+  # Recruitment quants --------------------------------------------------------
+
 
   # Standard error between the OM and EM (final year) -------------------------
   standard_error_ssb <- NULL

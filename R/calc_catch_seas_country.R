@@ -8,6 +8,7 @@
 #' each season. Canada will be the first row and the US the second
 #' @export
 #' @importFrom readr read_csv
+#' @importFrom dplyr ungroup
 calc_catch_seas_country <- function(data_csv_dir = NULL,
                                     n_yrs = 10,
                                     weight = c(1, 1, 1, 1)){

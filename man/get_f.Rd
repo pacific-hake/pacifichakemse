@@ -2,7 +2,8 @@
 % Please edit documentation in R/get_f.R
 \name{get_f}
 \alias{get_f}
-\title{Calculate the fishing mortality based on catch}
+\title{Calculate the fishing mortality based on catch.
+See Methot & Wetzel 2013, Appendix A.}
 \usage{
 get_f(
   e_tmp = NULL,
@@ -14,7 +15,7 @@ get_f(
   f_sel = NULL,
   n_tmp = NULL,
   wage_catch = NULL,
-  method = "Pope"
+  method = "Hybrid"
 )
 }
 \arguments{
@@ -30,11 +31,12 @@ get_f(
 
 \item{wage_catch}{Weight at age}
 
-\item{method}{One of 'Pope' or 'Hybrid'}
+\item{method}{Only 'Hybrid' implemented}
 }
 \value{
 The fishing mortality value
 }
 \description{
-Calculate the fishing mortality based on catch
+Calculate the fishing mortality based on catch.
+See Methot & Wetzel 2013, Appendix A.
 }

@@ -55,6 +55,7 @@ run_mses <- function(n_runs = 10,
                      results_root_dir = here("results"),
                      results_dir = here("results", "default"),
                      catch_floor = NULL,
+                     hcr_apply = FALSE,
                      ...){
 
   verify_argument(fns, chk_len = length(plot_names))
@@ -143,6 +144,7 @@ run_mses <- function(n_runs = 10,
                               tac = tacs[[fn_ind]],
                               attain = attains[[fn_ind]],
                               catch_floor = catch_floor,
+                              hcr_apply = FALSE, # Tell OM not to apply HCR. If TRUE MSE will break
                               ...)
       if(is.list(tmp)) tmp else NA
     }, ...)

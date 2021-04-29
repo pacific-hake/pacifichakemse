@@ -73,7 +73,7 @@ run_year_loop_om <- function(om = NULL,
         om$catch_n_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
       }else{
-        om$catch_age[,yr_ind] <<- rowSums(om$catch_save_age[,yr_ind,,])
+        om$catch_age[,yr_ind] <<- rowSums(om$catch_savebr_age[,yr_ind,,])
         om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
         om$catch_n_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
         om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])

@@ -20,6 +20,7 @@ run_mses(
   results_root_dir = here("results"),
   results_dir = here("results", "default"),
   catch_floor = NULL,
+  hcr_apply = FALSE,
   ...
 )
 }
