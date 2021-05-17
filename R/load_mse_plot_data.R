@@ -39,7 +39,7 @@ load_mse_plot_data <- function(scenario = NULL,
                                  main_results_dir = main_results_dir,
                                  quants = quants,
                                  ...)
-    saveRDS(ps, file = po_filename)
+    saveRDS(ps, file = po_filename, compress = FALSE)
   }
 
   readRDS(po_filename)
