@@ -82,7 +82,7 @@ apply_hcr_om <- function(
   #spr <- ssb_eq / ssb_0
 
   # Calculate the F_SPR40% (hcr_fspr) reference point
-  get_f <- function(par, z_age, n_1, ssb_eq, f_sel, r_0, ssb_0){
+  get_f <- function(par, n_1, ssb_eq, f_sel, r_0, ssb_0){
     z_age <- m_age + par[1] * f_sel
     n_1 <- NULL
     n_1[1] <- r_0
@@ -95,16 +95,15 @@ apply_hcr_om <- function(
     (ssb_eq / ssb_0 - hcr_fspr) ^ 2
   }
   f_xx <- optim(par = 0.1,
-                 fn = get_f,
-                 method = "Brent",
-                 lower = 0,
-                 upper = 4,
-                 z_age = z_age,
-                 n_1 = n_1,
-                 ssb_eq = ssb_eq,
-                 f_sel = f_sel,
-                 r_0 = r_0,
-                 ssb_0 = ssb_0)
+                fn = get_f,
+                method = "Brent",
+                lower = 0,
+                upper = 4,
+                n_1 = n_1,
+                ssb_eq = ssb_eq,
+                f_sel = f_sel,
+                r_0 = r_0,
+                ssb_0 = ssb_0)
 
   f_new <- f_xx$par
 
@@ -128,6 +127,8 @@ apply_hcr_om <- function(
   }else{
     # 40:10 adjustment (actually hcr_upper:hcr_lower)
     fct <- ((ssb_y - hcr_lower * ssb_0) / (hcr_upper * ssb_0 - hcr_lower * ssb_0))
+    # Nis' code with extra term:
+    #fct <- ((ssb_y - hcr_lower * ssb_0) * ((hcr_upper * ssb_0 / ssb_y) / (hcr_upper * ssb_0 - hcr_lower * ssb_0)))
     c_new <- fct * f_x * v
   }
 
