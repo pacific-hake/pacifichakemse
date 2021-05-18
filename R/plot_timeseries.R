@@ -37,8 +37,7 @@ plot_timeseries <- function(ps = NULL,
                             ci_lines = TRUE,
                             show_ci = TRUE,
                             show_ssb0 = TRUE,
-                            show_40_10 = TRUE,
-                            show_25 = FALSE,
+                            show_hcr = TRUE,
                             rev_scenarios = FALSE,
                             legend_position = c(0.26, 0.85),
                             ssb_line_txt_cex = 0.8,
@@ -64,8 +63,7 @@ plot_timeseries <- function(ps = NULL,
   verify_argument(ci_lines, "logical", 1)
   verify_argument(show_ci, "logical", 1)
   verify_argument(show_ssb0, "logical", 1)
-  verify_argument(show_40_10, "logical", 1)
-  verify_argument(show_25, "logical", 1)
+  verify_argument(show_hcr, "logical", 1)
 
   if(type == "ssb"){
     if(by_country){
@@ -231,43 +229,42 @@ plot_timeseries <- function(ps = NULL,
                  linetype = ssb_line_type)
   }
 
-  if(show_40_10 && type %in% c("ssb", "ssb_ssb0")){
+  if(show_hcr && type %in% c("ssb", "ssb_ssb0")){
     if(type == "ssb"){
-      ssb40_lab <- as.expression(bquote(SSB[.(0.4)] == .(round(ssb0 * 0.4, 2))))
-      ssb10_lab <- as.expression(bquote(SSB[.(0.1)] == .(round(ssb0 * 0.1, 2))))
+      hcr_upper_vals <- map(ps$sim_data, ~{
+        .x[[1]]$hcr_upper
+      })
+      hcr_upper_vals <- hcr_upper_vals[!map_lgl(hcr_upper_vals, is.null)]
+      if(length(unique(hcr_upper_vals)) != 1){
+        stop("There is more than one hcr_upper value in the list given, cannot plot more than one upper HCR line", call. = FALSE)
+      }
+      hcr_upper_val <- unique(hcr_upper_vals)[[1]]
+      hcr_lower_vals <- map(ps$sim_data, ~{
+        .x[[1]]$hcr_lower
+      })
+      hcr_lower_vals <- hcr_lower_vals[!map_lgl(hcr_lower_vals, is.null)]
+      if(length(unique(hcr_lower_vals)) != 1){
+        stop("There is more than one hcr_lower value in the list given, cannot plot more than one lower HCR line", call. = FALSE)
+      }
+      hcr_lower_val <- unique(hcr_lower_vals)[[1]]
+      ssb_upper_lab <- as.expression(bquote(SSB[.(hcr_upper_val)] == .(round(ssb0 * hcr_upper_val, 2))))
+      ssb_lower_lab <- as.expression(bquote(SSB[.(hcr_lower_val)] == .(round(ssb0 * hcr_lower_val, 2))))
     }else{
-      ssb40_lab <- as.expression(bquote(SSB[.(0.4)]))
-      ssb10_lab <- as.expression(bquote(SSB[.(0.1)]))
+      ssb_upper_lab <- as.expression(bquote(SSB[.(hcr_upper_val)]))
+      ssb_lower_lab <- as.expression(bquote(SSB[.(hcr_lower_val)]))
     }
     b_brks <- c(b_brks,
-                round(ssb0 * 0.4, 2),
-                round(ssb0 * 0.1, 2))
+                round(ssb0 * hcr_upper_val, 2),
+                round(ssb0 * hcr_lower_val, 2))
     b_lbls <- c(b_lbls,
-                ssb40_lab,
-                ssb10_lab)
+                ssb_upper_lab,
+                ssb_lower_lab)
 
     g <- g +
-      geom_hline(aes(yintercept = ssb0 * 0.4),
+      geom_hline(aes(yintercept = ssb0 * hcr_upper_val),
                  color = ssb_line_col,
                  linetype = ssb_line_type) +
-      geom_hline(aes(yintercept = ssb0 * 0.1),
-                 color = ssb_line_col,
-                 linetype = ssb_line_type)
-  }
-
-  if(show_25 && type %in% c("ssb", "ssb_ssb0")){
-    if(type == "ssb"){
-      ssb25_lab <- as.expression(bquote(SSB[.(0.25)] == .(round(ssb0 * 0.25, 2))))
-    }else{
-      ssb25_lab <- as.expression(bquote(SSB[.(0.25)]))
-    }
-    b_brks <- c(b_brks,
-                round(ssb0 * 0.25, 2))
-    b_lbls <- c(b_lbls,
-                ssb25_lab)
-
-    g <- g +
-      geom_hline(aes(yintercept = ssb0 * 0.25),
+      geom_hline(aes(yintercept = ssb0 * hcr_lower_val),
                  color = ssb_line_col,
                  linetype = ssb_line_type)
   }

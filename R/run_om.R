@@ -13,6 +13,10 @@
 run_om <- function(om = NULL,
                    yrs = om$yrs,
                    random_seed = NULL,
+                   hcr_apply = FALSE,
+                   hcr_lower,
+                   hcr_upper,
+                   hcr_fspr,
                    ...){
 
   verify_argument(om, "list")
@@ -22,5 +26,17 @@ run_om <- function(om = NULL,
 
   om <- init_agebased_model(om)
 
-  run_year_loop_om(om, yrs = yrs, ...)
+  om <- run_year_loop_om(om, yrs = yrs,
+                         hcr_apply = hcr_apply,
+                         hcr_lower = hcr_lower,
+                         hcr_upper = hcr_upper,
+                         hcr_fspr = hcr_fspr,
+                         ...)
+
+  # Save the HCR reference points used for reporting/plotting later
+  om$hcr_lower <- ifelse(hcr_apply, hcr_lower, NA)
+  om$hcr_upper <- ifelse(hcr_apply, hcr_upper, NA)
+  om$hcr_fspr <- ifelse(hcr_apply, hcr_fspr, NA)
+
+  om
 }
