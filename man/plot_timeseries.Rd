@@ -15,8 +15,9 @@ plot_timeseries(
   ci_lines = TRUE,
   show_ci = TRUE,
   show_ssb0 = TRUE,
-  show_40_10 = TRUE,
-  show_25 = FALSE,
+  show_hcr = TRUE,
+  show_hcr_values = TRUE,
+  show_y_values = TRUE,
   rev_scenarios = FALSE,
   legend_position = c(0.26, 0.85),
   ssb_line_txt_cex = 0.8,
@@ -51,8 +52,13 @@ the limits of the data are used.}
 \item{show_ssb0}{If \code{TRUE}, show the initial biomass, SSB0 line.
 Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
 
-\item{show_40_10}{If \code{TRUE}, show the 0.4 initial biomass and 0.1 initial biomass lines.
+\item{show_hcr}{If \code{TRUE}, show the 0.4 initial biomass and 0.1 initial biomass lines.
 Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
+
+\item{show_hcr_values}{If \code{TRUE}, show the SSB values for the HCR lines in the margin
+Only used if \code{type} is 'ssb' or 'ssb_ssb0'.}
+
+\item{show_y_values}{If \code{TRUE}, show the Y-axis values}
 
 \item{rev_scenarios}{If \code{TRUE}, reverse the order of the scenarios in the legend.}
 

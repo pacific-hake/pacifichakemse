@@ -15,8 +15,11 @@
 #' @param show_ci If `TRUE`, show the confidence interval, if `FALSE`, only show the median
 #' @param show_ssb0 If `TRUE`, show the initial biomass, SSB0 line.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
-#' @param show_40_10 If `TRUE`, show the 0.4 initial biomass and 0.1 initial biomass lines.
+#' @param show_hcr If `TRUE`, show the 0.4 initial biomass and 0.1 initial biomass lines.
 #' Only used if `type` is 'ssb' or 'ssb_ssb0'.
+#' @param show_hcr_values If `TRUE`, show the SSB values for the HCR lines in the margin
+#' Only used if `type` is 'ssb' or 'ssb_ssb0'.
+#' @param show_y_values If `TRUE`, show the Y-axis values
 #' @param rev_scenarios If `TRUE`, reverse the order of the scenarios in the legend.
 #' @param legend_position A vector of two - X and Y position for the legend. See [ggplot2::theme()]
 #' @param ssb_line_txt_cex Size multiplier for SSB reference point line labels.
@@ -38,6 +41,8 @@ plot_timeseries <- function(ps = NULL,
                             show_ci = TRUE,
                             show_ssb0 = TRUE,
                             show_hcr = TRUE,
+                            show_hcr_values = TRUE,
+                            show_y_values = TRUE,
                             rev_scenarios = FALSE,
                             legend_position = c(0.26, 0.85),
                             ssb_line_txt_cex = 0.8,
@@ -84,8 +89,8 @@ plot_timeseries <- function(ps = NULL,
       }
     }
     # SSB0 - All scenarios and runs are the same so just use the first scenario, first run
-    ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0) / 2 * 1e-6
-    y_factor <- 1e-6 / 2
+    ssb0 <- sum(ps$sim_data[[1]][[1]]$ssb_0) * 1e-6
+    y_factor <- 1e-6
   }else if(type == "ssb_ssb0"){
     ssb0 <- 1
     subsc <- 0
@@ -193,6 +198,12 @@ plot_timeseries <- function(ps = NULL,
                     ylim = ylim) +
     theme(legend.title = element_blank())
 
+  if(!show_y_values){
+    g <- g +
+      theme(axis.text.y.left = element_blank(),
+            axis.ticks.y = element_blank())
+  }
+
   if(show_ci){
     if(ci_lines){
       if(by_country){
@@ -246,13 +257,20 @@ plot_timeseries <- function(ps = NULL,
       if(length(unique(hcr_lower_vals)) != 1){
         stop("There is more than one hcr_lower value in the list given, cannot plot more than one lower HCR line", call. = FALSE)
       }
+
       hcr_lower_val <- unique(hcr_lower_vals)[[1]]
-      ssb_upper_lab <- as.expression(bquote(SSB[.(hcr_upper_val)] == .(round(ssb0 * hcr_upper_val, 2))))
-      ssb_lower_lab <- as.expression(bquote(SSB[.(hcr_lower_val)] == .(round(ssb0 * hcr_lower_val, 2))))
+      if(!show_hcr_values){
+        ssb_upper_lab <- as.expression(bquote(SSB[upper]))
+        ssb_lower_lab <- as.expression(bquote(SSB[lower]))
+      }else{
+        ssb_upper_lab <- as.expression(bquote(SSB[.(hcr_upper_val)] == .(round(ssb0 * hcr_upper_val, 2))))
+        ssb_lower_lab <- as.expression(bquote(SSB[.(hcr_lower_val)] == .(round(ssb0 * hcr_lower_val, 2))))
+      }
     }else{
       ssb_upper_lab <- as.expression(bquote(SSB[.(hcr_upper_val)]))
       ssb_lower_lab <- as.expression(bquote(SSB[.(hcr_lower_val)]))
     }
+
     b_brks <- c(b_brks,
                 round(ssb0 * hcr_upper_val, 2),
                 round(ssb0 * hcr_lower_val, 2))
