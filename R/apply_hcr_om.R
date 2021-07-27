@@ -121,7 +121,8 @@ apply_hcr_om <- function(
   depl <- ssb_y / ssb_0
 
   if(depl < hcr_lower){
-    c_new <- 0.05 * v
+    c_new <- 0
+    #c_new <- 0.05 * v
   }else if(depl > hcr_upper){
     c_new <- f_x * v
   }else{
