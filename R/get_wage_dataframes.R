@@ -8,9 +8,6 @@
 get_wa_dfs <- function(lst = NULL,
                        yr = NULL){
 
-  verify_argument(lst, "list")
-  verify_argument(yr, c("integer", "numeric"))
-
   # If in a year past the end of the conditioned time period, return the start year weight-at-age data
   yr <- ifelse(yr <= lst$m_yr, yr, lst$s_yr)
   out <- NULL

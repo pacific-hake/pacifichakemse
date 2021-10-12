@@ -14,16 +14,13 @@ get_select <- function(ages = NULL,
                        s_min = NULL,
                        s_max = NULL){
 
-  verify_argument(ages, "integer")
-  verify_argument(p_sel, "tbl_df")
-  verify_argument(s_min, "numeric", 1)
-  verify_argument(s_max, "numeric", 1)
   stopifnot(s_min < s_max)
   stopifnot(sum(!is.na(match(s_min:s_max, ages))) == length(s_min:s_max))
 
   n_age <- length(ages)
   sel <- rep(NA, n_age)
-  p_sel_val <- c(0, p_sel %>% pull(value))
+  p_sel_val <- c(0, unlist(p_sel[, names(p_sel) == "value"]))
+  #p_sel_val <- c(0, p_sel %>% pull(value))
   p_max <- max(cumsum(p_sel_val))
 
   for(i in seq_along(ages)){

@@ -571,13 +571,7 @@ setup_blank_om_objects <- function(yrs = NULL,
 get_age_dat <- function(d = NULL,
                         yr = NULL){
 
-  verify_argument(d, "data.frame")
-  verify_argument(yr, c("integer", "numeric"))
-  stopifnot("Yr" %in% names(d))
-
-  # Using the pipes here significantly slows down the code, so use base code
-  #d %>% filter(Yr %in% yr) %>% select(-c(Yr))
-  d[d$Yr %in% yr, -1]
+  unlist(d[d$Yr == yr,])[-1]
 }
 
 #' Modify the `yr` row in the `wage` [data.frame], copying data from the `yr_copy` row
@@ -710,9 +704,6 @@ append_objs_to_list <- function(lst = NULL,
 #' @return A [data.frame]
 format_wage_df <- function(df = NULL,
                            fleet = NULL){
-
-  verify_argument(df, "data.frame")
-  verify_argument(fleet, c("integer", "numeric"), 1)
 
   df %>%
     filter(Fleet == fleet) %>%

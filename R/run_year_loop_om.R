@@ -26,7 +26,7 @@ run_year_loop_om <- function(om = NULL,
     yr_ind <- which(yr == om$yrs)
     wage <- get_wa_dfs(om, yr)
 
-    r_y <- om$parameters$r_in %>% filter(yr == !!yr) %>% pull(value)
+    r_y <- om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value
     m_yrs <- om$m_age
     # M is distributed throughout the yrs
     m_season <- m_yrs / om$n_season
@@ -161,10 +161,11 @@ run_year_loop_om <- function(om = NULL,
       rowSums(tmp)
     })
     # Aggregate catch-at-age by space
-    catch_tmp <- catch_tmp %>%
-      set_names(seq_len(length(catch_tmp))) %>%
-      bind_rows() %>%
-      as.matrix()
+    catch_tmp <- catch_tmp %>% do.call(rbind, .)
+    # catch_tmp <- catch_tmp %>%
+    #   set_names(seq_len(length(catch_tmp))) %>%
+    #   bind_rows() %>%
+    #   as.matrix()
     # Calculate catch totals by space by summing the catch-at-age for each space
     catch_tot <- map_dbl(seq_len(om$n_space), ~{
       sum(om$catch_n_save_age[, yr_ind, .x,])

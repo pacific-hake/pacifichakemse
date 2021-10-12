@@ -92,10 +92,8 @@ run_season_loop_om <- function(om,
       # Calculate catch space -------------------------------------------------
       if(om$n_space > 1){
         if(yr <= om$m_yr){
-          catch_space <- om$catch_country %>%
-            filter(year == yr) %>%
-            select(contains(paste0("space", space))) %>%
-            pull()
+          space_col <- paste0("space", space)
+          catch_space <- om$catch_country[om$catch_country$year == yr, space_col][[1]]
         }else{
           if(is_tibble(om$catch_obs)){
             catch_space <- om$catch_obs[yr_ind, ]$value
@@ -121,20 +119,24 @@ run_season_loop_om <- function(om,
                                 yr_ind = yr_ind,
                                 ...)
       }
+      space_seas_catch_prop <- as.numeric(om$catch_props_space_season[space, season])
       if(yr > om$m_yr){
         e_tmp <- e_tmp *
           om$f_space[space] *
           ifelse(attain[space] == 0, 1, attain[space]) *
-          pull(om$catch_props_space_season[space, season])
+          space_seas_catch_prop
       }else{
         e_tmp <- e_tmp *
           om$f_space[space] *
-          pull(om$catch_props_space_season[space, season])
+          space_seas_catch_prop
       }
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
-        col <- sym(grep(paste0("space", space), names(om$catch_country), value = TRUE))
-        tmp_space_catch <- pull(om$catch_country[yr_ind, col])
+        col <- paste0("space", space)
+        tmp_space_catch <- om$catch_country[om$catch_country[["year"]] == yr, ]
+        tmp_space_catch <- unlist(tmp_space_catch[, names(tmp_space_catch) == col])
+        #col <- sym(grep(paste0("space", space), names(om$catch_country), value = TRUE))
+        #tmp_space_catch <- pull(om$catch_country[yr_ind, col])
         tmp_space_catch <- ifelse(is.na(tmp_space_catch), 0, tmp_space_catch)
         if(season == 1){
           tmp_space_catch <- 0
@@ -145,6 +147,7 @@ run_season_loop_om <- function(om,
             om$catch_country[yr_ind, "space2"]
         }
       }
+
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
@@ -265,7 +268,8 @@ run_season_loop_om <- function(om,
       if(yr_ind == 1 && season == 1){
         om$ssb_all[1, space, season] <<- om$init_ssb_all[space]
       }else{
-        om$ssb_all[yr_ind, space, season] <<- sum(om$n_save_age[, yr_ind, space, season] * mat_sel, na.rm = TRUE)
+        mat_sel_vec <- mat_sel %>% unlist
+        om$ssb_all[yr_ind, space, season] <<- sum(om$n_save_age[, yr_ind, space, season] * mat_sel_vec, na.rm = TRUE)
       }
       om$catch_n_save_age[, yr_ind, space, season] <<- (om$f_season_save[, yr_ind, space, season] / z) *
         (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]

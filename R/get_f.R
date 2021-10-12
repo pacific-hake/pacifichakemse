@@ -22,13 +22,6 @@ get_f <- function(e_tmp = NULL,
                   wage_catch = NULL,
                   method = "Hybrid"){
 
-  verify_argument(e_tmp, "numeric", 1)
-  verify_argument(b_tmp, "numeric", 1)
-  verify_argument(m_season, "numeric")
-  verify_argument(f_sel, "numeric")
-  verify_argument(n_tmp, "numeric")
-  verify_argument(wage_catch, "numeric")
-  verify_argument(method, "character", 1)
   stopifnot(length(m_season) == length(f_sel))
   stopifnot(length(f_sel) == length(n_tmp))
   stopifnot(length(n_tmp) == length(wage_catch))

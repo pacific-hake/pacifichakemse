@@ -104,12 +104,12 @@ get_ref_point <- function(pars,
 
   ssb_new <- sum(mat_sel * n_eq) * 0.5
   spr_new <- ssb_new / ssb_0
+
   f_new <- f_xx$par
   v <- sum(n_end * c_w * f_sel)
   # Convert to harvest rate
   f_x <- 1 - exp(-f_new)
   depl <- ssb_y / ssb_0
-
 
   if(depl < hcr_lower){
     c_new <- 0
