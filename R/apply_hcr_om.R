@@ -43,11 +43,7 @@ apply_hcr_om <- function(
                        om$s_max)
   f_sel <- (f_sel1 + f_sel2) / 2
 
-  c_w <- om$wage_catch_df %>%
-    filter(Yr == yr - 1) %>%
-    select(-Yr) %>%
-    unlist(use.names = FALSE)
-
+  c_w <- om$wage_catch_df[om$wage_catch_df[, "Yr"] == yr - 1, -1]
   m_age <- rep(m_est, om$n_age)
   n_0 <- r_0
   for(a in 1:(om$n_age - 1)){

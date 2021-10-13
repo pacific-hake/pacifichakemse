@@ -386,14 +386,6 @@ load_ss_model_data <- function(s_min = 1,
                                selex_fill_val = 1,
                                ...){
 
-  verify_argument(s_min, c("integer", "numeric"), 1)
-  verify_argument(s_max, c("integer", "numeric"), 1)
-  verify_argument(s_min_survey, c("integer", "numeric"), 1)
-  verify_argument(s_max_survey, c("integer", "numeric"), 1)
-  verify_argument(weight_factor, c("integer", "numeric"), 1)
-  verify_argument(n_space, c("integer", "numeric"), 1)
-  verify_argument(selex_fill_val, c("integer", "numeric"), 1)
-
   rds_file <- create_rds_file(...)
   ss_model <- readRDS(rds_file)
 
@@ -435,14 +427,22 @@ load_ss_model_data <- function(s_min = 1,
     lst$catch_obs[lst$catch_obs$yr == 2008,]$value + 1
 
   # Weight-at-age data --------------------------------------------------------
-  waa <- ss_model$wtatage %>%
-    as_tibble() %>%
-    select(-c(Seas, Sex, Bio_Pattern, BirthSeas)) %>%
-    filter(Yr %in% yrs)
-  lst$wage_catch_df <- format_wage_df(waa, 1)
-  lst$wage_survey_df <- format_wage_df(waa, 2)
-  lst$wage_mid_df <- format_wage_df(waa, -1)
-  lst$wage_ssb_df <- format_wage_df(waa, -2)
+  waa <- ss_model$wtatage[!names(ss_model$wtatage) %in% c("Seas", "Sex", "Bio_Pattern", "BirthSeas")]
+  lst$wage_catch_df <- waa[waa[["Fleet"]] == 1,]
+  lst$wage_catch_df <- lst$wage_catch_df[names(lst$wage_catch_df) != "Fleet"]
+  lst$wage_catch_df <- lst$wage_catch_df[lst$wage_catch_df[["Yr"]] <= lst$m_yr,]
+
+  lst$wage_survey_df <- waa[waa[["Fleet"]] == 2,]
+  lst$wage_survey_df <- lst$wage_survey_df[names(lst$wage_survey_df) != "Fleet"]
+  lst$wage_survey_df <- lst$wage_survey_df[lst$wage_survey_df[["Yr"]] <= lst$m_yr,]
+
+  lst$wage_mid_df <- waa[waa[["Fleet"]] == -1,]
+  lst$wage_mid_df <- lst$wage_mid_df[names(lst$wage_mid_df) != "Fleet"]
+  lst$wage_mid_df <- lst$wage_mid_df[lst$wage_mid_df[["Yr"]] <= lst$m_yr,]
+
+  lst$wage_ssb_df <- waa[waa[["Fleet"]] == -2,]
+  lst$wage_ssb_df <- lst$wage_ssb_df[names(lst$wage_ssb_df) != "Fleet"]
+  lst$wage_ssb_df <- lst$wage_ssb_df[lst$wage_ssb_df[["Yr"]] <= lst$m_yr,]
 
   # Maturity from first year only ---------------------------------------------
   lst$mat_sel <- lst$wage_ssb[1,]

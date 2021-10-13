@@ -571,7 +571,8 @@ setup_blank_om_objects <- function(yrs = NULL,
 get_age_dat <- function(d = NULL,
                         yr = NULL){
 
-  unlist(d[d$Yr == yr,])[-1]
+  d[d[,"Yr"] == yr, -1]
+  #unlist(d[d$Yr == yr,])[-1]
 }
 
 #' Modify the `yr` row in the `wage` [data.frame], copying data from the `yr_copy` row
@@ -694,20 +695,6 @@ append_objs_to_list <- function(lst = NULL,
          call. = FALSE)
   }
   lst
-}
-
-#' Extract the weight-at-age data for the given Fleet
-#'
-#' @param df A weight-at-age [data.frame]
-#' @param fleet The fleet number to extract
-#'
-#' @return A [data.frame]
-format_wage_df <- function(df = NULL,
-                           fleet = NULL){
-
-  df %>%
-    filter(Fleet == fleet) %>%
-    select(-Fleet)
 }
 
 #' Convert the output of [format_wage_df()] into a matrix of correct dimensions

@@ -37,9 +37,7 @@ run_season_loop_om <- function(om,
                                const_catch = FALSE,
                                ...){
 
-  verify_argument(om, "list")
-
-  mat_sel <- om$mat_sel %>% select(-Yr)
+  mat_sel <- om$mat_sel[-1]
   # Begin season loop ---------------------------------------------------------
   map(seq_len(om$n_season), function(season = .x){
     if(verbose){
@@ -51,7 +49,9 @@ run_season_loop_om <- function(om,
         cat(yellow("      Space:", space, "\n"))
       }
       # Calculate selectivity -------------------------------------------------
-      p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == space,]
+      #browser()
+      p_sel <- om$parameters$p_sel_fish %>% filter(space == !!space)
+      #p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == space,]
       p_sel_yrs <- om$sel_by_yrs
       if(om$flag_sel[yr_ind]){
         p_sel$value <- p_sel$value +
@@ -150,7 +150,7 @@ run_season_loop_om <- function(om,
 
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
-      wage_catch <- om$wage_catch_df %>% get_age_dat(yr) %>% unlist()
+      wage_catch <- om$wage_catch_df %>% get_age_dat(yr)
       b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel, na.rm = TRUE)
       om$v_save[yr_ind, space, season] <<- b_tmp
       om$catch_quota[yr_ind, space, season] <<- e_tmp

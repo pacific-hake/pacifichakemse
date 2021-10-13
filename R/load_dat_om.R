@@ -81,38 +81,6 @@ load_data_om <- function(ss_model = NULL,
                          include_recruitment = TRUE,
                          ...){
 
-  verify_argument(ss_model, "list")
-  verify_argument(yr_future, c("integer", "numeric"), 1)
-  verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
-  verify_argument(n_season, c("numeric", "integer"), 1, 1:4)
-  verify_argument(season_names, "character", n_season)
-  verify_argument(n_space, c("numeric", "integer"), 1, 1:2)
-  verify_argument(space_names, "character", n_space)
-  if(!is.null(ages)){
-    verify_argument(ages, c("numeric", "integer"))
-    verify_argument(age_names, "character", length(ages))
-  }
-  verify_argument(rdev_sd, c("numeric", "integer"), 1)
-  if(!is.null(move_init)){
-    stopifnot(class(move_init) == "numeric")
-    stopifnot(length(move_init) == 1)
-  }
-  verify_argument(move_max_init, "numeric", 1)
-  verify_argument(move_fifty_init, "numeric", 1)
-  verify_argument(move_out, "numeric", 1)
-  verify_argument(move_south, "numeric", 1)
-  verify_argument(move_slope, "numeric", 1)
-  verify_argument(ages_no_move, c("numeric", "integer"))
-  verify_argument(selectivity_change, c("numeric", "integer"), 1)
-  verify_argument(s_min, c("numeric", "integer"), 1)
-  verify_argument(s_max, c("numeric", "integer"), 1)
-  verify_argument(s_min_survey, c("numeric", "integer"), 1)
-  verify_argument(s_max_survey, c("numeric", "integer"), 1)
-  verify_argument(b_future, "numeric", 1)
-  verify_argument(sel_change_yr, c("numeric", "integer"), 1)
-  verify_argument(f_space, "numeric", n_space)
-  verify_argument(log_phi_survey, "numeric", 1)
-
   # Throw error if the number of simulation years is exactly 1
   stopifnot(yr_future >= 0 & yr_future != 1)
   # Throw error if move_init is NULL and n_space is not 2
@@ -283,12 +251,14 @@ load_data_om <- function(ss_model = NULL,
   lst$wage_survey_df <- ss_model$wage_survey_df
   lst$wage_ssb_df <- ss_model$wage_ssb_df
   lst$wage_mid_df <- ss_model$wage_mid_df
+
   # Add `lst$n_future_yrs` new rows to the data frame, which are copies of row `row`.
   # It is assumed the column `Yr` exists and `lst$future_yrs` will be used as the names
   # for the new years in the appended rows.
   add_yrs <- function(df, row = 1){
     if(lst$n_yr > nrow(df)){
       new_df <- df %>%
+        as_tibble() %>%
         slice(rep(row, each = lst$n_future_yrs)) %>%
         mutate(Yr = lst$future_yrs)
       if(!populate_future){
@@ -297,13 +267,12 @@ load_data_om <- function(ss_model = NULL,
       df <- df %>%
         bind_rows(new_df)
     }
-    df
+    df %>% as.matrix()
   }
   lst$wage_catch_df <- add_yrs(lst$wage_catch_df)
   lst$wage_survey_df <- add_yrs(lst$wage_survey_df)
   lst$wage_ssb_df <- add_yrs(lst$wage_ssb_df)
   lst$wage_mid_df <- add_yrs(lst$wage_mid_df)
-
 
   # Create empty objects for OM------------------------------------------------
   lst <- append(lst, setup_blank_om_objects(yrs = lst$yrs,
