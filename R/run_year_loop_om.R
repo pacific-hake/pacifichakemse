@@ -98,9 +98,7 @@ run_year_loop_om <- function(om = NULL,
     })
 
     if(om$move){
-      n_surv <- n_surv %>%
-        set_names(seq_len(length(n_surv))) %>%
-        bind_rows()
+      n_surv <- n_surv %>% do.call(rbind, .)
       # Take the sum of all the spaces (areas)
       n_surv <- n_surv %>% apply(2, sum)
     }

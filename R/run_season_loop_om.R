@@ -49,9 +49,7 @@ run_season_loop_om <- function(om,
         cat(yellow("      Space:", space, "\n"))
       }
       # Calculate selectivity -------------------------------------------------
-      #browser()
-      p_sel <- om$parameters$p_sel_fish %>% filter(space == !!space)
-      #p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == space,]
+      p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == space,]
       p_sel_yrs <- om$sel_by_yrs
       if(om$flag_sel[yr_ind]){
         p_sel$value <- p_sel$value +
@@ -143,8 +141,9 @@ run_season_loop_om <- function(om,
         }
         om$catch_country[yr_ind, col] <<- tmp_space_catch + e_tmp
         if(season == 4 & space == 2){
-          om$catch_country[yr_ind, "total"] <<- om$catch_country[yr_ind, "space1"] +
-            om$catch_country[yr_ind, "space2"]
+          #om$catch_country[yr_ind, "total"] <<- om$catch_country[yr_ind, "space1"] +
+          #  om$catch_country[yr_ind, "space2"]
+          om$catch_country[yr_ind, "total"] <<- sum(om$catch_country[yr_ind, c("space1", "space2")])
         }
       }
 

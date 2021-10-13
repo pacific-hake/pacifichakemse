@@ -29,10 +29,8 @@ apply_hcr_om <- function(
   r_0 <- exp(pars$log_r_init)
   m_est <- exp(pars$log_m_init)
   h <- exp(pars$log_h)
-  p_sel1 <- pars$p_sel_fish %>%
-    filter(space == 1)
-  p_sel2 <- pars$p_sel_fish %>%
-    filter(space == 2)
+  p_sel1 <- pars$p_sel_fish[pars$p_sel_fish$space == 1, ]
+  p_sel2 <- pars$p_sel_fish[pars$p_sel_fish$space == 2, ]
   f_sel1 <- get_select(om$ages,
                        p_sel1,
                        om$s_min,
@@ -52,7 +50,8 @@ apply_hcr_om <- function(
   # Adjust plus group sum of geometric series as a/(1-r)
   n_0[om$n_age] <- n_0[om$n_age] / (1 - m_age[om$n_age])
 
-  mat_sel <- om$mat_sel %>% select(-Yr) %>% unlist(use.names = FALSE)
+  #mat_sel <- as.numeric(as.matrix(om$mat_sel[1, -1]))
+  mat_sel <- as.numeric(om$mat_sel[1, -1])
   ssb_age <- mat_sel * n_0 * 0.5
   ssb_0 <- sum(ssb_age)
 
@@ -80,10 +79,11 @@ apply_hcr_om <- function(
   # Calculate the F_SPR40% (hcr_fspr) reference point
   get_f <- function(par, n_1, ssb_eq, f_sel, r_0, ssb_0){
     z_age <- m_age + par[1] * f_sel
+    exp_z_age <- exp(-z_age)
     n_1 <- NULL
     n_1[1] <- r_0
     for(a in 1:(om$n_age - 1)){
-      n_1[a + 1] <- n_1[a] * exp(-z_age[a])
+      n_1[a + 1] <- n_1[a] * exp_z_age[a]
     }
     # Adjust plus group sum of geometric series as a/(1-r)
     n_1[om$n_age] <- n_1[om$n_age] / (1 - z_age[om$n_age])
