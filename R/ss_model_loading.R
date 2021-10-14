@@ -445,7 +445,7 @@ load_ss_model_data <- function(s_min = 1,
   lst$wage_ssb_df <- lst$wage_ssb_df[lst$wage_ssb_df[["Yr"]] <= lst$m_yr,]
 
   # Maturity from first year only ---------------------------------------------
-  lst$mat_sel <- lst$wage_ssb[1,]
+  lst$mat_sel <- as.matrix(lst$wage_ssb[1,])
 
   lst$parms_scalar <- load_ss_parameters(ss_model)
   lst$age_survey <- extract_age_comps(ss_model,

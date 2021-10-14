@@ -50,8 +50,7 @@ apply_hcr_om <- function(
   # Adjust plus group sum of geometric series as a/(1-r)
   n_0[om$n_age] <- n_0[om$n_age] / (1 - m_age[om$n_age])
 
-  #mat_sel <- as.numeric(as.matrix(om$mat_sel[1, -1]))
-  mat_sel <- as.numeric(om$mat_sel[1, -1])
+  mat_sel <- om$mat_sel[1, -1]
   ssb_age <- mat_sel * n_0 * 0.5
   ssb_0 <- sum(ssb_age)
 
@@ -65,7 +64,9 @@ apply_hcr_om <- function(
   z_age <- (z_age1 + z_age2) / 2
 
   # Portion the R0 value into the areas based on apportionment
-  n_1 <- r_0
+  # Pre-allocate vector makes it faster than increasing its size at every iteration
+  n_1 <- vector(mode = "numeric", length = length(1:(om$n_age - 1)))
+  n_1[1] <- r_0
   for(a in 1:(om$n_age - 1)){
     n_1[a + 1] <- n_1[a] * exp(-z_age[a])
   }
@@ -79,11 +80,11 @@ apply_hcr_om <- function(
   # Calculate the F_SPR40% (hcr_fspr) reference point
   get_f <- function(par, n_1, ssb_eq, f_sel, r_0, ssb_0){
     z_age <- m_age + par[1] * f_sel
-    exp_z_age <- exp(-z_age)
-    n_1 <- NULL
+    # Pre-allocate vector makes it faster than increasing its size at every iteration
+    n_1 <- vector(mode = "numeric", length = length(1:(om$n_age - 1)))
     n_1[1] <- r_0
     for(a in 1:(om$n_age - 1)){
-      n_1[a + 1] <- n_1[a] * exp_z_age[a]
+      n_1[a + 1] <- n_1[a] * exp(-z_age[a])
     }
     # Adjust plus group sum of geometric series as a/(1-r)
     n_1[om$n_age] <- n_1[om$n_age] / (1 - z_age[om$n_age])
@@ -133,11 +134,16 @@ apply_hcr_om <- function(
   if(length(tac) == 1){
     # Floor 50%
     c_exp <- c_new * 0.5
-    c_exp <- ifelse(c_exp < catch_floor, catch_floor, c_exp)
+    if(c_exp < catch_floor){
+      c_exp <- catch_floor
+    }
   }else{
     c_exp <- tac[1] + tac[2] * c_new
   }
 
   # Never go over the JTC recommendation
-  ifelse(c_exp > c_new, c_new, c_exp)
+  if(c_exp > c_new){
+    c_exp <- c_new
+  }
+  c_exp
 }

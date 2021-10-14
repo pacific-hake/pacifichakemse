@@ -34,9 +34,15 @@ run_om <- function(om = NULL,
                          ...)
 
   # Save the HCR reference points used for reporting/plotting later
-  om$hcr_lower <- ifelse(hcr_apply, hcr_lower, NA)
-  om$hcr_upper <- ifelse(hcr_apply, hcr_upper, NA)
-  om$hcr_fspr <- ifelse(hcr_apply, hcr_fspr, NA)
+  if(hcr_apply){
+    om$hcr_lower <- hcr_lower
+    om$hcr_upper <- hcr_upper
+    om$hcr_fspr <- hcr_fspr
+  }else{
+    om$hcr_lower <- NA
+    om$hcr_upper <- NA
+    om$hcr_fspr <- NA
+  }
 
   om
 }

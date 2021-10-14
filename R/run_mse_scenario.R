@@ -44,7 +44,11 @@ run_mse_scenario <- function(om = NULL,
 
   # Survey years setup ---------------------------------------------------------
   # Calculate survey years, where odd years are survey years
-  first_sim_surv_yr <- ifelse((om$m_yr + 1) %% 2 == 1, om$m_yr + 1, om$m_yr + 2)
+  if((om$m_yr + 1) %% 2 == 1){
+    first_sim_surv_yr <- om$m_yr + 1
+  }else{
+    first_sim_surv_yr <- om$m_yr + 2
+  }
   yr_survey_sims <- seq(first_sim_surv_yr, om$m_yr + 1 + n_sim_yrs, by = om$n_survey)
   # Remove any survey years not included in the simulated years
   yr_survey_sims <- yr_survey_sims[yr_survey_sims %in% om$yrs]

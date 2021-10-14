@@ -33,7 +33,6 @@ init_agebased_model <- function(om = NULL){
   om$q <- exp(om$log_q)
 
   # Maturity and fecundity ----------------------------------------------------
-  om$mat_sel <- om$mat_sel
   om$h <- exp(om$parameters$log_h)
 
   # Numbers-at-age - calculate n0 based on r0 ---------------------------------
@@ -102,7 +101,7 @@ init_agebased_model <- function(om = NULL){
   # Calculate initial year-1 spawning biomass ---------------------------------
   #  by numbers-at-age * weight-at-age (ssb) and
   #  numbers-at-age * selectivity (ssb_all)
-  mat_sel <- om$mat_sel %>% select(-Yr)
+  mat_sel <- om$mat_sel[-1]
   yr_ind <- 1
   wage <- get_wa_dfs(om, om$yrs[yr_ind])
   n_save_age <- om$n_save_age[, yr_ind, , 1] %>% as.data.frame() %>% map(~{.x})

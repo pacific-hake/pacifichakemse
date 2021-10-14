@@ -55,7 +55,7 @@ get_ref_point <- function(pars,
   # Adjust plus group sum of geometric series as a/(1-r)
   n_0[df$n_age] <- n_0[df$n_age] / (1 - m_age[df$n_age])
 
-  mat_sel <- df$mat_sel %>% select(-Yr) %>% unlist(use.names = FALSE)
+  mat_sel <- df$mat_sel[-1]
   ssb_age <- mat_sel * n_0 * 0.5
   ssb_0 <- sum(ssb_age)
 
@@ -129,12 +129,17 @@ get_ref_point <- function(pars,
   if(length(tac) == 1){
     # Floor 50%
     c_exp <- c_new * 0.5
-    c_exp <- ifelse(c_exp < catch_floor, catch_floor, c_exp)
+    if(c_exp < catch_floor){
+      c_exp <- catch_floor
+    }
   }else{
     c_exp <- tac[1] + tac[2] * c_new
   }
+
   # Never go over the JTC recommendation
-  c_exp <- ifelse(c_exp > c_new, c_new, c_exp)
+  if(c_exp > c_new){
+    c_exp <- c_new
+  }
 
   list(c_new = c_exp, f_new = f_new)
 }

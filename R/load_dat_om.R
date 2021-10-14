@@ -93,13 +93,17 @@ load_data_om <- function(ss_model = NULL,
 
   lst <- NULL
   # Only populate the future years if the `yr_future` is >0 which means this
-  # is going to be run in OM-only mode
-  populate_future <- ifelse(yr_future > 0, TRUE, FALSE)
+  # is going to be run in OM-only model
+  populate_future <- yr_future > 0
 
   # Years in OM ---------------------------------------------------------------
   lst$s_yr <- ss_model$s_yr
   lst$m_yr <- ss_model$m_yr
-  lst$n_future_yrs <- ifelse(yr_future == 0, n_sim_yrs, yr_future)
+  if(yr_future == 0){
+    lst$n_future_yrs <- n_sim_yrs
+  }else{
+    lst$n_future_yrs <- yr_future
+  }
   lst$future_yrs <- (lst$m_yr + 1):(lst$m_yr + lst$n_future_yrs)
   lst$yrs <- lst$s_yr:(lst$m_yr + lst$n_future_yrs)
   lst$n_sim_yrs <- n_sim_yrs
@@ -146,9 +150,13 @@ load_data_om <- function(ss_model = NULL,
   lst$s_mul <- 0.5
   lst$sigma_p_sel <- 1.4
   lst$sum_zero <- 0
-  lst$move <- ifelse(lst$n_space == 1, FALSE, TRUE)
+  lst$move <- lst$n_space > 1
   lst$log_phi_survey <- log_phi_survey
-  lst$r_mul <- ifelse(lst$n_space == 2, 1.1, 1)
+  if(lst$n_space > 1){
+    lst$r_mul <- 1.1
+  }else{
+    lst$r_mul <- 1
+  }
 
   # Bias adjustments in OM ----------------------------------------------------
   lst$b <- ss_model$b
@@ -211,11 +219,13 @@ load_data_om <- function(ss_model = NULL,
     as_tibble() %>%
     mutate(value = as.numeric(value))
   if(lst$n_yr > nrow(lst$catch_obs)){
-    new_val <- ifelse(populate_future, mean(lst$catch_obs$value), NA)
-    new_df <- rep(new_val, lst$n_yr - nrow(lst$catch_obs)) %>%
-      as_tibble() %>%
-      mutate(yr = lst$future_yrs) %>%
-      select(yr, value)
+    if(populate_future){
+      new_val <- mean(lst$catch_obs$value)
+    }else{
+      new_val <- NA
+    }
+    new_df <- tibble(yr = lst$future_yrs,
+                     value = rep(new_val, lst$n_yr - nrow(lst$catch_obs)))
     lst$catch_obs <- lst$catch_obs %>%
       bind_rows(new_df)
   }
@@ -257,12 +267,12 @@ load_data_om <- function(ss_model = NULL,
   # for the new years in the appended rows.
   add_yrs <- function(df, row = 1){
     if(lst$n_yr > nrow(df)){
-      new_df <- df %>%
-        as_tibble() %>%
-        slice(rep(row, each = lst$n_future_yrs)) %>%
-        mutate(Yr = lst$future_yrs)
+      new_df <- as.matrix(df[row, ])
+      new_df <- new_df[rep(1, times = lst$n_future_yrs), ]
+      new_df[, 1] <- lst$future_yrs
+      new_df <- as_tibble(new_df)
       if(!populate_future){
-        new_df[,-1] <- NA
+        new_df[, -1] <- NA
       }
       df <- df %>%
         bind_rows(new_df)

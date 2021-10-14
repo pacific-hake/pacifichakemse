@@ -44,9 +44,10 @@ create_tmb_data <- function(om = NULL,
   #   `rownames<-`(inc_yrs)
 
   # Maturity
-  om$mat_sel <- om$mat_sel %>%
-    select(-Yr) %>%
-    unlist(use.names = FALSE)
+  om$mat_sel <- om$mat_sel[-1]
+  # om$mat_sel <- om$mat_sel %>%
+  #   select(-Yr) %>%
+  #   unlist(use.names = FALSE)
 
   # Create matrix versions of the WA data frames
   om$wage_catch <- format_wage_matrix(om$wage_catch_df[1:inc_yr_ind,])

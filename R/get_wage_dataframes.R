@@ -9,7 +9,9 @@ get_wa_dfs <- function(lst = NULL,
                        yr = NULL){
 
   # If in a year past the end of the conditioned time period, return the start year weight-at-age data
-  yr <- ifelse(yr <= lst$m_yr, yr, lst$s_yr)
+  if(yr > lst$m_yr){
+    yr <- lst$s_yr
+  }
   out <- NULL
   out$catch <- get_age_dat(lst$wage_catch_df, yr)
   out$survey <- get_age_dat(lst$wage_survey_df, yr)
