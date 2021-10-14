@@ -366,12 +366,9 @@ load_data_om <- function(ss_model = NULL,
   lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
 
   # Initial Numbers-at-age in OM ----------------------------------------------
-  lst$init_n <- ss_model$init_n %>%
-    as.data.frame() %>%
-    as_tibble() %>%
-    mutate(age = ages[-which(0 %in% ages)]) %>%
-    select(age, everything()) %>%
-    rename(value = 2)
+  lst$init_n <- matrix(ages[-which(0 %in% ages)], ncol = 1)
+  lst$init_n <- cbind(lst$init_n, ss_model$init_n)
+  colnames(lst$init_n) <- c("age", "value")
 
   # Parameters to initialize the OM -------------------------------------------
   lst$parameters <- list(log_r_init = ss_model$parms_scalar$log_r_init + log(lst$r_mul),

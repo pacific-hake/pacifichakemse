@@ -77,12 +77,12 @@ init_agebased_model <- function(om = NULL){
   # Initial numbers-at-age for all older than age 0 ---------------------------
   om$n_init[om$age_1_ind:(om$n_age - 1)] <- om$r0 *
     exp(-om$m_cumu_age[om$age_1_ind:(om$n_age - 1)]) *
-    exp(-0.5 * om$rdev_sd ^ 2 * 0 + om$n_init_dev[1:(om$n_age - 2),]$value)
+    exp(-0.5 * om$rdev_sd ^ 2 * 0 + om$n_init_dev[1:(om$n_age - 2), "value"])
 
   # Plus group (ignore recruitment devs in first yrs ) ------------------------
   om$n_init[om$n_age] <- om$r0 *
     exp(-(om$m_age[om$n_age] * om$ages[om$n_age])) / (1 - exp(-om$m_age[om$n_age])) *
-    exp(-0.5 * om$rdev_sd ^ 2 * 0 + om$n_init_dev[om$n_age - 1,]$value)
+    exp(-0.5 * om$rdev_sd ^ 2 * 0 + om$n_init_dev[om$n_age - 1, "value"])
 
   for(space in seq_len(om$n_space)){
     # Initialize only
