@@ -91,7 +91,7 @@ run_season_loop_om <- function(om,
       if(om$n_space > 1){
         if(yr <= om$m_yr){
           space_col <- paste0("space", space)
-          catch_space <- om$catch_country[om$catch_country$year == yr, space_col][[1]]
+          catch_space <- om$catch_country[om$catch_country[, "year"] == yr, space_col]
         }else{
           if(is_tibble(om$catch_obs)){
             catch_space <- om$catch_obs[yr_ind, ]$value
@@ -133,18 +133,13 @@ run_season_loop_om <- function(om,
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
         col <- paste0("space", space)
-        tmp_space_catch <- om$catch_country[om$catch_country[["year"]] == yr, ]
-        tmp_space_catch <- unlist(tmp_space_catch[, names(tmp_space_catch) == col])
-        #col <- sym(grep(paste0("space", space), names(om$catch_country), value = TRUE))
-        #tmp_space_catch <- pull(om$catch_country[yr_ind, col])
-        tmp_space_catch <- ifelse(is.na(tmp_space_catch), 0, tmp_space_catch)
-        if(season == 1){
+        tmp_space_catch <- om$catch_country[om$catch_country[, "year"] == yr, ]
+        tmp_space_catch <- tmp_space_catch[names(tmp_space_catch) == col]
+        if(season == 1 || is.na(tmp_space_catch)){
           tmp_space_catch <- 0
         }
         om$catch_country[yr_ind, col] <<- tmp_space_catch + e_tmp
         if(season == 4 & space == 2){
-          #om$catch_country[yr_ind, "total"] <<- om$catch_country[yr_ind, "space1"] +
-          #  om$catch_country[yr_ind, "space2"]
           om$catch_country[yr_ind, "total"] <<- sum(om$catch_country[yr_ind, c("space1", "space2")])
         }
       }

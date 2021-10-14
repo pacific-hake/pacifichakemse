@@ -245,6 +245,7 @@ merge_run_data <- function(sim_data = NULL,
 
   # catch_ca ------------------------------------------------------------------
   out$catch_ca <- out$catch_country %>%
+    as_tibble() %>%
     select(year, catch_ca, run) %>%
     rename(catch = catch_ca)
 
@@ -254,6 +255,7 @@ merge_run_data <- function(sim_data = NULL,
 
   # catch_us ------------------------------------------------------------------
   out$catch_us <- out$catch_country %>%
+    as_tibble() %>%
     select(year, catch_us, run) %>%
     rename(catch = catch_us)
 

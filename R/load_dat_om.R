@@ -237,23 +237,24 @@ load_data_om <- function(ss_model = NULL,
   # loading phase.
   #lst$catch <- lst$catch_obs
 
-  lst$catch_country <- ss_model$catch_country %>%
-    mutate(total = can + us) %>%
-    set_names(c("year", "space1", "space2", "total"))
+  lst$catch_country <- ss_model$catch_country %>% cbind(rowSums(ss_model$catch_country[, -1]))
+  colnames(lst$catch_country) <- c("year", "space1", "space2", "total")
+
   # TODO: Check why the sum of the catch country file does not add up to the total in the SS data file
   # lst$catch_obs <- lst$catch_country %>% pull(total)
   # If n_yr greater than the number of catch observations, append the mean catch across
   # time series to the end lst$yrs
   if(lst$n_yr > nrow(lst$catch_country)){
-    new_df <- lst$catch_country %>%
-      summarize_all(mean) %>%
-      slice(rep(1, each = lst$n_future_yrs)) %>%
-      mutate(year = lst$future_yrs)
+    mean_catch <- apply(lst$catch_country[, -1], 2, mean)
+    new_df <- matrix(mean_catch, nrow = 1)
+    new_df <- new_df[rep(1, times = lst$n_future_yrs), ]
+    new_df <- cbind(lst$future_yrs, new_df)
+    colnames(new_df) <- c("year", "space1", "space2", "total")
+
     if(!populate_future){
       new_df[,-1] <- NA
     }
-    lst$catch_country <- lst$catch_country %>%
-      bind_rows(new_df)
+    lst$catch_country <- rbind(lst$catch_country, new_df)
   }
 
   # Weight-at-age in OM -------------------------------------------------------

@@ -40,5 +40,5 @@ extract_catch_country <- function(data_csv_dir = NULL){
     select(year, can, us)
 
   #df$Catch.country <- as.matrix(Catch.country[,2:3])[,c(2,1)]
-  k
+  as.matrix(k)
 }
