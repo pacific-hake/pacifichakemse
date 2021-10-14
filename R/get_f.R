@@ -22,13 +22,6 @@ get_f <- function(e_tmp = NULL,
                   wage_catch = NULL,
                   method = "Hybrid"){
 
-  stopifnot(length(m_season) == length(f_sel))
-  stopifnot(length(f_sel) == length(n_tmp))
-  stopifnot(length(n_tmp) == length(wage_catch))
-  stopifnot(method == "Hybrid")
-
-  # TODO: This function can be simplified significantly
-
   if(e_tmp <= 0){
     return(0)
   }
@@ -45,7 +38,7 @@ get_f <- function(e_tmp = NULL,
     lambda <- (1 - exp(-z_prime)) / z_prime
     tmp <- sum(n_tmp * wage_catch * f_sel * lambda)
     f_tmp <- e_tmp / (tmp + 0.0001)
-    j2 <- (1 + exp(30 * (f_tmp - 0.95))) ^ -1
+    j2 <- 1 / (1 + exp(30 * (f_tmp - 0.95)))
     f_new <- j2 * f_tmp + (1 - j2)
   }
 

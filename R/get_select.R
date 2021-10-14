@@ -14,23 +14,27 @@ get_select <- function(ages = NULL,
                        s_min = NULL,
                        s_max = NULL){
 
-  stopifnot(s_min < s_max)
-  stopifnot(sum(!is.na(match(s_min:s_max, ages))) == length(s_min:s_max))
-
   n_age <- length(ages)
-  sel <- rep(NA, n_age)
+  sel <- rep(NA_real_, n_age)
   p_sel_val <- c(0, p_sel[, "value"])
   #p_max <- max(cumsum(p_sel_val))
   p_max <- sum(p_sel_val)
 
+  # These logicals are set up for speed purposes. It costs a lot to do element comparisons inside a loop
+  ages_less_s_min <- ages < s_min
+  ages_eq_s_min <- ages == s_min
+  ages_less_eq_s_min <- ages_less_s_min | ages_eq_s_min
+  ages_greater_s_max <- ages > s_max
+  ages_greater_eq_s_max <- ages >= s_max
+  ages_between_s_min_s_max <- !ages_less_eq_s_min & !ages_greater_s_max
   for(i in seq_along(ages)){
-    if(ages[i] < s_min){
+    if(ages_less_s_min[i]){
       sel[i] <- 0
       p_tmp <- 0
-    }else if(ages[i] == s_min){
+    }else if(ages_eq_s_min[i]){
       p_tmp <- p_sel_val[i - s_min]
       sel[i] = exp(p_tmp - p_max)
-    }else if(ages[i] > s_min & ages[i] <= s_max){
+    }else if(ages_between_s_min_s_max[i]){
       p_tmp <- p_sel_val[i - s_min] + p_tmp
       sel[i] <- exp(p_tmp - p_max)
     }else{
