@@ -19,7 +19,7 @@ get_select <- function(ages = NULL,
 
   n_age <- length(ages)
   sel <- rep(NA, n_age)
-  p_sel_val <- c(0, p_sel$value)
+  p_sel_val <- c(0, p_sel[, "value"])
   #p_max <- max(cumsum(p_sel_val))
   p_max <- sum(p_sel_val)
 

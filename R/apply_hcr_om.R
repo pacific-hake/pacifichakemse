@@ -29,8 +29,9 @@ apply_hcr_om <- function(
   r_0 <- exp(pars$log_r_init)
   m_est <- exp(pars$log_m_init)
   h <- exp(pars$log_h)
-  p_sel1 <- pars$p_sel_fish[pars$p_sel_fish$space == 1, ]
-  p_sel2 <- pars$p_sel_fish[pars$p_sel_fish$space == 2, ]
+
+  p_sel1 <- pars$p_sel_fish[pars$p_sel_fish[, "space"] == 1, ]
+  p_sel2 <- pars$p_sel_fish[pars$p_sel_fish[, "space"] == 2, ]
   f_sel1 <- get_select(om$ages,
                        p_sel1,
                        om$s_min,

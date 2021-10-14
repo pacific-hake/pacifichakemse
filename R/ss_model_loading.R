@@ -484,20 +484,20 @@ load_ss_model_data <- function(s_min = 1,
                                            selex_fill_val = selex_fill_val,
                                            ...)
 
-  lst$p_sel_fish <- sel_param_ests %>% filter(source == "fish")
-  lst$p_sel_surv <- sel_param_ests %>% filter(source == "survey")
+  lst$p_sel_fish <- sel_param_ests[sel_param_ests[, "source"] == 1, ]
+  lst$p_sel_surv <- sel_param_ests[sel_param_ests[, "source"] == 2, ]
 
   # Add more selectivities by space (area).
   if(n_space == 1){
-    lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 1)
+    spc <- rep(1, nrow(lst$p_sel_fish))
+    lst$p_sel_fish <- cbind(lst$p_sel_fish, spc)
   }else{
-    lst$p_sel_fish <- lst$p_sel_fish %>% mutate(space = 2)
-    lst$p_sel_fish <- tibble(value = rep(selex_fill_val,
-                                         length(s_min:(s_max - 1))),
-                             source = "fish",
-                             space = 1,
-                             age = s_min:(s_max - 1)) %>%
-      bind_rows(lst$p_sel_fish)
+    spc <- rep(2, nrow(lst$p_sel_fish))
+    lst$p_sel_fish <- cbind(lst$p_sel_fish[, 1:2], spc, lst$p_sel_fish[, 3])
+    colnames(lst$p_sel_fish)[3:4] <- c("space", "age")
+    spc1_mat <- matrix(rep(selex_fill_val, length(s_min:(s_max - 1))), ncol = 1)
+    spc1_mat <- cbind(spc1_mat, spc1_mat, spc1_mat, s_min:(s_max - 1))
+    lst$p_sel_fish <- rbind(spc1_mat, lst$p_sel_fish)
   }
 
   if(nrow(lst$age_survey) != nrow(lst$age_catch)){
@@ -905,7 +905,7 @@ load_ss_parameters <- function(ss_model = NULL){
 #' @param s_max_survey Maximum age in survey selectivity
 #' @param ... Arguments absorbed which are meant for other functions
 #'
-#' @return A [data.frame] of estimates, age, and source (fishery and survey)
+#' @return A [matrix] of estimates, age, and source (fishery and survey coded as 1 and 2 respectively)
 #' @importFrom dplyr add_row
 #' @export
 load_ss_sel_parameters <- function(ss_model = NULL,
@@ -915,11 +915,6 @@ load_ss_sel_parameters <- function(ss_model = NULL,
                                    s_max_survey = NULL,
                                    ...){
 
-  verify_argument(ss_model, "list")
-  verify_argument(s_min, c("integer", "numeric"), 1)
-  verify_argument(s_max, c("integer", "numeric"), 1)
-  verify_argument(s_min_survey, c("integer", "numeric"), 1)
-  verify_argument(s_max_survey, c("integer", "numeric"), 1)
   if(s_max < s_min){
     stop("`s_max` must be greater or equal to `s_min`",
          call. = FALSE)
@@ -957,7 +952,7 @@ load_ss_sel_parameters <- function(ss_model = NULL,
   }
   fish <- fish %>%
     transmute(value = Value) %>%
-    mutate(source = "fish") %>%
+    mutate(source = 1) %>%
     mutate(age = fish_ages[-length(fish_ages)])
 
   survey <- parm_tbl %>%
@@ -973,10 +968,10 @@ load_ss_sel_parameters <- function(ss_model = NULL,
   }
   survey <- survey %>%
     transmute(value = Value) %>%
-    mutate(source = "survey") %>%
+    mutate(source = 2) %>%
     mutate(age = survey_ages[-length(survey_ages)])
 
-  bind_rows(fish, survey)
+  as.matrix(bind_rows(fish, survey))
 }
 
 #' Create and return a list of stats to attach to the main model by

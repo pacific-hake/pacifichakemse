@@ -49,22 +49,22 @@ run_season_loop_om <- function(om,
         cat(yellow("      Space:", space, "\n"))
       }
       # Calculate selectivity -------------------------------------------------
-      p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == space,]
+      p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish[, "space"] == space,]
       p_sel_yrs <- om$sel_by_yrs
       if(om$flag_sel[yr_ind]){
-        p_sel$value <- p_sel$value +
+        p_sel[, "value"] <- p_sel[, "value"] +
           p_sel_yrs[, yr_ind - om$sel_idx + 1] * om$sigma_p_sel
       }
       if(om$yrs[yr_ind] > om$m_yr){
         if(om$selectivity_change == 1){
           if(space != 1){
-            p_sel$value <- c(rep(0.05, om$s_min_survey),
-                             rep(0, om$s_max_survey - 2 *
-                                   om$s_min_survey + 1))
+            p_sel[, "value"] <- c(rep(0.05, om$s_min_survey),
+                                  rep(0, om$s_max_survey - 2 *
+                                        om$s_min_survey + 1))
           }
         }else if(om$selectivity_change == 2){
-          p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish$space == 2,]
-          p_sel$value <- p_sel$value +
+          p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish[, "space"] == 2, ]
+          p_sel[, "value"] <- p_sel[, "value"] +
             p_sel_yrs[,ncol(p_sel_yrs)] *
             om$sigma_p_sel
         }
