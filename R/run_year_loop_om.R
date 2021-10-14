@@ -147,10 +147,7 @@ run_year_loop_om <- function(om = NULL,
         sum(n_surv[(om$age_max_age + 1):om$n_age] *
               om$surv_sel[(om$age_max_age + 1):om$n_age] * om$q) / om$surv_tot[yr_ind, .x])
     })
-    om$age_comps_surv_space[1:om$age_max_age, yr_ind, ] <<- surv_age_comps_tmp %>%
-      set_names(seq_len(length(surv_age_comps_tmp))) %>%
-      bind_rows() %>%
-      as.matrix()
+    om$age_comps_surv_space[1:om$age_max_age, yr_ind, ] <<- surv_age_comps_tmp %>% do.call(rbind, .)
 
     # Calculate catch value by space -----------------------------------------
     # rowSums sums all seasons within a space
@@ -173,11 +170,7 @@ run_year_loop_om <- function(om = NULL,
         # Plus group
         sum(catch_tmp[.x, (om$age_max_age + 1):om$n_age])) / catch_tot[.x]
     })
-
-    om$age_comps_catch_space[1:om$age_max_age, yr_ind,] <<- catch_age_comps_tmp %>%
-      set_names(seq_len(length(catch_age_comps_tmp))) %>%
-      bind_rows() %>%
-      as.matrix()
+    om$age_comps_catch_space[1:om$age_max_age, yr_ind,] <<- catch_age_comps_tmp %>% do.call(rbind, .)
 
     if(om$flag_catch[yr_ind] == 1){
       om$age_comps_catch[1:(om$age_max_age - 1), yr_ind] <<-
