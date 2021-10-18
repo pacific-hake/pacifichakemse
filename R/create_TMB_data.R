@@ -19,10 +19,6 @@ create_tmb_data <- function(om = NULL,
                             yr = NULL,
                             ...){
 
-  verify_argument(om, "list")
-  verify_argument(ss_model, "list")
-  verify_argument(yr, c("integer", "numeric"), 1)
-
   inc_yrs <- om$yrs[om$yrs <= yr]
   inc_yr_ind <- which(om$yrs == yr)
   om$catch_obs <- om$catch[rownames(om$catch) %in% inc_yrs, ]
@@ -50,28 +46,22 @@ create_tmb_data <- function(om = NULL,
   #   unlist(use.names = FALSE)
 
   # Create matrix versions of the WA data frames
-  om$wage_catch <- format_wage_matrix(om$wage_catch_df[1:inc_yr_ind,])
-  om$wage_survey <- format_wage_matrix(om$wage_survey_df[1:inc_yr_ind,])
-  om$wage_mid <- format_wage_matrix(om$wage_mid_df[1:inc_yr_ind,])
-  om$wage_ssb <- format_wage_matrix(om$wage_ssb_df[1:inc_yr_ind,])
+  om$wage_catch <- t(om$wage_catch_df[1:inc_yr_ind, -1])
+  om$wage_survey <- t(om$wage_survey_df[1:inc_yr_ind, -1])
+  om$wage_mid <- t(om$wage_mid_df[1:inc_yr_ind, -1])
+  om$wage_ssb <- t(om$wage_ssb_df[1:inc_yr_ind, -1])
 
   # Make tibbles into matrices or vectors for TMB input
   # Logical must be changed to integer
-  om$flag_sel <- om$flag_sel[1:inc_yr_ind] %>% as.numeric()
+  om$flag_sel <- om$flag_sel[1:inc_yr_ind] %>% as.integer()
   om$flag_survey <- om$flag_survey[1:inc_yr_ind] %>% as.integer()
   om$flag_catch <- om$flag_catch[1:inc_yr_ind] %>% as.integer()
   # This needs to be an index, not the year
   om$sel_change_yr <- which(om$sel_change_yr == inc_yrs)
   # Remove age column
-  om$parameters$init_n <- om$parameters$init_n %>%
-    select(value) %>%
-    as.matrix()
+  om$parameters$init_n <- om$parameters$init_n[, "value"]
 
-  om$parameters$r_in <- om$parameters$r_in %>%
-    filter(yr <= !!yr) %>%
-    # Remove the final year
-    slice(-n()) %>%
-    pull(value)
+  om$parameters$r_in <- om$parameters$r_in[om$parameters$r_in[, "yr"] <= yr, "value"]
   om$parameters$f_0 <- rowSums(om$f_out_save[1:inc_yr_ind, , ])
   # Set f_0 and r_in values to 0.2 and 0 respectively in the future years
   if(yr > om$m_yr){
@@ -84,6 +74,7 @@ create_tmb_data <- function(om = NULL,
     end_yr_const_r <- which(inc_yrs == yr - 1)
     om$parameters$r_in[start_yr_const_r:end_yr_const_r] <- 0
   }
+
   om$parameters$p_sel <- om$sel_by_yrs %>%
     as.matrix()
 
@@ -134,13 +125,10 @@ create_tmb_data <- function(om = NULL,
 
   # Convert some parameter objects to base types
   params <- om$parameters
-  params$p_sel_fish <- om$parameters$p_sel_fish %>%
-    filter(space == 2) %>%
-    pull(value)
-  params$p_sel_surv <- om$parameters$p_sel_surv %>%
-    pull(value)
+  params$p_sel_fish <- params$p_sel_fish[params$p_sel_fish[, "space"] == 2, "value"]
+  params$p_sel_surv <- params$p_sel_surv[, "value"]
 
-  last_catch <- om$catch_obs %>% tail(1)
+  last_catch <- tail(om$catch_obs, 1)
   if(last_catch == 0){
     params$f_0[length(params$f_0)] <- 0
   }

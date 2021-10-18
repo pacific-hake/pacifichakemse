@@ -16,16 +16,12 @@ create_rds_file <- function(ss_model_output_dir = NULL,
                             load_extra_mcmc = TRUE,
                             ...){
 
-  verify_argument(ss_model_output_dir, "character", 1)
   if(!dir.exists(ss_model_output_dir)){
     stop("The directory name you set for the SS3 model output ",
          "(ss_model_output_dir) does not exist:\n",
          ss_model_output_dir,
          call. = FALSE)
   }
-  verify_argument(ss_model_data_csv_dir, "character", 1)
-  verify_argument(overwrite_ss_rds, "logical", 1)
-  verify_argument(load_extra_mcmc, "logical", 1)
 
   rds_file <- file.path(ss_model_output_dir, paste0(basename(ss_model_output_dir), ".rds"))
   # The RDS file will have the same name as the directory it is in
@@ -85,9 +81,6 @@ create_rds_file <- function(ss_model_output_dir = NULL,
 #' @export
 load_ss_files <- function(ss_model_output_dir = NULL,
                           printstats = FALSE){
-
-  verify_argument(ss_model_output_dir, "character", 1)
-  verify_argument(printstats, "logical", 1)
 
   # Load MPD results
   model <- tryCatch({
@@ -395,36 +388,37 @@ load_ss_model_data <- function(s_min = 1,
   lst$catch_obs <- ss_model$dat$catch %>%
     transmute(yr = year,
               value = catch) %>%
-    filter(yr != -999)
+    filter(yr > 1900) %>%
+    as.matrix()
 
-  lst$s_yr <- min(lst$catch_obs$yr)
-  lst$m_yr <- max(lst$catch_obs$yr)
+  lst$s_yr <- min(lst$catch_obs[, "yr"])
+  lst$m_yr <- max(lst$catch_obs[, "yr"])
   yrs <- lst$s_yr:lst$m_yr
   lst$catch_props_space_season <- ss_model$catch_seas_country
   lst$catch_country <- ss_model$catch_country
 
-  # TODO: This is to copy what is in the original MSE EXACTLY, from the table in the assessment.
-  # It is not exactly the same as what is in the SS data file and overwrites that which is
-  # loaded above.
-  lst$catch_obs <- read_csv(system.file("extdata/csv-data/catches.csv",
-                                        package = "pacifichakemse",
-                                        mustWork = TRUE),
-                            col_types = cols("i", "i", "i", "i")) %>%
-    transmute(yr = Year,
-              value = Total) %>%
-    add_row(lst$catch_obs %>% tail(1), .after = nrow(.))
-  lst$catch_obs[lst$catch_obs$yr == 1991,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1991,]$value + 1
-  lst$catch_obs[lst$catch_obs$yr == 1992,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1992,]$value + 1
-  lst$catch_obs[lst$catch_obs$yr == 1995,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1995,]$value + 1
-  lst$catch_obs[lst$catch_obs$yr == 1996,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 1996,]$value - 1
-  lst$catch_obs[lst$catch_obs$yr == 2005,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 2005,]$value - 1
-  lst$catch_obs[lst$catch_obs$yr == 2008,]$value <-
-    lst$catch_obs[lst$catch_obs$yr == 2008,]$value + 1
+  # Remove
+  # lst$catch_obs <- lst$catch_obs %>% as_tibble()
+  # lst$catch_obs <- read_csv(system.file("extdata/csv-data/catches.csv",
+  #                                       package = "pacifichakemse",
+  #                                       mustWork = TRUE),
+  #                           col_types = cols("i", "i", "i", "i")) %>%
+  #   transmute(yr = Year,
+  #             value = Total) %>%
+  #   add_row(lst$catch_obs %>% tail(1), .after = nrow(.))
+  # lst$catch_obs[lst$catch_obs[, "yr"] == 1991, "value"] <-
+  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1991, "value"] + 1
+  # lst$catch_obs[lst$catch_obs[, "yr"] == 1992, "value"] <-
+  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1992, "value"] + 1
+  # lst$catch_obs[lst$catch_obs[, "yr"] == 1995, "value"] <-
+  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1995, "value"] + 1
+  # lst$catch_obs[lst$catch_obs[, "yr"] == 1996, "value"] <-
+  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1996, "value"] - 1
+  # lst$catch_obs[lst$catch_obs[, "yr"] == 2005, "value"] <-
+  #   lst$catch_obs[lst$catch_obs[, "yr"] == 2005, "value"] - 1
+  # lst$catch_obs[lst$catch_obs[, "yr"] == 2008, "value"] <-
+  #   lst$catch_obs[lst$catch_obs[, "yr"] == 2008, "value"] + 1
+  # lst$catch_obs <- lst$catch_obs %>% as.matrix()
 
   # Weight-at-age data --------------------------------------------------------
   waa <- ss_model$wtatage[!names(ss_model$wtatage) %in% c("Seas", "Sex", "Bio_Pattern", "BirthSeas")]
@@ -513,10 +507,11 @@ load_ss_model_data <- function(s_min = 1,
     filter(index == 2) %>%
     transmute(yr = year, value = obs, err = se_log) %>%
     complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
-    replace(is.na(.), 1)
+    replace(is.na(.), 1) %>%
+    as.matrix()
 
-  lst$survey <- surv %>% pull(value)
-  lst$survey_err <- surv %>% pull(err)
+  lst$survey <- surv[, "value"]
+  lst$survey_err <- surv[, "err"]
 
   # Sample sizes for fishery and survey ---------------------------------------
   ss <- ss_model$agedbase %>%
@@ -528,22 +523,20 @@ load_ss_model_data <- function(s_min = 1,
     mutate(flag = 1) %>%
     complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
     replace(is.na(.), 0) %>%
-    mutate(flag = ifelse(flag == 0, -1, flag))
-  lst$ss_catch <- ss_catch %>%
-    pull(ss)
-  lst$flag_catch <- ss_catch %>%
-    pull(flag)
+    mutate(flag = ifelse(flag == 0, -1, flag)) %>%
+    as.matrix()
+  lst$ss_catch <- ss_catch[, "ss"]
+  lst$flag_catch <- ss_catch[, "flag"]
   ss_survey <- ss %>%
     filter(fleet == 2) %>%
     select(-fleet) %>%
     mutate(flag = 1) %>%
     complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
     replace(is.na(.), 0) %>%
-    mutate(flag = ifelse(flag == 0, -1, flag))
-  lst$ss_survey <- ss_survey %>%
-    pull(ss)
-  lst$flag_survey <- ss_survey %>%
-    pull(flag)
+    mutate(flag = ifelse(flag == 0, -1, flag)) %>%
+    as.matrix()
+  lst$ss_survey <- ss_survey[, "ss"]
+  lst$flag_survey <- ss_survey[, "flag"]
 
   # Median population estimates -----------------------------------------------
   # The following is shown in a table in the assessment doc and made by the
@@ -587,11 +580,12 @@ load_ss_model_data <- function(s_min = 1,
   lst$med_popests[nrow_p, ncol_p] <- NA
 
   # Recruitment deviations ----------------------------------------------------
-  lst$r_dev <- ss_model$recruitpars %>%
-    as_tibble() %>%
-    filter(grepl("RecrDev", type)) %>%
-    filter(!grepl("^Late_", type)) %>%
-    select(yr = Yr, value = Value)
+  rownames(ss_model$recruitpars) <- NULL
+  recr_rows <- grepl("Early_RecrDev|Main_RecrDev", ss_model$recruitpars[, "type"])
+  lst$r_dev <- ss_model$recruitpars[recr_rows, ]
+  lst$r_dev <- lst$r_dev[, colnames(lst$r_dev) %in% c("Yr", "Value")]
+  lst$r_dev <- as.matrix(lst$r_dev[, c("Yr", "Value")])
+  colnames(lst$r_dev) <- c("yr", "value")
 
   # Bias ramp adjustment ------------------------------------------------------
   ctl <- ss_model$ctl

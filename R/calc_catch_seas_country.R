@@ -13,10 +13,6 @@ calc_catch_seas_country <- function(data_csv_dir = NULL,
                                     n_yrs = 10,
                                     weight = c(1, 1, 1, 1)){
 
-  verify_argument(data_csv_dir, "character", 1)
-  verify_argument(n_yrs, c("integer", "numeric"), 1)
-  verify_argument(weight, c("integer", "numeric"), 4)
-
   helper <- function(d){
     d_seas1 <- d %>%
       select(year, `1`, `2`, `3`) %>%
@@ -88,5 +84,5 @@ calc_catch_seas_country <- function(data_csv_dir = NULL,
     as_tibble(.name_repair = "unique")
   names(k) <- c("seas1", "seas2", "seas3", "seas4")
 
-  k
+  as.matrix(k)
 }

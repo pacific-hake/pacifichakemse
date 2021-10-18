@@ -93,18 +93,18 @@ run_season_loop_om <- function(om,
           space_col <- paste0("space", space)
           catch_space <- om$catch_country[om$catch_country[, "year"] == yr, space_col]
         }else{
-          if(is_tibble(om$catch_obs)){
-            catch_space <- om$catch_obs[yr_ind, ]$value
-          }else{
-            catch_space <- om$catch_obs[yr_ind, ]
-          }
+          #if(is_tibble(om$catch_obs)){
+          #  catch_space <- om$catch_obs[yr_ind, ]$value
+          #}else{
+            catch_space <- om$catch_obs[yr_ind, "value"]
+          #}
         }
       }else{
-        if(is_tibble(om$catch_obs)){
-          catch_space <- om$catch_obs[yr_ind, ]$value
-        }else{
-          catch_space <- om$catch_obs[yr_ind, ]
-        }
+        #if(is_tibble(om$catch_obs)){
+        #  catch_space <- om$catch_obs[yr_ind, ]$value
+        #}else{
+          catch_space <- om$catch_obs[yr_ind, "value"]
+        #}
       }
 
       # Calculate catch distribution ------------------------------------------

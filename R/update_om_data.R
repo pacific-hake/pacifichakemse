@@ -24,8 +24,6 @@ update_om_data <- function(yr = NULL,
                            wage_only = FALSE,
                            ...){
 
-  verify_argument(om, "list")
-  verify_argument(wage_only, "logical", 1)
   if(wage_only){
     om$wage_catch_df <- modify_wage_df(om$wage_catch_df, yr)
     om$wage_survey_df <- modify_wage_df(om$wage_survey_df, yr)
@@ -33,16 +31,11 @@ update_om_data <- function(yr = NULL,
     om$wage_ssb_df <- modify_wage_df(om$wage_ssb_df, yr)
     return(om)
   }
-  verify_argument(yr_survey_sims, c("integer", "numeric"))
-  verify_argument(f_new, "list", 2)
-  verify_argument(c_increase, "numeric", 1)
-  verify_argument(m_increase, "numeric", 1)
-  verify_argument(sel_change, c("integer", "numeric"), 1)
 
   yr_ind <- which(om$yrs == yr)
 
   # Catch updates ------------------------------------------------------------
-  om$catch_obs[om$catch_obs$yr == yr,]$value <- f_new$c_new
+  om$catch_obs[om$catch_obs[, "yr"] == yr, "value"] <- f_new$c_new
   #om$catch_obs[as.numeric(rownames(om$catch_obs)) == yr,] <- f_new$c_new
 
   curr_ss_catch <- om$ss_catch[1:(yr_ind - 1)]

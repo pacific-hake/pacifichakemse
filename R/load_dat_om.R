@@ -168,29 +168,29 @@ load_data_om <- function(ss_model = NULL,
   lst$survey_err <- ss_model$survey_err
   # TODO: Remove these hardwired values. They are here to match the former MSE
   # code. These are only good for 2018 and it will break if you try 2020.
-  lst$survey_err <- c(rep(1, 29),
-                      0.08929600000000000037,
-                      rep(1, 2),
-                      0.05259600000000010100,
-                      rep(1, 2),
-                      0.10589600000000000402,
-                      1,
-                      0.06419599999999990592,
-                      1,
-                      0.06379600000000000548,
-                      1,
-                      0.07659599999999990028,
-                      1,
-                      0.09949600000000000111,
-                      1,
-                      0.11769599999999999507,
-                      0.06729599999999999471,
-                      0.06459600000000009778,
-                      1,
-                      0.08289600000000009461,
-                      1,
-                      0.06319600000000000217,
-                      1)
+  # lst$survey_err <- c(rep(1, 29),
+  #                     0.08929600000000000037,
+  #                     rep(1, 2),
+  #                     0.05259600000000010100,
+  #                     rep(1, 2),
+  #                     0.10589600000000000402,
+  #                     1,
+  #                     0.06419599999999990592,
+  #                     1,
+  #                     0.06379600000000000548,
+  #                     1,
+  #                     0.07659599999999990028,
+  #                     1,
+  #                     0.09949600000000000111,
+  #                     1,
+  #                     0.11769599999999999507,
+  #                     0.06729599999999999471,
+  #                     0.06459600000000009778,
+  #                     1,
+  #                     0.08289600000000009461,
+  #                     1,
+  #                     0.06319600000000000217,
+  #                     1)
   lst$ss_survey <- ss_model$ss_survey
   lst$flag_survey <- ss_model$flag_survey
   lst$age_survey <- ss_model$age_survey
@@ -215,19 +215,18 @@ load_data_om <- function(ss_model = NULL,
   lst$flag_catch <- ss_model$flag_catch
   lst$age_catch <- ss_model$age_catch
   lst$ss_catch <- ss_model$ss_catch
-  lst$catch_obs <- ss_model$catch_obs %>%
-    as_tibble() %>%
-    mutate(value = as.numeric(value))
+  lst$catch_obs <- ss_model$catch_obs
+
+  #n_row <- dim(lst$catch_obs)[1]
   if(lst$n_yr > nrow(lst$catch_obs)){
     if(populate_future){
-      new_val <- mean(lst$catch_obs$value)
+      new_val <- mean(lst$catch_obs[, "value"])
     }else{
       new_val <- NA
     }
-    new_df <- tibble(yr = lst$future_yrs,
-                     value = rep(new_val, lst$n_yr - nrow(lst$catch_obs)))
-    lst$catch_obs <- lst$catch_obs %>%
-      bind_rows(new_df)
+    new_mat <- matrix(lst$future_yrs, ncol = 1)
+    new_mat <- cbind(new_mat, rep(new_val, lst$n_yr - nrow(lst$catch_obs)))
+    lst$catch_obs <- rbind(lst$catch_obs, new_mat)
   }
 
   # `catch` differs from catch_obs: catch will contain the mean values for all years into the future.
@@ -286,12 +285,13 @@ load_data_om <- function(ss_model = NULL,
   lst$wage_mid_df <- add_yrs(lst$wage_mid_df)
 
   # Create empty objects for OM------------------------------------------------
-  lst <- append(lst, setup_blank_om_objects(yrs = lst$yrs,
-                                            ages = lst$ages,
-                                            age_plus_grp = age_plus_grp,
-                                            max_surv_age = lst$age_max_age,
-                                            n_space = lst$n_space,
-                                            n_season = lst$n_season))
+  lst <- append(lst,
+                setup_blank_om_objects(yrs = lst$yrs,
+                                       ages = lst$ages,
+                                       age_plus_grp = age_plus_grp,
+                                       max_surv_age = lst$age_max_age,
+                                       n_space = lst$n_space,
+                                       n_season = lst$n_season))
 
   # Movement in OM ------------------------------------------------------------
   lst$move_init <- move_init
@@ -307,6 +307,7 @@ load_data_om <- function(ss_model = NULL,
   lst$move_south <- move_south
   lst$move_out <- move_out
   lst$move_slope <- move_slope
+
   # Movement matrix will be initialized with values even if yr_future == 0,
   # It is assumed int he MSE code that all values in it have been
   # initialized previously
@@ -354,16 +355,20 @@ load_data_om <- function(ss_model = NULL,
   # Add a zero for the final year
   # TODO: Why is a zero assumed here? It is like this in the original code so
   # added here
-  last_yr_rdev <- tibble(yr = lst$m_yr, value = 0)
-  lst$r_dev <- lst$r_dev %>%
-    bind_rows(last_yr_rdev)
+  last_yr_rdev <- matrix(c(lst$m_yr, 0), nrow = 1)
+  colnames(last_yr_rdev) <- c("yr", "value")
+  lst$r_dev <- rbind(lst$r_dev, last_yr_rdev)
+  rownames(lst$r_dev) <- NULL
+
   # future_yrs is declared above
+  new_mat <- matrix(lst$future_yrs, ncol = 1)
   if(populate_future){
-    new_df <- tibble(yr = lst$future_yrs, value = r_devs)
+    new_mat <- cbind(new_mat, r_devs)
   }else{
-    new_df <- tibble(yr = lst$future_yrs, value = NA)
+    new_mat <- cbind(new_mat, rep(NA, length(lst$future_yrs)))
   }
-  lst$r_dev <- lst$r_dev %>% bind_rows(new_df)
+  colnames(new_mat) <- c("yr", "value")
+  lst$r_dev <- rbind(lst$r_dev, new_mat)
 
   # Initial Numbers-at-age in OM ----------------------------------------------
   lst$init_n <- matrix(ages[-which(0 %in% ages)], ncol = 1)

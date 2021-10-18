@@ -1,3 +1,16 @@
+#' Version of as.data.frame() which is 20-50 times faster
+#'
+#' @param l A list
+#'
+#' @return
+#' @export
+#'
+#' @examples
+quickdf <- function(l) {
+  class(l) <- "data.frame"
+  attr(l, "row.names") <- .set_row_names(length(l[[1]]))
+  l
+}
 #' Calculate and insert columns containing arbitrary quantiles for a particular column
 #'
 #' @description Calculate and insert columns containing arbitrary quantiles for a particular column
@@ -585,15 +598,13 @@ get_age_dat <- function(d = NULL,
 #' @export
 modify_wage_df <- function(wage = NULL, yr = NULL, yr_copy = NULL){
 
-  verify_argument(wage, "data.frame")
-  verify_argument(yr, c("integer", "numeric"), 1)
-  stopifnot("Yr" %in% names(wage))
+  stopifnot("Yr" %in% colnames(wage))
 
-  line <- which(wage$Yr == yr)
+  line <- which(wage[, "Yr"] == yr)
   if(is.null(yr_copy)){
     line_copy <- 1
   }else{
-    line_copy <- which(wage$Yr == yr_copy)
+    line_copy <- which(wage[, "Yr"] == yr_copy)
   }
 
   if(!nrow(wage)){
@@ -695,19 +706,6 @@ append_objs_to_list <- function(lst = NULL,
          call. = FALSE)
   }
   lst
-}
-
-#' Convert the output of [format_wage_df()] into a matrix of correct dimensions
-#' for the TMB input
-#'
-#' @param df  A weight-at-age [data.frame] as output from [format_wage_df()]
-#'
-#' @return A [matrix]
-format_wage_matrix <- function(df = NULL){
-  df %>%
-    select(-Yr) %>%
-    as.matrix() %>%
-    t()
 }
 
 #' Extract parameter estimates from the linear par vector returned by TMB

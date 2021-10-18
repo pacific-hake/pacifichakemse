@@ -33,15 +33,6 @@ run_mse_scenario <- function(om = NULL,
                              save_all_em = FALSE,
                              ...){
 
-  verify_argument(om, "list")
-  verify_argument(random_seed, c("integer", "numeric"), 1)
-  verify_argument(n_sim_yrs, c("integer", "numeric"), 1)
-  verify_argument(tac, c("integer", "numeric"))
-  verify_argument(attain, c("integer", "numeric"))
-  verify_argument(c_increase, c("integer", "numeric"), 1)
-  verify_argument(m_increase, c("integer", "numeric"), 1)
-  verify_argument(sel_change, c("integer", "numeric"), 1)
-
   # Survey years setup ---------------------------------------------------------
   # Calculate survey years, where odd years are survey years
   if((om$m_yr + 1) %% 2 == 1){
@@ -88,7 +79,7 @@ run_mse_scenario <- function(om = NULL,
     if(yr >= om$m_yr + 1){
       r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
       #r_dev <<- 0
-      om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value <<- r_dev
+      om$parameters$r_in[om$parameters$r_in[, "yr"] == yr, "value"] <<- r_dev
     }
 
     # Run the Operating Model -------------------------------------------------

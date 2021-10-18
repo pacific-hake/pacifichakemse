@@ -26,7 +26,7 @@ run_year_loop_om <- function(om = NULL,
     yr_ind <- which(yr == om$yrs)
     wage <- get_wa_dfs(om, yr)
 
-    r_y <- om$parameters$r_in[om$parameters$r_in$yr == yr, ]$value
+    r_y <- om$parameters$r_in[om$parameters$r_in[, "yr"] == yr, "value"]
     m_yrs <- om$m_age
     # M is distributed throughout the yrs
     m_season <- m_yrs / om$n_season

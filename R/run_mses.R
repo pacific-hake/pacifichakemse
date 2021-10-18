@@ -58,14 +58,6 @@ run_mses <- function(n_runs = 10,
                      hcr_apply = FALSE,
                      ...){
 
-  verify_argument(fns, chk_len = length(plot_names))
-  verify_argument(tacs, c("numeric", "list"))
-  verify_argument(attains, c("numeric", "list"))
-  verify_argument(c_increases, c("integer", "numeric"))
-  verify_argument(m_increases, c("integer", "numeric"))
-  verify_argument(sel_changes, c("integer", "numeric"))
-  verify_argument(n_surveys, c("integer", "numeric"))
-
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
     ifelse(str_ends(.x, pattern = "\\.rds"), .x, paste0(.x, ".rds"))
@@ -134,6 +126,7 @@ run_mses <- function(n_runs = 10,
                          ...)
 
       cat(green("Run #", run, "\n"))
+
       tmp <- run_mse_scenario(om = om,
                               ss_model = ss_model,
                               n_sim_yrs = n_sim_yrs,
