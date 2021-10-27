@@ -353,7 +353,15 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(catch_us_tmp)
 
   # Recruitment quants --------------------------------------------------------
-
+  mse_quants$r_quant <- merge_dfs_from_scenarios(merged_run_data, "r_quant")
+  mse_quants$r_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "r_ca_quant")
+  mse_quants$r_us_quant <- merge_dfs_from_scenarios(merged_run_data, "r_us_quant")
+  r_ca_tmp <- mse_quants$r_ca_quant %>%
+    mutate(country = "Canada")
+  r_us_tmp <- mse_quants$r_us_quant %>%
+    mutate(country = "US")
+  mse_quants$r_quant_country <- r_ca_tmp %>%
+    bind_rows(r_us_tmp)
 
   # Standard error between the OM and EM (final year) -------------------------
   standard_error_ssb <- NULL
