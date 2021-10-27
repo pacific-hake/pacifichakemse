@@ -23,10 +23,6 @@ plot_em_timeseries <- function(ps,
                                free_y_scale = FALSE,
                                ...){
 
-  verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("catch", "f", "r", "ssb", "survey"))
-  verify_argument(ci, "numeric", 2)
-
   y_factor <- 1
   if(type == "catch"){
     d <- ps$em_outputs$catch_quants_by_year_runmeans

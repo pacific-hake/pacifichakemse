@@ -163,10 +163,6 @@ calc_mcmc <- function(mcmc,
                       recruitment_scale = 1e6,
                       ...){
 
-  verify_argument(mcmc, "data.frame")
-  verify_argument(ss_mcmc_quants, "numeric", 3)
-  verify_argument(biomass_scale, "numeric", 1)
-  verify_argument(recruitment_scale, "numeric", 1)
   if(ss_mcmc_quants[1] > ss_mcmc_quants[2] || ss_mcmc_quants[2] > ss_mcmc_quants[3]){
     stop("`ss_mcmc_quants` must be in ascending order",
          call. = FALSE)
@@ -664,17 +660,10 @@ extract_age_comps <- function(ss_model = NULL,
                               age_comps_fleet_col = "Fleet",
                               ...){
 
-  verify_argument(ss_model, "list")
-  verify_argument(age_comps_fleet, "numeric", 1)
   stopifnot(age_comps_fleet %in% c(1, 2))
-  verify_argument(s_yr, c("integer", "numeric"), 1)
-  verify_argument(m_yr, c("integer", "numeric"), 1)
   if(is.na(age_comps_fill)){
     age_comps_fill <- NA_real_
   }
-  verify_argument(age_comps_fill, "numeric", 1)
-  verify_argument(yr_col, "character", 1)
-  verify_argument(age_comps_fleet_col, "character", 1)
 
   age_comp_data <- ss_model$agedbase %>%
     as_tibble()
@@ -757,17 +746,10 @@ extract_age_comp_data <- function(ss_model = NULL,
                                   age_comps_fleet_col = "FltSvy",
                                   ...){
 
-  verify_argument(ss_model, "list")
-  verify_argument(age_comps_fleet, "numeric", 1)
   stopifnot(age_comps_fleet %in% c(1, 2))
-  verify_argument(s_yr, "numeric", 1)
-  verify_argument(m_yr, "numeric", 1)
   if(is.na(age_comps_fill)){
     age_comps_fill <- NA_real_
   }
-  verify_argument(age_comps_fill, "numeric", 1)
-  verify_argument(yr_col, "character", 1)
-  verify_argument(age_comps_fleet_col, "character", 1)
 
   age_comp_data <- ss_model$dat$agecomp
   if(!yr_col %in% names(age_comp_data)){
@@ -810,7 +792,6 @@ extract_age_comp_data <- function(ss_model = NULL,
 #' @export
 load_ss_parameters <- function(ss_model = NULL){
 
-  verify_argument(ss_model, "list")
   parm_tbl <- ss_model$parameters %>%
     as_tibble()
   if(!"Value" %in% names(parm_tbl)){
@@ -985,9 +966,6 @@ load_ss_sel_parameters <- function(ss_model = NULL,
 fetch_extra_mcmc <- function(model = NULL,
                              ss_mcmc_quants = NULL,
                              ...){
-
-  verify_argument(model, "list")
-  verify_argument(ss_mcmc_quants, "numeric", 3)
 
   posts_file_name <- "posteriors.sso"
 

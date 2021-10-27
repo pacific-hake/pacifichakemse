@@ -31,18 +31,6 @@ run_oms <- function(ss_model = NULL,
                     results_dir = here("results", "default"),
                     ...){
 
-  verify_argument(n_runs, c("integer", "numeric"))
-  verify_argument(fns, "character")
-  verify_argument(yr_future, c("integer", "numeric"))
-  verify_argument(n_surveys, c("integer", "numeric"))
-  verify_argument(b_futures, c("integer", "numeric"))
-  verify_argument(sel_changes, c("integer", "numeric"))
-  verify_argument(catch_in, c("integer", "numeric"), 1)
-  verify_argument(plot_names, "character")
-  verify_argument(random_seed, c("integer", "numeric"))
-  verify_argument(results_root_dir, "character", 1)
-  verify_argument(results_dir, "character", 1)
-
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
     ifelse(str_ends(.x, pattern = "\\.rds"), .x, paste0(.x, ".rds"))

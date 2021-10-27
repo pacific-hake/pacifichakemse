@@ -10,8 +10,6 @@ plot_bars_country <- function(ps = NULL,
                               facet_back_cols = c("red", "blue"),
                               ...){
 
-  verify_argument(ps, "list")
-
   cols <- brewer.pal(3, "Dark2")
 
   g <- ggplot(ps$mse_quants$country_season_indicators_quant,

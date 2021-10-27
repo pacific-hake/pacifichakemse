@@ -50,26 +50,6 @@ plot_timeseries <- function(ps = NULL,
                             ssb_line_type = 2,
                             ...){
 
-  verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("ssb",
-                                          "ssb_ssb0",
-                                          "vb",
-                                          "catch",
-                                          "catch_obs",
-                                          "recr",
-                                          "aas",
-                                          "aac",
-                                          "aap",
-                                          "catch_quota"))
-  verify_argument(time, "character", 1, c("beg", "mid"))
-  verify_argument(ci, "numeric", 2)
-  verify_argument(by_country, "logical", 1)
-  verify_argument(yr_lim, "numeric", 2)
-  verify_argument(ci_lines, "logical", 1)
-  verify_argument(show_ci, "logical", 1)
-  verify_argument(show_ssb0, "logical", 1)
-  verify_argument(show_hcr, "logical", 1)
-
   if(type == "ssb"){
     if(by_country){
       if(time == "beg"){

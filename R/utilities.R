@@ -1,16 +1,3 @@
-#' Version of as.data.frame() which is 20-50 times faster
-#'
-#' @param l A list
-#'
-#' @return
-#' @export
-#'
-#' @examples
-quickdf <- function(l) {
-  class(l) <- "data.frame"
-  attr(l, "row.names") <- .set_row_names(length(l[[1]]))
-  l
-}
 #' Calculate and insert columns containing arbitrary quantiles for a particular column
 #'
 #' @description Calculate and insert columns containing arbitrary quantiles for a particular column
@@ -59,11 +46,6 @@ calc_quantiles <- function(df = NULL,
                            col = NULL,
                            probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
                            include_mean = TRUE){
-
-  verify_argument(df, c("data.frame", "tbl_df"))
-  verify_argument(col, "character", 1)
-  verify_argument(probs, "numeric")
-  verify_argument(include_mean, "logical", 1)
 
   stopifnot(col %in% names(df))
   stopifnot(class(df[[col]]) == "numeric")
@@ -209,14 +191,6 @@ calc_term_quantiles <- function(df = NULL,
                                 max_yr = NA_real_,
                                 probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
                                 mean_multiplier = 1){
-
-  verify_argument(df, c("data.frame", "tbl_df"))
-  verify_argument(grp_col, "character", 1)
-  verify_argument(col, "character", 1)
-  verify_argument(min_yr, c("integer", "numeric"), 1)
-  verify_argument(max_yr, c("integer", "numeric"), 1)
-  verify_argument(probs, "numeric")
-  verify_argument(mean_multiplier, c("integer", "numeric"), 1)
 
   stopifnot(grp_col %in% names(df))
   stopifnot(col %in% names(df))
@@ -683,7 +657,6 @@ extract_rep_table <- function(reps_lst, header){
 #' @return The modified list
 append_objs_to_list <- function(lst = NULL,
                            ...){
-  verify_argument(lst, "list")
 
   ellipsis <- list(...)
   arg_names <- get_args()[-1]
@@ -828,10 +801,6 @@ color_facet_backgrounds <- function(g = NULL,
                                     facet_back_cols = NULL,
                                     facet_back_alpha = 99){
 
-  verify_argument(g, "ggplot")
-  verify_argument(facet_back_cols, "character")
-  verify_argument(facet_back_alpha, c("integer", "numeric"), 1)
-
   if(facet_back_alpha < 0){
     facet_back_alpha <- 0
   }
@@ -890,8 +859,6 @@ color_facet_backgrounds <- function(g = NULL,
 #' @importFrom grDevices rgb col2rgb
 #' @export
 col2hex <- function(cname){
-
-  verify_argument(cname, "character", 1)
 
   col_mat <- col2rgb(cname)
   rgb(red = col_mat[1, ] / 255, green = col_mat[2, ] / 255, blue = col_mat[3, ] / 255)

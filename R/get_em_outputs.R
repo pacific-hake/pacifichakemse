@@ -12,10 +12,6 @@ get_em_outputs <- function(em,
                            quants = c(0.05, 0.5, 0.95),
                            ...){
 
-  verify_argument(em, "list")
-  verify_argument(scen_name, "character", 1)
-  verify_argument(quants, "numeric")
-
   yrs <- names(em[[1]]$ssb_se[[length(em[[1]]$ssb_se)]])
   out <- NULL
 

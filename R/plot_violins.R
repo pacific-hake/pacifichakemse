@@ -10,9 +10,6 @@
 plot_violins <- function(ps = NULL,
                          quants = c(0.05, 0.95)){
 
-  verify_argument(ps, "list")
-  verify_argument(quants, "numeric")
-
   inds <- c("SSB < 0.10 SSB0",
             "0.10 < SSB < 0.4 SSB0",
             "SSB > 0.4 SSB0",

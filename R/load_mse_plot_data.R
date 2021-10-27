@@ -18,9 +18,14 @@
 load_mse_plot_data <- function(scenario = NULL,
                                overwrite_rds = FALSE,
                                main_results_dir = "results",
-                               quants = c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975),
+                               quants = c(0.05, 0.5, 0.95),
+                               #quants = c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975),
                                ...){
 
+  if(!0.5 %in% quants){
+    stop("You must include the median (0.5) in the quants vector", call. = FALSE)
+  }
+  tic()
   results_dir <- here(main_results_dir, scenario)
   if(!dir.exists(results_dir)){
     stop("Directory ", scenario, " does not exist.",
@@ -42,5 +47,6 @@ load_mse_plot_data <- function(scenario = NULL,
     saveRDS(ps, file = po_filename, compress = FALSE)
   }
 
+  toc()
   readRDS(po_filename)
 }

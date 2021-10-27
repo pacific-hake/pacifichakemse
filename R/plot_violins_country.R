@@ -16,8 +16,6 @@ plot_violins_country <- function(ps = NULL,
                                  facet_back_cols = c("red", "blue"),
                                  ...){
   #TODO: Fix this
-  verify_argument(ps, "list")
-
   d <- ps$violin_indicators
   stopifnot("scenario" %in% names(d))
 

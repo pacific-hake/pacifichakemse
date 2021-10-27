@@ -480,23 +480,6 @@ init_movement_mat <- function(n_space = NULL,
                               age_names = NULL,
                               f_space = NULL){
 
-  verify_argument(n_space, c("numeric", "integer"), 1)
-  verify_argument(space_names, "character", n_space)
-  verify_argument(n_season, c("numeric", "integer"), 1)
-  verify_argument(season_names, "character", n_season)
-  verify_argument(n_yr, c("numeric", "integer"), 1)
-  verify_argument(yrs, c("numeric", "integer"))
-  verify_argument(move_max, "numeric", n_season)
-  verify_argument(move_slope, "numeric", 1)
-  verify_argument(move_fifty, "numeric", 1)
-  verify_argument(move_south, "numeric", 1)
-  verify_argument(move_out, "numeric", 1)
-  verify_argument(move_init, "numeric", n_space)
-  verify_argument(ages_no_move, c("numeric", "integer"))
-  verify_argument(ages, c("numeric", "integer"))
-  verify_argument(age_names, "character", length(ages))
-  verify_argument(f_space, "numeric", n_space)
-
   n_age <- length(ages)
   move_mat <- array(0,
                     dim = c(n_space, n_age, n_season, n_yr),

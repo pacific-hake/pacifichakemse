@@ -7,8 +7,6 @@
 #' @importFrom readr read_csv
 extract_catch_country <- function(data_csv_dir = NULL){
 
-  verify_argument(data_csv_dir, "character", 1)
-
   fn <- file.path(data_csv_dir, "landings-tac-history.csv")
   if(!file.exists(fn)){
     cat(red(symbol$cross),

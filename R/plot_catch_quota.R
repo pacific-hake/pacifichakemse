@@ -12,11 +12,6 @@ plot_catch_quota <- function(ps = NULL,
                              yr_lim = c(NA_real_, NA_real_),
                              y_lim = c(NA_real_, NA_real_)){
 
-  verify_argument(ps, "list")
-  verify_argument(ci, "numeric", 2)
-  verify_argument(yr_lim, "numeric", 2)
-  verify_argument(y_lim, "numeric", 2)
-
   cqct <- ps$mse_quants$catch_quota_quant
   stopifnot("0.5" %in% names(cqct))
   stopifnot(all(ci %in% names(cqct)))

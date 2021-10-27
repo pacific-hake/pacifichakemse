@@ -20,6 +20,12 @@ merge_run_data <- function(sim_data = NULL,
                            catch_multiplier = 1e-6,
                            ...){
 
+  if(is.null(short_term_yrs)){
+    stop("You must supply the short_term_yrs vector", call. = FALSE)
+  }
+  if(is.null(long_term_yrs)){
+    stop("You must supply the long_term_yrs start year value", call. = FALSE)
+  }
   if(max(sim_data[[1]]$future_yrs) < max(short_term_yrs)){
     stop("The maximum year in the simulation (", max(sim_data[[1]]$future_yrs), ") is less than the last term year (", max(short_term_yrs), ")",
          call. = FALSE)
@@ -275,43 +281,60 @@ merge_run_data <- function(sim_data = NULL,
       stop("space must be 0, 1, or 2", call. = FALSE)
     }
 
-    x <- map_df(1:nruns, ~{
-      if(sim_age_comp_type == "catch"){
-        if(space == 1){
-          # TODO: This code is all correct, but the space age_comps_catch_space[,,1], age_comps_catch_space[,,2],
-          # age_comps_surv_space[,,1], age_comps_surv_space[,,2] are fully populated when I think they should
-          # have NAs for non-data years. Populated correctly is age_comps_catch and age_comps_surv
-          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], sim_data[[.x]]$age_max_age)
-        }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,2], sim_data[[.x]]$age_max_age)
-        }else{
-          calc_mean_age(sim_data[[.x]]$age_comps_catch, sim_data[[.x]]$age_max_age)
-        }
-      }else if(sim_age_comp_type == "surv"){
-        if(space == 1){
-          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,1], sim_data[[.x]]$age_max_age)
-        }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,2], sim_data[[.x]]$age_max_age)
-        }else{
-          calc_mean_age(sim_data[[.x]]$age_comps_surv, sim_data[[.x]]$age_max_age)
-        }
+    # TODO: This code is all correct, but the space age_comps_catch_space[,,1], age_comps_catch_space[,,2],
+    # age_comps_surv_space[,,1], age_comps_surv_space[,,2] are fully populated when I think they should
+    # have NAs for non-data years. Populated correctly is age_comps_catch and age_comps_surv
+    if(sim_age_comp_type == "catch"){
+      if(space == 1){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[, , 1], sim_data[[.x]]$age_max_age)
+        })
+      }else if(space == 2){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[, , 2], sim_data[[.x]]$age_max_age)
+        })
       }else{
-        if(space == 1){
-          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 1, 3], sim_data[[.x]]$age_max_age)
-        }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 2, 3], sim_data[[.x]]$age_max_age)
-        }else{
-          calc_mean_age(apply(sim_data[[.x]]$age_comps_om[, , , 3], c(1, 2), sum), sim_data[[.x]]$age_max_age)
-        }
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_catch, sim_data[[.x]]$age_max_age)
+        })
       }
-    }) %>%
+    }else if(sim_age_comp_type == "surv"){
+      if(space == 1){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[, , 1], sim_data[[.x]]$age_max_age)
+        })
+      }else if(space == 2){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[, , 2], sim_data[[.x]]$age_max_age)
+        })
+      }else{
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_surv, sim_data[[.x]]$age_max_age)
+        })
+      }
+    }else{
+      if(space == 1){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 1, 3], sim_data[[.x]]$age_max_age)
+        })
+      }else if(space == 2){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 2, 3], sim_data[[.x]]$age_max_age)
+        })
+      }else{
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(apply(sim_data[[.x]]$age_comps_om[, , , 3], c(1, 2), sum), sim_data[[.x]]$age_max_age)
+        })
+      }
+    }
+    x <- x %>%
       t() %>%
       as_tibble(.name_repair = ~ as.character(1:nruns)) %>%
       mutate(yr = yrs)
     names(x) <- c(1:nruns, "yr")
-    x <- x %>%
+
+    x %>%
       select(yr, everything())
-    x
   }
 
   # Average age in population -------------------------------------------------
