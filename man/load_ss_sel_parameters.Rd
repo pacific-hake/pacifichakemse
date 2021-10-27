@@ -27,7 +27,7 @@ load_ss_sel_parameters(
 \item{...}{Arguments absorbed which are meant for other functions}
 }
 \value{
-A \link{data.frame} of estimates, age, and source (fishery and survey)
+A \link{matrix} of estimates, age, and source (fishery and survey coded as 1 and 2 respectively)
 }
 \description{
 Load a selectivity parameter estimates from the SS model output

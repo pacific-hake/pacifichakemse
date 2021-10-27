@@ -19,9 +19,6 @@ run_om <- function(om = NULL,
                    hcr_fspr,
                    ...){
 
-  verify_argument(om, "list")
-  verify_argument(random_seed, c( "integer", "numeric"), 1)
-
   set.seed(random_seed)
 
   om <- init_agebased_model(om)

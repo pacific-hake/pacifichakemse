@@ -134,13 +134,6 @@ calc_quantiles_by_group <- function(df = NULL,
                                     probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
                                     include_mean = TRUE){
 
-  verify_argument(df, c("data.frame", "tbl_df"))
-  verify_argument(grp_col, "character", 1)
-  verify_argument(col, "character", 1)
-  verify_argument(grp_names, "character", 1)
-  verify_argument(probs, "numeric")
-  verify_argument(include_mean, "logical", 1)
-
   stopifnot(grp_col %in% names(df))
   stopifnot(col %in% names(df))
 

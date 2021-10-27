@@ -141,6 +141,7 @@ run_mses <- function(n_runs = 10,
                             ...)
 
     cat(green("End single run\n"))
+    toc()
     return(invisible())
   }
 

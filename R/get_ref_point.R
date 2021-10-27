@@ -108,7 +108,7 @@ get_ref_point <- function(pars,
   depl <- ssb_y / ssb_0
 
   if(depl < hcr_lower){
-    c_new <- 0
+    c_new <- 0.0001
     #c_new <- 0.05 * v_real
   }else if(depl > hcr_upper){
     c_new <- f_x * v

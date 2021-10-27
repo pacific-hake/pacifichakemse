@@ -20,11 +20,14 @@ merge_run_data <- function(sim_data = NULL,
                            catch_multiplier = 1e-6,
                            ...){
 
-  verify_argument(sim_data, "list")
-  verify_argument(short_term_yrs, c("integer", "numeric"))
-  verify_argument(long_term_yrs, c("integer", "numeric"), 1)
-  verify_argument(quants,  "numeric")
-  verify_argument(catch_multiplier,  "numeric")
+  if(max(sim_data[[1]]$future_yrs) < max(short_term_yrs)){
+    stop("The maximum year in the simulation (", max(sim_data[[1]]$future_yrs), ") is less than the last term year (", max(short_term_yrs), ")",
+         call. = FALSE)
+  }
+  if(max(sim_data[[1]]$future_yrs) < long_term_yrs){
+    stop("The maximum year in the simulation (", max(sim_data[[1]]$future_yrs), ") is less than the long term year (", long_term_yrs, ")",
+         call. = FALSE)
+  }
 
   yrs <- sim_data[[1]]$yrs
   min_yr <- min(yrs)
@@ -203,13 +206,11 @@ merge_run_data <- function(sim_data = NULL,
 
   # catch_plot ----------------------------------------------------------------
   out$catch_obs_plot <- map2(sim_data, seq_along(sim_data), ~{
-    .x$catch_obs %>%
-      rename(catch = value,
-             year = yr) %>%
-      mutate(run = .y) %>%
-      select(year, catch, run)
-  }) %>%
-    map_df(~{.x}) %>%
+    .x$catch_obs <- cbind(.x$catch_obs, rep(.y, nrow(.x$catch_obs)))
+    colnames(.x$catch_obs) <- c("year", "catch", "run")
+    .x$catch_obs
+  })
+  out$catch_obs_plot <- do.call(rbind, out$catch_obs_plot) %>%
     as_tibble()
   out$catch_plot <- map2(sim_data, seq_along(sim_data), ~{
     .x$catch %>%
@@ -652,6 +653,7 @@ merge_run_data <- function(sim_data = NULL,
     ungroup()
 
   # catch_short_term ----------------------------------------------------------
+
   out$catch_short_term <- calc_term_quantiles(out$catch_plot,
                                               grp_col = "run",
                                               col = "catch",

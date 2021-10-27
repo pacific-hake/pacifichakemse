@@ -13,12 +13,9 @@ run_year_loop_om <- function(om = NULL,
                              verbose = TRUE,
                              ...){
 
-  verify_argument(om, "list")
-  verify_argument(yrs, c("integer", "numerical"))
-  verify_argument(verbose, "logical", 1)
-
   # Begin year loop -----------------------------------------------------------
-  map(yrs, function(yr = .x){
+  for(yr in yrs){
+  #map(yrs, function(yr = .x){
     if(verbose){
       cat(green(paste0(yr, ":\n")))
     }
@@ -47,11 +44,12 @@ run_year_loop_om <- function(om = NULL,
       rec
     }) %>% set_names(om$space_names)
 
-    om$n_save_age[1, yr_ind, , 1] <<- init_rec
+    om$n_save_age[1, yr_ind, , 1] <- init_rec
 
-    om$r_save[yr_ind, ] <<- init_rec
+    om$r_save[yr_ind, ] <- init_rec
+
     # Run season loop code ----------------------------------------------------
-    om <<- run_season_loop_om(om = om,
+    om <- run_season_loop_om(om = om,
                               yr = yr,
                               yr_ind = yr_ind,
                               m_season = m_season,
@@ -59,24 +57,30 @@ run_year_loop_om <- function(om = NULL,
                               ...)
     # Return from season loop -------------------------------------------------
 
-
     # Calculate catch and catch-age -------------------------------------------
     if(om$n_season > 1){
-      om$catch_age[, yr_ind] <<- rowSums(om$catch_save_age[, yr_ind,,])
-      om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
-      om$catch_n_age[, yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
-      om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
+      # The tmp variable is for speed reasons. array look-ups cost more than assignments
+      tmp <- rowSums(om$catch_save_age[, yr_ind,,])
+      om$catch_age[, yr_ind] <- tmp
+      om$catch[yr_ind] <- sum(tmp)
+      tmp <- rowSums(om$catch_n_save_age[,yr_ind,,])
+      om$catch_n_age[, yr_ind] <- tmp
+      om$catch_n[yr_ind] <- sum(tmp)
     }else{
       if(om$n_space == 1){
-        om$catch_age[,yr_ind] <<- om$catch_save_age[,yr_ind,,]
-        om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
-        om$catch_n_age[,yr_ind] <<- om$catch_n_save_age[,yr_ind,,]
-        om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
+        tmp <- om$catch_save_age[,yr_ind,,]
+        om$catch_age[,yr_ind] <- tmp
+        om$catch[yr_ind] <- sum(tmp)
+        tmp <- om$catch_n_save_age[,yr_ind,,]
+        om$catch_n_age[,yr_ind] <- tmp
+        om$catch_n[yr_ind] <- sum(tmp)
       }else{
-        om$catch_age[,yr_ind] <<- rowSums(om$catch_savebr_age[,yr_ind,,])
-        om$catch[yr_ind] <<- sum(om$catch_save_age[,yr_ind,,])
-        om$catch_n_age[,yr_ind] <<- rowSums(om$catch_n_save_age[,yr_ind,,])
-        om$catch_n[yr_ind] <<- sum(om$catch_n_save_age[,yr_ind,,])
+        tmp <- rowSums(om$catch_savebr_age[,yr_ind,,])
+        om$catch_age[,yr_ind] <- tmp
+        om$catch[yr_ind] <- sum(tmp)
+        tmp <- rowSums(om$catch_n_save_age[,yr_ind,,])
+        om$catch_n_age[,yr_ind] <- tmp
+        om$catch_n[yr_ind] <- sum(tmp)
       }
     }
 
@@ -85,7 +89,7 @@ run_year_loop_om <- function(om = NULL,
     if(om$n_season == 1){
       m_surv_mul <- 0.5
     }
-    om$survey_true[,yr_ind] <<- map_dbl(seq_len(om$n_space), ~{
+    om$survey_true[,yr_ind] <- map_dbl(seq_len(om$n_space), ~{
       sum(om$n_save_age[, yr_ind, .x, om$survey_season] *
           exp(-m_surv_mul * om$z_save[, yr_ind, .x, om$survey_season]) *
             om$surv_sel * om$q * wage$survey)
@@ -113,28 +117,28 @@ run_year_loop_om <- function(om = NULL,
         surv <- sum(n_surv * om$surv_sel *
                       om$q * wage$survey)
       }
-      om$survey[yr_ind] <<- surv
+      om$survey[yr_ind] <- surv
     }else{
-      om$survey[yr_ind] <<- 1
+      om$survey[yr_ind] <- 1
     }
     # Calculate survey age-comps ----------------------------------------------
     surv_tmp <- sum(n_surv * om$surv_sel * om$q)
     age_1_ind <- which(om$ages == 1)
     if(om$flag_survey[yr_ind] == 1){
-      om$age_comps_surv[1:(om$age_max_age - 1), yr_ind] <<-
+      om$age_comps_surv[1:(om$age_max_age - 1), yr_ind] <-
         (n_surv[age_1_ind:(om$age_max_age)] *
            om$surv_sel[age_1_ind:(om$age_max_age)] * om$q) / surv_tmp
-      om$age_comps_surv[om$age_max_age, yr_ind] <<-
+      om$age_comps_surv[om$age_max_age, yr_ind] <-
         sum(n_surv[(om$age_max_age + 1):om$n_age] *
               om$surv_sel[(om$age_max_age + 1):om$n_age] * om$q) / surv_tmp
     }else{
-      om$age_comps_surv[,yr_ind] <<- NA
+      om$age_comps_surv[,yr_ind] <- NA
     }
 
     # Calculate survey biomass by space -------------------------------------
-    om$surv_tot[yr_ind,] <<- map_dbl(seq_len(om$n_space), ~{
+    om$surv_tot[yr_ind,] <- map_dbl(seq_len(om$n_space), ~{
       n_surv <- om$n_save_age[,yr_ind, .x, om$survey_season]
-      om$surv_tot[yr_ind, .x] <<- sum(n_surv *
+      om$surv_tot[yr_ind, .x] <- sum(n_surv *
                                          om$surv_sel * om$q *
                                          exp(-m_surv_mul * om$z_save[,yr_ind, .x, om$survey_season]))
     })
@@ -147,7 +151,7 @@ run_year_loop_om <- function(om = NULL,
         sum(n_surv[(om$age_max_age + 1):om$n_age] *
               om$surv_sel[(om$age_max_age + 1):om$n_age] * om$q) / om$surv_tot[yr_ind, .x])
     })
-    om$age_comps_surv_space[1:om$age_max_age, yr_ind, ] <<- surv_age_comps_tmp %>% do.call(rbind, .)
+    om$age_comps_surv_space[1:om$age_max_age, yr_ind, ] <- surv_age_comps_tmp %>% do.call(rbind, .)
 
     # Calculate catch value by space -----------------------------------------
     # rowSums sums all seasons within a space
@@ -170,19 +174,19 @@ run_year_loop_om <- function(om = NULL,
         # Plus group
         sum(catch_tmp[.x, (om$age_max_age + 1):om$n_age])) / catch_tot[.x]
     })
-    om$age_comps_catch_space[1:om$age_max_age, yr_ind,] <<- catch_age_comps_tmp %>% do.call(rbind, .)
+    om$age_comps_catch_space[1:om$age_max_age, yr_ind,] <- catch_age_comps_tmp %>% do.call(rbind, .)
 
     if(om$flag_catch[yr_ind] == 1){
-      om$age_comps_catch[1:(om$age_max_age - 1), yr_ind] <<-
+      om$age_comps_catch[1:(om$age_max_age - 1), yr_ind] <-
         om$catch_n_age[age_1_ind:(om$age_max_age), yr_ind] / om$catch_n[yr_ind]
-      om$age_comps_catch[om$age_max_age, yr_ind] <<-
+      om$age_comps_catch[om$age_max_age, yr_ind] <-
         sum(om$catch_n_age[(om$age_max_age + 1):om$n_age, yr_ind]) / om$catch_n[yr_ind]
     }
 
     if(verbose){
       cat("\n")
     }
-  })
+  }
   # End year loop -------------------------------------------------------------
   om
 }
