@@ -82,7 +82,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   }
 
   # em_output -----------------------------------------------------------------
-  #  Estimation model output -  check this using str(em_output, 3)
+  # Estimation model output -  check this using str(em_output, 3)
   em_output <- NULL
   if(!om_only){
     em_output <- map(mse_om_output, ~{

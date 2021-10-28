@@ -89,56 +89,46 @@ run_season_loop_om <- function(om,
 
       om$f_sel_save[, yr_ind, space] <- f_sel
 
-      # Calculate catch space -------------------------------------------------
+      # Calculate catch by country --------------------------------------------
+      space_col <- paste0("space", space)
       if(om$n_space > 1){
         if(yr <= om$m_yr){
-          space_col <- paste0("space", space)
-          catch_space <- om$catch_country[om$catch_country[, "year"] == yr, space_col]
+          catch_country <- om$catch_country[yr_ind, space_col]
         }else{
-          catch_space <- om$catch_obs[yr_ind, "value"]
+          catch_country <- om$catch_obs[yr_ind, "value"] # * om$f_space[space]
         }
       }else{
-        catch_space <- om$catch_obs[yr_ind, "value"]
+        catch_country <- om$catch_obs[yr_ind, "value"]
       }
 
       # Calculate catch distribution ------------------------------------------
-      e_tmp <- catch_space
+      e_tmp <- catch_country
 
       if(attain[space] == 0){
         if(yr > om$m_yr){
           e_tmp <- zero_catch_val
         }
-      }else if(hcr_apply & yr > om$m_yr){
-          e_tmp <- apply_hcr_om(om = om,
-                                yr = yr,
-                                yr_ind = yr_ind,
-                                ...)
+      }else if(hcr_apply && yr > om$m_yr){
+        e_tmp <- apply_hcr_om(om = om,
+                              yr = yr,
+                              yr_ind = yr_ind,
+                              ...)
       }
-      space_seas_catch_prop <- as.numeric(om$catch_props_space_season[space, season])
+      e_tmp <- e_tmp * as.numeric(om$catch_props_space_season[space, season])
       if(yr > om$m_yr){
-        e_tmp <- e_tmp *
-          #om$f_space[space] *
-          ifelse(attain[space] == 0, 1, attain[space]) *
-          space_seas_catch_prop
-      }else{
-        e_tmp <- e_tmp *
-          #om$f_space[space] *
-          space_seas_catch_prop
+        e_tmp <- e_tmp * ifelse(attain[space] == 0, 1, attain[space]) * om$f_space[space]
       }
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
-        col <- paste0("space", space)
-        tmp_space_catch <- om$catch_country[om$catch_country[, "year"] == yr, ]
-        tmp_space_catch <- tmp_space_catch[names(tmp_space_catch) == col]
+        tmp_space_catch <- om$catch_country[yr_ind, space_col]
         if(season == 1 || is.na(tmp_space_catch)){
           tmp_space_catch <- 0
         }
-        om$catch_country[yr_ind, col] <- tmp_space_catch + e_tmp
+        om$catch_country[yr_ind, space_col] <- tmp_space_catch + e_tmp
         if(season == 4 & space == 2){
           om$catch_country[yr_ind, "total"] <- sum(om$catch_country[yr_ind, c("space1", "space2")])
         }
       }
-
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr)
@@ -267,9 +257,9 @@ run_season_loop_om <- function(om,
       # Inputting constant catch value alone is not enough to guarantee constant catch, because the get_f() function
       # is used to approximate F based on catch for each space/season sub-unit within a year and it is not exact
       if(const_catch && yr > om$m_yr && !hcr_apply){
-        val <- om$catch_obs %>% filter(!!yr == yr) %>% pull(value)
+        val <- om$catch_obs[yr_ind, "value"]
         val <- val * #om$f_space[space] *
-          attain[space] * pull(om$catch_props_space_season[space, season])
+          attain[space] * om$catch_props_space_season[space, season]
         # Prevent NaNs in the division below
         val <- ifelse(val == 0, 1e-5, val)
         val <- f_sel * rep(val, om$n_age) / sum(f_sel * rep(val, om$n_age)) * val
