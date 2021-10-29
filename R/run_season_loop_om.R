@@ -14,7 +14,7 @@
 #' @param zero_catch_val The value to use instead of zero for catch (necessary for EM to converge)
 #' @param hcr_apply If `TRUE`, apply the Harvest control rule inside the Operating model. Set to `FALSE`
 #' when running MSE as the HCR is already applied
-#' @param const_catch If `TRUE` make the catch constant for trhe projection period. `catch_in` still
+#' @param const_catch If `TRUE` make the catch constant for the projection period. `catch_in` still
 #' needs to be set to some value when running `run_oms()`
 #'
 #' @return A modified version of `om` with the current data for `yr` populated
@@ -258,7 +258,7 @@ run_season_loop_om <- function(om,
       # is used to approximate F based on catch for each space/season sub-unit within a year and it is not exact
       if(const_catch && yr > om$m_yr && !hcr_apply){
         val <- om$catch_obs[yr_ind, "value"]
-        val <- val * #om$f_space[space] *
+        val <- val * om$f_space[space] *
           attain[space] * om$catch_props_space_season[space, season]
         # Prevent NaNs in the division below
         val <- ifelse(val == 0, 1e-5, val)
