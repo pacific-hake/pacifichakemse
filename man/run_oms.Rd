@@ -13,6 +13,8 @@ run_oms(
   b_futures = 0.5,
   sel_changes = 0,
   catch_in = NA_real_,
+  hcr_apply = TRUE,
+  random_recruitment = TRUE,
   attain = c(1, 1),
   plot_names = NULL,
   random_seed = NULL,

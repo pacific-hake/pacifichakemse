@@ -227,7 +227,9 @@ plot_timeseries <- function(ps = NULL,
       })
       hcr_upper_vals <- hcr_upper_vals[!map_lgl(hcr_upper_vals, is.null)]
       if(length(unique(hcr_upper_vals)) != 1){
-        stop("There is more than one hcr_upper value in the list given, cannot plot more than one upper HCR line", call. = FALSE)
+        stop("There is more than one hcr_upper value in the list given, cannot plot more than one upper HCR line.\n",
+             "When you ran run_oms() did you set some scenario's hcr_apply argument to TRUE and others to FALSE?",
+             call. = FALSE)
       }
       hcr_upper_val <- unique(hcr_upper_vals)[[1]]
       hcr_lower_vals <- map(ps$sim_data, ~{
@@ -235,7 +237,9 @@ plot_timeseries <- function(ps = NULL,
       })
       hcr_lower_vals <- hcr_lower_vals[!map_lgl(hcr_lower_vals, is.null)]
       if(length(unique(hcr_lower_vals)) != 1){
-        stop("There is more than one hcr_lower value in the list given, cannot plot more than one lower HCR line", call. = FALSE)
+        stop("There is more than one hcr_lower value in the list given, cannot plot more than one lower HCR line\n",
+             "When you ran run_oms() did you set some scenario's hcr_apply argument to TRUE and others to FALSE?",
+             call. = FALSE)
       }
 
       hcr_lower_val <- unique(hcr_lower_vals)[[1]]

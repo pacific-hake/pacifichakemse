@@ -33,7 +33,7 @@ load_data_om(
   sel_change_yr = 1991,
   f_space = c(0.2612, 0.7388),
   log_phi_survey = log(11.46),
-  include_recruitment = TRUE,
+  random_recruitment = TRUE,
   ...
 )
 }
@@ -100,7 +100,7 @@ the second is the US}
 \item{log_phi_survey}{Survey phi parameter value
 If FALSE, they will be given random normal values based on rdev_sd}
 
-\item{include_recruitment}{Logical. If \code{FALSE}, recruitment deviations will be
+\item{random_recruitment}{Logical. If \code{FALSE}, recruitment deviations will be
 set to zero in the projection period. If \code{TRUE}, recruitment deviations will be set
 to random values in the projection period}
 

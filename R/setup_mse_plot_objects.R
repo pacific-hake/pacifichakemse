@@ -159,7 +159,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # To view structure and names of merged_run_data: str(merged_run_data, 1) and str(merged_run_data[[1]], 1)
   # To see objectives probability table for the first scenario: merged_run_data[[1]]$info
   merged_run_data <- map(om_output, function(om = .x, ...){
-    tmp <- merge_run_data(om, quants = quants, ...)
+      tmp <- merge_run_data(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
       mutate(scenario = names(om))
     tmp$vtac_seas <- tmp$vtac_seas %>%

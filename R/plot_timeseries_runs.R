@@ -62,7 +62,7 @@ plot_timeseries_runs <- function(ps,
                        sec.axis = sec_axis(~ ., breaks = end_order$value, labels = end_order$run))
     theme(legend.title = element_blank())
 
-    message("Order of runs from highest to lowest value (", length(end_order$run), " runs) is:")
+    message("Order of runs from highest to lowest value (", length(end_order$run), " runs) for the terminal year is:")
     print(end_order$run)
   g
 }
