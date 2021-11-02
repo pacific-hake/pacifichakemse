@@ -31,6 +31,9 @@ run_mse_scenario <- function(om = NULL,
                              m_increase = 0,
                              sel_change = 0,
                              save_all_em = FALSE,
+                             hcr_lower = 0.1,
+                             hcr_upper = 0.4,
+                             hcr_fspr = 0.4,
                              ...){
 
   # Survey years setup ---------------------------------------------------------
@@ -199,7 +202,6 @@ run_mse_scenario <- function(om = NULL,
                            v_real = v_real,
                            ...)
 
-
     param_vals <- pars[leading_params] %>% map_dbl(~exp(as.numeric(.x)))
 
     # Save EM outputs ---------------------------------------------------------
@@ -298,6 +300,12 @@ run_mse_scenario <- function(om = NULL,
   # End MSE loop --------------------------------------------------------------
   # Removes an NA entry at the end which is caused by the loop having one more year than
   # actual simulated years (see NA a few lines above). Making it NULL automatically removes it from the list.
+
+  # The HCR values are appended here. They are needed for plotting
+  om_output$hcr_lower <- hcr_lower
+  om_output$hcr_upper <- hcr_upper
+  om_output$hcr_fspr <- hcr_fspr
+
   mse_run[is.na(mse_run)] <- NULL
   list(mse_run, om_output, em_output)
 }
