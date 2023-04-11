@@ -40,10 +40,20 @@ run_year_loop_om <- function(om = NULL,
         wage <- get_wa_dfs(om, yr)
         om$ssb_initial[yr_ind, space] <<- sum(om$n_save_age[, yr_ind, space, 1] * wage$ssb, na.rm = TRUE) * 0.5
       }
-      rec <- (4 * om$h * om$r0_space[space] * om$ssb_initial[yr_ind, space] /
+
+      # Single coastwide recruitment curve
+      if(rec_sp == 1){
+        rec <- (4 * om$h * om$r0_space[space] * om$ssb_initial[yr_ind, space] /
           (om$ssb_0[space] * (1 - om$h) + om$ssb_initial[yr_ind, space] *
              (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                       om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
+      }else{
+        #multiple region-specific recruitment curves
+        rec <- (4 * om$h * om$r0_space[space] * om$ssb_initial[yr_ind, space] /
+                (om$ssb_0[space] * (1 - om$h) + om$ssb_initial[yr_ind, space] *
+                   (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
+                                            om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
+      }
       rec
     }) %>% set_names(om$space_names)
 

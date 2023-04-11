@@ -19,6 +19,7 @@
 #' @param move_fifty_init Age at 50 percent maximum movement rate
 #' @param n_survey Survey frequency
 #' @param rdev_sd Recruitment deviation Standard deviation
+#' @param rec_sp Number of spatially explicit stock-recruitment curves
 #' @param b_future Bias adjustment in the future
 #' @param move_out Fraction of individuals that travel south in the last season
 #' @param move_south Fraction of individuals that move south during the year
@@ -62,6 +63,7 @@ load_data_om <- function(ss_model = NULL,
                          age_plus_grp = 15,
                          age_names = paste("age", 0:20),
                          rdev_sd = 1.4,
+                         rec_sp = 1,
                          move_init = NULL,
                          move_max_init = 0.35,
                          move_fifty_init = 6,
