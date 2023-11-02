@@ -533,7 +533,7 @@ merge_run_data <- function(sim_data = NULL,
   # yrs_quota_met -------------------------------------------------------------
   out$yrs_quota_met <- out$ssb_plot %>%
     group_by(run) %>%
-    summarize(value = length(which(ssb > 0.1 && ssb <= 0.4)) / simyears)
+    summarize(value = length(which(ssb > 0.1 & ssb <= 0.4)) / simyears)
 
   # catch_area ----------------------------------------------------------------
   out$catch_area <- map2(sim_data, seq_along(sim_data), ~{
