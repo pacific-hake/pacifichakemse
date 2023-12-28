@@ -45,7 +45,7 @@ when running MSE as the HCR is already applied}
 
 \item{testing}{Logical. If TRUE, write out testing files}
 
-\item{const_catch}{If \code{TRUE} make the catch constant for trhe projection period. \code{catch_in} still
+\item{const_catch}{If \code{TRUE} make the catch constant for the projection period. \code{catch_in} still
 needs to be set to some value when running \code{run_oms()}}
 
 \item{...}{Absorbs additional arguments meant for other functions}

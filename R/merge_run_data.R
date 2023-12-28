@@ -20,11 +20,20 @@ merge_run_data <- function(sim_data = NULL,
                            catch_multiplier = 1e-6,
                            ...){
 
-  verify_argument(sim_data, "list")
-  verify_argument(short_term_yrs, c("integer", "numeric"))
-  verify_argument(long_term_yrs, c("integer", "numeric"), 1)
-  verify_argument(quants,  "numeric")
-  verify_argument(catch_multiplier,  "numeric")
+  if(is.null(short_term_yrs)){
+    stop("You must supply the short_term_yrs vector", call. = FALSE)
+  }
+  if(is.null(long_term_yrs)){
+    stop("You must supply the long_term_yrs start year value", call. = FALSE)
+  }
+  if(max(sim_data[[1]]$future_yrs) < max(short_term_yrs)){
+    stop("The maximum year in the simulation (", max(sim_data[[1]]$future_yrs), ") is less than the last term year (", max(short_term_yrs), ")",
+         call. = FALSE)
+  }
+  if(max(sim_data[[1]]$future_yrs) < long_term_yrs){
+    stop("The maximum year in the simulation (", max(sim_data[[1]]$future_yrs), ") is less than the long term year (", long_term_yrs, ")",
+         call. = FALSE)
+  }
 
   yrs <- sim_data[[1]]$yrs
   min_yr <- min(yrs)
@@ -203,13 +212,11 @@ merge_run_data <- function(sim_data = NULL,
 
   # catch_plot ----------------------------------------------------------------
   out$catch_obs_plot <- map2(sim_data, seq_along(sim_data), ~{
-    .x$catch_obs %>%
-      rename(catch = value,
-             year = yr) %>%
-      mutate(run = .y) %>%
-      select(year, catch, run)
-  }) %>%
-    map_df(~{.x}) %>%
+    .x$catch_obs <- cbind(.x$catch_obs, rep(.y, nrow(.x$catch_obs)))
+    colnames(.x$catch_obs) <- c("year", "catch", "run")
+    .x$catch_obs
+  })
+  out$catch_obs_plot <- do.call(rbind, out$catch_obs_plot) %>%
     as_tibble()
   out$catch_plot <- map2(sim_data, seq_along(sim_data), ~{
     .x$catch %>%
@@ -274,43 +281,60 @@ merge_run_data <- function(sim_data = NULL,
       stop("space must be 0, 1, or 2", call. = FALSE)
     }
 
-    x <- map_df(1:nruns, ~{
-      if(sim_age_comp_type == "catch"){
-        if(space == 1){
-          # TODO: This code is all correct, but the space age_comps_catch_space[,,1], age_comps_catch_space[,,2],
-          # age_comps_surv_space[,,1], age_comps_surv_space[,,2] are fully populated when I think they should
-          # have NAs for non-data years. Populated correctly is age_comps_catch and age_comps_surv
-          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,1], sim_data[[.x]]$age_max_age)
-        }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[,,2], sim_data[[.x]]$age_max_age)
-        }else{
-          calc_mean_age(sim_data[[.x]]$age_comps_catch, sim_data[[.x]]$age_max_age)
-        }
-      }else if(sim_age_comp_type == "surv"){
-        if(space == 1){
-          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,1], sim_data[[.x]]$age_max_age)
-        }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[,,2], sim_data[[.x]]$age_max_age)
-        }else{
-          calc_mean_age(sim_data[[.x]]$age_comps_surv, sim_data[[.x]]$age_max_age)
-        }
+    # TODO: This code is all correct, but the space age_comps_catch_space[,,1], age_comps_catch_space[,,2],
+    # age_comps_surv_space[,,1], age_comps_surv_space[,,2] are fully populated when I think they should
+    # have NAs for non-data years. Populated correctly is age_comps_catch and age_comps_surv
+    if(sim_age_comp_type == "catch"){
+      if(space == 1){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[, , 1], sim_data[[.x]]$age_max_age)
+        })
+      }else if(space == 2){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_catch_space[, , 2], sim_data[[.x]]$age_max_age)
+        })
       }else{
-        if(space == 1){
-          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 1, 3], sim_data[[.x]]$age_max_age)
-        }else if(space == 2){
-          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 2, 3], sim_data[[.x]]$age_max_age)
-        }else{
-          calc_mean_age(apply(sim_data[[.x]]$age_comps_om[, , , 3], c(1, 2), sum), sim_data[[.x]]$age_max_age)
-        }
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_catch, sim_data[[.x]]$age_max_age)
+        })
       }
-    }) %>%
+    }else if(sim_age_comp_type == "surv"){
+      if(space == 1){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[, , 1], sim_data[[.x]]$age_max_age)
+        })
+      }else if(space == 2){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_surv_space[, , 2], sim_data[[.x]]$age_max_age)
+        })
+      }else{
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_surv, sim_data[[.x]]$age_max_age)
+        })
+      }
+    }else{
+      if(space == 1){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 1, 3], sim_data[[.x]]$age_max_age)
+        })
+      }else if(space == 2){
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(sim_data[[.x]]$age_comps_om[, , 2, 3], sim_data[[.x]]$age_max_age)
+        })
+      }else{
+        x <- map_df(seq_len(nruns), ~{
+          calc_mean_age(apply(sim_data[[.x]]$age_comps_om[, , , 3], c(1, 2), sum), sim_data[[.x]]$age_max_age)
+        })
+      }
+    }
+    x <- x %>%
       t() %>%
       as_tibble(.name_repair = ~ as.character(1:nruns)) %>%
       mutate(yr = yrs)
     names(x) <- c(1:nruns, "yr")
-    x <- x %>%
+
+    x %>%
       select(yr, everything())
-    x
   }
 
   # Average age in population -------------------------------------------------
@@ -509,7 +533,7 @@ merge_run_data <- function(sim_data = NULL,
   # yrs_quota_met -------------------------------------------------------------
   out$yrs_quota_met <- out$ssb_plot %>%
     group_by(run) %>%
-    summarize(value = length(which(ssb > 0.1 && ssb <= 0.4)) / simyears)
+    summarize(value = length(which(ssb > 0.1 & ssb <= 0.4)) / simyears)
 
   # catch_area ----------------------------------------------------------------
   out$catch_area <- map2(sim_data, seq_along(sim_data), ~{
@@ -652,6 +676,7 @@ merge_run_data <- function(sim_data = NULL,
     ungroup()
 
   # catch_short_term ----------------------------------------------------------
+
   out$catch_short_term <- calc_term_quantiles(out$catch_plot,
                                               grp_col = "run",
                                               col = "catch",

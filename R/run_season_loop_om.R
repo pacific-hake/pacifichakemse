@@ -14,7 +14,7 @@
 #' @param zero_catch_val The value to use instead of zero for catch (necessary for EM to converge)
 #' @param hcr_apply If `TRUE`, apply the Harvest control rule inside the Operating model. Set to `FALSE`
 #' when running MSE as the HCR is already applied
-#' @param const_catch If `TRUE` make the catch constant for trhe projection period. `catch_in` still
+#' @param const_catch If `TRUE` make the catch constant for the projection period. `catch_in` still
 #' needs to be set to some value when running `run_oms()`
 #'
 #' @return A modified version of `om` with the current data for `yr` populated
@@ -39,12 +39,14 @@ run_season_loop_om <- function(om,
 
   mat_sel <- om$mat_sel[-1]
   # Begin season loop ---------------------------------------------------------
-  map(seq_len(om$n_season), function(season = .x){
+  for(season in seq_len(om$n_season)){
+  #map(seq_len(om$n_season), function(season = .x){
     if(verbose){
       cat(red("Season:", season, "\n"))
     }
     # Begin space loop --------------------------------------------------------
-    map(seq_len(om$n_space), function(space = .x){
+    for(space in seq_len(om$n_space)){
+    #map(seq_len(om$n_space), function(space = .x){
       if(verbose){
         cat(yellow("      Space:", space, "\n"))
       }
@@ -85,71 +87,54 @@ run_season_loop_om <- function(om,
         write(paste(yr, season, space, paste(f_sel, sep = ",", collapse = ","), sep = ","), "fselvals.csv", append = TRUE)
       }
 
-      om$f_sel_save[, yr_ind, space] <<- f_sel
+      om$f_sel_save[, yr_ind, space] <- f_sel
 
-      # Calculate catch space -------------------------------------------------
+      # Calculate catch by country --------------------------------------------
+      space_col <- paste0("space", space)
       if(om$n_space > 1){
         if(yr <= om$m_yr){
-          space_col <- paste0("space", space)
-          catch_space <- om$catch_country[om$catch_country[, "year"] == yr, space_col]
+          catch_country <- om$catch_country[yr_ind, space_col]
         }else{
-          #if(is_tibble(om$catch_obs)){
-          #  catch_space <- om$catch_obs[yr_ind, ]$value
-          #}else{
-            catch_space <- om$catch_obs[yr_ind, "value"]
-          #}
+          catch_country <- om$catch_obs[yr_ind, "value"] # * om$f_space[space]
         }
       }else{
-        #if(is_tibble(om$catch_obs)){
-        #  catch_space <- om$catch_obs[yr_ind, ]$value
-        #}else{
-          catch_space <- om$catch_obs[yr_ind, "value"]
-        #}
+        catch_country <- om$catch_obs[yr_ind, "value"]
       }
 
       # Calculate catch distribution ------------------------------------------
-      e_tmp <- catch_space
+      e_tmp <- catch_country
+
       if(attain[space] == 0){
         if(yr > om$m_yr){
           e_tmp <- zero_catch_val
         }
-      }else if(hcr_apply & yr > om$m_yr){
-          e_tmp <- apply_hcr_om(om = om,
-                                yr = yr,
-                                yr_ind = yr_ind,
-                                ...)
+      }else if(hcr_apply && yr > om$m_yr){
+        e_tmp <- apply_hcr_om(om = om,
+                              yr = yr,
+                              yr_ind = yr_ind,
+                              ...)
       }
-      space_seas_catch_prop <- as.numeric(om$catch_props_space_season[space, season])
+      e_tmp <- e_tmp * as.numeric(om$catch_props_space_season[space, season])
       if(yr > om$m_yr){
-        e_tmp <- e_tmp *
-          om$f_space[space] *
-          ifelse(attain[space] == 0, 1, attain[space]) *
-          space_seas_catch_prop
-      }else{
-        e_tmp <- e_tmp *
-          om$f_space[space] *
-          space_seas_catch_prop
+        e_tmp <- e_tmp * ifelse(attain[space] == 0, 1, attain[space]) * om$f_space[space]
       }
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
-        col <- paste0("space", space)
-        tmp_space_catch <- om$catch_country[om$catch_country[, "year"] == yr, ]
-        tmp_space_catch <- tmp_space_catch[names(tmp_space_catch) == col]
+        tmp_space_catch <- om$catch_country[yr_ind, space_col]
         if(season == 1 || is.na(tmp_space_catch)){
           tmp_space_catch <- 0
         }
-        om$catch_country[yr_ind, col] <<- tmp_space_catch + e_tmp
+        om$catch_country[yr_ind, space_col] <- tmp_space_catch + e_tmp
         if(season == 4 & space == 2){
-          om$catch_country[yr_ind, "total"] <<- sum(om$catch_country[yr_ind, c("space1", "space2")])
+          om$catch_country[yr_ind, "total"] <- sum(om$catch_country[yr_ind, c("space1", "space2")])
         }
       }
-
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
       wage_catch <- om$wage_catch_df %>% get_age_dat(yr)
       b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel, na.rm = TRUE)
-      om$v_save[yr_ind, space, season] <<- b_tmp
-      om$catch_quota[yr_ind, space, season] <<- e_tmp
+      om$v_save[yr_ind, space, season] <- b_tmp
+      om$catch_quota[yr_ind, space, season] <- e_tmp
 
       tryCatch({
         tmp <- e_tmp / b_tmp
@@ -167,7 +152,7 @@ run_season_loop_om <- function(om,
                   season, " , space ", space)
         }
         #e_tmp <- 0.75 * b_tmp
-        #om$catch_quota_n[yr_ind, space, season] <<- 1
+        #om$catch_quota_n[yr_ind, space, season] <- 1
       }
 
       # Calculate F based on catch distribution -------------------------------
@@ -188,10 +173,10 @@ run_season_loop_om <- function(om,
         f_season <- f_out * f_sel
       }
       # Terminal fishing mortality
-      om$f_out_save[yr_ind, season, space] <<- f_out
-      om$f_season_save[, yr_ind, space, season] <<- f_season
+      om$f_out_save[yr_ind, season, space] <- f_out
+      om$f_season_save[, yr_ind, space, season] <- f_season
       z <- m_season + f_season
-      om$z_save[, yr_ind, space, season] <<- z
+      om$z_save[, yr_ind, space, season] <- z
 
       # Calculate numbers-at-age with movement --------------------------------
       # This is used to deal with movement from one space to another.
@@ -220,7 +205,7 @@ run_season_loop_om <- function(om,
             n_in <- n_in + n_in_tmp
           }
         }
-        om$n_save_age[, yr_ind, space, season + 1] <<- om$n_save_age[, yr_ind, space, season] * exp(-z) -
+        om$n_save_age[, yr_ind, space, season + 1] <- om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
           # Add the ones come from the surrounding areas
@@ -241,7 +226,7 @@ run_season_loop_om <- function(om,
             n_in_plus <- n_in_plus + n_in_plus_tmp
           }
         }
-        om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <<- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
+        om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave
           exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space, 1:(om$n_age - 2), season, yr_ind]) +
@@ -255,31 +240,32 @@ run_season_loop_om <- function(om,
         # Leaving
         n_out_plus <- n_survive_plus * (om$move_mat[space, om$n_age, season, yr_ind])
 
-        om$n_save_age[om$n_age, yr_ind + 1, space, 1] <<- n_survive_plus - n_out_plus + n_in_plus
+        om$n_save_age[om$n_age, yr_ind + 1, space, 1] <- n_survive_plus - n_out_plus + n_in_plus
       }
 
       # Calculate age-comps ---------------------------------------------------
-      om$age_comps_om[, yr_ind, space, season] <<- om$n_save_age[, yr_ind, space, season] /
+      om$age_comps_om[, yr_ind, space, season] <- om$n_save_age[, yr_ind, space, season] /
         sum(om$n_save_age[, yr_ind, space, season])
       if(yr_ind == 1 && season == 1){
-        om$ssb_all[1, space, season] <<- om$init_ssb_all[space]
+        om$ssb_all[1, space, season] <- om$init_ssb_all[space]
       }else{
         mat_sel_vec <- mat_sel %>% unlist
-        om$ssb_all[yr_ind, space, season] <<- sum(om$n_save_age[, yr_ind, space, season] * mat_sel_vec, na.rm = TRUE)
+        om$ssb_all[yr_ind, space, season] <- sum(om$n_save_age[, yr_ind, space, season] * mat_sel_vec, na.rm = TRUE)
       }
-      om$catch_n_save_age[, yr_ind, space, season] <<- (om$f_season_save[, yr_ind, space, season] / z) *
+      om$catch_n_save_age[, yr_ind, space, season] <- (om$f_season_save[, yr_ind, space, season] / z) *
         (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
       # Inputting constant catch value alone is not enough to guarantee constant catch, because the get_f() function
       # is used to approximate F based on catch for each space/season sub-unit within a year and it is not exact
       if(const_catch && yr > om$m_yr && !hcr_apply){
-        val <- om$catch_obs %>% filter(!!yr == yr) %>% pull(value)
-        val <- val * om$f_space[space] * attain[space] * pull(om$catch_props_space_season[space, season])
+        val <- om$catch_obs[yr_ind, "value"]
+        val <- val * om$f_space[space] *
+          attain[space] * om$catch_props_space_season[space, season]
         # Prevent NaNs in the division below
         val <- ifelse(val == 0, 1e-5, val)
         val <- f_sel * rep(val, om$n_age) / sum(f_sel * rep(val, om$n_age)) * val
-        om$catch_save_age[, yr_ind, space, season] <<- val
+        om$catch_save_age[, yr_ind, space, season] <- val
       }else{
-        om$catch_save_age[, yr_ind, space, season] <<- om$catch_n_save_age[, yr_ind, space, season] * wage_catch
+        om$catch_save_age[, yr_ind, space, season] <- om$catch_n_save_age[, yr_ind, space, season] * wage_catch
       }
 
       # Calculate catch quota -------------------------------------------------
@@ -289,9 +275,9 @@ run_season_loop_om <- function(om,
       #          call. = FALSE)
       #   }
       # }
-    })
+    }
     # End space loop ----------------------------------------------------------
-  })
+  }
   # End season loop -----------------------------------------------------------
 
   om

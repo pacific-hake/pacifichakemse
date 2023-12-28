@@ -27,11 +27,11 @@
 #' @param results_root_dir The results root directory
 #' @param results_dir The results directory
 #' @param catch_floor The lowest value to allow catch to drop to when applying the tac rule for the catch floor
+#' @param single_seed If NULL, ignore. If a number, use that as a seed to run a single run of the MSE. User for testing.
 #' @param ... Arguments passed to [load_data_om()]
 #'
 #' @return Nothing
 #' @importFrom dplyr transmute group_map mutate_at quo
-#' @importFrom gfutilities verify_argument func_name
 #' @importFrom here here
 #' @importFrom purrr map2 map map_chr map_lgl
 #' @importFrom r4ss SS_output
@@ -52,6 +52,7 @@ run_mses <- function(n_runs = 10,
                      n_surveys = 2,
                      b_futures = 0.5,
                      random_seed = 12345,
+                     single_seed = NULL,
                      results_root_dir = here("results"),
                      results_dir = here("results", "default"),
                      catch_floor = NULL,
@@ -114,11 +115,41 @@ run_mses <- function(n_runs = 10,
 
   cat(green(symbol$tick), green(" SS model output successfully loaded\n"))
 
+  if(!is.null(single_seed)){
+    cat(white("Scenario:", fns[1], "\n"))
+    om <- load_data_om(ss_model,
+                       n_sim_yrs = n_sim_yrs,
+                       n_survey = n_surveys[1],
+                       b_future = b_futures[1],
+                       selectivity_change = sel_changes[1],
+                       ...)
+
+    cat(green("Single run, seed = ", single_seed, "\n"))
+
+    tmp <- run_mse_scenario(om = om,
+                            ss_model = ss_model,
+                            n_sim_yrs = n_sim_yrs,
+                            random_seed = single_seed,
+                            sel_change = sel_changes[1],
+                            c_increase = c_increases[1],
+                            m_increase = m_increases[1],
+                            tac = tacs[[1]],
+                            attain = attains[[1]],
+                            catch_floor = catch_floor,
+                            hcr_apply = FALSE, # Tell OM not to apply HCR. If TRUE MSE will break
+                            ...)
+
+    cat(green("End single run\n"))
+    toc()
+    return(invisible())
+  }
+
   # Begin MSEs loop -----------------------------------------------------------
   map2(fns, 1:length(fns), function(fn = .x, fn_ind = .y, ...){
     cat(white("Scenario:", fn, "\n"))
+    #lst <- furrr::future_map(1:n_runs, function(run = .x, ...){
     lst <- map(1:n_runs, function(run = .x, ...){
-      om <- load_data_om(ss_model,
+        om <- load_data_om(ss_model,
                          n_sim_yrs = n_sim_yrs,
                          n_survey = n_surveys[fn_ind],
                          b_future = b_futures[fn_ind],
@@ -141,7 +172,8 @@ run_mses <- function(n_runs = 10,
                               ...)
       if(is.list(tmp)) tmp else NA
     }, ...)
-    attr(lst, "plotname") <- plot_names[fn_ind]
+    #}, ..., .options = furrr::furrr_options(seed = T))
+  attr(lst, "plotname") <- plot_names[fn_ind]
     saveRDS(lst, file = file.path(results_dir, fn))
   }, ...)
   # End MSEs loop -----------------------------------------------------------

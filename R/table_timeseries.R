@@ -35,17 +35,6 @@ table_timeseries <- function(ps = NULL,
                              format = "latex",
                              ...){
 
-  verify_argument(ps, "list")
-  verify_argument(type, "character", 1, c("ssb", "ssb_ssb0", "catch", "aas", "aac", "aap", "catch_quota"))
-  verify_argument(time, "character", 1, c("beg", "mid"))
-  verify_argument(ci, "numeric")
-  verify_argument(decimals, "numeric", 1)
-  verify_argument(by_country, "logical", 1)
-  verify_argument(scen, c("integer", "numeric"))
-  verify_argument(yr_lim, "numeric", 2)
-  verify_argument(inc_mean, "logical", 1)
-  verify_argument(format, "character", 1)
-
   stopifnot(!(by_country & length(scen) > 1))
 
   scenario_names <- names(ps$sim_data)

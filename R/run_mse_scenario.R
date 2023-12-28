@@ -31,6 +31,9 @@ run_mse_scenario <- function(om = NULL,
                              m_increase = 0,
                              sel_change = 0,
                              save_all_em = FALSE,
+                             hcr_lower = 0.1,
+                             hcr_upper = 0.4,
+                             hcr_fspr = 0.4,
                              ...){
 
   # Survey years setup ---------------------------------------------------------
@@ -70,15 +73,23 @@ run_mse_scenario <- function(om = NULL,
                     survey_values = vector(mode = "list", length = om$n_future_yrs),
                     survey_se = vector(mode = "list", length = om$n_future_yrs))
   em_iter <- 1
+  #mse_iter <- 1
+  #mse_run <- list(length = length(c(om$m_yr, om$future_yrs)))
 
   # Begin MSE loop ------------------------------------------------------------
+  #for(yr in c(om$m_yr, om$future_yrs)){
   mse_run <- map(c(om$m_yr, om$future_yrs), function(yr = .x){
     yr_ind <- which(yr == om$yrs)
 
     # Recruitment deviations --------------------------------------------------
     if(yr >= om$m_yr + 1){
       r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
-      #r_dev <<- 0
+      # If the deviate has been drawn and used previously, re-draw up to 2 times
+      iter_rdev <- 1
+      while(r_dev %in% om$parameters$r_in[, "value"] && iter_rdev < 2){
+        r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
+        iter_rdev <- iter_rdev + 1
+      }
       om$parameters$r_in[om$parameters$r_in[, "yr"] == yr, "value"] <<- r_dev
     }
 
@@ -89,6 +100,7 @@ run_mse_scenario <- function(om = NULL,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          attain = attain,
+                         testing = FALSE,
                          ...)
 
     om$catch_country <- om_output$catch_country
@@ -166,8 +178,8 @@ run_mse_scenario <- function(om = NULL,
                   obj$gr,
                   lower = lower,
                   upper = upper,
-                  control = list(iter.max = 1e6,
-                                 eval.max = 1e6))
+                  control = list(iter.max = 500,
+                                 eval.max = 500))
 
     report <- obj$report()
     plike <- get_likelihoods(report) %>% format(nsmall = 20)
@@ -199,7 +211,9 @@ run_mse_scenario <- function(om = NULL,
       em_output$r_save[[em_iter]] <<- report$N_beg[1,]
       em_output$f40_save[em_iter] <<- f_new[[2]]
       em_output$catch_save[[em_iter]] <<- report$Catch
+      em_output$has_extended_output[[em_iter]] <<- FALSE
       if(yr == tail(om$yrs, 1) || save_all_em){
+        em_output$has_extended_output[[em_iter]] <<- TRUE
         # Suppress these warnings:
         # In sqrt(diag(object$cov.fixed)) : NaNs produced
         # In sqrt(diag(cov)) : NaNs produced
@@ -262,9 +276,10 @@ run_mse_scenario <- function(om = NULL,
 
     # Update the OM data for next year ----------------------------------------
     # Update the OM data for the next simulation year in the loop. Note reference points
-    # are being passed into this function. Double <<- is used here so that `om` is
+    # are being passed into this function. Double <- is used here so that `om` is
     # in scope in the next iteration of the loop. Without that, `om` would be `NULL`
     # in the next simulation year.
+    #
     if(yr < tail(om$yrs, 1)){
       # No need to call this in the final year as the loop is finished
       om <<- update_om_data(yr = yr + 1,
@@ -275,14 +290,22 @@ run_mse_scenario <- function(om = NULL,
                             m_increase = m_increase,
                             sel_change = sel_change,
                             ...)
-
-    }else{
+      #mse_run[[mse_iter]] <- om
+    }
+    else{
+      #mse_run[[mse_iter]] <- NA
       NA
     }
   })
   # End MSE loop --------------------------------------------------------------
   # Removes an NA entry at the end which is caused by the loop having one more year than
   # actual simulated years (see NA a few lines above). Making it NULL automatically removes it from the list.
+
+  # The HCR values are appended here. They are needed for plotting
+  om_output$hcr_lower <- hcr_lower
+  om_output$hcr_upper <- hcr_upper
+  om_output$hcr_fspr <- hcr_fspr
+
   mse_run[is.na(mse_run)] <- NULL
   list(mse_run, om_output, em_output)
 }

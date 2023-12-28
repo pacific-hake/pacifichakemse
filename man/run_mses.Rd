@@ -17,6 +17,7 @@ run_mses(
   n_surveys = 2,
   b_futures = 0.5,
   random_seed = 12345,
+  single_seed = NULL,
   results_root_dir = here("results"),
   results_dir = here("results", "default"),
   catch_floor = NULL,
@@ -57,6 +58,8 @@ If \code{NULL}, 2 will be used for every scenario}
 the future, in the same order as the \code{fns} file names, or a single value which will be used for all scenarios}
 
 \item{random_seed}{A seed value to use when calling for all random functions}
+
+\item{single_seed}{If NULL, ignore. If a number, use that as a seed to run a single run of the MSE. User for testing.}
 
 \item{results_root_dir}{The results root directory}
 

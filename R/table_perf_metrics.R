@@ -21,12 +21,6 @@ table_perf_metrics <- function(ps,
                                format = "latex",
                                ...){
 
-  verify_argument(ps, "list")
-  verify_argument(ci, "numeric")
-  verify_argument(decimals, "numeric", 1)
-  verify_argument(inc_mean, "logical", 1)
-  verify_argument(format, "character", 1)
-
   scenario_names <- names(ps$sim_data)
 
   if(is.null(scen)){

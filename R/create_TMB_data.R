@@ -63,17 +63,18 @@ create_tmb_data <- function(om = NULL,
 
   om$parameters$r_in <- om$parameters$r_in[om$parameters$r_in[, "yr"] <= yr, "value"]
   om$parameters$f_0 <- rowSums(om$f_out_save[1:inc_yr_ind, , ])
+
   # Set f_0 and r_in values to 0.2 and 0 respectively in the future years
-  if(yr > om$m_yr){
+  if(yr > om$m_yr + 1){
     start_yr_const_f <- which(inc_yrs == om$m_yr + 1)
     end_yr_const_f <- which(inc_yrs == yr)
     om$parameters$f_0[start_yr_const_f:end_yr_const_f] <- 0.2
   }
-  if(yr > om$m_yr + 1){
-    start_yr_const_r <- which(inc_yrs == om$m_yr + 1)
-    end_yr_const_r <- which(inc_yrs == yr - 1)
-    om$parameters$r_in[start_yr_const_r:end_yr_const_r] <- 0
-  }
+  # if(yr > om$m_yr){
+  #   start_yr_const_r <- which(inc_yrs == om$m_yr + 1)
+  #   end_yr_const_r <- which(inc_yrs == yr - 1)
+  #   om$parameters$r_in[start_yr_const_r:end_yr_const_r] <- 0
+  # }
 
   om$parameters$p_sel <- om$sel_by_yrs %>%
     as.matrix()

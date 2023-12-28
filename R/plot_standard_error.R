@@ -15,10 +15,6 @@ plot_standard_error <- function(ps = NULL,
                                 yr_lim = c(NA_real_, NA_real_),
                                 ...){
 
-  verify_argument(ps, "list")
-  verify_argument(ci, "numeric", 2)
-  verify_argument(yr_lim, "numeric", 2)
-
   se <- ps$standard_error_ssb
   if(is.null(se) || !length(se)){
     stop("The ps$standard_error_ssb data frame is empty.\n",

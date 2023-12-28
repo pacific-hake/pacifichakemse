@@ -24,24 +24,14 @@ run_oms <- function(ss_model = NULL,
                     b_futures = 0.5,
                     sel_changes = 0,
                     catch_in = NA_real_,
+                    hcr_apply = TRUE,
+                    random_recruitment = TRUE,
                     attain = c(1, 1),
                     plot_names = NULL,
                     random_seed = NULL,
                     results_root_dir = here("results"),
                     results_dir = here("results", "default"),
                     ...){
-
-  verify_argument(n_runs, c("integer", "numeric"))
-  verify_argument(fns, "character")
-  verify_argument(yr_future, c("integer", "numeric"))
-  verify_argument(n_surveys, c("integer", "numeric"))
-  verify_argument(b_futures, c("integer", "numeric"))
-  verify_argument(sel_changes, c("integer", "numeric"))
-  verify_argument(catch_in, c("integer", "numeric"), 1)
-  verify_argument(plot_names, "character")
-  verify_argument(random_seed, c("integer", "numeric"))
-  verify_argument(results_root_dir, "character", 1)
-  verify_argument(results_dir, "character", 1)
 
   # Check file names and append .rds if necessary
   fns <- map_chr(fns, ~{
@@ -72,23 +62,28 @@ run_oms <- function(ss_model = NULL,
   set.seed(random_seed)
   random_seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
 
+  if(!is.na(catch_in) && catch_in != 0 && hcr_apply){
+    warning("Both hcr_apply and catch_in are set.\n",
+            "catch_in value was ignored, default catch was used with the HCR rule applied.",
+            call. = FALSE)
+  }
   # Begin MSEs loop -----------------------------------------------------------
   iter <<- 1
   map2(fns, 1:length(fns), function(fn = .x, fn_ind = .y, ...){
     cat(white("Scenario:", fn, "\n"))
     # Begin run loop ----------------------------------------------------------
-    lst <- map(1:n_runs, function(run = .x, ...){
+    lst <- map(1:ifelse(random_recruitment, n_runs, 1), function(run = .x, ...){
       cat(green("OM run", run, ": Seed =", random_seeds[run], "\n"))
       om <- load_data_om(ss_model,
                          yr_future = yr_future,
                          n_survey = n_surveys[fn_ind],
                          b_future = b_futures[fn_ind],
                          selectivity_change = sel_changes[fn_ind],
+                         random_recruitment = random_recruitment,
                          ...)
       iter <<- iter + 1
       const_catch <- FALSE
       if(!is.na(catch_in)){
-        #om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in * (attain[1] * om$f_space[1] + attain[2] * om$f_space[2])
         om$catch_obs[(which(om$yrs == om$m_yr) + 1):nrow(om$catch_obs), 2] <- catch_in
         const_catch <- TRUE
       }
@@ -98,6 +93,7 @@ run_oms <- function(ss_model = NULL,
              const_catch = const_catch,
              zero_catch_val = 0,
              attain = attain,
+             hcr_apply = hcr_apply,
              ...)
     }, ...)
     # End run loop ------------------------------------------------------------

@@ -8,9 +8,6 @@
 calc_mean_age <- function(agemat = NULL,
                           maxage = NULL){
 
-  verify_argument(agemat, "matrix")
-  verify_argument(maxage, c("numeric", "integer"), 1)
-
   n_ages_agemat <- nrow(agemat)
   stopifnot(n_ages_agemat >= maxage)
   age <- 1:maxage

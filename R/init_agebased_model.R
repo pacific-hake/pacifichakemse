@@ -7,8 +7,6 @@
 #' @export
 init_agebased_model <- function(om = NULL){
 
-  verify_argument(om, "list")
-
   # Natural mortality - males = females ---------------------------------------
   om$m_sel <- om$m_sel
   om$m0 <- exp(om$parameters$log_m_init)

@@ -55,7 +55,7 @@ update_om_data <- function(yr = NULL,
                                   mean(curr_survey_err[curr_survey_err < 1]),
                                   1)
 
-  if(om$catch_obs[yr_ind, ] == 0 && om$flag_survey[yr_ind] == -1){
+  if(om$catch_obs[yr_ind, "value"] == 0 && om$flag_survey[yr_ind] == -1){
     red(message("Stock in peril! Conducting emergency survey"))
     om$flag_survey[yr_ind] <- 1
     # Emergency survey adds 200 more age samples onto the mean value for all surveys,

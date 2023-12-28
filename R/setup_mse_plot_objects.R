@@ -40,7 +40,6 @@ setup_mse_plot_objects <- function(results_dir = NULL,
                                    quants = c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975),
                                    om_only = FALSE,
                                    ...){
-  verify_argument(results_dir, "character", 1)
 
   fls <- dir(results_dir)
   fls <- fls[grep("\\.rds", fls)]
@@ -83,7 +82,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   }
 
   # em_output -----------------------------------------------------------------
-  #  Estimation model output -  check this using str(em_output, 3)
+  # Estimation model output -  check this using str(em_output, 3)
   em_output <- NULL
   if(!om_only){
     em_output <- map(mse_om_output, ~{
@@ -160,7 +159,7 @@ setup_mse_plot_objects <- function(results_dir = NULL,
   # To view structure and names of merged_run_data: str(merged_run_data, 1) and str(merged_run_data[[1]], 1)
   # To see objectives probability table for the first scenario: merged_run_data[[1]]$info
   merged_run_data <- map(om_output, function(om = .x, ...){
-    tmp <- merge_run_data(om, quants = quants, ...)
+      tmp <- merge_run_data(om, quants = quants, ...)
     tmp$info <- tmp$info %>%
       mutate(scenario = names(om))
     tmp$vtac_seas <- tmp$vtac_seas %>%
@@ -354,7 +353,15 @@ setup_mse_plot_objects <- function(results_dir = NULL,
     bind_rows(catch_us_tmp)
 
   # Recruitment quants --------------------------------------------------------
-
+  mse_quants$r_quant <- merge_dfs_from_scenarios(merged_run_data, "r_quant")
+  mse_quants$r_ca_quant <- merge_dfs_from_scenarios(merged_run_data, "r_ca_quant")
+  mse_quants$r_us_quant <- merge_dfs_from_scenarios(merged_run_data, "r_us_quant")
+  r_ca_tmp <- mse_quants$r_ca_quant %>%
+    mutate(country = "Canada")
+  r_us_tmp <- mse_quants$r_us_quant %>%
+    mutate(country = "US")
+  mse_quants$r_quant_country <- r_ca_tmp %>%
+    bind_rows(r_us_tmp)
 
   # Standard error between the OM and EM (final year) -------------------------
   standard_error_ssb <- NULL

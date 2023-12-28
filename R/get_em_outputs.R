@@ -12,10 +12,6 @@ get_em_outputs <- function(em,
                            quants = c(0.05, 0.5, 0.95),
                            ...){
 
-  verify_argument(em, "list")
-  verify_argument(scen_name, "character", 1)
-  verify_argument(quants, "numeric")
-
   yrs <- names(em[[1]]$ssb_se[[length(em[[1]]$ssb_se)]])
   out <- NULL
 
@@ -23,18 +19,22 @@ get_em_outputs <- function(em,
     item <- sym(item)
     out <- map2(x, seq_along(x), ~{
       names(.x[[item]]) <- as.character(seq_along(.x[[item]]))
-      history_len <- length(.x[[item]][[1]])
+      # Choose one of the ones with extended output when others may be NULL
+      history_len <- length(.x[[item]][map_lgl(.x$has_extended_output, ~{.x})][[1]])
       proj_len <- length(.x[[item]])
       dat <- map(.x[[item]], ~{
-        length(.x) <- history_len + proj_len - 1
-        .x
+        if(is.null(.x)){
+          NA
+        }else{
+          length(.x) <- history_len #+ proj_len - 1
+          .x
+        }
       }) %>%
         map_dfr(~{.x}) %>%
         t() %>%
         as_tibble()
 
       names(dat) <- yrs
-
       dat <- dat %>%
         mutate(sim_year = seq_len(proj_len)) %>%
         mutate(run = .y) %>%
