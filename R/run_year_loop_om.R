@@ -29,21 +29,47 @@ run_year_loop_om <- function(om = NULL,
     m_season <- m_yrs / om$n_season
 
     # Setup initial recruitment -----------------------------------------------
+    # Single coastwide recruitment curve
+    rec_sp <- om$rec_sp
+    ssb_tot <- rep(NA, length(yrs))
+    ssb_0_tot <- sum(om$ssb_0)
+
     init_rec <- map_dbl(seq_len(om$n_space), function(space = .x){
       # Recruitment only in season 1
       if(yr_ind == 1){
         om$ssb_initial[1, space] <<- om$init_ssb[space]
+        ssb_tot[1] <<- sum(om$init_ssb, na.rm=TRUE)
       }else{
         wage <- get_wa_dfs(om, yr)
         om$ssb_initial[yr_ind, space] <<- sum(om$n_save_age[, yr_ind, space, 1] * wage$ssb, na.rm = TRUE) * 0.5
-      }
+        ssb_tot[yr_ind] <<- sum(om$n_save_age[, yr_ind, , 1] * wage$ssb, na.rm = TRUE) * 0.5
+        }
 
-      # Single coastwide recruitment curve
+      #ssb_0_tot <- sum(om$ssb_0)
+      #browser()
       if(rec_sp == 1){
-        rec <- (4 * om$h * om$r0_space[space] * om$ssb_initial[yr_ind, space] /
-          (om$ssb_0[space] * (1 - om$h) + om$ssb_initial[yr_ind, space] *
-             (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
-                                      om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
+
+        # recruits are distributed proportional to ssb in each area
+        rec <- om$ssb_initial[yr_ind , space]/ssb_tot[yr_ind] *
+                    (4 * om$h * om$r0 * ssb_tot[yr_ind]  /
+                          (ssb_0_tot * (1 - om$h) + ssb_tot[yr_ind] *
+                                           (5 * om$h - 1))) *
+                        exp(-0.5 * om$b[yr_ind] * om$rdev_sd ^ 2 + r_y)
+
+
+        # recruits are distributed 75/25 US/CANADA
+#        rec <- om$move_init[space] * (4 * om$h * om$r0 * ssb_tot[yr_ind]  /
+ #                                       (ssb_0_tot * (1 - om$h) + ssb_tot[yr_ind] *
+  #                                         (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
+   #                                                                 om$rdev_sd ^ 2 + r_y)
+
+
+         # browser()
+        #rec <- om$move_init[space] * (4 * om$h * om$r0 * sum(om$ssb_initial[yr_ind,])  /
+        #  (sum(om$ssb_0) * (1 - om$h) + sum(om$ssb_initial[yr_ind,]) *
+         #    (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
+          #                            om$rdev_sd ^ 2 + r_y)
+
       }else{
         #multiple region-specific recruitment curves
         rec <- (4 * om$h * om$r0_space[space] * om$ssb_initial[yr_ind, space] /
@@ -51,13 +77,20 @@ run_year_loop_om <- function(om = NULL,
                    (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                             om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
       }
+
       rec
+
     }) %>% set_names(om$space_names)
+
+    #browser()
+
+    print(init_rec)
 
     om$n_save_age[1, yr_ind, , 1] <- init_rec
 
     om$r_save[yr_ind, ] <- init_rec
 
+    #browser()
     # Run season loop code ----------------------------------------------------
     om <- run_season_loop_om(om = om,
                               yr = yr,
@@ -198,5 +231,6 @@ run_year_loop_om <- function(om = NULL,
     }
   }
   # End year loop -------------------------------------------------------------
+  #browser()
   om
 }

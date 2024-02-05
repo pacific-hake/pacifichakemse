@@ -354,6 +354,8 @@ load_data_om <- function(ss_model = NULL,
   }
 
   lst$r_dev <- ss_model$r_dev
+  lst$rec_sp <- rec_sp
+
   # Add a zero for the final year
   # TODO: Why is a zero assumed here? It is like this in the original code so
   # added here
