@@ -1,76 +1,3 @@
-#' Create an rds file to hold an SS model's data and outputs.
-#'
-#' @param ss_model_output_dir Directory name of model to be loaded
-#' @param ss_model_data_csv_dir Directory name where Hake assessment CSV data are located
-#' @param overwrite_ss_rds Logical. Overwrite the RDS file if it exists
-#' @param load_extra_mcmc Logical. If TRUE, attempt to load the extra-MCMC
-#' runs from the model. The ss_model_output_dir must contain an `extra-mcmc` directory
-#' @param ... Absorb arguments destined for other functions
-#'
-#' @return [base::invisible()]
-#' @importFrom r4ss SSgetMCMC
-#' @export
-create_rds_file <- function(ss_model_output_dir = NULL,
-                            ss_model_data_csv_dir = NULL,
-                            overwrite_ss_rds = FALSE,
-                            load_extra_mcmc = TRUE,
-                            ...){
-
-  if(!dir.exists(ss_model_output_dir)){
-    stop("The directory name you set for the SS3 model output ",
-         "(ss_model_output_dir) does not exist:\n",
-         ss_model_output_dir,
-         call. = FALSE)
-  }
-
-  rds_file <- file.path(ss_model_output_dir, paste0(basename(ss_model_output_dir), ".rds"))
-  # The RDS file will have the same name as the directory it is in
-  if(file.exists(rds_file)){
-    if(overwrite_ss_rds){
-      unlink(rds_file, force = TRUE)
-    }else{
-      return(rds_file)
-    }
-  }
-  cat(green("\nCreating a new RDS file in", ss_model_output_dir, "\n"))
-  # If this point is reached, no RDS file exists so it has to be built from scratch
-  model <- load_ss_files(ss_model_output_dir)
-  model$mcmc_dir <- file.path(ss_model_output_dir, "mcmc")
-  if(dir.exists(model$mcmc_dir)){
-    cat(green("Loading MCMC posteriors\n"))
-    mcmc_out <- SSgetMCMC(dir = model$mcmc_dir,
-                          writecsv = FALSE,
-                          verbose = FALSE)
-    model$mcmccalcs <- calc_mcmc(mcmc_out, ...)
-    cat(green(symbol$tick),
-        green("Finished loading MCMC posteriors\n"))
-  }else{
-    cat(red(symbol$cross),
-        red("MCMC posteriors not loaded (mcmc directory not found)\n"))
-  }
-  if(load_extra_mcmc){
-    model$extra_mcmc_dir <- file.path(ss_model_output_dir, "extra-mcmc")
-    if(dir.exists(model$extra_mcmc_dir)){
-      cat(green("Loading extra MCMC outputs\n"))
-      model$extra_mcmc <- fetch_extra_mcmc(model, ...)
-      cat(green(symbol$tick),
-          green(" Finished loading extra MCMC output\n"))
-    }else{
-      cat(red(symbol$cross),
-          red("Extra MCMC outputs not loaded (extra-mcmc directory not found)\n"))
-    }
-  }
-  # Load the catch by country and season data
-  model$catch_country <- extract_catch_country(ss_model_data_csv_dir)
-  model$catch_seas_country <- calc_catch_seas_country(ss_model_data_csv_dir)
-
-  saveRDS(model, file = rds_file)
-  cat(green(symbol$tick),
-      green("Created RDS file successfully\n"))
-
-  rds_file
-}
-
 #' Load all the SS files for output and input, and return the model object
 #'
 #' @param ss_model_output_dir Directory the model resides in
@@ -141,212 +68,6 @@ load_ss_files <- function(ss_model_output_dir = NULL,
   model
 }
 
-#' Return a list of mcmc calculations, e.g. quantiles for various values
-#'
-#' @param mcmc The output of the [r4ss::SSgetMCMC()] function as a data.frame
-#' @param ss_mcmc_quants Quantile probability value. See the `probs` argument in [stats::quantile()].
-#' The vector must have 3 values and be in ascending order
-#' @param biomass_scale Scale the biomass by this amount. The default is 2e6 because
-#' biomass will be shown in the millions of tonnes and it is female only
-#' @param recruitment_scale Scale the recruitment by this amount. The default is 1e6
-#' because recruitment will be shown in millions of tonnes
-#' @param ... Absorb arguments destined for other functions
-#'
-#' @return A [list] of MCMC calculated values
-#' @importFrom r4ss SSgetMCMC
-#' @importFrom dplyr mutate_all
-#' @importFrom tidyselect starts_with
-#' @export
-calc_mcmc <- function(mcmc,
-                      ss_mcmc_quants = c(0.025, 0.5, 0.975),
-                      biomass_scale = 2e6,
-                      recruitment_scale = 1e6,
-                      ...){
-
-  if(ss_mcmc_quants[1] > ss_mcmc_quants[2] || ss_mcmc_quants[2] > ss_mcmc_quants[3]){
-    stop("`ss_mcmc_quants` must be in ascending order",
-         call. = FALSE)
-  }
-  lower <- ss_mcmc_quants[1]
-  med <- ss_mcmc_quants[2]
-  upper <- ss_mcmc_quants[3]
-
-  lst <- NULL
-
-  mcmc <- as_tibble(mcmc)
-  # In 2018, SS changed from SPB to SSB in the MCMC reporting
-  names(mcmc) <- gsub("SPB", "SSB", names(mcmc))
-
-  ssb <- mcmc %>%
-    select(contains("SSB"))
-  ssb <- ssb / biomass_scale
-  ssb <- ssb %>%
-    set_names(gsub("SSB_", "", names(.)))
-  lst$svirg <- quantile(ssb %>% select(Virgin) %>% pull(),
-                        ss_mcmc_quants)
-  lst$sinit <- quantile(ssb %>% select(Initial) %>% pull(),
-                        ss_mcmc_quants)
-  # ssb_initial is added back later so that depletion calculations can be done
-  ssb_initial <- ssb %>% select(Initial) %>% pull()
-  names_to_remove <- c("Virgin",
-                       "Initial",
-                       "unfished",
-                       "Btgt",
-                       "SPR",
-                       "MSY",
-                       "SPRtgt",
-                       "B_MSY/unfished")
-  map(names_to_remove, ~{
-    if(.x %in% names(ssb)){
-      ssb <<- ssb %>% select(-.x)
-    }
-  })
-
-  lst$slower <- apply(ssb, 2, quantile, prob = lower)
-  lst$smed   <- apply(ssb, 2, quantile, prob = med)
-  lst$supper <- apply(ssb, 2, quantile, prob = upper)
-
-  ssb <- ssb %>% mutate(Initial = ssb_initial)
-  depl <- ssb %>%
-    mutate_at(.vars = vars(-Initial), .funs = ~{. / Initial}) %>%
-    select(-Initial)
-  lst$dlower <- apply(depl, 2, quantile, prob = lower)
-  lst$dmed   <- apply(depl, 2, quantile, prob = med)
-  lst$dupper <- apply(depl, 2, quantile, prob = upper)
-
-  recr <- mcmc %>%
-    select(contains("Recr_"))
-  recr <- recr / recruitment_scale
-  recr <- recr %>%
-    set_names(gsub("Recr_", "", names(.)))
-  recr <- recr %>% select(-starts_with("Fore"))
-  lst$rvirg <- quantile(recr %>% select(Virgin) %>% pull(),
-                        ss_mcmc_quants)
-  lst$rinit <- quantile(recr %>% select(Initial) %>% pull(),
-                        ss_mcmc_quants)
-  # nfished below covers unfished and Unfished. The capitalization changed in 2018
-  lst$runfished <- quantile(recr %>% select(contains("nfished")) %>% pull(),
-                            ss_mcmc_quants)
-  #recr <- recr %>% select(-c("Virgin", "Initial", "unfished"))
-  names_to_remove <- c("Virgin",
-                       "Initial",
-                       "unfished",
-                       "Unfished")
-  map(names_to_remove, ~{
-    if(.x %in% names(recr)){
-      recr <<- recr %>% select(-.x)
-    }
-  })
-  lst$rmed <- apply(recr, 2, quantile, prob = med)
-  lst$rmean <- apply(recr, 2, mean)
-  lst$rlower <- apply(recr, 2, quantile, prob = lower)
-  lst$rupper <- apply(recr, 2, quantile, prob = upper)
-
-  dev <- mcmc %>%
-    select(starts_with(c("Early_InitAge_",
-                         "Early_RecrDev_",
-                         "Main_RecrDev_",
-                         "Late_RecrDev_",
-                         "ForeRecr_")))
-  names(dev) <- gsub("Early_RecrDev_", "", names(dev))
-  names(dev) <- gsub("Main_RecrDev_", "", names(dev))
-  names(dev) <- gsub("Late_RecrDev_", "", names(dev))
-  names(dev) <- gsub("ForeRecr_", "", names(dev))
-
-  # Change the Early_Init names to be the correct preceding years
-  start_yr <- as.numeric(min(names(dev)))
-  early <- grep("Early_InitAge_", names(dev))
-  num_early_yrs <- length(early)
-  early_yrs <- seq(start_yr - num_early_yrs, start_yr - 1, 1)
-  late_yrs <- names(dev[-early])
-  names(dev) <- c(as.character(early_yrs), late_yrs)
-
-  lst$devlower <- apply(dev, 2, quantile, prob = lower)
-  lst$devmed <- apply(dev, 2, quantile, prob = med)
-  lst$devupper <- apply(dev, 2, quantile, prob = upper)
-
-  spr <- mcmc %>%
-    select(contains("SPRratio_"))
-  spr <- spr %>%
-    set_names(gsub("SPRratio_", "", names(.)))
-  lst$plower <- apply(spr, 2, quantile, prob = lower)
-  lst$pmed <- apply(spr, 2, quantile, prob = med)
-  lst$pupper <- apply(spr, 2, quantile, prob = upper)
-
-  f <- mcmc %>%
-    select(contains("F_"))
-  f <- f %>%
-    set_names(gsub("F_", "", names(.)))
-  lst$flower <- apply(f, 2, quantile, prob = lower)
-  lst$fmed   <- apply(f, 2, quantile, prob = med)
-  lst$fupper <- apply(f, 2, quantile, prob = upper)
-
-  # Reference point calculations
-  lst$unfish_fem_bio <- quantile(mcmc$SSB_Virgin,
-                                 prob = ss_mcmc_quants) / biomass_scale * 1000
-  lst$unfish_recr <- quantile(mcmc$Recr_Virgin,
-                              prob = ss_mcmc_quants) / recruitment_scale * 1000
-  if(!"SSB_SPR" %in% names(mcmc)){
-    if("SSB_SPRtgt" %in% names(mcmc)){
-      mcmc <- mcmc %>% rename(SSB_SPR = SSB_SPRtgt)
-    }
-  }
-  if("SSB_SPR" %in% names(mcmc)){
-    lst$f_spawn_bio_bf40 <- quantile(mcmc$SSB_SPR,
-                                     prob = ss_mcmc_quants) / biomass_scale * 1000
-  }
-  if(!"Fstd_SPR" %in% names(mcmc)){
-    if("Fstd_SPRtgt" %in% names(mcmc)){
-      mcmc <- mcmc %>% rename(Fstd_SPR = Fstd_SPRtgt)
-    }
-  }
-  if("Fstd_SPR" %in% names(mcmc)){
-    lst$exp_frac_spr <- quantile(mcmc$Fstd_SPR,
-                                 prob = ss_mcmc_quants)
-  }
-  if(!"Dead_Catch_SPR" %in% names(mcmc)){
-    if("TotYield_SPRtgt" %in% names(mcmc)){
-      mcmc <- mcmc %>% rename(Dead_Catch_SPR = TotYield_SPRtgt)
-    }
-  }
-  if("Dead_Catch_SPR" %in% names(mcmc)){
-    lst$yield_bf40 <- quantile(mcmc$Dead_Catch_SPR,
-                             prob = ss_mcmc_quants) / recruitment_scale * 1000
-  }
-  lst$fem_spawn_bio_b40 <- quantile(mcmc$SSB_Btgt,
-                                    prob = ss_mcmc_quants) / biomass_scale * 1000
-  lst$spr_b40 <- quantile(mcmc$SPR_Btgt,
-                          prob = ss_mcmc_quants)
-  lst$exp_frac_b40 <- quantile(mcmc$Fstd_Btgt,
-                               prob = ss_mcmc_quants)
-  if(!"Dead_Catch_Btgt" %in% names(mcmc)){
-    if("TotYield_Btgt" %in% names(mcmc)){
-      mcmc <- mcmc %>% rename(Dead_Catch_Btgt = TotYield_Btgt)
-    }
-  }
-  if("Dead_Catch_Btgt" %in% names(mcmc)){
-    lst$yield_b40 <- quantile(mcmc$Dead_Catch_Btgt,
-                            prob = ss_mcmc_quants) / recruitment_scale * 1000
-  }
-  lst$fem_spawn_bio_bmsy <- quantile(mcmc$SSB_MSY,
-                                     prob = ss_mcmc_quants) / biomass_scale * 1000
-  lst$spr_msy <- quantile(mcmc$SPR_MSY,
-                          prob = ss_mcmc_quants)
-  lst$exp_frac.sprmsy <- quantile(mcmc$Fstd_MSY,
-                                  prob = ss_mcmc_quants)
-  if(!"Dead_Catch_MSY" %in% names(mcmc)){
-    if("TotYield_MSY" %in% names(mcmc)){
-      mcmc <- mcmc %>% rename(Dead_Catch_MSY = TotYield_MSY)
-    }
-  }
-  if("Dead_Catch_MSY" %in% names(mcmc)){
-    lst$msy <- quantile(mcmc$Dead_Catch_MSY,
-                      prob = ss_mcmc_quants) / recruitment_scale * 1000
-  }
-
-  lst
-}
-
 #' Load the SS model input and output data needed by this package in correct format
 #'
 #' @param s_min Minimum age in fishery selectivity
@@ -373,48 +94,36 @@ load_ss_model_data <- function(s_min = 1,
                                weight_factor = 1000,
                                n_space = 2,
                                selex_fill_val = 1,
+                               ss_model_output_dir,
                                ...){
 
-  rds_file <- create_rds_file(...)
-  ss_model <- readRDS(rds_file)
+  rds_file <- file.path(ss_model_output_dir,
+                        paste0(basename(ss_model_output_dir), ".rds"))
+  # The RDS file will have the same name as the directory it is in
+  if(!file.exists(rds_file)){
+    stop("The RDS file does not exist.\n",
+         rds_file)
+  }
 
+  ss_model <- readRDS(rds_file)
+  ss_model$catch_seas_country <- extract_catch_country(...)
+browser()
   lst <- NULL
 
   # Catch observations --------------------------------------------------------
-  lst$catch_obs <- ss_model$dat$catch %>%
+  lst$catch_obs <- ss_model$dat$catch |>
     transmute(yr = year,
-              value = catch) %>%
-    filter(yr > 1900) %>%
+              value = catch) |>
+    filter(yr > 1900) |>
     as.matrix()
 
   lst$s_yr <- min(lst$catch_obs[, "yr"])
   lst$m_yr <- max(lst$catch_obs[, "yr"])
   yrs <- lst$s_yr:lst$m_yr
+
+
   lst$catch_props_space_season <- ss_model$catch_seas_country
   lst$catch_country <- ss_model$catch_country
-
-  # Remove
-  # lst$catch_obs <- lst$catch_obs %>% as_tibble()
-  # lst$catch_obs <- read_csv(system.file("extdata/csv-data/catches.csv",
-  #                                       package = "pacifichakemse",
-  #                                       mustWork = TRUE),
-  #                           col_types = cols("i", "i", "i", "i")) %>%
-  #   transmute(yr = Year,
-  #             value = Total) %>%
-  #   add_row(lst$catch_obs %>% tail(1), .after = nrow(.))
-  # lst$catch_obs[lst$catch_obs[, "yr"] == 1991, "value"] <-
-  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1991, "value"] + 1
-  # lst$catch_obs[lst$catch_obs[, "yr"] == 1992, "value"] <-
-  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1992, "value"] + 1
-  # lst$catch_obs[lst$catch_obs[, "yr"] == 1995, "value"] <-
-  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1995, "value"] + 1
-  # lst$catch_obs[lst$catch_obs[, "yr"] == 1996, "value"] <-
-  #   lst$catch_obs[lst$catch_obs[, "yr"] == 1996, "value"] - 1
-  # lst$catch_obs[lst$catch_obs[, "yr"] == 2005, "value"] <-
-  #   lst$catch_obs[lst$catch_obs[, "yr"] == 2005, "value"] - 1
-  # lst$catch_obs[lst$catch_obs[, "yr"] == 2008, "value"] <-
-  #   lst$catch_obs[lst$catch_obs[, "yr"] == 2008, "value"] + 1
-  # lst$catch_obs <- lst$catch_obs %>% as.matrix()
 
   # Weight-at-age data --------------------------------------------------------
   waa <- ss_model$wtatage[!names(ss_model$wtatage) %in% c("Seas", "Sex", "Bio_Pattern", "BirthSeas")]
@@ -665,22 +374,26 @@ extract_age_comps <- function(ss_model = NULL,
     age_comps_fill <- NA_real_
   }
 
-  age_comp_data <- ss_model$agedbase %>%
+  age_comp_data <- ss_model$agedbase |>
     as_tibble()
-  ages <- unique(age_comp_data$Bin)
+  ages <- age_comp_data |>
+    filter(Fleet == age_comps_fleet) |>
+    pull(Bin) |>
+    unique()
+
   if(!yr_col %in% names(age_comp_data)){
-    stop("The column `", yr_col, "` does not exist in the SS age comp data table.",
-         call. = FALSE)
+    stop("The column `", yr_col, "` does not exist in the SS age ",
+         "comp data table.")
   }
   if(!age_comps_fleet_col %in% names(age_comp_data)){
-    stop("The column `", age_comps_fleet_col, "` does not exist in the SS age comp data table.",
-         call. = FALSE)
+    stop("The column `", age_comps_fleet_col, "` does not exist in the SS ",
+         "age comp data table.")
   }
-  age_comps <- age_comp_data %>%
+  age_comps <- age_comp_data |>
     filter(!!sym(age_comps_fleet_col) == age_comps_fleet)
   if(nrow(age_comps) == 0){
-    stop("The fleet number `", age_comps_fleet, "` was not found in the SS age comp data table. ",
-         call. = FALSE)
+    stop("The fleet number `", age_comps_fleet, "` was not found in the SS ",
+         "age comp data table. ")
   }
 
   # Reformat the age estimates into a table with ages as rows and years as columns

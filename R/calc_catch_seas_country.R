@@ -49,7 +49,9 @@ calc_catch_seas_country <- function(data_csv_dir = NULL,
           red(paste0("The data file ", fn, " does not exist.\n")))
       return(NULL)
     }
-    read_csv(fn, col_types = cols())
+    k <- read_csv(fn, col_types = cols())
+browser()
+    k
   }
   fns_can <- list("can-ft-catch-by-month.csv",
                   "can-ss-catch-by-month.csv")
@@ -63,7 +65,7 @@ calc_catch_seas_country <- function(data_csv_dir = NULL,
     summarize_all(sum) %>%
     ungroup()
   df_can <- helper(df_can)
-
+browser()
   # USA data is in long format, so use dcast() first to make it the same as the Canadian data
   df_usa <- map(fns_usa, helper_load_file) %>%
     map_dfr(~{.x}) %>%

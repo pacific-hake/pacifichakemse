@@ -12,6 +12,7 @@ load_ss_model_data(
   weight_factor = 1000,
   n_space = 2,
   selex_fill_val = 1,
+  ss_model_output_dir,
   ...
 )
 }

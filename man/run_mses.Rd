@@ -76,6 +76,6 @@ Nothing
 Run the MSE for a number of runs for any scenarios
 }
 \details{
-Saves the output of the MSE runs to the files specified in \code{fns}, in the directories
-specified in \code{results_root_dir} and \code{results_dir}
+Saves the output of the MSE runs to the files specified in \code{fns},
+in the directories specified in \code{results_root_dir} and \code{results_dir}
 }

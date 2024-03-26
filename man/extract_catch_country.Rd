@@ -4,10 +4,13 @@
 \alias{extract_catch_country}
 \title{Extract the catch by country using the assessment landings file}
 \usage{
-extract_catch_country(data_csv_dir = NULL)
+extract_catch_country(ss_model_data_csv_dir = NULL, ...)
 }
 \arguments{
-\item{data_csv_dir}{The directory in which the assessment csv files containing catch by month are located}
+\item{ss_model_data_csv_dir}{The directory in which the assessment csv
+files containing catch by month are located. Can be a URL}
+
+\item{...}{Ansorbs arguments meant for other functions}
 }
 \value{
 A data frame with three columns, the year, the Canadian catch and the US catch

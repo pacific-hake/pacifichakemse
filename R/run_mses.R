@@ -1,7 +1,7 @@
 #' Run the MSE for a number of runs for any scenarios
 #'
-#' @details Saves the output of the MSE runs to the files specified in `fns`, in the directories
-#' specified in `results_root_dir` and `results_dir`
+#' @details Saves the output of the MSE runs to the files specified in `fns`,
+#' in the directories specified in `results_root_dir` and `results_dir`
 #'
 #' @param n_runs Then number of runs to do for each simulation
 #' @param n_sim_yrs The number of years to simulate into the future
@@ -88,15 +88,15 @@ run_mses <- function(n_runs = 10,
   tacs <- fill_vec(tacs)
   attains <- fill_vec(attains)
 
-  if(any(map_lgl(tacs, ~{length(.x) == 1 && .x != 0})) && is.null(catch_floor)){
-    stop("`catch_floor` argument is NULL with at least one of the `tac` argument list ",
-         "values having length 1, and being not equal to zero (which signifies no tac application). ",
-         "Provide a catch_floor value to use when applying tac value of 1.",
-         call. = FALSE)
+  if(any(map_lgl(tacs, ~{length(.x) == 1 && .x != 0})) &&
+     is.null(catch_floor)){
+    stop("`catch_floor` argument is NULL with at least one of the `tac` ",
+         "argument list values having length 1, and being not equal to ",
+         "zero (which signifies no tac application). Provide a ",
+         "`catch_floor` value to use when applying tac value of 1.")
   }
   if(!all(map_lgl(tacs, ~{if(length(.x) %in% 1:2) TRUE else FALSE}))){
-    stop("List elements of `tacs` must be either length 1 or length 2.",
-         call. = FALSE)
+    stop("List elements of `tacs` must be either length 1 or length 2.")
   }
 
   tic()

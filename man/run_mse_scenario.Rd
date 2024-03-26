@@ -14,6 +14,9 @@ run_mse_scenario(
   m_increase = 0,
   sel_change = 0,
   save_all_em = FALSE,
+  hcr_lower = 0.1,
+  hcr_upper = 0.4,
+  hcr_fspr = 0.4,
   ...
 )
 }
