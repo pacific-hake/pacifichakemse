@@ -170,17 +170,16 @@ load_ss_model_data <- function(s_min = 1,
 
   # Survey index and error (log SD) -------------------------------------------
   browser()
-  surv <- ss_model$dat$CPUE |>
-    as_tibble() |>
-    filter(index == 2) |>
-    transmute(yr = year,
-              value = obs,
-              err = se_log) |>
+
+  survey_index <- ss_model$extra_mcmc$index_med |>
+    filter(fleet == 2) |>
+    select(-fleet) |>
     complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
     replace(is.na(.), 1)
 
-  lst$survey <- surv |> pull(value)
-  lst$survey_err <- surv |> pull(err)
+  lst$survey <- survey_index |> pull(value)
+  # TODO: Check this. Do we need to extract the Err from the extra MCMC?
+  lst$survey_err <- 0.5
 
   # Sample sizes for fishery and survey ---------------------------------------
   ss <- ss_model$agedbase  |>
