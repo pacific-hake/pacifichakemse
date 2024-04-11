@@ -28,7 +28,7 @@
 #' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom ggplot2 expand_limits sec_axis
+#'
 #' @export
 plot_timeseries <- function(ps = NULL,
                             type = "ssb",

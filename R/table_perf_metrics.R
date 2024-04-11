@@ -11,6 +11,7 @@
 #' @param ... Arguments passed to [knitr::kable()]
 #'
 #' @return a [knitr::kable()] table object
+#'
 #' @export
 table_perf_metrics <- function(ps,
                                ci = c(0.05, 0.5, 0.95),

@@ -31,14 +31,7 @@
 #' @param ... Arguments passed to [load_data_om()]
 #'
 #' @return Nothing
-#' @importFrom dplyr transmute group_map mutate_at quo
-#' @importFrom here here
-#' @importFrom purrr map2 map map_chr map_lgl
-#' @importFrom r4ss SS_output
-#' @importFrom stringr str_ends
-#' @importFrom clisymbols symbol
-#' @importFrom tictoc tic toc
-#' @importFrom crayon white
+#'
 #' @export
 run_mses <- function(n_runs = 10,
                      n_sim_yrs = NULL,
@@ -149,13 +142,13 @@ run_mses <- function(n_runs = 10,
     cat(white("Scenario:", fn, "\n"))
     #lst <- furrr::future_map(1:n_runs, function(run = .x, ...){
     lst <- map(1:n_runs, function(run = .x, ...){
-        om <- load_data_om(ss_model,
+      om <- load_data_om(ss_model,
                          n_sim_yrs = n_sim_yrs,
                          n_survey = n_surveys[fn_ind],
                          b_future = b_futures[fn_ind],
                          selectivity_change = sel_changes[fn_ind],
                          ...)
-
+browser()
       cat(green("Run #", run, "\n"))
 
       tmp <- run_mse_scenario(om = om,

@@ -22,17 +22,7 @@
 #' (9) A list of length = number of scenarios, containing three-column [data.frame]s with `run`, `SE.SSB`,
 #' and `year` as columns/ SE.SSB is the standard error between the OM and EM, (10) `sim_data` - output
 #' from the function [run_om()] (the operating model output)
-#' @importFrom dplyr filter summarise summarize group_by select %>% mutate
-#' @importFrom PNWColors pnw_palette
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom ggplot2 geom_bar scale_x_discrete scale_y_continuous scale_fill_manual
-#' @importFrom ggplot2 facet_wrap element_text position_dodge geom_violin geom_boxplot
-#' @importFrom ggplot2 theme_classic coord_cartesian element_blank element_rect geom_hline
-#' @importFrom ggplot2 scale_color_manual
-#' @importFrom reshape2 melt
-#' @importFrom cowplot plot_grid
-#' @importFrom purrr map_df
-#' @importFrom stringr str_extract
+#'
 #' @export
 setup_mse_plot_objects <- function(results_dir = NULL,
                                    plotnames = NULL,

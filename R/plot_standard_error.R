@@ -9,6 +9,7 @@
 #' @param ... Extra arguments to be passed to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
+#'
 #' @export
 plot_standard_error <- function(ps = NULL,
                                 ci = c(0.05, 0.95),

@@ -5,8 +5,7 @@
 #' @param name name to print in data frame
 #'
 #' @return Nothing
-#' @importFrom ggplot2 ggplot geom_line aes geom_point geom_ribbon theme_bw
-#' @importFrom ggplot2 theme scale_y_continuous scale_x_continuous
+#'
 #' @export
 plotValues <- function(est,
                        data,

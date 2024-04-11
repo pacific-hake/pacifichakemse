@@ -8,10 +8,7 @@
 #' @param ... Absorbs extra parameters
 #'
 #' @return List of many outputs from the MSE
-#' @importFrom ggplot2 alpha
-#' @importFrom dplyr left_join lead lag n summarize_at vars everything bind_rows
-#' @importFrom purrr partial map_int
-#' @importFrom stats quantile
+#'
 #' @export
 merge_run_data <- function(sim_data = NULL,
                            short_term_yrs = NULL,

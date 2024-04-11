@@ -4,9 +4,8 @@
 #' @param quants Quantile values as limits to remove tail data from plot
 #'
 #' @return A [ggplot2::ggplot()] object
+#'
 #' @export
-#' @importFrom forcats fct_relevel
-#' @importFrom PNWColors pnw_palette
 plot_violins <- function(ps = NULL,
                          quants = c(0.05, 0.95)){
 

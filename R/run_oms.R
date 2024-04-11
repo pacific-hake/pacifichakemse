@@ -15,6 +15,7 @@
 #' @param ... Arguments passed to [load_data_om()]
 #'
 #' @return Nothing, save OM output to a file
+#'
 #' @export
 run_oms <- function(ss_model = NULL,
                     n_runs = NULL,

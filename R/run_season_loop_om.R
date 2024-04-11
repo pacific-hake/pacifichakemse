@@ -19,9 +19,7 @@
 #'
 #' @return A modified version of `om` with the current data for `yr` populated
 #' in all it's arrays and other objects
-#' @importFrom crayon red yellow
-#' @importFrom tidyselect contains
-#' @importFrom tibble is_tibble
+#'
 #' @export
 run_season_loop_om <- function(om,
                                yr,
@@ -51,12 +49,18 @@ run_season_loop_om <- function(om,
         cat(yellow("      Space:", space, "\n"))
       }
       # Calculate selectivity -------------------------------------------------
-      p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish[, "space"] == space,]
+      p_sel_fish_matrix <- om$parameters$p_sel_fish
+      p_sel <- p_sel_fish_matrix[p_sel_fish_matrix[, "space"] == space,]
       p_sel_yrs <- om$sel_by_yrs
       if(om$flag_sel[yr_ind]){
-        p_sel[, "value"] <- p_sel[, "value"] +
-          p_sel_yrs[, yr_ind - om$sel_idx + 1] * om$sigma_p_sel
+        p_sel_df <- p_sel_yrs[, yr_ind - om$sel_idx + 1] %>%
+          mutate(val = .[[1]] * om$sigma_p_sel) |>
+          bind_cols(p_sel[, "value"])
+          select(val)
+        #p_sel[, "value"] <- #p_sel[, "value"] +
+        #  p_sel_yrs[, yr_ind - om$sel_idx + 1] * om$sigma_p_sel
       }
+
       if(om$yrs[yr_ind] > om$m_yr){
         if(om$selectivity_change == 1){
           if(space != 1){
@@ -73,10 +77,11 @@ run_season_loop_om <- function(om,
       }
 
       # Constant over space
+      if(yr %in% 1991) browser()
       f_sel <- get_select(om$ages,
                           p_sel,
                           om$s_min,
-                          om$s_max)
+                          om$s_max, yr)
 
       # Write selectivity testing file ----------------------------------------
       if(testing){
@@ -84,7 +89,9 @@ run_season_loop_om <- function(om,
           header <- c("Year", "Season", "Space", "Fsel", paste0("fsel", 1:(length(f_sel) - 1)))
           write(paste0(header, collapse = ","), "fselvals.csv")
         }
-        write(paste(yr, season, space, paste(f_sel, sep = ",", collapse = ","), sep = ","), "fselvals.csv", append = TRUE)
+        write(paste(yr, season, space,
+                    paste(f_sel, sep = ",", collapse = ","),
+                    sep = ","), "fselvals.csv", append = TRUE)
       }
 
       om$f_sel_save[, yr_ind, space] <- f_sel
@@ -95,7 +102,7 @@ run_season_loop_om <- function(om,
         if(yr <= om$m_yr){
           catch_country <- om$catch_country[yr_ind, space_col]
         }else{
-          catch_country <- om$catch_obs[yr_ind, "value"] # * om$f_space[space]
+          catch_country <- om$catch_obs[yr_ind, "value"]
         }
       }else{
         catch_country <- om$catch_obs[yr_ind, "value"]
@@ -114,6 +121,7 @@ run_season_loop_om <- function(om,
                               yr_ind = yr_ind,
                               ...)
       }
+
       e_tmp <- e_tmp * as.numeric(om$catch_props_space_season[space, season])
       if(yr > om$m_yr){
         e_tmp <- e_tmp * ifelse(attain[space] == 0, 1, attain[space]) * om$f_space[space]
@@ -131,20 +139,23 @@ run_season_loop_om <- function(om,
       }
       n_tmp <- om$n_save_age[, yr_ind, space, season]
       # Get biomass from previous yrs
-      wage_catch <- om$wage_catch_df %>% get_age_dat(yr)
+
+      wage_catch <- om$wage_catch_df |>
+        get_age_dat(yr)
+
       b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel, na.rm = TRUE)
       om$v_save[yr_ind, space, season] <- b_tmp
       om$catch_quota[yr_ind, space, season] <- e_tmp
 
-      tryCatch({
-        tmp <- e_tmp / b_tmp
-      }, error = function(e){
-        stop("Error in the Operating model. If running a standalone OM outside the MSE, ",
-             "did you set `n_sim_yrs` instead of `yr_future`?",
+      e_over_b <- e_tmp / b_tmp
+      if(is.na(e_over_b)){
+        stop("Error in the Operating model. If running a standalone OM ",
+             "outside the MSE, did you set `n_sim_yrs` instead of ",
+             "`yr_future`?",
              call. = FALSE)
-      })
+      }
 
-      if(e_tmp / b_tmp >= 0.9){
+      if(e_over_b >= 0.9){
         if(om$yrs[yr_ind] < om$m_yr){
           # Stop if in the past
           message("Catch exceeds available biomass in yrs: ",

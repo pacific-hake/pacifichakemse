@@ -34,6 +34,9 @@ the limits of the data are used.}
 
 \item{line_type}{Type of the lines. See \code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}}
 }
+\value{
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object
+}
 \description{
 Plot individual run output against each other as a time series
 }

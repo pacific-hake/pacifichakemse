@@ -1,29 +1,30 @@
-#' Calculate the catch value to apply to the current year in the OM loop. TACs can be applied
-#' to the catch value also.
+#' Calculate the catch value to apply to the current year in the OM loop.
+#'  TACs can be applied to the catch value also.
 #'
 #' @param om Operating model list
 #' @param yr The year to calculate the reference points for
 #' @param yr_ind Index for the year `yr` in the om output
 #' @param tac TAC values to apply to the catch before returning the function.
 #' @param catch_floor The lowest catch to be allowed
-#' @param hcr_lower If `hcr_apply` is `TRUE`, this is the lower limit for the rule
-#' @param hcr_upper If `hcr_apply` is `TRUE`, this is the upper limit for the rule
-#' @param hcr_fspr If `hcr_apply` is `TRUE`, this is the value to set the Fspr at
-#' for catch above `hcr_upper`
-#' @param ... Absorb arguments meant for other functions
+#' @param hcr_lower If `hcr_apply` is `TRUE`, this is the lower limit for
+#'  the rule
+#' @param hcr_upper If `hcr_apply` is `TRUE`, this is the upper limit for
+#'  the rule
+#' @param hcr_fspr If `hcr_apply` is `TRUE`, this is the value to set the
+#'  Fspr at for catch above `hcr_upper`
+#' @param ... Absorbs arguments meant for other functions
 #'
 #' @return Catch for the next year
 #' @export
-apply_hcr_om <- function(
-  om,
-  yr = NULL,
-  yr_ind = NULL,
-  tac = NULL,
-  catch_floor = NULL,
-  hcr_lower = 0.1,
-  hcr_upper = 0.4,
-  hcr_fspr = 0.4,
-  ...){
+apply_hcr_om <- function(om,
+                         yr = NULL,
+                         yr_ind = NULL,
+                         tac = NULL,
+                         catch_floor = NULL,
+                         hcr_lower = 0.1,
+                         hcr_upper = 0.4,
+                         hcr_fspr = 0.4,
+                         ...){
 
   pars <- om$parameters
   r_0 <- exp(pars$log_r_init)
@@ -65,7 +66,8 @@ apply_hcr_om <- function(
   z_age <- (z_age1 + z_age2) / 2
 
   # Portion the R0 value into the areas based on apportionment
-  # Pre-allocate vector makes it faster than increasing its size at every iteration
+  # Pre-allocate vector makes it faster than increasing its size at every
+  #  iteration
   n_1 <- vector(mode = "numeric", length = length(1:(om$n_age - 1)))
   n_1[1] <- r_0
   for(a in 1:(om$n_age - 1)){
@@ -81,7 +83,8 @@ apply_hcr_om <- function(
   # Calculate the F_SPR40% (hcr_fspr) reference point
   get_f <- function(par, n_1, ssb_eq, f_sel, r_0, ssb_0){
     z_age <- m_age + par[1] * f_sel
-    # Pre-allocate vector makes it faster than increasing its size at every iteration
+    # Pre-allocate vector makes it faster than increasing its size at every
+    #  iteration
     n_1 <- vector(mode = "numeric", length = length(1:(om$n_age - 1)))
     n_1[1] <- r_0
     for(a in 1:(om$n_age - 1)){
@@ -108,7 +111,8 @@ apply_hcr_om <- function(
   # Extract a vector for the numbers-at-age at the end of last year
   n_end <- om$n_save_age[, yr_ind - 1, , om$n_season] %>% rowSums
 
-  # Replace age 0's with zero because there aren't any age zeros at the end of the year
+  # Replace age 0's with zero because there aren't any age zeros at the
+  #  end of the year
   n_end[1] <- 0.0
   v <- sum(n_end * c_w * f_sel)
 
@@ -126,7 +130,7 @@ apply_hcr_om <- function(
   }else{
     # 40:10 adjustment (actually hcr_upper:hcr_lower)
     fct <- ((ssb_y - hcr_lower * ssb_0) / (hcr_upper * ssb_0 - hcr_lower * ssb_0))
-    # Nis' code with extra term:
+    # TODO: Nis' code with extra term follows. Why is it like this? Is it wrong?
     #fct <- ((ssb_y - hcr_lower * ssb_0) * ((hcr_upper * ssb_0 / ssb_y) / (hcr_upper * ssb_0 - hcr_lower * ssb_0)))
     c_new <- fct * f_x * v
   }
@@ -146,5 +150,6 @@ apply_hcr_om <- function(
   if(c_exp > c_new){
     c_exp <- c_new
   }
+
   c_exp
 }

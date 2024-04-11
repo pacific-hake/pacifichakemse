@@ -12,7 +12,7 @@
 #' return a random normal using mean = 0 and sd = exp(om$rdev_sd)
 #'
 #' @return A list of the data needed by [TMB::MakeADFun()]
-#' @importFrom stringr str_split
+#'
 #' @export
 update_om_data <- function(yr = NULL,
                            om = NULL,

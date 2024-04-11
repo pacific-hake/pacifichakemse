@@ -2,15 +2,16 @@
 #'
 #' @param ss_model_data_csv_dir The directory in which the assessment csv
 #' files containing catch by month are located. Can be a URL
-#' @param ... Ansorbs arguments meant for other functions
+#' @param ... Absorbs arguments meant for other functions
 #'
-#' @return A data frame with three columns, the year, the Canadian catch and the US catch
+#' @return A data frame with three columns, the year, the Canadian catch
+#' and the US catch
+#'
 #' @export
-#' @importFrom readr read_csv
 extract_catch_country <- function(ss_model_data_csv_dir = NULL,
                                   ...){
 
-  fn <- file.path(ss_model_data_csv_dir, "landings-tac-history.csv")
+  fn <- file.path(ss_model_data_csv_dir, hake::landings_tac_fn)
 
   if(!files_exist(fn)){
     cat(red(symbol$cross),

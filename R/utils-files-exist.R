@@ -9,7 +9,6 @@
 #' locations
 #'
 #' @export
-#' @importFrom httr HEAD
 files_exist <- function(fns_lst){
 
   http_status_ok <- 200

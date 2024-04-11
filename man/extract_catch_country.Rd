@@ -10,10 +10,11 @@ extract_catch_country(ss_model_data_csv_dir = NULL, ...)
 \item{ss_model_data_csv_dir}{The directory in which the assessment csv
 files containing catch by month are located. Can be a URL}
 
-\item{...}{Ansorbs arguments meant for other functions}
+\item{...}{Absorbs arguments meant for other functions}
 }
 \value{
-A data frame with three columns, the year, the Canadian catch and the US catch
+A data frame with three columns, the year, the Canadian catch
+and the US catch
 }
 \description{
 Extract the catch by country using the assessment landings file

@@ -18,9 +18,7 @@
 #' @param ... Arguments passed to [knitr::kable()]
 #'
 #' @return a [knitr::kable()] table object
-#' @importFrom knitr kable
-#' @importFrom dplyr select_at mutate_at
-#' @importFrom kableExtra collapse_rows row_spec add_header_above kable_styling
+#'
 #' @export
 table_timeseries <- function(ps = NULL,
                              type = "ssb",

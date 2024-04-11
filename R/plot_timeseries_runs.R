@@ -11,10 +11,8 @@
 #' @param line_width Width of the lines. See [ggplot2::geom_line()]
 #' @param line_type Type of the lines. See [ggplot2::geom_line()]
 #'
-#' @return
-#' @importFrom grDevices colorRampPalette
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom ggplot2 scale_color_gradientn
+#' @return A [ggplot2::ggplot()] object
+#'
 #' @export
 plot_timeseries_runs <- function(ps,
                                  type = "ssb",

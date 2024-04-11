@@ -7,6 +7,7 @@
 #'
 #' @return A [data.frame] with columns SSB, SSB.10, SSB.40, Catch.short,
 #' Catch.long, and AAV
+#'
 #' @export
 hake_violin <- function(mse_output,
                         om_output,

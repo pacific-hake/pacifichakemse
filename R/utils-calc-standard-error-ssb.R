@@ -1,5 +1,5 @@
-#' Calculate the standard error on SSB between the Operating Model and the Estimation Model
-#' for all runs in the list
+#' Calculate the standard error on SSB between the Operating Model and the
+#'  Estimation Model for all runs in the list
 #'
 #' @param em_output A list of Estimation model output
 #' @param om_output A list of Operating model outpu
@@ -7,8 +7,9 @@
 #' @param quants A vector of quantiles to pass to [stats::quantile()]
 #' @param inc_mean Logical. Include the mean (as column `avg`)
 #'
-#' @return A [data.frame] of 3 columns: The run number, the standard error of spawning
-#' stock biomass from EM in regards to the OM, and the year
+#' @return A [data.frame] of 3 columns: The run number, the standard error
+#'  of spawning stock biomass from EM in regards to the OM, and the year
+#'
 #' @export
 calc_standard_error_ssb <- function(em_output,
                                     om_output,

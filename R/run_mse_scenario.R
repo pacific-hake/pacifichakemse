@@ -18,9 +18,6 @@
 #'
 #' @return A list of length 3: The MSE output, the OM output, and the EM output
 #'
-#' @importFrom TMB sdreport MakeADFun
-#' @importFrom stats rnorm nlminb runif predict lm median optim setNames
-#' @importFrom utils read.csv read.table
 #' @export
 run_mse_scenario <- function(om = NULL,
                              random_seed = NULL,
@@ -100,7 +97,7 @@ run_mse_scenario <- function(om = NULL,
                          yrs = om$yrs[1:yr_ind],
                          random_seed = random_seed,
                          attain = attain,
-                         testing = FALSE,
+                         testing = TRUE,
                          ...)
 
     om$catch_country <- om_output$catch_country

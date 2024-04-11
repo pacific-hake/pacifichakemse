@@ -12,6 +12,7 @@
 #' @param ... Extra arguments to pass to [color_facet_backgrounds()]
 #'
 #' @return A [ggplot2::ggplot()] object
+#'
 #' @export
 plot_em_timeseries <- function(ps,
                                type = "ssb",

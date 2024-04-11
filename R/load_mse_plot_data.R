@@ -14,6 +14,7 @@
 #' @param ... Arguments to send to [merge_run_data()]
 #'
 #' @return The object which was returned by [setup_mse_plot_objects()]
+#'
 #' @export
 load_mse_plot_data <- function(scenario = NULL,
                                overwrite_rds = FALSE,

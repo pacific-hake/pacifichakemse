@@ -6,6 +6,7 @@
 #' the limits of the data are used
 #' @param y_lim A vector of 2 for minimum and maximum y axis values
 #' @return A [ggplot2::ggplot()] object
+#'
 #' @export
 plot_catch_quota <- function(ps = NULL,
                              ci = c(0.05, 0.95),

@@ -8,7 +8,7 @@
 #' @param ... Arguments passed to [run_year_loop_om()]
 #'
 #' @return A list of model outputs
-#' @importFrom purrr map_dbl
+#'
 #' @export
 run_om <- function(om = NULL,
                    yrs = om$yrs,

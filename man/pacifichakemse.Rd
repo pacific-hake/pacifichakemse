@@ -5,12 +5,18 @@
 \alias{pacifichakemse}
 \title{Pacific Hake MSE package}
 \description{
-Management strategy evaluation framework with a Spatial Operating Model.
+Management strategy evaluation framework with a Spatial
+Operating Model.
+
+All of these imports are in alphabetical order, both packages and
+functions within them
 }
 \references{
-PacifichakeMSE on GitHub: \url{https://github.com/nissandjac/PacifichakeMSE}
+pacifichakemse on GitHub:
+\url{https://github.com/pacific-hake/pacifichakemse}
 }
 \author{
-Nis S Jacobsen, Ian G. Taylor, Kristin Marshall, Aaron Berger, Chris Grandin
-Package maintainer: Nis Jacobsen \href{mailto:nissandjac@gmail.com}{nissandjac@gmail.com}
+Chris J. Grandin, Nis S. Jacobsen, Ian G. Taylor, Kristin Marshall,
+Aaron Berger
+Package maintainer: Chris J. Grandin \href{mailto:chris.grandin@gmail.com}{chris.grandin@gmail.com}
 }

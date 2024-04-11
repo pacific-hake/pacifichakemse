@@ -6,7 +6,7 @@
 #' @param ... Additional arguments to be passed to [run_season_loop_om()]
 #'
 #' @return A list
-#' @importFrom crayon green
+#'
 #' @export
 run_year_loop_om <- function(om = NULL,
                              yrs = NULL,

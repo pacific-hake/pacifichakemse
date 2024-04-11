@@ -3,6 +3,7 @@
 #' @param df A [data.frame] as output by [calc_tac_est_vs_real()]
 #'
 #' @return A [ggplot2::ggplot()] object
+#'
 #' @export
 plot_tac_est_vs_real <- function(df){
   ggplot(data = df$tac_ssb, aes(x = ssb * 1e-6, y = tac * 1e-6)) +
@@ -17,9 +18,7 @@ plot_tac_est_vs_real <- function(df){
 #' @param ps A plot setup object as output by [setup_mse_plot_objects()]
 #'
 #' @return A [ggplot2::ggplot()] object
-#' @importFrom dplyr rename
-#' @importFrom ggplot2 margin
-#' @importFrom PNWColors pnw_palette
+#'
 #' @export
 plot_tac_vs_hcr <- function(ps = NULL){
 

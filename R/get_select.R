@@ -7,12 +7,13 @@
 #' @param s_max Maximum age
 #'
 #' @return A vector of selectivity values of the same length as the `ages` vector
-#' @importFrom dplyr arrange
+#'
 #' @export
 get_select <- function(ages = NULL,
                        p_sel = NULL,
                        s_min = NULL,
-                       s_max = NULL){
+                       s_max = NULL,
+                       yr = 0){
 
   n_age <- length(ages)
   sel <- rep(NA_real_, n_age)
@@ -41,5 +42,6 @@ get_select <- function(ages = NULL,
       sel[i] <- sel[s_max + 1]
     }
   }
+
   sel
 }

@@ -5,6 +5,7 @@
 #' @param fn Location of the om_output.rds file from the old code"s base OM run
 #'
 #' @return a [ggplot2::ggplot()] object
+#'
 #' @export
 compare_biomass <- function(om,
                             which_om = 0,

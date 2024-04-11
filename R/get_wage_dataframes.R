@@ -4,6 +4,7 @@
 #' @param yr The year to fetch
 #'
 #' @return A list of 4 [data.frame]s: `catch`, `surv`, `mid`, and `ssb`
+#'
 #' @export
 get_wa_dfs <- function(lst = NULL,
                        yr = NULL){

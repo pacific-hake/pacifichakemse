@@ -5,7 +5,7 @@
 \title{Get a vector of selectivities of the same length as the \code{ages} vector
 based on a range asked for}
 \usage{
-get_select(ages = NULL, p_sel = NULL, s_min = NULL, s_max = NULL)
+get_select(ages = NULL, p_sel = NULL, s_min = NULL, s_max = NULL, yr = 0)
 }
 \arguments{
 \item{ages}{A vector of ages to calculate selectivity for}

@@ -4,7 +4,7 @@
 #' @param parameters estimates parameters
 #'
 #' @return Nothing
-#' @importFrom graphics plot
+
 #' @export
 plotSelectivity <- function(df.new,
                             parameters){

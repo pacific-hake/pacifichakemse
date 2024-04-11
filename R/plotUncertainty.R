@@ -4,7 +4,7 @@
 #' @param data A [data.frame] of uncertainty data
 #'
 #' @return Nothing
-#' @importFrom graphics points polygon
+#'
 #' @export
 plotUncertainty <- function(est, data){
   yl <- ylimits(est$name, data)

@@ -4,6 +4,7 @@
 #'
 #' @return A [list] with the same structure as `om`, but with a new element,
 #' `n_init` added, and some values changed for the initialization of the model
+#'
 #' @export
 init_agebased_model <- function(om = NULL){
 
@@ -53,7 +54,10 @@ init_agebased_model <- function(om = NULL){
   # Initial biomass -----------------------------------------------------------
   om$ssb_0 <- map_dbl(seq_len(om$n_space), ~{
     sum(om$n0 * om$move_init[.x] * om$wage_ssb) * 0.5
-  }) %>% set_names(paste0(rep("space", each = om$n_space), seq_len(om$n_space)))
+  })
+  names(om$ssb_0) <- paste0(rep("space",
+                                each = om$n_space),
+                            seq_len(om$n_space))
 
   # Set m-at-age for year 1, space 1, season 1 --------------------------------
   om$z_save[, 1, 1, 1] <- om$m_age
@@ -86,6 +90,7 @@ init_agebased_model <- function(om = NULL){
     # Initialize only
     # Set numbers-at-age for year 1, space, season 1
     om$n_save_age[, 1, space, 1] <- om$n_init * om$move_init[space]
+
     # Set mid-year numbers-at-age by equally partitioning M across
     #  seasons and dividing by 2
     om$n_save_age_mid[, 1, space, 1] <- om$n_save_age[, 1, space, 1] *
