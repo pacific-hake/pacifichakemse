@@ -328,22 +328,12 @@ load_data_om <- function(ss_model = NULL,
   }
 
   lst$r_dev <- ss_model$r_dev
-  # Add a zero for the final year
-  # TODO: Why is a zero assumed here? It is like this in the original code so
-  # added here
-  last_yr_rdev <- matrix(c(lst$m_yr, 0), nrow = 1)
-  colnames(last_yr_rdev) <- c("yr", "value")
-  lst$r_dev <- rbind(lst$r_dev, last_yr_rdev)
 
-  # future_yrs is declared above
-  new_mat <- matrix(lst$future_yrs, ncol = 1)
-  if(populate_future){
-    new_mat <- cbind(new_mat, r_devs)
-  }else{
-    new_mat <- cbind(new_mat, rep(NA, length(lst$future_yrs)))
-  }
-  colnames(new_mat) <- c("yr", "value")
-  lst$r_dev <- rbind(lst$r_dev, new_mat)
+  # Add the future years to the recruitment deviations
+  yr_min <- min(lst$r_dev$yr)
+  yr_max <- max(lst$future_yrs)
+  lst$r_dev <- lst$r_dev |>
+    complete(yr = yr_min:yr_max)
 
   # Initial Numbers-at-age in OM ----------------------------------------------
   lst$init_n <- tibble(age = ages[ages != 0],

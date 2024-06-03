@@ -169,8 +169,6 @@ load_ss_model_data <- function(s_min = 1,
   lst$p_sel_surv <- p_sel_surv |> as.matrix()
 
   # Survey index and error (log SD) -------------------------------------------
-  browser()
-
   survey_index <- ss_model$extra_mcmc$index_med |>
     filter(fleet == 2) |>
     select(-fleet) |>
@@ -254,45 +252,43 @@ load_ss_model_data <- function(s_min = 1,
   lst$med_popests[nrow_p, ncol_p] <- NA
 
   # Recruitment deviations ----------------------------------------------------
-  lst$r_dev <- ss_model$recruitpars |>
-    select(-type) |>
-    rownames_to_column("type") %>%
-    filter(grepl("Early_RecrDev|Main_RecrDev", .[, "type"])) |>
-    transmute(yr = Yr, value = Value)
+  lst$r_dev <- ss_model$extra_mcmc$recr_devs |>
+    filter(yr %in% ss_model$startyr:ss_model$endyr)
 
   # Bias ramp adjustment ------------------------------------------------------
   # The hake model no longer used bias ramping after 2021 due to strictly
   # MCMC models being used. The MLE models were abandoned
   # TODO: Test to see if this needs to be present or if it can be deleted
-  ctl <- ss_model$ctl
-  b_breakpoints <- ss_model$breakpoints_for_bias_adjustment_ramp[1, ] |>
-    as.numeric()
-  yb_1 <- b_breakpoints[1]
-  yb_2 <- b_breakpoints[2]
-  yb_3 <- b_breakpoints[3]
-  yb_4 <- b_breakpoints[4]
-  b_max <- b_breakpoints[5]
-  b_yrs <- lst$s_yr:lst$m_yr
-  lst$b <- NULL
-  for(j in 1:length(b_yrs)){
-    if(b_yrs[j] <= yb_1){
-      lst$b[j] <- 0
-    }
-    if(b_yrs[j] > yb_1 && b_yrs[j]< yb_2){
-      lst$b[j] <- b_max * ((b_yrs[j] - yb_1) / (yb_2 - yb_1))
-    }
-    if(b_yrs[j] >= yb_2 && b_yrs[j] <= yb_3){
-      lst$b[j] <- b_max
-    }
-    if(b_yrs[j] > yb_3 && b_yrs[j] < yb_4){
-      lst$b[j] <- b_max * (1 - (yb_3 - b_yrs[j]) / (yb_4 - yb_3))
-    }
-    if(b_yrs[j] >= yb_4){
-      lst$b[j] <- 0
-    }
-  }
+  # ctl <- ss_model$ctl
+  # b_breakpoints <- ss_model$breakpoints_for_bias_adjustment_ramp[1, ] |>
+  #   as.numeric()
+  # yb_1 <- b_breakpoints[1]
+  # yb_2 <- b_breakpoints[2]
+  # yb_3 <- b_breakpoints[3]
+  # yb_4 <- b_breakpoints[4]
+  # b_max <- b_breakpoints[5]
+  # b_yrs <- lst$s_yr:lst$m_yr
+  # lst$b <- NULL
+  # for(j in 1:length(b_yrs)){
+  #   if(b_yrs[j] <= yb_1){
+  #     lst$b[j] <- 0
+  #   }
+  #   if(b_yrs[j] > yb_1 && b_yrs[j]< yb_2){
+  #     lst$b[j] <- b_max * ((b_yrs[j] - yb_1) / (yb_2 - yb_1))
+  #   }
+  #   if(b_yrs[j] >= yb_2 && b_yrs[j] <= yb_3){
+  #     lst$b[j] <- b_max
+  #   }
+  #   if(b_yrs[j] > yb_3 && b_yrs[j] < yb_4){
+  #     lst$b[j] <- b_max * (1 - (yb_3 - b_yrs[j]) / (yb_4 - yb_3))
+  #   }
+  #   if(b_yrs[j] >= yb_4){
+  #     lst$b[j] <- 0
+  #   }
+  # }
 
-  # Initial numbers-at-age ---------------------------------------------------
+  # Initial numbers-at-age -----------------------------------------------------
+  browser()
   lst$init_n <- ss_model$extra_mcmc$init_natage |>
     pull(`50%`)
   names(lst$init_n) <- ss_model$extra_mcmc$init_natage$age
@@ -303,6 +299,7 @@ load_ss_model_data <- function(s_min = 1,
   lst$dat_file <- ss_model$dat_file
   lst$dat <- ss_model$dat
   lst$mcmccalcs <- ss_model$mcmccalcs
+  lst$extra_mcmc <- ss_model$extra_mcmc
   lst$mcmc <- ss_model$mcmc
 
   cat(green(symbol$tick),
