@@ -30,7 +30,7 @@ load_ss_model_data(
 and to which a selectivity-at-age is to be set. See the value of
 \code{p_sel_fish} in the returned list}
 
-\item{rds_fn}{File name for the RDS file containing the4 model input/output
+\item{rds_fn}{File name for the RDS file containing the model input/output
 as created using \code{\link[hake:create_rds_file]{hake::create_rds_file()}}}
 
 \item{...}{Arguments to be passed to \code{\link[=load_ss_sel_parameters]{load_ss_sel_parameters()}}}

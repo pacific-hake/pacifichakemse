@@ -16,7 +16,7 @@
 #' any year column
 #'
 #' @export
-calc_catch_seas_country <- function(ss_model_data_csv_dir = NULL,
+calc_catch_seas_country <- function(data_tables_url = NULL,
                                     n_yrs = 10,
                                     weight = c(1, 1, 1, 1),
                                     ...){
@@ -24,14 +24,16 @@ calc_catch_seas_country <- function(ss_model_data_csv_dir = NULL,
   make_catch_prop_by_season <- \(fn_lst){
 
     df <- map_dfr(fn_lst, \(fn){
-      fn <- file.path(ss_model_data_csv_dir, fn)
-      if(!files_exist(fn)){
-        cat(red(symbol$cross),
-            red(paste0("The data file ", fn, " does not exist.\n")))
+      url <- file.path(data_tables_url,
+                       fn)
+
+      d <- load_data_table_from_web(url)
+
+      if(is.null(d)){
         return(NULL)
       }
 
-      read_csv(fn, col_types = cols())
+      d
     }) |>
       group_by(year, month) |>
       summarize(across(catch, ~sum(.x))) |>
@@ -61,6 +63,7 @@ calc_catch_seas_country <- function(ss_model_data_csv_dir = NULL,
       left_join(df_tot_ct_by_yr, by = "year") |>
       mutate(catch_prop = catch.x / catch.y) |>
       select(-catch.x, -catch.y)
+
   }
 
   fns_can <- list(hake::can_ft_catch_by_month_fn,
@@ -96,13 +99,15 @@ calc_catch_seas_country <- function(ss_model_data_csv_dir = NULL,
       select(-year) |>
       group_by(country, season) |>
       summarize(catch_prop = mean(catch_prop))
+
+    df_can |>
+      bind_rows(df_us) |>
+      select(country, everything()) |>
+      pivot_wider(names_from = "season",
+                  values_from = "catch_prop") |>
+      ungroup() |>
+      select(-country) |>
+      as.matrix()
   }
 
-  df_can |>
-    bind_rows(df_us) |>
-    select(country, everything()) |>
-    pivot_wider(names_from = "season", values_from = "catch_prop") |>
-    ungroup() |>
-    select(-country) |>
-    as.matrix()
 }

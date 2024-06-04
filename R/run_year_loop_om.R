@@ -23,7 +23,8 @@ run_year_loop_om <- function(om = NULL,
     yr_ind <- which(yr == om$yrs)
     wage <- get_wa_dfs(om, yr)
 
-    r_y <- om$parameters$r_in[om$parameters$r_in[, "yr"] == yr, "value"]
+    r_y <- om$parameters$r_in[om$parameters$r_in[, "yr"] == yr, "50%"] |>
+      pull()
     m_yrs <- om$m_age
     # M is distributed throughout the yrs
     m_season <- m_yrs / om$n_season
@@ -42,7 +43,8 @@ run_year_loop_om <- function(om = NULL,
              (5 * om$h - 1))) * exp(-0.5 * om$b[yr_ind] *
                                       om$rdev_sd ^ 2 + r_y) #*recruit_mat[space]
       rec
-    }) %>% set_names(om$space_names)
+    }) |>
+      set_names(om$space_names)
 
     om$n_save_age[1, yr_ind, , 1] <- init_rec
 

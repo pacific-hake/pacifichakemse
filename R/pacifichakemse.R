@@ -8,6 +8,7 @@
 #' functions within them
 #' @import ggplot2
 #' @import hake
+#' @import httr2
 #' @import knitr
 #' @import purrr
 #' @import readr

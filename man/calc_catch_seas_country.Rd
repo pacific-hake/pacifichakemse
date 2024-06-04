@@ -5,16 +5,13 @@
 \title{Calculate the catch proportions by country, year, and season}
 \usage{
 calc_catch_seas_country(
-  ss_model_data_csv_dir = NULL,
+  data_tables_url = NULL,
   n_yrs = 10,
   weight = c(1, 1, 1, 1),
   ...
 )
 }
 \arguments{
-\item{ss_model_data_csv_dir}{The directory in which the assessment csv
-files containing catch by month are located. Can be a URL}
-
 \item{n_yrs}{If \code{NULL}, a data frame containing all years of data with
 proportions of catch by season will be returned. If this is a number, it is
 the number of years at the end of the data to average the proportions by
@@ -24,6 +21,9 @@ any year column}
 \item{weight}{A vector of 4 for the weights given to each season}
 
 \item{...}{Absorbs arguments meant for other functions}
+
+\item{ss_model_data_csv_dir}{The directory in which the assessment csv
+files containing catch by month are located. Can be a URL}
 }
 \value{
 If \code{n_yrs} is \code{NULL}, a data frame containing all years of data with

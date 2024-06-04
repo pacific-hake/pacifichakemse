@@ -8,18 +8,17 @@
 #' and the US catch
 #'
 #' @export
-extract_catch_country <- function(ss_model_data_csv_dir = NULL,
+extract_catch_country <- function(data_tables_url = NULL,
                                   ...){
 
-  fn <- file.path(ss_model_data_csv_dir, hake::landings_tac_fn)
+  url <- file.path(data_tables_url,
+                   hake::landings_tac_fn)
 
-  if(!files_exist(fn)){
-    cat(red(symbol$cross),
-        red(paste0("The data file:\n`", fn, "`\n does not exist. ",
-                   "`catch_country` object is NULL")))
+  d <- load_data_table_from_web(url)
+
+  if(is.null(d)){
     return(NULL)
   }
-  d <- read_csv(fn, col_types = cols())
 
   can <- d |>
     mutate(can = `Canada Foreign` +

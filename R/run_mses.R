@@ -148,7 +148,7 @@ run_mses <- function(n_runs = 10,
                          b_future = b_futures[fn_ind],
                          selectivity_change = sel_changes[fn_ind],
                          ...)
-browser()
+
       cat(green("Run #", run, "\n"))
 
       tmp <- run_mse_scenario(om = om,

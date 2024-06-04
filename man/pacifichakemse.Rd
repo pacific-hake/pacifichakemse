@@ -2,6 +2,7 @@
 % Please edit documentation in R/pacifichakemse.R
 \docType{package}
 \name{pacifichakemse}
+\alias{pacifichakemse-package}
 \alias{pacifichakemse}
 \title{Pacific Hake MSE package}
 \description{
@@ -14,6 +15,13 @@ functions within them
 \references{
 pacifichakemse on GitHub:
 \url{https://github.com/pacific-hake/pacifichakemse}
+}
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/pacific-hake/pacifichakemse/issues}
+}
+
 }
 \author{
 Chris J. Grandin, Nis S. Jacobsen, Ian G. Taylor, Kristin Marshall,

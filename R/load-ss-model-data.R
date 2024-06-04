@@ -8,7 +8,7 @@
 #' @param n_space The number of spaces (areas) in which fishing takes place
 #' and to which a selectivity-at-age is to be set. See the value of
 #' `p_sel_fish` in the returned list
-#' @param rds_fn File name for the RDS file containing the4 model input/output
+#' @param rds_fn File name for the RDS file containing the model input/output
 #' as created using [hake::create_rds_file()]
 #' @param ... Arguments to be passed to [load_ss_sel_parameters()]
 #'
@@ -34,9 +34,8 @@ load_ss_model_data <- function(s_min = 1,
   ss_model$catch_country <- extract_catch_country(...)
   ss_model$catch_seas_country <- calc_catch_seas_country(...)
 
-  lst <- NULL
-
   # Catch observations --------------------------------------------------------
+  lst <- NULL
   lst$catch_obs <- ss_model$dat$catch |>
     transmute(yr = year,
               value = catch) |>
@@ -46,7 +45,6 @@ load_ss_model_data <- function(s_min = 1,
   lst$s_yr <- min(lst$catch_obs[, "yr"])
   lst$m_yr <- max(lst$catch_obs[, "yr"])
   yrs <- lst$s_yr:lst$m_yr
-
 
   lst$catch_props_space_season <- ss_model$catch_seas_country
   lst$catch_country <- ss_model$catch_country
@@ -232,12 +230,12 @@ load_ss_model_data <- function(s_min = 1,
       pull(Bio_all)
     b <- b / weight_factor
 
-    lst$med_popests <-  tibble(f_ssb = vals_mc$smed * weight_factor,
-                               rel_ssb = vals_mc$dmed,
-                               b = b,
-                               r = vals_mc$rmed * weight_factor,
-                               spr_f = vals_mc$pmed,
-                               e = vals_mc$fmed)
+    lst$med_popests <- tibble(f_ssb = vals_mc$smed * weight_factor,
+                              rel_ssb = vals_mc$dmed,
+                              b = b,
+                              r = vals_mc$rmed * weight_factor,
+                              spr_f = vals_mc$pmed,
+                              e = vals_mc$fmed)
   }
 
   lst$med_popests <- lst$med_popests |>
@@ -288,11 +286,10 @@ load_ss_model_data <- function(s_min = 1,
   # }
 
   # Initial numbers-at-age -----------------------------------------------------
-  browser()
-  lst$init_n <- ss_model$extra_mcmc$init_natage |>
-    pull(`50%`)
-  names(lst$init_n) <- ss_model$extra_mcmc$init_natage$age
-  lst$init_n <- c(`0` = 0, lst$init_n)
+  lst$init_n <- ss_model$extra_mcmc$natage_med |>
+    select(-yr) |>
+    slice(1) |>
+    unlist()
 
   lst$ctl_file <- ss_model$ctl_file
   lst$ctl <- ss_model$ctl
