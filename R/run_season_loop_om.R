@@ -53,9 +53,10 @@ run_season_loop_om <- function(om,
       p_sel <- p_sel_fish_matrix[p_sel_fish_matrix[, "space"] == space,]
       p_sel_yrs <- om$sel_by_yrs
       if(om$flag_sel[yr_ind]){
+
         p_sel_df <- p_sel_yrs[, yr_ind - om$sel_idx + 1] %>%
           mutate(val = .[[1]] * om$sigma_p_sel) |>
-          bind_cols(p_sel[, "value"])
+          bind_cols(p_sel |> as_tibble() |> select(value)) |>
           select(val)
         #p_sel[, "value"] <- #p_sel[, "value"] +
         #  p_sel_yrs[, yr_ind - om$sel_idx + 1] * om$sigma_p_sel
