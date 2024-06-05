@@ -286,10 +286,8 @@ load_ss_model_data <- function(s_min = 1,
   # }
 
   # Initial numbers-at-age -----------------------------------------------------
-  lst$init_n <- ss_model$extra_mcmc$natage_med |>
-    select(-yr) |>
-    slice(1) |>
-    unlist()
+  lst$init_n <- ss_model$extra_mcmc$init_natage |>
+    pull("50%")
 
   lst$ctl_file <- ss_model$ctl_file
   lst$ctl <- ss_model$ctl
