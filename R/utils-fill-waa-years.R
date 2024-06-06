@@ -38,12 +38,13 @@ fill_waa_years <- function(waa,
 
   yr_col_sym <- sym(yr_col)
 
-  if(any(yrs %in% waa[[yr_col]])){
-    stop("One or more of the years in `yrs` already exist in the `waa` data ",
-         "frame.")
+  missing_yrs <- setdiff(yrs, unique(waa$Yr))
+
+  if(!length(missing_yrs)){
+    return(waa)
   }
 
-  for(i in yrs){
+  for(i in missing_yrs){
     new_vals <- values |>
       mutate(!!yr_col_sym := i) |>
       select(!!yr_col_sym, everything())
@@ -51,6 +52,8 @@ fill_waa_years <- function(waa,
       bind_rows(new_vals)
   }
 
-  waa |>
+  out <- waa |>
     arrange(!!yr_col_sym)
+
+  out
 }

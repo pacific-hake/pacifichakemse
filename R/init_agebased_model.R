@@ -9,7 +9,6 @@
 init_agebased_model <- function(om = NULL){
 
   # Natural mortality - males = females ---------------------------------------
-  om$m_sel <- om$m_sel
   om$m0 <- exp(om$parameters$log_m_init)
   om$m_age <- om$m0 * om$m_sel
   om$m_cumu_age <- c(0, cumsum(om$m_age[1:(om$n_age - 1)]))
@@ -40,8 +39,8 @@ init_agebased_model <- function(om = NULL){
   n_age_3 <- length(ages_3)
 
   n0_tmp <- NULL
-  n0_tmp[1:(n_age_3 - 1)] = om$r0 * exp(-ages_3[1:(n_age_3 - 1)] * om$m0)
-  n0_tmp[n_age_3] =  om$r0 * exp(-om$m0 * ages_3[n_age_3]) / (1 - exp(-om$m0))
+  n0_tmp[1:(n_age_3 - 1)] <- om$r0 * exp(-ages_3[1:(n_age_3 - 1)] * om$m0)
+  n0_tmp[n_age_3] <- om$r0 * exp(-om$m0 * ages_3[n_age_3]) / (1 - exp(-om$m0))
 
   om$n0 <- matrix(NA, om$n_age)
   om$n0[1:(om$n_age - 1)] <- n0_tmp[1:(om$n_age - 1)]
@@ -107,10 +106,12 @@ init_agebased_model <- function(om = NULL){
   mat_sel <- om$mat_sel[-1]
   yr_ind <- 1
   wage <- get_wa_dfs(om, om$yrs[yr_ind])
-  n_save_age <- om$n_save_age[, yr_ind, , 1] %>% as.data.frame() %>% map(~{.x})
+  n_save_age <- om$n_save_age[, yr_ind, , 1] |>
+    as.data.frame() |>
+    map(~{.x})
 
   # Calculate initial SSB for each space --------------------------------------
-  om$init_ssb <- map_dbl(n_save_age, function(space_num_at_age = .x){
+  om$init_ssb <- map_dbl(n_save_age, \(space_num_at_age = .x){
     sum(space_num_at_age * wage$ssb, na.rm = TRUE) * 0.5
   })
 

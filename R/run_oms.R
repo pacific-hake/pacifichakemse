@@ -9,7 +9,8 @@
 #' @param sel_changes Selectivity changes. See [run_mses()]
 #' @param catch_in Catch into the future in kg
 #' @param plot_names A vector of names to show on plots. See [run_mses()]
-#' @param random_seed The random seed to base run random seeds from. See [run_mses()]
+#' @param random_seed The random seed to base run random seeds from. See
+#' [run_mses()]
 #' @param results_root_dir The results root directory
 #' @param results_dir The results directory
 #' @param ... Arguments passed to [load_data_om()]
@@ -46,9 +47,9 @@ run_oms <- function(ss_model = NULL,
     dir.create(results_dir)
   }
 
-  # This function expands a single value to a vector of the length of `fns`. If it is already
-  # the same length, nothing happens.
-  fill_vec <- function(d){
+  # This function expands a single value to a vector of the length of
+  # `fns`. If it is already the same length, nothing happens.
+  fill_vec <- \(d){
     stopifnot(length(d) == 1 | length(d) == length(fns))
     if(length(d) == 1 && length(fns) > 1){
       d <- rep(d, length(fns))
@@ -59,13 +60,13 @@ run_oms <- function(ss_model = NULL,
   n_surveys <- fill_vec(n_surveys)
   b_futures <- fill_vec(b_futures)
 
-  tic()
   set.seed(random_seed)
   random_seeds <- floor(runif(n = n_runs, min = 1, max = 1e6))
 
   if(!is.na(catch_in) && catch_in != 0 && hcr_apply){
     warning("Both hcr_apply and catch_in are set.\n",
-            "catch_in value was ignored, default catch was used with the HCR rule applied.",
+            "catch_in value was ignored, default catch was used ",
+            "with the HCR rule applied.",
             call. = FALSE)
   }
   # Begin MSEs loop -----------------------------------------------------------
@@ -73,7 +74,7 @@ run_oms <- function(ss_model = NULL,
   map2(fns, 1:length(fns), function(fn = .x, fn_ind = .y, ...){
     cat(white("Scenario:", fn, "\n"))
     # Begin run loop ----------------------------------------------------------
-    lst <- map(1:ifelse(random_recruitment, n_runs, 1), function(run = .x, ...){
+    lst <- map(1:ifelse(random_recruitment, n_runs, 1), \(run = .x, ...){
       cat(green("OM run", run, ": Seed =", random_seeds[run], "\n"))
       om <- load_data_om(ss_model,
                          yr_future = yr_future,
@@ -82,6 +83,7 @@ run_oms <- function(ss_model = NULL,
                          selectivity_change = sel_changes[fn_ind],
                          random_recruitment = random_recruitment,
                          ...)
+
       iter <<- iter + 1
       const_catch <- FALSE
       if(!is.na(catch_in)){
@@ -102,5 +104,4 @@ run_oms <- function(ss_model = NULL,
     saveRDS(lst, file = file.path(results_dir, fn))
   }, ...)
   # End MSEs loop -------------------------------------------------------------
-  toc()
 }

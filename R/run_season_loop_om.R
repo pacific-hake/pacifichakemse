@@ -78,7 +78,7 @@ run_season_loop_om <- function(om,
       }
 
       # Constant over space
-      if(yr %in% 1991) browser()
+      #if(yr %in% 1991) browser()
       f_sel <- get_select(om$ages,
                           p_sel,
                           om$s_min,
@@ -150,22 +150,23 @@ run_season_loop_om <- function(om,
 
       e_over_b <- e_tmp / b_tmp
       if(is.na(e_over_b)){
+        browser()
         stop("Error in the Operating model. If running a standalone OM ",
              "outside the MSE, did you set `n_sim_yrs` instead of ",
              "`yr_future`?",
              call. = FALSE)
       }
 
-      if(e_over_b >= 0.9){
-        if(om$yrs[yr_ind] < om$m_yr){
-          # Stop if in the past
-          message("Catch exceeds available biomass in yrs: ",
-                  om$yrs[yr_ind], " and season ",
-                  season, " , space ", space)
-        }
-        #e_tmp <- 0.75 * b_tmp
-        #om$catch_quota_n[yr_ind, space, season] <- 1
-      }
+      # if(e_over_b >= 0.9){
+      #   if(om$yrs[yr_ind] < om$m_yr){
+      #     # Stop if in the past
+      #     message("Catch exceeds available biomass in yrs: ",
+      #             om$yrs[yr_ind], " and season ",
+      #             season, " , space ", space)
+      #   }
+      #   #e_tmp <- 0.75 * b_tmp
+      #   #om$catch_quota_n[yr_ind, space, season] <- 1
+      # }
 
       # Calculate F based on catch distribution -------------------------------
       f_out <- get_f(e_tmp = e_tmp,
@@ -217,6 +218,7 @@ run_season_loop_om <- function(om,
             n_in <- n_in + n_in_tmp
           }
         }
+
         om$n_save_age[, yr_ind, space, season + 1] <- om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
           om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +

@@ -15,6 +15,7 @@ load_ss_sel_parameters <- function(ss_model = NULL,
   mcmc_df <- ss_model$mcmc |>
     as_tibble()
   nms <- grep(fishery_pat, names(mcmc_df), val = TRUE)
+
   # Extract the ages from the parameter names. subtract 1 to account for
   #  age zero in the parameters
   fishery_ages <- gsub(fishery_pat,
@@ -22,6 +23,9 @@ load_ss_sel_parameters <- function(ss_model = NULL,
                        nms) |>
     as.numeric()
   fishery_ages <- fishery_ages - 1
+  if(!1 %in% fishery_ages){
+    fishery_ages <- c(1, fishery_ages)
+  }
 
   # Get survey ages from the names of the MCMC columns
   surv_pat <- "^AgeSel_P(\\d+)_Acoustic_Survey\\(2\\)$"

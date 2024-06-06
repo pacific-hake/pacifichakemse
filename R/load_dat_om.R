@@ -1,19 +1,24 @@
 #' Prepare the data for the operating model
 #'
-#' @param ss_model A model input/output list representing the SS model as as found in
-#' the RDS file created by  [create_rds_file()]
-#' @param yr_future Number of years to run the OM into the future in an OM-only run.
-#' If this is > 0, `n_sim_yrs` cannot be. This must be 0 when running from an MSE context.
-#' Use `n_sim_yrs` for that instead.
-#' @param n_sim_yrs Number of years to allocate OM objects for the future. If this is > 0,
-#' `yr_future` cannot be. All future values will be `NA` except for the movement matrix values.
+#' @param ss_model A model input/output list representing the SS model as
+#' found in the RDS file created by  [create_rds_file()]
+#' @param yr_future Number of years to run the OM into the future in an OM
+#' only run. If this is > 0, `n_sim_yrs` cannot be. This must be 0 when
+#' running from an MSE context. Use `n_sim_yrs` for that instead.
+#' @param n_sim_yrs Number of years to allocate OM objects for the future.
+#' If this is > 0, `yr_future` cannot be. All future values will be `NA`
+#' except for the movement matrix values.
 #' @param n_season Number of seasons
-#' @param season_names A vector of names for the seasons. Length must equal `n_season`
+#' @param season_names A vector of names for the seasons. Length must
+#' equal `n_season`
 #' @param n_space Number of spatial areas
-#' @param space_names A vector of names for the spaces. Length must equal `n_space`
+#' @param space_names A vector of names for the spaces. Length must
+#' equal `n_space`
 #' @param ages A vector of ages
-#' @param age_plus_grp Plus group for ages. Required for [setup_blank_om_objects()]
-#' @param age_names A vector of names for the ages. Length must equal length of `ages`
+#' @param age_plus_grp Plus group for ages. Required for
+#' [setup_blank_om_objects()]
+#' @param age_names A vector of names for the ages. Length must equal
+#' length of `ages`
 #' @param sel_change_yr A year in which a selectivity change took place
 #' @param move_max_init Maximum movement rate
 #' @param move_fifty_init Age at 50 percent maximum movement rate
@@ -30,13 +35,13 @@
 #' @param s_max Maximum age in fishery selectivity
 #' @param s_min_survey Minimum age in survey selectivity
 #' @param s_max_survey Maximum age in survey selectivity
-#' @param f_space The proportion of TAC given to each country. First value is Canada,
-#' the second is the US
+#' @param f_space The proportion of TAC given to each country. First value
+#' is Canada, the second is the US
 #' @param log_phi_survey Survey phi parameter value
 #' If FALSE, they will be given random normal values based on rdev_sd
-#' @param random_recruitment Logical. If `FALSE`, recruitment deviations will be
-#' set to zero in the projection period. If `TRUE`, recruitment deviations will be set
-#' to random values in the projection period
+#' @param random_recruitment Logical. If `FALSE`, recruitment deviations
+#' will be set to zero in the projection period. If `TRUE`, recruitment
+#' deviations will be set to random values in the projection period
 
 #' @param ... Absorb arguments destined for other functions
 #'
@@ -52,7 +57,10 @@ load_data_om <- function(ss_model = NULL,
                          yr_future = 0,
                          n_sim_yrs = 0,
                          n_season = 4,
-                         season_names = c("Season1", "Season2", "Season3", "Season4"),
+                         season_names = c("Season1",
+                                          "Season2",
+                                          "Season3",
+                                          "Season4"),
                          n_space = 2,
                          space_names = c("Canada", "US"),
                          n_survey = 2,
@@ -132,6 +140,7 @@ load_data_om <- function(ss_model = NULL,
   lst$yr_sel <- length(lst$sel_change_yr:lst$m_yr)
   lst$selectivity_change <- selectivity_change
   lst$sel_by_yrs <- ss_model$sel_by_yrs
+
   # Selectivity change in that year
   lst$flag_sel <- rep(FALSE, lst$n_yr)
   lst$flag_sel[which(lst$yrs == lst$sel_change_yr):which(lst$yrs == lst$m_yr)] <- TRUE
@@ -341,8 +350,9 @@ load_data_om <- function(ss_model = NULL,
     as.matrix()
 
   # Parameters to initialize the OM -------------------------------------------
-  lst$parameters <- list(log_r_init = exp(ss_model$mcmccalcs$rinit["50%"]) + log(lst$r_mul),
-                         log_h = ss_model$mcmccalcs$steep["50%"] |> log(),
+  lst$parameters <- list(log_r_init = exp(ss_model$mcmccalcs$rinit["50%"]) +
+                           log(lst$r_mul),
+                         log_h = log(ss_model$mcmccalcs$steep["50%"]),
                          log_m_init = log(ss_model$mcmccalcs$m["50%"]),
                          log_sd_surv = log(ss_model$mcmccalcs$survey_sd["50%"]),
                          log_phi_survey = ss_model$mcmccalcs$dm_survey["50%"],
@@ -379,85 +389,4 @@ load_data_om <- function(ss_model = NULL,
   }
 
   lst
-}
-
-#' Initialize the movement model matrix. An alternative function should be
-#' written if changes are required to the initialization assumptions
-#'
-#' @param n_space See [load_data_om()]
-#' @param space_names See [load_data_om()]
-#' @param n_season See [load_data_om()]
-#' @param season_names See [load_data_om()]
-#' @param m_yr The last non-future year. Used to de-populate future values if `populate_future` is FALSE
-#' @param n_yr The number of years in the array dimension
-#' @param yrs A vector of names for the years. Length must equal `n_yr`
-#' @param move_max A vector of the maximum movement rate, one for each of `n_seasons`
-#' @param move_slope  See [load_data_om()]
-#' @param move_fifty Age at 50 percent movement rate
-#' @param move_south  See [load_data_om()]
-#' @param move_out  See [load_data_om()]
-#' @param move_init  See [load_data_om()]
-#' @param ages_no_move See [load_data_om()]
-#' @param ages See [load_data_om()]
-#' @param age_names See [load_data_om()]
-#' @param f_space See [load_data_om()]
-#'
-#' @return A list of 3 elements: The `move_mat` matrix for movement, the `move_init`
-#' vector of length `n_space` and the `f_space` vector of length `n_space`
-#' @export
-init_movement_mat <- function(n_space = NULL,
-                              space_names = NULL,
-                              n_season = NULL,
-                              season_names = NULL,
-                              m_yr = NULL,
-                              n_yr = NULL,
-                              yrs = NULL,
-                              move_max = NULL,
-                              move_slope = NULL,
-                              move_fifty = NULL,
-                              move_south = NULL,
-                              move_out = NULL,
-                              move_init = NULL,
-                              ages_no_move = NULL,
-                              ages = NULL,
-                              age_names = NULL,
-                              f_space = NULL){
-
-  n_age <- length(ages)
-  move_mat <- array(0,
-                    dim = c(n_space, n_age, n_season, n_yr),
-                    dimnames = list(space_names,
-                                    age_names,
-                                    season_names,
-                                    yrs))
-  for(i in 1:n_space){
-    for(j in 1:n_season){
-      move_mat[i, , j, ] <- move_max[j] / (1 + exp(-move_slope * (ages - move_fifty)))
-    }
-  }
-
-  # Some ages don't move
-  move_mat[, which(ages_no_move %in% ages), , ] <- 0
-  if(n_season == 4){
-    # Don't move south during the year
-    move_mat[1, 3:n_age, 2:3,] <- move_south
-    # continuing south movement at spawning time
-    move_mat[1, 3:n_age, 1,] <- move_south
-    # The following two lines are co-dependent. The fish that move_out of Canada
-    # move into the US
-    move_mat[1, 3:n_age, 4,] <- move_out
-    move_mat[2, 3:n_age, 4,] <- move_south
-
-  }else{
-    move_init <- 1
-    # All F occurs in US
-    f_space <- c(0, 1)
-  }
-  # if(!populate_future){
-  #   m_ind <- which(yrs == m_yr)
-  #   move_mat[, , , (m_ind + 1):n_yr] <- NA
-  # }
-  list(move_mat = move_mat,
-       move_init = move_init,
-       f_space = f_space)
 }

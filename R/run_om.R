@@ -29,7 +29,7 @@ run_om <- function(om = NULL,
                          hcr_upper = hcr_upper,
                          hcr_fspr = hcr_fspr,
                          ...)
-
+browser()
   # Save the HCR reference points used for reporting/plotting later
   if(hcr_apply){
     om$hcr_lower <- hcr_lower

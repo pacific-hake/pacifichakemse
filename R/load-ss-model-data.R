@@ -54,41 +54,41 @@ load_ss_model_data <- function(s_min = 1,
     as_tibble() |>
     select(-c("Seas", "Sex", "Bio_Pattern", "BirthSeas"))
 
-  fill_means <- \(waa_df){
-    mn <- calc_mean_waa(
-      waa = waa_df,
-      yrs = -ss_model$startyr)
-    fill_waa_years(
-      waa = waa_df,
-      values = mn,
-      yrs = (ss_model$startyr + 1):(unique(ss_model$agedbase$Yr)[1] - 1))
+  fill_means <- \(waa_df,
+                  s_yr = ss_model$startyr,
+                  e_yr = ss_model$endyr){
+                  #e_yr = unique(ss_model$agedbase$Yr)[1] - 1){
+    waa_df <- waa_df |>
+      filter(Yr %in% s_yr:e_yr)
+
+   # Get means by age of all years in the start year to end year range
+   # as a single row data frame
+    d_means <- calc_mean_waa(waa_df)
+
+    fill_waa_years(waa = waa_df,
+                   values = d_means,
+                   yrs = s_yr:e_yr)
   }
+
   lst$wage_catch_df <- waa |>
     filter(Fleet == 1) |>
     select(-Fleet) |>
-    mutate(Yr = ifelse(Yr < 0, lst$s_yr, Yr)) |>
-    filter(Yr <= lst$m_yr) |>
     fill_means()
 
   lst$wage_survey_df <- waa |>
     filter(Fleet == 2) |>
     select(-Fleet) |>
-    mutate(Yr = ifelse(Yr < 0, lst$s_yr, Yr)) |>
-    filter(Yr <= lst$m_yr) |>
     fill_means()
 
   lst$wage_mid_df <- waa |>
     filter(Fleet == -1) |>
     select(-Fleet) |>
-    mutate(Yr = ifelse(Yr < 0, lst$s_yr, Yr)) |>
-    filter(Yr <= lst$m_yr) |>
     fill_means()
 
   lst$wage_ssb_df <- waa |>
-    as_tibble() |>
-    filter(Yr < 0, Fleet == -2) |>
-    mutate(Yr = lst$s_yr) |>
-    select(-Fleet)
+    filter(Fleet == -2) |>
+    select(-Fleet) |>
+    fill_means()
 
   # Maturity from first year only ---------------------------------------------
   lst$mat_sel <- lst$wage_ssb_df
@@ -288,6 +288,8 @@ load_ss_model_data <- function(s_min = 1,
   # Initial numbers-at-age -----------------------------------------------------
   lst$init_n <- ss_model$extra_mcmc$init_natage |>
     pull("50%")
+  names(lst$init_n) <- ss_model$extra_mcmc$init_natage |>
+    pull(age)
 
   lst$ctl_file <- ss_model$ctl_file
   lst$ctl <- ss_model$ctl
