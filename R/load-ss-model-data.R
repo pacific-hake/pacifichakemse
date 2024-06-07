@@ -122,19 +122,18 @@ load_ss_model_data <- function(s_min = 1,
     complete(yr = min(dups$yr):max(dups$yr),
              fill = val_lst)
 
-  sel_fish <- sel_fish[!duplicated(sel_fish[, -1]), ] |>
+  # Remove the duplicated rows (ignoring year), and bind the
+  # prepared rows with values to fill in the data frame for every year.
+  # The pivot_wider and longer are an alternative to t() which will
+  # introduce warnings
+  sel_fish <- sel_fish[!duplicated(sel_fish |> select(-yr)), ] |>
     filter(yr != ss_model$startyr) |>
     filter(yr <= ss_model$endyr) |>
     bind_rows(static_sel_df) |>
     arrange(yr) |>
-    t() |>
-    as_tibble() |>
-    # Suppress .name_repair warning which doesn't matter
-    suppressWarnings()
-  names(sel_fish) <- sel_fish |>
-    slice(1)
-  sel_fish <- sel_fish |>
-    slice(-1)
+    pivot_longer(-yr, names_to = "age") |>
+    mutate(age = as.numeric(age)) |>
+    pivot_wider(names_from = "yr")
 
   # `lst$sel_by_yrs` has `s_max` - `s_min` + 1 rows, for ages `s_min` to
   # `s_max` and 33 columns, one for each year 1991-2023 (2023-1991 + 1)
@@ -149,19 +148,10 @@ load_ss_model_data <- function(s_min = 1,
     filter(source == 2)
 
   # Add more selectivities by space (area).
-  if(n_space == 1){
-    p_sel_fish <- p_sel_fish |>
-      mutate(space = 1)
-  }else{
-    p_sel_fish <- p_sel_fish |>
-      mutate(space = 2)
-    p_sel_fish2 <- p_sel_fish |>
-      mutate(space = 1, value = 1)
-    p_sel_fish <- p_sel_fish |>
-      bind_rows(p_sel_fish2) |>
-      select(value, source, space, age) |>
-      arrange(order(space))
-  }
+  p_sel_fish <- imap_dfr(seq_len(n_space), ~{
+    p_sel_fish |>
+      mutate(space = .y)
+  })
 
   lst$p_sel_fish <- p_sel_fish |> as.matrix()
   lst$p_sel_surv <- p_sel_surv |> as.matrix()
@@ -189,7 +179,7 @@ load_ss_model_data <- function(s_min = 1,
     select(-fleet) |>
     mutate(flag = 1) |>
     complete(yr = seq(lst$s_yr, lst$m_yr)) %>%
-    replace(is.na(.), 0) %>%
+    replace(is.na(.), 0) |>
     mutate(flag = ifelse(flag == 0, -1, flag))
   lst$ss_catch <- ss_catch |> pull(ss)
   lst$flag_catch <- ss_catch |> pull(flag)
@@ -257,33 +247,34 @@ load_ss_model_data <- function(s_min = 1,
   # The hake model no longer used bias ramping after 2021 due to strictly
   # MCMC models being used. The MLE models were abandoned
   # TODO: Test to see if this needs to be present or if it can be deleted
-  # ctl <- ss_model$ctl
-  # b_breakpoints <- ss_model$breakpoints_for_bias_adjustment_ramp[1, ] |>
-  #   as.numeric()
-  # yb_1 <- b_breakpoints[1]
-  # yb_2 <- b_breakpoints[2]
-  # yb_3 <- b_breakpoints[3]
-  # yb_4 <- b_breakpoints[4]
-  # b_max <- b_breakpoints[5]
-  # b_yrs <- lst$s_yr:lst$m_yr
-  # lst$b <- NULL
-  # for(j in 1:length(b_yrs)){
-  #   if(b_yrs[j] <= yb_1){
-  #     lst$b[j] <- 0
-  #   }
-  #   if(b_yrs[j] > yb_1 && b_yrs[j]< yb_2){
-  #     lst$b[j] <- b_max * ((b_yrs[j] - yb_1) / (yb_2 - yb_1))
-  #   }
-  #   if(b_yrs[j] >= yb_2 && b_yrs[j] <= yb_3){
-  #     lst$b[j] <- b_max
-  #   }
-  #   if(b_yrs[j] > yb_3 && b_yrs[j] < yb_4){
-  #     lst$b[j] <- b_max * (1 - (yb_3 - b_yrs[j]) / (yb_4 - yb_3))
-  #   }
-  #   if(b_yrs[j] >= yb_4){
-  #     lst$b[j] <- 0
-  #   }
-  # }
+  ctl <- ss_model$ctl
+  b_breakpoints <- ss_model$breakpoints_for_bias_adjustment_ramp[1, ] |>
+    as.numeric()
+
+  yb_1 <- b_breakpoints[1]
+  yb_2 <- b_breakpoints[2]
+  yb_3 <- b_breakpoints[3]
+  yb_4 <- b_breakpoints[4]
+  b_max <- b_breakpoints[5]
+  b_yrs <- lst$s_yr:lst$m_yr
+  lst$b <- NULL
+  for(j in 1:length(b_yrs)){
+    if(b_yrs[j] <= yb_1){
+      lst$b[j] <- 0
+    }
+    if(b_yrs[j] > yb_1 && b_yrs[j]< yb_2){
+      lst$b[j] <- b_max * ((b_yrs[j] - yb_1) / (yb_2 - yb_1))
+    }
+    if(b_yrs[j] >= yb_2 && b_yrs[j] <= yb_3){
+      lst$b[j] <- b_max
+    }
+    if(b_yrs[j] > yb_3 && b_yrs[j] < yb_4){
+      lst$b[j] <- b_max * (1 - (yb_3 - b_yrs[j]) / (yb_4 - yb_3))
+    }
+    if(b_yrs[j] >= yb_4){
+      lst$b[j] <- 0
+    }
+  }
 
   # Initial numbers-at-age -----------------------------------------------------
   lst$init_n <- ss_model$extra_mcmc$init_natage |>

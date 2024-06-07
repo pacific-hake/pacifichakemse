@@ -4,18 +4,21 @@
 #' @param yr The year to run the operating model for
 #' @param yr_ind The index of `yr` in the `om$yrs` vector
 #' @param m_season A vector of natural mortality-at-age
-#' @param attain The attainment vector of length 2, in the order Canada, US. These are proportions
-#' of the catch to take.
+#' @param attain The attainment vector of length 2, in the order Canada, US.
+#' These are proportions of the catch to take.
 #' @param ages_no_move Ages that don't move in the movement model
 #' @param pope_mul Multiplier used in Pope's method
 #' @param verbose Print the loop information to the console
 #' @param testing Logical. If TRUE, write out testing files
 #' @param ... Absorbs additional arguments meant for other functions
-#' @param zero_catch_val The value to use instead of zero for catch (necessary for EM to converge)
-#' @param hcr_apply If `TRUE`, apply the Harvest control rule inside the Operating model. Set to `FALSE`
-#' when running MSE as the HCR is already applied
-#' @param const_catch If `TRUE` make the catch constant for the projection period. `catch_in` still
-#' needs to be set to some value when running `run_oms()`
+#' @param zero_catch_val The value to use instead of zero for catch
+#' (necessary for EM to converge)
+#' @param hcr_apply If `TRUE`, apply the Harvest control rule inside the
+#' Operating model. Set to `FALSE` when running MSE as the HCR is already
+#' applied
+#' @param const_catch If `TRUE` make the catch constant for the projection
+#' period. `catch_in` still needs to be set to some value when running
+#' `run_oms()`
 #'
 #' @return A modified version of `om` with the current data for `yr` populated
 #' in all it's arrays and other objects
@@ -70,7 +73,9 @@ run_season_loop_om <- function(om,
                                         om$s_min_survey + 1))
           }
         }else if(om$selectivity_change == 2){
-          p_sel <- om$parameters$p_sel_fish[om$parameters$p_sel_fish[, "space"] == 2, ]
+          p_sel <-
+            om$parameters$p_sel_fish[om$parameters$p_sel_fish[, "space"] == 2, ]
+
           p_sel[, "value"] <- p_sel[, "value"] +
             p_sel_yrs[,ncol(p_sel_yrs)] *
             om$sigma_p_sel
@@ -87,7 +92,8 @@ run_season_loop_om <- function(om,
       # Write selectivity testing file ----------------------------------------
       if(testing){
         if(yr == 1966 && season == 1 && space == 1){
-          header <- c("Year", "Season", "Space", "Fsel", paste0("fsel", 1:(length(f_sel) - 1)))
+          header <- c("Year", "Season", "Space", "Fsel",
+                      paste0("fsel", 1:(length(f_sel) - 1)))
           write(paste0(header, collapse = ","), "fselvals.csv")
         }
         write(paste(yr, season, space,
@@ -123,9 +129,14 @@ run_season_loop_om <- function(om,
                               ...)
       }
 
-      e_tmp <- e_tmp * as.numeric(om$catch_props_space_season[space, season])
+      e_tmp <- e_tmp *
+        as.numeric(om$catch_props_space_season[space, season])
+
       if(yr > om$m_yr){
-        e_tmp <- e_tmp * ifelse(attain[space] == 0, 1, attain[space]) * om$f_space[space]
+
+        e_tmp <- e_tmp *
+          ifelse(attain[space] == 0, 1, attain[space]) *
+          om$f_space[space]
       }
       # Save the catch actually applied to each country so the EM can access it
       if(yr > om$m_yr){
@@ -135,7 +146,8 @@ run_season_loop_om <- function(om,
         }
         om$catch_country[yr_ind, space_col] <- tmp_space_catch + e_tmp
         if(season == 4 & space == 2){
-          om$catch_country[yr_ind, "total"] <- sum(om$catch_country[yr_ind, c("space1", "space2")])
+          om$catch_country[yr_ind, "total"] <-
+            sum(om$catch_country[yr_ind, c("space1", "space2")])
         }
       }
       n_tmp <- om$n_save_age[, yr_ind, space, season]
@@ -144,13 +156,16 @@ run_season_loop_om <- function(om,
       wage_catch <- om$wage_catch_df |>
         get_age_dat(yr)
 
-      b_tmp <- sum(n_tmp * exp(-m_season * pope_mul) * wage_catch * f_sel, na.rm = TRUE)
+      b_tmp <- sum(n_tmp *
+                     exp(-m_season * pope_mul) *
+                     wage_catch *
+                     f_sel, na.rm = TRUE)
       om$v_save[yr_ind, space, season] <- b_tmp
       om$catch_quota[yr_ind, space, season] <- e_tmp
 
       e_over_b <- e_tmp / b_tmp
       if(is.na(e_over_b)){
-        browser()
+
         stop("Error in the Operating model. If running a standalone OM ",
              "outside the MSE, did you set `n_sim_yrs` instead of ",
              "`yr_future`?",
@@ -211,7 +226,8 @@ run_season_loop_om <- function(om,
       if(season < om$n_season){
         for(k in 1:length(space_idx)){
           # Add the ones come to the surrounding areas
-          n_in_tmp <- om$n_save_age[, yr_ind, space_idx, season] * exp(-z) * (om$move_mat[space_idx[k], , season, yr_ind])
+          n_in_tmp <- om$n_save_age[, yr_ind, space_idx, season] *
+            exp(-z) * (om$move_mat[space_idx[k], , season, yr_ind])
           if(k == 1){
             n_in <- n_in_tmp
           }else{
@@ -219,18 +235,24 @@ run_season_loop_om <- function(om,
           }
         }
 
-        om$n_save_age[, yr_ind, space, season + 1] <- om$n_save_age[, yr_ind, space, season] * exp(-z) -
+        om$n_save_age[, yr_ind, space, season + 1] <-
+          om$n_save_age[, yr_ind, space, season] * exp(-z) -
           # Remove the ones that leave
-          om$n_save_age[, yr_ind, space, season] * exp(-z) * (om$move_mat[space, , season, yr_ind]) +
+          om$n_save_age[, yr_ind, space, season] * exp(-z) *
+          (om$move_mat[space, , season, yr_ind]) +
           # Add the ones come from the surrounding areas
           n_in
       }else{
         for(k in 1:length(space_idx)){
           # Add the ones come to the surrounding areas
           n_in_tmp <- om$n_save_age[1:(om$n_age - 2), yr_ind, space_idx, season] *
-            exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
-          n_in_plus_tmp <- (om$n_save_age[om$n_age - 1, yr_ind, space_idx[k], om$n_season] * exp(-z[om$n_age - 1]) +
-                              om$n_save_age[om$n_age, yr_ind, space_idx[k], om$n_season] * exp(-z[om$n_age])) *
+            exp(-z[1:(om$n_age - 2)]) *
+            (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
+          n_in_plus_tmp <-
+            (om$n_save_age[om$n_age - 1, yr_ind, space_idx[k], om$n_season] *
+               exp(-z[om$n_age - 1]) +
+               om$n_save_age[om$n_age, yr_ind, space_idx[k], om$n_season] *
+               exp(-z[om$n_age])) *
             om$move_mat[space_idx[k], om$n_age, season, yr_ind]
           if(k == 1){
             n_in <- n_in_tmp
@@ -240,55 +262,68 @@ run_season_loop_om <- function(om,
             n_in_plus <- n_in_plus + n_in_plus_tmp
           }
         }
-        om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <- om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
-          exp(-z[1:(om$n_age - 2)]) - om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
+        om$n_save_age[2:(om$n_age - 1), yr_ind + 1, space, 1] <-
+          om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
+          exp(-z[1:(om$n_age - 2)]) -
+          om$n_save_age[1:(om$n_age - 2), yr_ind, space, season] *
           # Remove the ones that leave
-          exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space, 1:(om$n_age - 2), season, yr_ind]) +
+          exp(-z[1:(om$n_age - 2)]) *
+          (om$move_mat[space, 1:(om$n_age - 2), season, yr_ind]) +
           # Add the ones come to the surrounding areas
           om$n_save_age[1:(om$n_age - 2), yr_ind, space_idx, season] *
-          exp(-z[1:(om$n_age - 2)]) * (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
+          exp(-z[1:(om$n_age - 2)]) *
+          (om$move_mat[space_idx, 1:(om$n_age - 2), season, yr_ind])
 
         # Plus group
-        n_survive_plus <- (om$n_save_age[om$n_age - 1, yr_ind, space, om$n_season] * exp(-z[om$n_age - 1]) +
-                             om$n_save_age[om$n_age, yr_ind, space, om$n_season] * exp(-z[om$n_age]))
+        n_survive_plus <-
+          (om$n_save_age[om$n_age - 1, yr_ind, space, om$n_season] *
+             exp(-z[om$n_age - 1]) +
+             om$n_save_age[om$n_age, yr_ind, space, om$n_season] *
+             exp(-z[om$n_age]))
         # Leaving
-        n_out_plus <- n_survive_plus * (om$move_mat[space, om$n_age, season, yr_ind])
+        n_out_plus <- n_survive_plus *
+          (om$move_mat[space, om$n_age, season, yr_ind])
 
-        om$n_save_age[om$n_age, yr_ind + 1, space, 1] <- n_survive_plus - n_out_plus + n_in_plus
+        om$n_save_age[om$n_age, yr_ind + 1, space, 1] <-
+          n_survive_plus - n_out_plus + n_in_plus
       }
 
       # Calculate age-comps ---------------------------------------------------
-      om$age_comps_om[, yr_ind, space, season] <- om$n_save_age[, yr_ind, space, season] /
+      om$age_comps_om[, yr_ind, space, season] <-
+        om$n_save_age[, yr_ind, space, season] /
         sum(om$n_save_age[, yr_ind, space, season])
+
       if(yr_ind == 1 && season == 1){
         om$ssb_all[1, space, season] <- om$init_ssb_all[space]
       }else{
         mat_sel_vec <- mat_sel %>% unlist
-        om$ssb_all[yr_ind, space, season] <- sum(om$n_save_age[, yr_ind, space, season] * mat_sel_vec, na.rm = TRUE)
+        om$ssb_all[yr_ind, space, season] <-
+          sum(om$n_save_age[, yr_ind, space, season] *
+                mat_sel_vec, na.rm = TRUE)
       }
-      om$catch_n_save_age[, yr_ind, space, season] <- (om$f_season_save[, yr_ind, space, season] / z) *
-        (1 - exp(-z)) * om$n_save_age[, yr_ind, space, season]
-      # Inputting constant catch value alone is not enough to guarantee constant catch, because the get_f() function
-      # is used to approximate F based on catch for each space/season sub-unit within a year and it is not exact
+      om$catch_n_save_age[, yr_ind, space, season] <-
+        (om$f_season_save[, yr_ind, space, season] / z) *
+        (1 - exp(-z)) *
+        om$n_save_age[, yr_ind, space, season]
+      # Inputting constant catch value alone is not enough to guarantee
+      # constant catch, because the get_f() function is used to
+      # approximate F based on catch for each space/season sub-unit
+      # within a year and it is not exact
       if(const_catch && yr > om$m_yr && !hcr_apply){
         val <- om$catch_obs[yr_ind, "value"]
         val <- val * om$f_space[space] *
-          attain[space] * om$catch_props_space_season[space, season]
+          attain[space] *
+          om$catch_props_space_season[space, season]
         # Prevent NaNs in the division below
         val <- ifelse(val == 0, 1e-5, val)
-        val <- f_sel * rep(val, om$n_age) / sum(f_sel * rep(val, om$n_age)) * val
+        val <- f_sel * rep(val, om$n_age) /
+          sum(f_sel * rep(val, om$n_age)) * val
+
         om$catch_save_age[, yr_ind, space, season] <- val
       }else{
-        om$catch_save_age[, yr_ind, space, season] <- om$catch_n_save_age[, yr_ind, space, season] * wage_catch
+        om$catch_save_age[, yr_ind, space, season] <-
+          om$catch_n_save_age[, yr_ind, space, season] * wage_catch
       }
-
-      # Calculate catch quota -------------------------------------------------
-      # if(om$catch_quota[yr_ind, space, season] > 0){
-      #   if(sum(om$catch_save_age[, yr_ind, space, season]) / om$catch_quota[yr_ind, space, season] > 1.1){
-      #     stop("F estimation overshoots more than 10% in year ", yr, ", season ", season, "space ", space,
-      #          call. = FALSE)
-      #   }
-      # }
     }
     # End space loop ----------------------------------------------------------
   }

@@ -1,4 +1,4 @@
-#' Convert color name to hex string. Code borrowed from [gplots::col2hex()]
+#' Convert color name to hex string. Code borrowed from gplots::col2hex()
 #'
 #' @param cname Color name as a common name. If a hex string is supplied,
 #'  it will be returned unchanged.

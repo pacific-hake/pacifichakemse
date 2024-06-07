@@ -38,31 +38,36 @@ load_data_om(
 )
 }
 \arguments{
-\item{ss_model}{A model input/output list representing the SS model as as found in
-the RDS file created by  \code{\link[=create_rds_file]{create_rds_file()}}}
+\item{ss_model}{A model input/output list representing the SS model as
+found in the RDS file created by  \code{\link[=create_rds_file]{create_rds_file()}}}
 
-\item{yr_future}{Number of years to run the OM into the future in an OM-only run.
-If this is > 0, \code{n_sim_yrs} cannot be. This must be 0 when running from an MSE context.
-Use \code{n_sim_yrs} for that instead.}
+\item{yr_future}{Number of years to run the OM into the future in an OM
+only run. If this is > 0, \code{n_sim_yrs} cannot be. This must be 0 when
+running from an MSE context. Use \code{n_sim_yrs} for that instead.}
 
-\item{n_sim_yrs}{Number of years to allocate OM objects for the future. If this is > 0,
-\code{yr_future} cannot be. All future values will be \code{NA} except for the movement matrix values.}
+\item{n_sim_yrs}{Number of years to allocate OM objects for the future.
+If this is > 0, \code{yr_future} cannot be. All future values will be \code{NA}
+except for the movement matrix values.}
 
 \item{n_season}{Number of seasons}
 
-\item{season_names}{A vector of names for the seasons. Length must equal \code{n_season}}
+\item{season_names}{A vector of names for the seasons. Length must
+equal \code{n_season}}
 
 \item{n_space}{Number of spatial areas}
 
-\item{space_names}{A vector of names for the spaces. Length must equal \code{n_space}}
+\item{space_names}{A vector of names for the spaces. Length must
+equal \code{n_space}}
 
 \item{n_survey}{Survey frequency}
 
 \item{ages}{A vector of ages}
 
-\item{age_plus_grp}{Plus group for ages. Required for \code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
+\item{age_plus_grp}{Plus group for ages. Required for
+\code{\link[=setup_blank_om_objects]{setup_blank_om_objects()}}}
 
-\item{age_names}{A vector of names for the ages. Length must equal length of \code{ages}}
+\item{age_names}{A vector of names for the ages. Length must equal
+length of \code{ages}}
 
 \item{rdev_sd}{Recruitment deviation Standard deviation}
 
@@ -94,15 +99,15 @@ Use \code{n_sim_yrs} for that instead.}
 
 \item{sel_change_yr}{A year in which a selectivity change took place}
 
-\item{f_space}{The proportion of TAC given to each country. First value is Canada,
-the second is the US}
+\item{f_space}{The proportion of TAC given to each country. First value
+is Canada, the second is the US}
 
 \item{log_phi_survey}{Survey phi parameter value
 If FALSE, they will be given random normal values based on rdev_sd}
 
-\item{random_recruitment}{Logical. If \code{FALSE}, recruitment deviations will be
-set to zero in the projection period. If \code{TRUE}, recruitment deviations will be set
-to random values in the projection period}
+\item{random_recruitment}{Logical. If \code{FALSE}, recruitment deviations
+will be set to zero in the projection period. If \code{TRUE}, recruitment
+deviations will be set to random values in the projection period}
 
 \item{...}{Absorb arguments destined for other functions}
 }

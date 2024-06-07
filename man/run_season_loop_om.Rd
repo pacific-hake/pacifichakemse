@@ -29,24 +29,27 @@ run_season_loop_om(
 
 \item{m_season}{A vector of natural mortality-at-age}
 
-\item{attain}{The attainment vector of length 2, in the order Canada, US. These are proportions
-of the catch to take.}
+\item{attain}{The attainment vector of length 2, in the order Canada, US.
+These are proportions of the catch to take.}
 
-\item{zero_catch_val}{The value to use instead of zero for catch (necessary for EM to converge)}
+\item{zero_catch_val}{The value to use instead of zero for catch
+(necessary for EM to converge)}
 
 \item{ages_no_move}{Ages that don't move in the movement model}
 
 \item{pope_mul}{Multiplier used in Pope's method}
 
-\item{hcr_apply}{If \code{TRUE}, apply the Harvest control rule inside the Operating model. Set to \code{FALSE}
-when running MSE as the HCR is already applied}
+\item{hcr_apply}{If \code{TRUE}, apply the Harvest control rule inside the
+Operating model. Set to \code{FALSE} when running MSE as the HCR is already
+applied}
 
 \item{verbose}{Print the loop information to the console}
 
 \item{testing}{Logical. If TRUE, write out testing files}
 
-\item{const_catch}{If \code{TRUE} make the catch constant for the projection period. \code{catch_in} still
-needs to be set to some value when running \code{run_oms()}}
+\item{const_catch}{If \code{TRUE} make the catch constant for the projection
+period. \code{catch_in} still needs to be set to some value when running
+\code{run_oms()}}
 
 \item{...}{Absorbs additional arguments meant for other functions}
 }

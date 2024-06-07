@@ -4,18 +4,13 @@
 \alias{calc_mean_waa}
 \title{Calculate the mean weights-at-age for all rows in a data frame}
 \usage{
-calc_mean_waa(waa, yr_col = "Yr", yrs = NULL)
+calc_mean_waa(d, yr_col = "Yr")
 }
 \arguments{
-\item{waa}{A weigth-at-age data frame}
-
 \item{yr_col}{Name of the column to use for the year. It must be present
 in the \code{waa} data frame or an error will occur}
 
-\item{yrs}{The years to include in the calculation. If \code{NULL}, all years
-in \code{waa} will be used. Negatives will be removed from the calculation. For
-example if yrs = -c(1966, 1967) then all years except 1966 and 1967 will
-be used in the calculation}
+\item{waa}{A weigth-at-age data frame}
 }
 \value{
 A single-row data frame containing the averages

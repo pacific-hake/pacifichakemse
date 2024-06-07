@@ -42,7 +42,7 @@
 #' @importFrom TMB sdreport MakeADFun
 #' @importFrom utils read.csv read.table tail
 #'
-#' @docType package
+#' @docType _PACKAGE
 #' @author Chris J. Grandin, Nis S. Jacobsen, Ian G. Taylor, Kristin Marshall,
 #'  Aaron Berger
 #' Package maintainer: Chris J. Grandin <chris.grandin@@gmail.com>

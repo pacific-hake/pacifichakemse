@@ -42,7 +42,8 @@ run_oms(
 
 \item{plot_names}{A vector of names to show on plots. See \code{\link[=run_mses]{run_mses()}}}
 
-\item{random_seed}{The random seed to base run random seeds from. See \code{\link[=run_mses]{run_mses()}}}
+\item{random_seed}{The random seed to base run random seeds from. See
+\code{\link[=run_mses]{run_mses()}}}
 
 \item{results_root_dir}{The results root directory}
 

@@ -338,11 +338,20 @@ load_data_om <- function(ss_model = NULL,
 
   lst$r_dev <- ss_model$r_dev
 
-  # Add the future years to the recruitment deviations
-  yr_min <- min(lst$r_dev$yr)
-  yr_max <- max(lst$future_yrs)
-  lst$r_dev <- lst$r_dev |>
-    complete(yr = yr_min:yr_max)
+  # Add the future years to the recruitment deviations. Only add median (50%,
+  # leaving the CI probs as NAs)
+  if(lst$n_future_yrs > 0){
+    probs_cols_nms <- paste0(hake::probs * 100, "%")
+    probs_cols_syms <- syms(probs_cols_nms)
+    future_rec_df <- tibble(
+      yr = (ss_model$m_yr + 1):(ss_model$m_yr + lst$n_future_yrs),
+      !!probs_cols_syms[[1]] := NA,
+      !!probs_cols_syms[[2]] := r_devs,
+      !!probs_cols_syms[[3]] := NA)
+
+    lst$r_dev <- lst$r_dev |>
+      bind_rows(future_rec_df)
+  }
 
   # Initial Numbers-at-age in OM ----------------------------------------------
   lst$init_n <- tibble(age = ages[ages != 0],

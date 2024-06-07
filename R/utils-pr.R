@@ -4,7 +4,7 @@
 #' @param num_rows The number of rows to show on screen
 #' @param ... Arguments passed to `print()`
 #'
-#' @return
+#' @return Nothing, prints a data frame to screen
 #' @export
 pr <- function(d, num_rows = 100, ...){
   d |>

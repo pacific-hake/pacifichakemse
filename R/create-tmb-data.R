@@ -50,7 +50,9 @@ create_tmb_data <- function(om = NULL,
   # Remove age column
   om$parameters$init_n <- om$parameters$init_n[, "value"]
 
-  om$parameters$r_in <- om$parameters$r_in[om$parameters$r_in[, "yr"] <= yr, "value"]
+  om$parameters$r_in <-
+    om$parameters$r_in[om$parameters$r_in[, "yr"] <= yr, "50%"] |> pull()
+
   om$parameters$f_0 <- rowSums(om$f_out_save[1:inc_yr_ind, , ])
 
   # Set f_0 and r_in values to 0.2 and 0 respectively in the future years
@@ -71,34 +73,34 @@ create_tmb_data <- function(om = NULL,
   # Load parameters from the assessment
   # Steepness prior distribution
   ctl <- ss_model$ctl
-  h_grep <- grep("SR_BH_steep", ctl)
-  if(length(h_grep) != 1){
-    stop("There were ", length(h_grep), " occurences of `SR_BH_STEEP`` ",
+  param_df <- ctl$SR_parms |>
+    as_tibble(rownames = "param")
+  h_row <- param_df |>
+    filter(param == "SR_BH_steep")
+
+  if(nrow(h_row) != 1){
+    stop("There were ", nrow(h_row), " occurences of `SR_BH_STEEP`` ",
          "in the control file when there should be only one. Control ",
          "file location:\n",
          ss_model$ctl_file,
          call. = FALSE)
   }
-  h_prior_vec <- str_split(ctl[h_grep], " +")[[1]]
-  h_prior_vec <- h_prior_vec[h_prior_vec != ""]
-  h_min <- as.numeric(h_prior_vec[1])
-  h_max <- as.numeric(h_prior_vec[2])
-  h_init <- as.numeric(h_prior_vec[3])
-  h_prior <- as.numeric(h_prior_vec[4])
-  h_sd <- as.numeric(h_prior_vec[5])
+
+  h_min <- h_row |> pull(LO)
+  h_max <- h_row |> pull(HI)
+  h_init <- h_row |> pull(INIT)
+  h_prior <- h_row |> pull(PRIOR)
+  h_sd <- h_row |> pull(PR_SD)
   # For testing. This value was used in the original but not what was in
   #  the assessment output
-  h_sd <- 0.117
+  #h_sd <- 0.117
 
   om$mu <- (h_prior - h_min) / (h_max - h_min)
   om$tau <- ((h_prior - h_min) * (h_max - h_prior)) / h_sd ^ 2 - 1
   om$b_prior <- om$tau * om$mu
   om$a_prior <- om$tau * (1 - om$mu)
-
-  om$b <- om$b |> as.matrix()
-  # colname required to be identical to original version
-  colnames(om$b) <- "V1"
-
+  om$b <- om$b |>
+    as.matrix()
   om$t_end <- inc_yr_ind
 
   # Copy simulated data into output data
@@ -118,7 +120,8 @@ create_tmb_data <- function(om = NULL,
 
   # Convert some parameter objects to base types
   params <- om$parameters
-  params$p_sel_fish <- params$p_sel_fish[params$p_sel_fish[, "space"] == 2, "value"]
+  params$p_sel_fish <-
+    params$p_sel_fish[params$p_sel_fish[, "space"] == 2, "value"]
   params$p_sel_surv <- params$p_sel_surv[, "value"]
 
   last_catch <- tail(om$catch_obs, 1)

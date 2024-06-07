@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-col2hex.R
 \name{col2hex}
 \alias{col2hex}
-\title{Convert color name to hex string. Code borrowed from \code{\link[gplots:col2hex]{gplots::col2hex()}}}
+\title{Convert color name to hex string. Code borrowed from gplots::col2hex()}
 \usage{
 col2hex(cname)
 }
@@ -14,5 +14,5 @@ it will be returned unchanged.}
 The HEX string representing the color
 }
 \description{
-Convert color name to hex string. Code borrowed from \code{\link[gplots:col2hex]{gplots::col2hex()}}
+Convert color name to hex string. Code borrowed from gplots::col2hex()
 }
