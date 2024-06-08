@@ -32,10 +32,15 @@ create_tmb_data <- function(om = NULL,
     om$catch_obs[inc_yr_ind] <- ct[inc_yr_ind]
   }
 
-  # Maturity
-  om$mat_sel <- om$mat_sel[-1]
+  # Maturity ----
+  # Use last assessment year maturity for future years (`ss_model$m_yr`)
+  om$mat_sel <- om$mat_sel |>
+    filter(Yr == ss_model$m_yr) |>
+    select(-Yr) |>
+    unlist()
+  names(om$mat_sel) <- NULL
 
-  # Create matrix versions of the WA data frames
+  # Create matrix versions of the WA data frames ----
   om$wage_catch <- t(om$wage_catch_df[1:inc_yr_ind, -1])
   om$wage_survey <- t(om$wage_survey_df[1:inc_yr_ind, -1])
   om$wage_mid <- t(om$wage_mid_df[1:inc_yr_ind, -1])
