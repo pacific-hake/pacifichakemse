@@ -165,7 +165,15 @@ load_ss_model_data <- function(s_min = 1,
 
   lst$survey <- survey_index |> pull(value)
   # TODO: Check this. Do we need to extract the Err from the extra MCMC?
-  lst$survey_err <- 0.5
+
+  lst$survey_err <- ss_model$extra_mcmc$index_lo |>
+    full_join(ss_model$extra_mcmc$index_hi, by = c("fleet", "yr")) |>
+    mutate(sd = value.y - value.x) |>
+    filter(fleet == 2) |>
+    select(-fleet, -value.x, -value.y) |>
+    complete(yr = ss_model$startyr:ss_model$endyr, fill = list(sd = 1)) |>
+    pull(sd)
+  names(lst$survey_err) <- NULL
 
   # Sample sizes for fishery and survey ---------------------------------------
   ss <- ss_model$agedbase  |>
