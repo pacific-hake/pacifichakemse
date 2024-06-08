@@ -83,11 +83,11 @@ run_mse_scenario <- function(om = NULL,
       r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
       # If the deviate has been drawn and used previously, re-draw up to 2 times
       iter_rdev <- 1
-      while(r_dev %in% om$parameters$r_in[, "value"] && iter_rdev < 2){
+      while(r_dev %in% om$parameters$r_in[, "50%"] && iter_rdev < 2){
         r_dev <- rnorm(n = 1, mean = 0, sd = exp(om$rdev_sd))
         iter_rdev <- iter_rdev + 1
       }
-      om$parameters$r_in[om$parameters$r_in[, "yr"] == yr, "value"] <<- r_dev
+      om$parameters$r_in[om$parameters$r_in[, "yr"] == yr, "50%"] <<- r_dev
     }
 
     # Run the Operating Model -------------------------------------------------
@@ -146,10 +146,16 @@ run_mse_scenario <- function(om = NULL,
     # Run TMB model -----------------------------------------------------------
     obj <- MakeADFun(d, p, DLL = "pacifichakemse", silent = FALSE)
     report <- obj$report()
-    rsmall <- report %>% map(~{format(.x, nsmall = 20)})
-    plike <- report %>% get_likelihoods %>% format(nsmall = 20)
-    objfn <- obj$fn() %>% format(nsmall = 20)
-    psmall <- obj %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
+    rsmall <- report |>
+      map(~{format(.x, nsmall = 20)})
+    plike <- report |>
+      get_likelihoods() |>
+      format(nsmall = 20)
+    objfn <- obj$fn() |>
+      format(nsmall = 20)
+    psmall <- obj |>
+      extract_params_tmb() |>
+      map(~{format(.x, nsmall = 20)})
 
     # You can check likelihood components and parameter estimates by placing
     # a browser after the MakeADFun() call above and the nlminb() call below and
@@ -170,6 +176,7 @@ run_mse_scenario <- function(om = NULL,
     # Stop "outer mgc: XXX" from printing to screen
     obj$env$tracemgc <- FALSE
     # Minimize the Objective function
+
     opt <- nlminb(obj$par,
                   obj$fn,
                   obj$gr,
@@ -179,21 +186,28 @@ run_mse_scenario <- function(om = NULL,
                                  eval.max = 500))
 
     report <- obj$report()
-    plike <- get_likelihoods(report) %>% format(nsmall = 20)
+    plike <- get_likelihoods(report) |>
+      format(nsmall = 20)
     pars <- extract_params_tmb(opt)
-    psmall <- opt %>% extract_params_tmb %>% map(~{format(.x, nsmall = 20)})
+    psmall <- opt |>
+      extract_params_tmb() |>
+      map(~{format(.x, nsmall = 20)})
 
     # Calc ref points for next year vals --------------------------------------
-    wage_catch <- get_age_dat(om$wage_catch_df, yr - 1) %>% unlist(use.names = FALSE)
+    wage_catch <- get_age_dat(om$wage_catch_df, yr - 1) |>
+      unlist(use.names = FALSE)
     v_real <- sum(om_output$n_save_age[, which(om$yrs == yr), , om$n_season] *
                     matrix(rep(wage_catch, om$n_space),
-                           ncol = om$n_space) * (om_output$f_sel[, which(om$yrs == yr),]))
+                           ncol = om$n_space) *
+                    (om_output$f_sel[, which(om$yrs == yr),]))
 
     f_new <- get_ref_point(pars,
                            om,
                            yr = yr,
-                           ssb_y = report$SSB %>% tail(1),
-                           f_in = report$Fyear %>% tail(1),
+                           ssb_y = report$SSB |>
+                             tail(1),
+                           f_in = report$Fyear |>
+                             tail(1),
                            n_end = report$N_beg[, ncol(report$N_beg)],
                            tac = tac,
                            v_real = v_real,
@@ -228,11 +242,13 @@ run_mse_scenario <- function(om = NULL,
         names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_se[[em_iter]] <<- tmp
 
-        tmp <- em_output$ssb_save[[em_iter]] - 2 * em_output$ssb_se[[em_iter]]
+        tmp <- em_output$ssb_save[[em_iter]] - 2 *
+          em_output$ssb_se[[em_iter]]
         names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_min[[em_iter]] <<- tmp
 
-        tmp <- em_output$ssb_save[[em_iter]] + 2 * em_output$ssb_se[[em_iter]]
+        tmp <- em_output$ssb_save[[em_iter]] + 2 *
+          em_output$ssb_se[[em_iter]]
         names(tmp) <- om$yrs[1:yr_ind]
         em_output$ssb_max[[em_iter]] <<- tmp
 
